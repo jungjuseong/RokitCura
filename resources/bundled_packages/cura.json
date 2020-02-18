@@ -373,6 +373,23 @@
             }
         }
     },
+    "PreparingStage": {
+        "package_info": {
+            "package_id": "PreparingStage",
+            "package_type": "plugin",
+            "display_name": "Preparing Stage",
+            "description": "Provides a preparing stage in Cura.",
+            "package_version": "1.0.0",
+            "sdk_version": "7.0.0",
+            "website": "https://rokit.com",
+            "author": {
+                "author_id": "Iron",
+                "display_name": "Dr.INVIVO",
+                "email": "plugins@clbee.com",
+                "website": "https://clbee.com"
+            }
+        }
+    },
     "PreviewStage": {
         "package_info": {
             "package_id": "PreviewStage",

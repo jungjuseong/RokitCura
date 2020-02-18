@@ -143,10 +143,13 @@ UM.MainWindow
             }
         }
 
+        // hide menu
         ApplicationMenu
         {
             id: applicationMenu
             window: base
+            // visible: true
+            // height: 0
         }
 
         Item
@@ -158,7 +161,7 @@ UM.MainWindow
                 left: parent.left
                 right: parent.right
             }
-            height: stageMenu.source != "" ? Math.round(mainWindowHeader.height + stageMenu.height / 2) : mainWindowHeader.height
+            height: stageMenu.source != "" ? Math.round(mainWindowHeader.height) : mainWindowHeader.height
 
             LinearGradient
             {
@@ -174,13 +177,8 @@ UM.MainWindow
                     }
                     GradientStop
                     {
-                        position: 0.5
-                        color: UM.Theme.getColor("main_window_header_background_gradient")
-                    }
-                    GradientStop
-                    {
                         position: 1.0
-                        color: UM.Theme.getColor("main_window_header_background")
+                        color: UM.Theme.getColor("main_window_header_background_gradient")
                     }
                 }
             }
@@ -196,7 +194,7 @@ UM.MainWindow
                 verticalAlignment: Image.AlignTop
             }
         }
-
+        // Stage Menu
         MainWindowHeader
         {
             id: mainWindowHeader
@@ -220,7 +218,7 @@ UM.MainWindow
                 right: parent.right
             }
 
-            Keys.forwardTo: applicationMenu
+            // Keys.forwardTo: applicationMenu
 
             DropArea
             {
@@ -363,6 +361,15 @@ UM.MainWindow
                 //  HACK: This is to ensure that the parent never gets set to null, as this wreaks havoc on the focus.
                 function onParentDestroyed()
                 {
+                    preparingSetupSelector.parent = stageMenu
+                    preparingSetupSelector.visible = false
+
+                    materialSetupSelector.parent = stageMenu
+                    materialSetupSelector.visible = false
+
+                    layersSetupSelector.parent = stageMenu
+                    layersSetupSelector.visible = false
+
                     printSetupSelector.parent = stageMenu
                     printSetupSelector.visible = false
                 }
@@ -386,7 +393,60 @@ UM.MainWindow
                        parent.Component.destruction.connect(stageMenu.onParentDestroyed)
                    }
                 }
+                // The preparingSetupSelector is defined here so that the setting list doesn't need to get re-instantiated
+                // Every time the stage is changed.
+                property var preparingSetupSelector: Cura.PreparingSetupSelector
+                {
+                   width: UM.Theme.getSize("print_setup_widget").width
+                   height: UM.Theme.getSize("stage_menu").height
+                   headerCornerSide: RoundedRectangle.Direction.Right
+                   onParentChanged:
+                   {
+                       if(stageMenu.oldParent !=null)
+                       {
+                           stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
+                       }
+                       stageMenu.oldParent = parent
+                       visible = parent != stageMenu
+                       parent.Component.destruction.connect(stageMenu.onParentDestroyed)
+                   }
+                }
+
+                property var materialSetupSelector: Cura.MaterialSetupSelector
+                {
+                   width: UM.Theme.getSize("print_setup_widget").width
+                   height: UM.Theme.getSize("stage_menu").height
+                   headerCornerSide: RoundedRectangle.Direction.Right
+                   onParentChanged:
+                   {
+                       if(stageMenu.oldParent !=null)
+                       {
+                           stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
+                       }
+                       stageMenu.oldParent = parent
+                       visible = parent != stageMenu
+                       parent.Component.destruction.connect(stageMenu.onParentDestroyed)
+                   }
+                }
+                
+                property var layersSetupSelector: Cura.LayersSetupSelector
+                {
+                   width: UM.Theme.getSize("print_setup_widget").width
+                   height: UM.Theme.getSize("stage_menu").height
+                   headerCornerSide: RoundedRectangle.Direction.Right
+                   onParentChanged:
+                   {
+                       if(stageMenu.oldParent !=null)
+                       {
+                           stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
+                       }
+                       stageMenu.oldParent = parent
+                       visible = parent != stageMenu
+                       parent.Component.destruction.connect(stageMenu.onParentDestroyed)
+                   }
+                }
             }
+            
             UM.MessageStack
             {
                 anchors

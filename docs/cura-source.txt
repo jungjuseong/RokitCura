@@ -1,0 +1,645 @@
+## 클래스 
+
+### UM/Scene/SceneNode object.
+
+이 객체는 mesh와 여러 자식들을 가질 수 있다. 각 노드는 부모 공간을 로컬 공간으로
+매핑하는 변환 매트릭스가 있다.
+SceneNode는 SceneNodeDecorator를 추가하여 scene 노드의 기능을 더할 수 있다.
+
+### UM/Scene/Scene.py
+
+이 클래스의 주 목적은 루트 SceneNode를 제공하는 것임
+
+### UM/Scene/SceneDecorator.py
+
+SceneNodeDecorator의 요점은 SceneNode에 부가하여 데코레이션을 제공하는 것이다.
+데코레이션은 호출 가능한 SceneNodeDecorator의 함수들이다.
+
+
+### UM/Scene/Platform.py
+
+이 클래스는 Scene 노드의 특수한 경우이다. 특정 모델을 프린터의 플랫폼으로 렌더링한다.
+이러한 클래스를 사용하는 이유는 그리는 방식에 대한 차이와 플랫폼이 Texture를 가질 수 있다는 사실 때문이다.
+또한 활성 프린터가 바뀔 때 mesh를 다시 로딩하는 것도 처리한다.
+
+### UM/Settings/ContainerStack.py
+
+이 클래스는 설정 값을 얻어오는 것을 담당하는 설정 컨테이너의 스택이다
+
+
+### BuildVolume.py
+
+이 클래스는 프린트 가능 영역과 불가 영역의 렌더링을 담당하는 특수한 노드이다.
+
+
+### UI/WelcomePagesModel.py
+
+이 모델은 모든 웰컴 페이지 데이터를 담고 있는 Qt ListModel임. 
+각 페이지는 웰컴 위자드 대화상자에서 한 스텝을 보여줄 수 있는 페이지임.
+ListModel의 각 항목은 한 페이지를 나타내며 다음 필드들을 포함한다.
+
+- id: page_id로서 goToPage(page_id) 함수에서 사용됨
+- page_url: 이 페이지의 콘텐츠인 QML 파일의 QUrl
+- next_page_id : (OPTIONAL) 이 페이지가 끝나면 가는 다음 페이지 id. 없다면 현재 index + 1인 페이지로 이동
+- next_page_button_text: (OPTIONAL) 
+- should_show_function : (OPTIONAL) 이 페이지를 보여야 하는지를 나타냄. 모든 페이지를 보이는 것이 기본임.
+
+### qml/WelcomePages/WelcomeContent.qml
+
+Welcome 온보딩 과정의 "Welcome" 페이지의 내용이 들어 있음
+
+Item 
+
+- Column
+  + titleLabel: Label
+  + curaImage: Image
+  + textLabel: Label
+  + getStartedButton: Cura.PrimaryButton
+
+### plugins/MachineSettingsAction/MachineSettingsAction.py
+
+__init__에서 MachineSettingsAction.qml 로드
+
+# plugins/MachineSettingsAction/MachineSettingsAction.qml
+
+Cura.MachineAction
+
+- property var extrudersModel: Cura.ExtrudersModel {}
+- tabNameModel: ListModel
+- Cura.RoundedRectangle
+  + tabStack: StackLayout
+  + printerTab: MachineSettingsPrinterTab
+  + Repeater
+     * model: extrudersModel
+     * delegate: MachineSettingsExtruderTab
+        = id: discoverTab
+- machineNameLabel: Label
+- tabBar: UM.TabRow
+  + Repeater
+     * model: tabNameModel
+     * delegate: UM.TabRowButton
+
+### Cura.MachineAction.py
+
+/*
+  Machine actions은 특정 프린터 타입에 추가된 액션이다. 
+  예를 들어 펌웨어 업데이트, 원격 장치와 연결, bed 레벨링이다. 
+  Machine action은 qml을 가질 수 있으며 Cura.MachineAction 아이템을 포함해야 한다.
+  액티브가 되면 그 항목이 대화상자에 표시되며 이 객체는 "manager"로 추가된다.
+  (따라서 모든 pyqtSlot() 함수들은 manager.func()을 불러 호출이 가능하다)
+*/
+
+### qml/MachineSettingsAction/MachineSettingsPrinterTab.qml
+
+Machine Settings 대화상자에서 "Printer" 탭의 내용
+
+Item
+- id: base
+- columnWidth
+- columnSpacing
+- labelWidth
+- machineStackId
+- forceUpdateFunction
+- upperBlock: RowLayout
+  + Column // left side
+      * Label // title
+      * machineXWidthField: Cura.NumericTextFieldWithUnit
+      * machineYDepthField: Cura.NumericTextFieldWithUnit
+      * machineZHeightField: Cura.NumericTextFieldWithUnit
+      * buildPlateShapeComboBox: Cura.ComboBoxWithOptions
+      * originAtCenterCheckBox: Cura.SimpleCheckBox 
+      * heatedVolumeCheckBox: Cura.SimpleCheckBox
+      * gcodeFlavorComboBox: Cura.ComboBoxWithOptions
+  + Column // right side
+      * Label // title
+      * machineXMinField: Cura.PrintHeadMinMaxTextField
+      * machineYMinField: Cura.PrintHeadMinMaxTextField
+      * machineXMaxField: Cura.PrintHeadMinMaxTextField 
+      * machineYMaxField: Cura.PrintHeadMinMaxTextField 
+
+- lowerBlock: RowLayout
+  + Cura.GcodeTextArea
+  + Cura.GcodeTextArea
+
+### qml/MachineAction.qml
+
+Item
+- id: contentItem
+
+// Point to the dialog containing the displayItem
+- property var dialog
+
+// Connect the finished property change to completed signal.
+- property var finished: manager.finished
+- onFinishedChanged
+
+
+###
+
+# OneAtATimeIterator
+
+/*
+## Iterator that returns a list of nodes in the order that they need to be printed
+#  If there is no solution an empty list is returned.
+#  Take note that the list of nodes can have children (that may or may not contain mesh data)
+*/
+-------------------------------------------------------
+## Cura.qml
+
+UM.MainWIndow를 상속
+
+- title: Cura Application 제목
+- backgroundColor
+- greyOutBackground: Rectangle
+- welcomeDialogItem: WelcomeDialogItem
+- backgroundItem: Item
+  + applicationMenu: ApplicationMenu
+  + headerBackground: Item
+  + mainWindowHeader: MainWindowHeader  // stage menu
+  + contentItem: Item
+     * DropArea
+     * objectSelector: ObjectSelector
+     * jobSpecs: JobSpecs
+     * viewOrientationControls: ViewOrientationControls
+     * toolbar: Toolbar
+     * mainSafeArea: Item
+     * main: Loader // // A stage can control this area. If nothing is set, it will therefore show the 3D view.
+     * stageMenu: Loader
+        : printSetupSelector: Cura.PrintSetupSelector
+     * UM.MessageStack
+        : primaryButton: Component
+        : secondaryButton: Component
+  + PrintSetupTooltip
+- preferences: UM.PreferencesDialog
+- Connections
+  + CuraApplication
+     * onInitializationFinished:
+     * onShowMessageBox
+     * onShowDiscardOrKeepProfileChanges
+     * onOpenProjectFile:
+     * onShowConfirmExitDialog:
+     * onShowPreferencesWindow
+  + Cura.MachineManager.onBlurSettings
+  + Cura.Actions.preferences
+     * addProfile
+     * configureMachines
+     * manageProfiles
+     * .manageMaterials
+     * configureSettingVisibility
+     * quit
+     * toggleFullScreen
+     * exitFullScreen
+     * open
+     * showProfileFolder
+     * whatsNew
+     * addMachine
+     * about
+
+- Timer
+  + createProfileTimer
+  + startupTimer
+
+- contextMenu: ContextMenu
+
+- MessageDialog
+  + exitConfirmationDialog
+  + packageInstallDialog
+  + infoMultipleFilesWithGcodeDialog
+  + messageDialog
+
+- openDialog: FileDialog
+- aboutDialog: AboutDialog
+- openFilesIncludingProjectsDialog: OpenFilesIncludingProjectsDialog
+- askOpenAsProjectOrModelsDialog: AskOpenAsProjectOrModelsDialog
+- discardOrKeepProfileChangesDialog: DiscardOrKeepProfileChangesDialog
+- Cura.WizardDialog
+  + addMachineDialog 
+  + whatsNewDialog
+
+-------------------------------------------------------
+plugin은 CuraApplication,py에서 설치 여부를 확인
+
+Prepare Stage 
+
+(1) plugins/PrepareStage/__init__.py에서 PrepareStage로 등록하고 stage 이름을 Prepage로 정의.
+ 
+(2) plugins/PrepareStage/PrepareStage.py
+  displayComponent에 PrepareMenu.qml을 menu 컴포넌트,  PrepareMain을 main 컴포넌트로 add
+ 
+* menu 컴포넌트는 스테이지 바 아래의 가로 영역이다. 
+* 여기는 해당 스테이지의 버튼과 엘리먼트를 보여주는 영역이다.
+* menu 컴포넌트는 바와 main 컴포넌트 위에 그려진다.
+* Main Component는 스테이지 바의 아래에서 그려진다
+
+(3) plugins/PrepareStage/PrepareMain.qml
+
+Item
+{
+    id: prepareMain
+
+    Cura.ActionPanelWidget
+    {
+        id: actionPanelWidget
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: UM.Theme.getSize("thick_margin").width
+        anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
+    }
+}
+
+### qml/ActionPanel/ActionPanelWidget.qml
+
+* ActionPanelWidget은 사용자가 slice를 누르기 전에 필요한 모든 엘리먼트를 담고 있다. 
+* 이후에 프린트 시간, 재료 소모량, 출력 프로세스(파일 저장, 네트워크 상에서 프린트 등) 등의 정보를 얻는다.
+
+- actionPanelWidget: Rectangle
+   * outputAvailable: Bool
+   * Loader: sourceComponent: actionPanelWidget.outputAvailable ? outputProcessWidget : sliceProcessWidget
+   * sliceProcessWidget: Component
+   * outputProcessWidget: Component
+- additionalComponents: Item
+   * additionalComponentsRow: Row
+- Connections
+   * CuraApplication.onAdditionalComponentsChanged : ["saveButton"]
+
+
+### qml/ActionPanelOutputProcess.qml
+
+이 엘리먼드는 슬라이싱 처리 후에 얻어진 데이터(프린트 시간, 재료 소모량 등)를 보는데 필요한 모든 원소들을 담고 있다.
+또한 두 개의 버튼이 있어서 
+하나는 출력 레이어를 미리보기
+다른 하나는 무엇을 할 지(네트워크로 프린트, 파일에 저장 등)를 선택한다.
+
+Column {
+- information: Item
+   * printInformationPanel: PrintInformationPanel
+   * timeAndCostsInformation: Column
+- buttonRow: Item
+   * previewStageShortcut: Cura.SecondaryButton
+   * outputDevicesButton: Cura.OutputDevicesActionButton
+}
+
+### qml/ActionPanel/OutputProcessWidget.qml
+
+이 엘리먼트는 프린트에 걸린 시간, 재료 사용량 등 슬라이싱 후에 얻은 데이터를 보여주는데 필요한 모든 엘리먼트가 들어 있다.
+두 개의 버튼이 있으며 하나는 출력 레이어들을 미리 보여주며 다른 하나는 그것을 무엇을 할지(파일에 저장, 네트워크 상으로 프린트)를 결정하도록 한다.
+
+Column
+- id: widget
+- property bool preSlicedData: PrintInformation.preSliced
+- property alias hasPreviewButton: previewStageShortcut.visible
+- information: Item
+  + printInformationPanel: PrintInformationWidget
+  + timeAndCostsInformation: Column
+     * estimationTime: Cura.IconWithText
+     * estimatedCosts: Cura.IconWithText
+- buttonRow: Item
+  + previewStageShortcut: Cura.SecondaryButton
+  + outputDevicesButton: Cura.OutputDevicesActionButton
+
+### qml/ActionPanel/SliceProcessWidget.qml
+
+이 qml은 빌드플레이드에 놓인 모델로부터 printjob을 만드는데 필요한 모든 엘리먼트가 들어있다.
+슬라이싱 프로세스를 시작/정지하는 버튼과 진행을 알려주는 progress바가 있다.
+
+Column
+
+- progress: UM.Backend.progress
+- backendState: UM.Backend.state
+- waitingForSliceToStart: Bool
+- autoSlicingLabel: Label
+- unableToSliceMessage: Cura.IconWithText
+- progressBar: UM.ProgressBar
+- prepareButtons: Item
+   * sliceButton: Cura.PrimaryButton
+   * cancelButton: Cura.SecondaryButton
+- Connections
+    * UM.Preferences.onPreferenceChanged
+
+### qml/PrintSetupSelector/Recommended/RecommendedPrintSetup.qml
+
+Item
+
+- id: recommendedPrintSetup
+- height: childrenRect.height + 2 * padding
+- Column
+  + RecommendedQualityProfileSelector
+  + RecommendedInfillDensitySelector
+  + RecommendedSupportSelector
+  + RecommendedAdhesionSelector
+- extrudersEnabledCount: UM.SettingPropertyProvider
+
+### qml/PrintSetupSelector/Recommended/RecommendedQualityProfileSelector
+
+Item
+- id: qualityRow
+- height: childrenRect.height
+- Column
+  + activeProfileButtonGroup: Controls2.ButtonGroup
+  + Item
+    * profileLabel: Cura.IconWithText
+    * resetToDefaultQualityButton: UM.SimpleButton
+    * labelbar: Cura.LabelBar
+  + Repeater
+    * model: Cura.IntentCategoryModel {}
+    * Item 
+      = intentCategoryLabel:Label
+      = Cura.RadioCheckbar
+      = MouseArea
+      = NoIntentIcon
+
+(4) plugins/PrepareStage/PrepareMenu.qml
+
+Item {
+- id: itemRow
+- Item
+   + itemRow: Rowlayout
+      * machineSelection: Cura.MachineSelector 
+      * printSetup: Cura.ConfigurationMenu
+      * printSetupSelectorItem: [printSetupSelector]
+   + openFileButton: Button
+}
+
+---------------------------------------------------------------------
+Preview Stage
+
+(3) plugins/PreviewStage/PreviewMain.qml
+
+Item
+{
+   // 오버레이가 안전하게 놓이도록 경계가 보장된 아이템
+   // 기본은 사용 가능한 전체 영역인 parent이다.
+    property var safeArea: parent
+
+    // 안전 영역에서 actionPanel을 뺀다. 그러면 뷰는 그 위 아래에 인터페이스를 그리지 않을 것이다
+    Item
+    {
+        id: childSafeArea
+        x: safeArea.x - parent.x
+        y: safeArea.y - parent.y
+        width: actionPanelWidget.x - x
+        height: actionPanelWidget.y - y
+    }
+
+    Loader
+    {
+        id: previewMain
+        anchors.fill: parent
+
+        source: UM.Controller.activeView.mainComponent : ""
+
+        onLoaded:
+        {
+            if (previewMain.item.safeArea !== undefined){
+               previewMain.item.safeArea = Qt.binding(function() { return childSafeArea });
+            }
+        }
+    }
+
+    Cura.ActionPanelWidget
+    {
+        id: actionPanelWidget
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: UM.Theme.getSize("thick_margin").width
+        anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
+        hasPreviewButton: false
+    }
+}
+
+(4) plugins/PreviewStage/PreviewMenu.qml
+
+- stageMenuRow: Row
+  + viewsSelector: Cura.ViewSelector
+  + viewPanel: Loader
+     * source: UM.Controller.activeView.stageMenuComponent : ""
+  + printSetupSelectorItem: Item
+     * children: [printSetupSelector]
+
+
+#### MachineSelector.qml
+
+Cura.ExpandablePopup
+- id: machineSelector
+
+- property bool isNetworkPrinter: Cura.MachineManager.activeMachineHasNetworkConnection
+- property bool isCloudPrinter: Cura.MachineManager.activeMachineHasCloudConnection
+- property bool isGroup: Cura.MachineManager.activeMachineIsGroup
+- headerItem: Cura.IconWithText
+  + text
+  + source
+  + UM.RecolorImage
+- contentItem: Item
+  + id: popup
+  + ScrollView
+     * machineSelectorList: MachineSelectorList
+     * buttonRow: Row
+        = addPrinterButton: Cura.SecondaryButton
+        = managePrinterButton: Cura.SecondaryButton
+
+
+#### resources/qml/ExapandablePopup.qml
+
+이 컴포넌트의 2가지 주요 서브 컴포넌트가 있다:
+- headerItem: 항상 보이며 컴포넌트가 확장되면 일어날 일에 관한 정보를 보여줌
+- contentItem: 컴포넌트가 확장되면 보여줄 콘텐츠
+
+#### resources/qml/ExapandableComponent.qml
+
+이 컴포넌트의 2가지 주요 서브 컴포넌트가 있다:
+- headerItem: 항상 보이며 컴포넌트가 확장되면 일어날 일에 관한 정보를 보여줌
+- contentItem: 컴포넌트가 확장되면 보여줄 콘텐츠
+
+Item
+- id: base
+- property color contentBackgroundColor
+- property color headerBackgroundColor
+- property color headerActiveColor
+- property color headerHoverColor
+- background: RoundedRectangle
+  + disabledLabel: Label
+  + Item 
+     * headerItemLoader: Loader
+     * collapseButton: UM.RecolorImage
+- shadow: DropShadow
+- contentContainer: Cura.RoundedRectangle
+  + contentHeader: ExpandableComponentHeader
+     * headerTitle
+     * dragRegion: MouseArea
+  + content: Control
+     * contentItem: Item {}
+
+###  resources/qml/ExapandableComponentHeader.qml
+
+Cura.RoundedRectangle
+- id: header
+- alias headerTitle: headerLabel.text
+- headerLabel: Label
+   + text
+- closeButton: Button
+  + contentItem: UM.RecolorImage
+  + background: Item {}
+
+
+-------------------------------------------------------
+
+### resources/qml/PrinterSetupSelector.qml
+
+Cura.ExpandableComponent
+- id: printSetupSelector
+- property bool preSlicedData: PrintInformation.preSliced
+- contentHeaderTitle: catalog.i18nc("@label", "Print settings")
+- headerItem: PrintSetupSelectorHeader {}
+- contentItem: PrintSetupSelectorContents {}
+- property var extrudersModel: CuraApplication.getExtrudersModel()
+
+
+### PrintSetupSelectorHeader.qml
+
+RowLayout
+
+- Cura.IconWithText
+  + layerHeight: UM.SettingPropertyProvider
+- Cura.IconWithText
+  + infillDensity: UM.SettingPropertyProvider
+- Cura.IconWithText
+  + supportEnabled: UM.SettingPropertyProvider
+- Cura.IconWithText
+  + platformAdhesionType: UM.SettingPropertyProvider
+
+### PrintSetupSelectorContent.qml
+
+Item
+- id: content: Item
+- property int currentModeIndex:
+- contents: Item
+  + recommendedPrintSetup: RecommendedPrintSetup
+  + customPrintSetup: CustomPrintSetup
+     * Connections: UM.Preferences.onPreferenceChanged
+- buttonRow: Item
+  + recommendedButton: Cura.SecondaryButton
+  + customSettingsButton: Cura.SecondaryButton
+  + MouseArea
+
+#### RecommendedPrintSetup.qml
+
+Item
+
+- Column
+  + RecommendedQualityProfileSelector
+  + RecommendedInfillDensitySelector
+  + RecommendedSupportSelector
+  + RecommendedAdhesionSelector
+- extrudersEnabledCount: UM.SettingPropertyProvider
+
+####  RecommendedQualityProfileSelector.qml
+
+Item
+
+- Column
+  + Item
+     * profileLabel: Cura.IconWithText
+     * resetToDefaultQualityButton: UM.SimpleButton
+     * labelbar: LabelBar
+  + Repeater
+     * model: Cura.IntentCategoryModel {}
+     * Item
+        = intentCategoryLabel: Label
+        = Cura.RadioCheckbar
+        = MouseArea
+        = NoIntentIcon
+
+#### NoIntentIcon.qml
+
+Item
+- property var affected_extruders
+- property var intent_type: ""
+- UM.RecolorImage
+- MouseArea
+
+### qml/MachineAction.qml
+
+Item
+
+- id: contentItem
+// Point to the dialog containing the displayItem
+- property var dialog
+// Connect the finished property change to completed signal.
+- property var finished: manager.finished
+
+
+### qml/Menus/ConfigurationMenu/CustomConfiguration.qml
+
+Item 
+
+-  header: Label
+- printerTypeSelectorRow: Item
+  + text: Label 
+  + printerTypeSelector: OldControls.ToolButton
+- tabBar: UM.TabRow
+  + repeater: Repeater
+     * model: extrudersModel
+     * delegate: UM.TabRowButton
+
+
+
+-------------------------------------------------------
+## plugins/CuraEngine/CuraEngineBackend.py
+
+def slice()
+// scene에서 slice를 실행
+
+(1) build_plates_to_be_sliced가 있는지 확인
+(2) process_layers_job -  아직 작업 중인지 확인
+(3) gcode_dict 있는지 점검
+(4) 액티브 빌드플레이드를 가져온다
+(5) 빌드플레이드를 하나 꺼냄
+
+
+### StartSliceJob.py
+
+def run()
+
+(1) build_plate_number가 있는지 확인
+(2) Global Container stack이 있는지 확인
+(3) MachineManager가 정상인지
+(4) BuildVolume이 정상인지
+(5) MachineErrorCheck를 위해 잠깐 대기
+(6) 빌드 플레이트와 노즐 타입이 재료와 호환이 되는지 확인
+(7) 객체 설정 마다 에러가 없는지 확인
+(8) Scene을 잠구고
+ a. old 레이어 데이터 삭제
+ b. 프린트할 객체를 얻어온다
+ c. 
+
+
+### resources/qml/Menus/MaterialMenu.qml
+
+Menu
+- id: menu
+- favoriteMaterialsModel: Cura.FavoriteMaterialsModel
+- genericMaterialsModel: Cura.GenericMaterialsModel
+- materialBrandsModel: Cura:MaterialBrandsModel
+- MenuItem
+  + text: "Favorites"
+- Instantiator
+  + model: favoriteMaterialsModel
+  + delegate: MenuItem
+- genericMenu: Menu
+  + Instantiator
+     * model: genericMaterialsModel
+     * delegate: MenuItem
+       = text: model.name
+- Instantiator
+  + model: brandModel
+  + brandMenu: Menu
+     * id: brandMenu
+     * Instantiator
+       = model: brandMaterial
+       = delegator: Menu
+
+### cura/Machines/Models/FavoriteMaterialsModel.py
+
+선호하는 재료 목록을 보여주는 모델
+
+### cura/Machines/Models/GenericMaterialsModel.py

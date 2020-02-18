@@ -175,7 +175,7 @@ class CuraApplication(QtApplication):
                          tray_icon_name = "cura-icon-32.png",
                          **kwargs)
 
-        self.default_theme = "cura-light"
+        self.default_theme = "invivo"
 
         self.change_log_url = "https://ultimaker.com/ultimaker-cura-latest-features"
 
@@ -478,6 +478,7 @@ class CuraApplication(QtApplication):
             "XmlMaterialProfile", #Cura crashes without this one.
             "Toolbox", #This contains the interface to enable/disable plug-ins, so if you disable it you can't enable it back.
             "PrepareStage", #Cura is useless without this one since you can't load models.
+            "PreparingStage", #Cura is useless without this one since you can't load models.
             "PreviewStage", #This shows the list of the plugin views that are installed in Cura.
             "MonitorStage", #Major part of Cura's functionality.
             "LocalFileOutputDevice", #Major part of Cura's functionality.
@@ -880,7 +881,8 @@ class CuraApplication(QtApplication):
         self.initializeEngine()
 
         # Initialize UI state
-        controller.setActiveStage("PrepareStage")
+        # controller.setActiveStage("PrepareStage")
+        controller.setActiveStage("PreparingStage")
         controller.setActiveView("SolidView")
         controller.setCameraTool("CameraTool")
         controller.setSelectionTool("SelectionTool")

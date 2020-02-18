@@ -5191,6 +5191,16 @@ msgctxt "name"
 msgid "Prepare Stage"
 msgstr ""
 
+#: PreparingStage/plugin.json
+msgctxt "description"
+msgid "Provides a preparing stage in Cura."
+msgstr ""
+
+#: PreparingStage/plugin.json
+msgctxt "name"
+msgid "Preparing Stage"
+msgstr ""
+
 #: RemovableDriveOutputDevice/plugin.json
 msgctxt "description"
 msgid "Provides removable drive hotplugging and writing support."
