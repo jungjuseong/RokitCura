@@ -28,15 +28,15 @@
         "has_materials": true,
         "preferred_material": "generic_pla"
     },
-
     "overrides": {
         "layer_height": { "settable_per_extruder": true },
-        "layer_height_0": { "settable_per_extruder": true },
 
+        "machine_name": { "default_value": "Dr. INVIVO 4D6" },
         "machine_heated_bed": { "default_value": true },
+
         "machine_width": { "default_value": 80 },
         "machine_height": { "default_value": 80 },
-        "machine_depth": { "default_value": 40 },
+        "machine_depth": { "default_value": 50 },
         "machine_shape": { "default_value": "elliptic"},
 
         "infill_pattern": {"value": "'triangles'" },
@@ -48,6 +48,14 @@
 
         "switch_extruder_retraction_speeds": {"default_value": 15 },
         "switch_extruder_retraction_amount": {"value": 1 },
+
+        "wall_thickness": { "value": "1.2" },
+
+        "retraction_amount": { "default_value": 3 },
+        "retraction_speed": { "default_value": 15 },
+        "travel_retract_before_outer_wall": { "default_value": true },
+        "skin_overlap": { "value": "15" },
+        "adhesion_type": { "default_value": "skirt" },
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {
