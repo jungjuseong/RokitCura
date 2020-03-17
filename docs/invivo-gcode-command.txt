@@ -7,6 +7,18 @@
 * M330 - shot stop
 * G4 P4000 - 4sec delay
 
+
+    G01 Z${coord.z - 8}.
+    G04 P1000
+    M301
+    G04 P2000 
+    M330
+    G04 P500
+    G01 Z${coord.z}.
+    G01 X${coord.x} Y${coord.y} Z${coord.z} F700
+    G01 A0.
+    G01 B2.\n`
+    
 * G0 -> G1
 * G1 - Coordinated Movement X Y Z E
 * G2 - CW ARC

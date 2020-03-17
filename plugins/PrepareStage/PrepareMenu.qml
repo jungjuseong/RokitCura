@@ -46,8 +46,7 @@ Item
             height: parent.height
             spacing: 0
 
-            Cura.MachineSelector
-            {
+            Cura.RokitBuildVolumeSelector {
                 id: machineSelection
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
