@@ -1,7 +1,7 @@
 {
     "version": 2,
     "name": "Dr.Invivo 4D6",
-    "inherits": "fdmprinter",
+    "inherits": "rokitbio-printer",
     "metadata": {
         "visible": true,
         "author": "clbee",

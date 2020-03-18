@@ -46,7 +46,7 @@ Item
             height: parent.height
             spacing: 0
 
-            Cura.RokitBuildVolumeSelector {
+            Cura.MachineSelector { // RokitBuildVolumeSelector {
                 id: machineSelection
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -63,7 +63,7 @@ Item
                 color: UM.Theme.getColor("lining")
             }
 
-            Cura.ConfigurationMenu
+            Cura.RokitConfigurationMenu
             {
                 id: printerSetup
                 Layout.fillHeight: true
