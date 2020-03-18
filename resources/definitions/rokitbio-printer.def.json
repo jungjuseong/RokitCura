@@ -5026,6 +5026,7 @@
                     "label": "Layers",
                     "description": "UV per layers",
                     "type": "int",
+                    "unit": "layers",
                     "default_value": 1,
                     "minimum_value": "1",
                     "maximum_value_warning": "5",
@@ -5037,7 +5038,7 @@
                 {
                     "label": "Power (watt)",
                     "description": "UV Power",
-                    "unit": "",
+                    "unit": "PWM",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
@@ -5051,7 +5052,7 @@
                 {
                     "label": "Time",
                     "description": "time per UV",
-                    "unit": "mm",
+                    "unit": "s",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
@@ -5083,8 +5084,8 @@
                 "dispensor_shot":
                 {
                     "label": "SHOT",
-                    "description": "time of shot dispensor",
-                    "unit": "mm",
+                    "description": "time of shot",
+                    "unit": "s",
                     "type": "float",
                     "default_value": 1.0,
                     "minimum_value": "0.1",
@@ -5098,7 +5099,7 @@
                     "label": "VAC",
                     "description": "sec of dispensor vacume",
                     "type": "float",
-                    "unit": "mm",
+                    "unit": "s",
                     "default_value": 1,
                     "minimum_value": "1",
                     "maximum_value_warning": "5",
@@ -5110,7 +5111,7 @@
                 {
                     "label": "SET.P",
                     "description": "SHOT Power",
-                    "unit": "mm",
+                    "unit": "PWM",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
@@ -5124,7 +5125,7 @@
                 {
                     "label": "VAC.P",
                     "description": "VAC Power",
-                    "unit": "mm",
+                    "unit": "PWM",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
