@@ -13,7 +13,7 @@ Item
     id: base
     UM.I18nCatalog { id: catalog; name: "cura" }
 
-    property int columnWidth: parent.width * 2 - 2 * UM.Theme.getSize("default_margin").width
+    property int columnWidth: 150 * 2 - 2 * UM.Theme.getSize("default_margin").width
     property int columnSpacing: 3 * screenScaleFactor
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
 
