@@ -8,42 +8,31 @@ import QtQuick.Layouts 1.3
 import UM 1.3 as UM
 import Cura 1.1 as Cura
 
-//
-// This the content in the "Printer" tab in the Machine Settings dialog.
-//
 Item
 {
     id: base
     UM.I18nCatalog { id: catalog; name: "cura" }
 
-    property int columnWidth: ((parent.width - 2 * UM.Theme.getSize("default_margin").width) / 2) | 0
+    property int columnWidth: parent.width * 2 - 2 * UM.Theme.getSize("default_margin").width
     property int columnSpacing: 3 * screenScaleFactor
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
 
-    property int labelWidth: (columnWidth * 2 / 3 - UM.Theme.getSize("default_margin").width * 2) | 0
-    property int controlWidth: (columnWidth / 3) | 0
+    property int labelWidth: columnWidth * 0.6 - UM.Theme.getSize("default_margin").width
+    property int controlWidth: columnWidth * 0.4
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
-
     property var forceUpdateFunction: manager.forceUpdate
-
+    
     Cura.RoundedRectangle
     {
-        height: 300
-        anchors
-        {
-            top: parent.bottom + 100 // tabBar.bottom
-            topMargin: -UM.Theme.getSize("default_lining").height
-            bottom: parent.bottom + 400
-            left: parent.left
-            right: parent.right
-        }
         cornerSide: Cura.RoundedRectangle.Direction.Down
         border.color: UM.Theme.getColor("lining")
         border.width: UM.Theme.getSize("default_lining").width
         radius: UM.Theme.getSize("default_radius").width
         color: UM.Theme.getColor("main_background")
+        height: upperBlock.height + 20 
+        width: 300
 
         RowLayout
         {
@@ -58,18 +47,18 @@ Item
             spacing: UM.Theme.getSize("default_margin").width
             
             // =======================================
-            // "Printer Settings"
+            // "Build Volume Settings"
             // =======================================
             Column
             {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
-                spacing: base.columnSpacing
+                spacing: base.columnSpacing + 5
 
                 Label   // Title Label
                 {
-                    text: catalog.i18nc("@title:label", "Printer Settings")
+                    text: catalog.i18nc("@title:label", "Build Volume Settings")
                     font: UM.Theme.getFont("medium_bold")
                     color: UM.Theme.getColor("text")
                     renderType: Text.NativeRendering
