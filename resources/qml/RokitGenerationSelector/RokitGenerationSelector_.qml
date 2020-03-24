@@ -11,7 +11,7 @@ import "RokitBuildVolumeContents"
 
 Cura.ExpandablePopup
 {
-    id: buildVolumeSelector
+    id: generationSelector
 
     contentPadding: UM.Theme.getSize("default_lining").width
     contentAlignment: Cura.ExpandablePopup.ContentAlignment.AlignLeft
@@ -25,7 +25,7 @@ Cura.ExpandablePopup
 
     headerItem: Cura.IconWithText
     {
-        text: "Build Volume"
+        text: "Generation"
         source: UM.Theme.getIcon("printer_single")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")
@@ -43,17 +43,4 @@ Cura.ExpandablePopup
         }
         visible: true
     }
-
-    // 임의 설정 창
-    //contentItem: RokitBuildVolumeSetting
-    // {
-    //     id: rokitBuildVolumeSetting
-    //     anchors
-    //     {
-    //         left: parent.left
-    //         right: parent.right
-    //         top: rokitBuildVolumeSetup.bottom
-    //         topMargin: UM.Theme.getSize("wide_margin").width
-    //     }
-    // }
 }

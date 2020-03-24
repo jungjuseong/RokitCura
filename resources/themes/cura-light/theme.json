@@ -147,6 +147,9 @@
 
     "colors": {
 
+        "rokit_build_plate": [249, 249, 249, 255],
+        "rokit_build_plate_border": [226, 226, 226, 255],
+
         "main_background": [255, 255, 255, 255],
         "wide_lining": [245, 245, 245, 255],
         "thick_lining": [180, 180, 180, 255],
@@ -440,6 +443,16 @@
     },
 
     "sizes": {
+        "rokit_buildvolume_setting_widget" : [26.0, 28.0],
+        "rokit_buildvolume_Content_widget" : [28.0, 28.0],
+
+        "rokit_combobox_default" : [22, 2.5],
+        "rokit_combobox_radius": [0.25, 0.25],
+        
+        "rokit_culture_dish_diameter": [13, 13],
+        "rokit_well_plate_diameter": [6, 6],
+        "rokit_culture_slide": [7, 13],
+    
         "window_minimum_size": [80, 48],
         "large_popup_dialog": [48, 40],
         "popup_dialog": [40, 36],

@@ -88,6 +88,26 @@ Item
                 height: childrenRect.height
                 width: childrenRect.width
             }
+
+            Rectangle
+            {
+                id: sideBar
+                anchors.left: printSetupSelectorItem.rigth
+                height: parent.height
+                width: UM.Theme.getSize("default_lining").width
+                color: UM.Theme.getColor("lining")
+            }
+
+            Cura.RokitGenerationSelector {
+                id: generationItem
+                anchors.left: sideBar.right
+                
+                headerCornerSide: Cura.RoundedRectangle.Direction.Left
+                Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
+                Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
         }
 
         Button
