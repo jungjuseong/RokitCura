@@ -143,12 +143,12 @@
 
 ### Material
 -------
-- Default Printing Temperature(default_material_print_temperature): 프린팅에 사용하는 기본 온도. 이것이 재료의 기본 온도가 되야 함. 다른 모든 프린트 온도는 이 값과의 차이를 사용해야 함.
-- Build Volume Temperature(build_volume_temperature): The temperature of the environment to print in. If this is 0, the build volume temperature will not be adjusted.
-- Printing Temperature(material_print_temperature): 프링팅 온도.
-- Printing Temperature Initial Layer(material_print_temperature_layer_0): 첫 층에 사용되는 프린팅 온도. 첫 층을 특별하게 처리하지 않는다면 0으로 둔다.
-- Initial Printing Temperature(material_initial_print_temperature): 프린팅 온도로 가열하는 동안 프린팅이 사작횔 수 있는 최소 온도.
-- Final Printing Temperature(material_final_print_temperature): The temperature to which to already start cooling down just before the end of printing.
+- 디폴트 프린트 온도(default_material_print_temperature): 프린팅에 사용하는 기본 온도. 이것이 재료의 기본 온도가 되야 함. 다른 모든 프린트 온도는 이 값과의 차이를 사용해야 함.
+- 빌드 볼륨 온도(build_volume_temperature): 프린트 되는 환경의 온도. 값이 0이면 온도가 조절되지 않는다.
+- 프린트 온도(material_print_temperature): 프린트 할 때의 온도.
+- 첫 레이어의 프린팅 온도(material_print_temperature_layer_0): 첫 층에 사용되는 프린팅 온도. 첫 층을 특별하게 처리하지 않는다면 0으로 둔다.
+- 처음의 프린팅 온도(material_initial_print_temperature): 프린팅 온도로 가열하는 동안 프린팅이 사작횔 수 있는 최소 온도.
+- 마지막 프린팅 온도(material_final_print_temperature): The temperature to which to already start cooling down just before the end of printing.
 - Extrusion Cool Down Speed Modifier(material_extrusion_cool_down_speed): The extra speed by which the nozzle cools while extruding. The same value is used to signify the heat up speed lost when heating up while extruding.
 - Default Build Plate Temperature(default_material_bed_temperature): The default temperature used for the heated build plate. This should be the "base" temperature of a build plate. All other print temperatures should use offsets based on this value
 - Build Plate Temperature(material_bed_temperature): The temperature used for the heated build plate. If this is 0, the bed temperature will not be adjusted.
@@ -177,15 +177,15 @@
 
 ### Speed
 -------
-- Print Speed(speed_print): 프린팅 할때의 속도
-- Travel Speed(speed_travel): 이동만할 때의 속도.
+- 프린트 스피드(speed_print): 프린팅 할때의 속도
+- 트레블 스피드(speed_travel): 이동만할 때의 속도.
 - Initial Layer Speed(speed_layer_0): The speed for the initial layer. A lower value is advised to improve adhesion to the build plate.
 - Skirt/Brim Speed(skirt_brim_speed): The speed at which the skirt and brim are printed. Normally this is done at the initial layer speed, but sometimes you might want to print the skirt or brim at a different speed.
 - Z Hop Speed(speed_z_hop): The speed at which the vertical Z movement is made for Z Hops. This is typically lower than the print speed since the build plate or machine's gantry is harder to move.
 - Number of Slower Layers(speed_slowdown_layers): The first few layers are printed slower than the rest of the model, to get better adhesion to the build plate and improve the overall success rate of prints. The speed is gradually increased over these layers.
-- Equalize Filament Flow(speed_equalize_flow_enabled): Print thinner than normal lines faster so that the amount of material extruded per second remains the same. Thin pieces in your model might require lines printed with smaller line width than provided in the settings. This setting controls the speed changes for such lines.
-- Maximum Speed for Flow Equalization(speed_equalize_flow_max): Maximum print speed when adjusting the print speed in order to equalize flow.
-- Enable Acceleration Control(acceleration_enabled): Enables adjusting the print head acceleration. Increasing the accelerations can reduce printing time at the cost of print quality.
+- 필라멘트 플로우를 이퀄라이즈(speed_equalize_flow_enabled): Print thinner than normal lines faster so that the amount of material extruded per second remains the same. Thin pieces in your model might require lines printed with smaller line width than provided in the settings. This setting controls the speed changes for such lines.
+- 플로우 이퀄라이즈를 위한 최대 스피드(speed_equalize_flow_max): Maximum print speed when adjusting the print speed in order to equalize flow.
+- 가속 제어 가능(acceleration_enabled): Enables adjusting the print head acceleration. Increasing the accelerations can reduce printing time at the cost of print quality.
 - Print Acceleration(acceleration_print): The acceleration with which printing happens.
 - Travel Acceleration(acceleration_travel): The acceleration with which travel moves are made.
 - Initial Layer Acceleration(acceleration_layer_0): The acceleration for the initial layer.
@@ -198,20 +198,20 @@
 
 ### Travel
 -------
-- Enable Retraction(retraction_enable): 노즐이 프린팅하지 않는 영역으로 이동할때 필라멘트를 압입함
-- Retract at Layer Change(retract_at_layer_change): 노즐이 다음 층으로 이동할때 필라멘트를 압입함
-- Retraction Distance(retraction_amount): 압입 이동 동안 압입되는 재료의 길이
-- Retraction Speed(retraction_speed): 압입 이동 동안 필라멘트가 압입되고 프라임되는 속도.
+- 리트랙션 가능(retraction_enable): 노즐이 프린팅하지 않는 영역으로 이동할때 필라멘트를 흡입함
+- 레이어 변경시 리트랙트(retract_at_layer_change): 노즐이 다음 층으로 이동할때 필라멘트를 흡입함
+- 리트랙션 거리(retraction_amount): 흡입 이동 동안 흡입되는 재료의 길이
+- 리트랙션 속도(retraction_speed): 흡입 이동 동안 필라멘트가 흡입되고 프라임되는 속도.
 - Retraction Extra Prime Amount(retraction_extra_prime_amount): Some material can ooze away during a travel move, which can be compensated for here.
 - Retraction Minimum Travel(retraction_min_travel): The minimum distance of travel needed for a retraction to happen at all. This helps to get fewer retractions in a small area.
 - Maximum Retraction Count(retraction_count_max): This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
 - Minimum Extrusion Distance Window(retraction_extrusion_window): The window in which the maximum retraction count is enforced. This value should be approximately the same as the retraction distance, so that effectively the number of times a retraction passes the same patch of material is limited.
 - Limit Support Retractions(limit_support_retractions): Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
-- Combing Mode(retraction_combing): Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
-- Max Comb Distance With No Retract(retraction_combing_max_distance): When non-zero, combing travel moves that are longer than this distance will use retraction.
-- Retract Before Outer Wall(travel_retract_before_outer_wall): 외곽 벽을 시작하기 위해 이동할 때 항상 압입됨.
-- Avoid Printed Parts When Traveling(travel_avoid_other_parts): 노즐이 트래블링 시에 이미 인쇄된 파트를 회피함. 이 옵션은 combing이 활성일때만 사용 가능한다
-- Avoid Supports When Traveling(travel_avoid_supports): 노즐이 트래블링 시 이미 프린트된 지지대를 회피함. 이 옵션은 combing이 활성일때만 사용 가능
+- Combing 모드(retraction_combing): Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
+- 흡입없이 최대 Comb 거리(retraction_combing_max_distance): When non-zero, combing travel moves that are longer than this distance will use retraction.
+- 외벽 전에 리트랙트(travel_retract_before_outer_wall): 외곽 벽을 시작하기 위해 이동할 때 항상 압입됨.
+- 트레블링 시 인쇄된 부분 회피(travel_avoid_other_parts): 노즐이 트래블링 시에 이미 인쇄된 파트를 회피함. 이 옵션은 combing이 활성일때만 사용 가능한다
+- 트레블링 시 지지대를 회피(travel_avoid_supports): 노즐이 트래블링 시 이미 프린트된 지지대를 회피함. 이 옵션은 combing이 활성일때만 사용 가능
 - Travel Avoid Distance(travel_avoid_distance): 트래블 이동 동안 회피 시 노즐과 이미 인쇄된 파트 간의 거리
 - Layer Start X(layer_start_x): The X coordinate of the position near where to find the part to start printing each layer.
 - Layer Start Y(layer_start_y): The Y coordinate of the position near where to find the part to start printing each layer.
@@ -223,17 +223,19 @@
 
 ### Cooling
 -------
-- Enable Print Cooling(cool_fan_enabled): Enables the print cooling fans while printing. The fans improve print quality on layers with short layer times and bridging / overhangs.
-- Fan Speed(cool_fan_speed): The speed at which the print cooling fans spin.
-- Regular/Maximum Fan Speed Threshold(cool_min_layer_time_fan_speed_max): The layer time which sets the threshold between regular fan speed and maximum fan speed. Layers that print slower than this time use regular fan speed. For faster layers the fan speed gradually increases towards the maximum fan speed.
-- Initial Fan Speed(cool_fan_speed_0): The speed at which the fans spin at the start of the print. In subsequent layers the fan speed is gradually increased up to the layer corresponding to Regular Fan Speed at Height.
-- Regular Fan Speed at Height(cool_fan_full_at_height): The height at which the fans spin on regular fan speed. At the layers below the fan speed gradually increases from Initial Fan Speed to Regular Fan Speed.
-- Minimum Layer Time(cool_min_layer_time): The minimum time spent in a layer. This forces the printer to slow down, to at least spend the time set here in one layer. This allows the printed material to cool down properly before printing the next layer. Layers may still take shorter than the minimal layer time if Lift Head is disabled and if the Minimum Speed would otherwise be violated.
-- Minimum Speed(cool_min_speed): The minimum print speed, despite slowing down due to the minimum layer time. When the printer would slow down too much, the pressure in the nozzle would be too low and result in bad print quality.
+
+- 프린트 냉각 가능(cool_fan_enabled): 프린트시 프린트 쿨링 팬을 가능으로 함. The fans improve print quality on layers with short layer times and bridging / overhangs.
+- 팬 스피드(cool_fan_speed): 프린트 쿨링 팬의 회전 속도.
+- 일반/최대 팬 스피드 임계치(cool_min_layer_time_fan_speed_max): The layer time which sets the threshold between regular fan speed and maximum fan speed. Layers that print slower than this time use regular fan speed. For faster layers the fan speed gradually increases towards the maximum fan speed.
+- 초기 팬 스피드(cool_fan_speed_0): The speed at which the fans spin at the start of the print. In subsequent layers the fan speed is gradually increased up to the layer corresponding to Regular Fan Speed at Height.
+- Height에서 일반 팬 스피드(cool_fan_full_at_height): The height at which the fans spin on regular fan speed. At the layers below the fan speed gradually increases from Initial Fan Speed to Regular Fan Speed.
+-최저 레이어 시간(cool_min_layer_time): 한 레이어에서 소요할 최소 시간. This forces the printer to slow down, to at least spend the time set here in one layer. This allows the printed material to cool down properly before printing the next layer. Layers may still take shorter than the minimal layer time if Lift Head is disabled and if the Minimum Speed would otherwise be violated.
+- 최저 스피드(cool_min_speed): The minimum print speed, despite slowing down due to the minimum layer time. When the printer would slow down too much, the pressure in the nozzle would be too low and result in bad print quality.
 - Lift Head(cool_lift_head): When the minimum speed is hit because of minimum layer time, lift the head away from the print and wait the extra time until the minimum layer time is reached.
 
 ### Support
 -------
+
 - Generate Support(support_enable): Generate structures to support parts of the model which have overhangs. Without these structures, such parts would collapse during printing.
 - Support Extruder(support_extruder_nr): The extruder train to use for printing the support. This is used in multi-extrusion.
 - Support Placement(support_type): Adjusts the placement of the support structures. The placement can be set to touching build plate or everywhere. When set to everywhere the support structures will also be printed on the model.
@@ -275,6 +277,7 @@
 - Drop Down Support Mesh(support_mesh_drop_down): Make support everywhere below the support mesh, so that there's no overhang in the support mesh.
 
 ### Build Plate Adhesion
+
 -------
 - Enable Prime Blob(prime_blob_enable): Whether to prime the filament with a blob before printing. Turning this setting on will ensure that the extruder will have material ready at the nozzle before printing. Printing Brim or Skirt can act like priming too, in which case turning this setting off saves some time.
 - Extruder Prime X Position(extruder_prime_pos_x): The X coordinate of the position where the nozzle primes at the start of printing.
