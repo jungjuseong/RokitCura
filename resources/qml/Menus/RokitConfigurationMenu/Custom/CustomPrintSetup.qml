@@ -284,7 +284,7 @@ Item
         border.width: UM.Theme.getSize("default_lining").width
 
         color: UM.Theme.getColor("main_background")
-        Cura.SettingView
+        Cura.RokitSettingView
         {
             anchors
             {

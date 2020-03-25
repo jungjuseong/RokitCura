@@ -66,7 +66,7 @@ Settings 가져오기
 
 설정은 scene의 모든 객체에 저장돤다. scene 자체, mesh 그룹, 압출기 트레인과 mesh 등 모든 객체에 저장되어 있다. `Settings` 클래스의 인스턴스에 저장된다.
 
-`Settings` 클래스는 키와 `Settings` 인스턴스를 가진 매핑이다. 이 인스턴스 각각은 모든 설정 프로퍼티가 들어 있다. 현재 이것은 문자열로 저장된 설정 값, 압출기를 가리키는 포인터로 저장된 특정 압출기의 제약 사항을 포함한다. 설정 값은 여기에 문자열로 저장되며 나중에 다양한 방식으로 해석될 수 있다. 예를 들어 각도를 나타내는 설정은 어디에서는 `dgree`로 어디에서는 `radian`으로 해석될 수 있다. 설정 값을 요청할 때는 어떤 타입이 리턴되어야 할지를 템플릿으로 지정한다.
+`Settings` 클래스는 키와 `Settings` 인스턴스를 가진 매핑이다. 이 인스턴스 각각은 모든 설정 프로퍼티가 들어 있다. 현재 이것은 문자열로 저장된 설정 값, 익스트루더를 가리키는 포인터로 저장된 특정 익스트루더의 제약 사항을 포함한다. 설정 값은 여기에 문자열로 저장되며 나중에 다양한 방식으로 해석될 수 있다. 예를 들어 각도를 나타내는 설정은 어디에서는 `degree`로 어디에서는 `radian`으로 해석될 수 있다. 설정 값을 요청할 때는 어떤 타입이 리턴되어야 할지를 템플릿으로 지정한다.
 
 ```c++
     const Settings& settings = Application::getInstance().current_slice->scene.settings;
@@ -82,22 +82,22 @@ Settings 가져오기
 Inheritance
 ----
 
-각 `Settings` 인스턴스는 scene에 있는 것을 제외하고는 모두 부모가 있다. 설정이 현재의 Settings 인스턴스에 있지 않다면 설정을 부모에게 요청한다. `Scene` 인스턴스에 모든 설정이 들어 있다. scene 객체들의 계층도는 `Settings` 인스턴스에서 부모-자식 관계를 반영한다.
+각 `Settings` 인스턴스는 scene에 있는 하나를 제외하고 부모가 있다. 설정이 현재의 Settings 인스턴스에 있지 않다면 설정을 부모에게 요청한다. `Scene` 인스턴스에 모든 설정이 들어 있다. scene 객체들의 계층도는 `Settings` 인스턴스에서 부모-자식 관계를 반영한다.
 
-* scene은 트리의 루트. 전역 설정이다.
+* scene은 글로벌 설정인 트리의 루트임.
 * scene의 mesh 그룹의 부모. per-mesh-group 설정이다. 
 * 압출기의 부모는 현재의 mesh 그룹이다. 다음번 mesh 그룹을 처리할 때, 압출기 train의 부모는 다음번 mesh 그룹으로 바뀐다. 이들 압출기들은 per-extruder 설정을 가진다.
-* mesh들의 부모는 이들 mesh들을 프린트하는 압출기들이다. mesh들은 per-mesh 설정을 가진다.
+* mesh의 부모는 mesh를 프린트하는 압출기들이다. mesh들은 per-mesh 설정을 가진다.
 
 설정이 있는지의 여부는 프론트엔드 또는 명령행으로 보냈는지에 달려 있다.
 
-압출기에 제약을 두기
-----
+Limiting to extruder
+-------
 
-프린터 특성이 특정 압출기로 프린트하도록 설정된다면 어떤 설정을 위한 압출기가 제한될 것이다. 예를 들어 infill은 두번째 압출기로 프린트하도록 설정된다면 모든 infill 설정은 두번째 압출기로 계산되어야 한다. 만일 그 압출기의 설정이 있다면 먼저 그 압출기의 제약을 계산한다. 그 다음에는 압출기의 제약은 다시는 계산하지 않는다. 설정을 구하는 최종 알고리듬은 다음과 같다.
+프린터 특성이 특정 압출기로 프린트하도록 설정된다면 어떤 설정을 위한 익스트루더가 제한될 것이다. 예를 들어 infill은 두번째 압출기로 프린트하도록 설정된다면 모든 infill 설정은 두번째 압출기로 계산되어야 한다. 만일 그 압출기의 설정이 있다면 먼저 그 압출기의 제약을 계산한다. 그 다음에는 압출기의 제약은 다시는 계산하지 않는다. 설정을 구하는 최종 알고리즘은 다음과 같다.
 
-1. 현재 `Settings` 인스턴스가 설정 값이 있다면 그것을 리턴한다. 아니면 ...
-2. 설정이 특정 압출기에 제한된다면 그 압출기로부터 얻어온다. 그 다음부터는 더 이상 그 압출기에 재약되지 않는다. 아니면 ...
+1. 현재 `Settings` 인스턴스에 설정이 있다면 그것을 리턴한다. 아니면 ...
+2. 설정이 특정 압출기에 제한된다면 그 압출기로부터 얻어온다. 그 다음부터는 더 이상 그 압출기에 제약되지 않는다. 아니면 ...
 3. 현재 `Settings` 인스턴스가 부모가 있으면 거기서 설정을 가져온다. 아니면 ... 
 4. 에러를 일으킨다. 설정은 더 이상 존재하지 않는다!
 
@@ -111,31 +111,31 @@ Scene<a id="scene"></a>
 The Hierarchy
 -------------
 
-슬라이스들은 큐에 쌓아 처리 할 수 있다. 각 슬리아스는 프린트가 예정된 객체로 채워져 있는 빌드 플레이트를 나타내는 자신의 scene이 들어 있다.
+단편들은 큐에 쌓아 처리할 수 있다. 각 단편은 프린트가 예정된 객체로 채워져 있는 빌드 플레이트를 나타내는 자신의 scene이 들어 있다.
 
-각 scence은 여러개의 mesh 그룹과 여러개의 압출기가 들어 있다. 이 mesh 그룹들은 한번에 하나씩 처리된다. 각 mesh 그룹마다 같은 압출기들이 사용된다. mesh 그룹은 여러개의 mesh들이 들어 있다.
+각 scence은 여러개의 mesh 그룹과 여러개의 압출기가 들어 있다. 이 mesh 그룹들은 한번에 하나씩 처리된다. 각 mesh 그룹마다 같은 압출기가 사용된다. mesh 그룹에는  여러 mesh가 들어 있다.
 
 이 scene은 커뮤니케이션 클래스가 구축한다.
 
 Slicing<a id="slicing"></a>
 ==========================
 
-여기서는 CuraEngine이 3D mesh의 슬라이스(절단면)을 만드는 방법을 설명한다.
+여기서는 CuraEngine이 3D mesh의 단편을 만드는 방법을 설명한다.
 
-"슬라이싱"이란 용어는 혼동되는 용어이다. Cura는 "슬라이서"라고 여기고 슬라이서는 3D mesh를 g-code로 변환하는 과정을 "슬라이싱"이라고 부르기 때문이다. 여기서는 "슬라이싱"을 3D mesh의 절단면을 특정한 높이로 만드는 과정이라고 정의한다.
+"슬라이싱"이란 용어는 혼동되는 용어이다. Cura는 "슬라이서"라고 하지만 슬라이서는 3D mesh를 g-code로 변환하는 과정을 "슬라이싱"이라고 부르기 때문이다. 여기서는 "슬라이싱"을 3D mesh의 절단면을 특정한 높이로 만드는 과정이라고 정의한다.
 
 레이어 높이 결정하기
 ---------------------
 
 CuraEngine은 3D mesh의 절단면을 만들기 전에 먼저 절단면의 높이를 결정해야 한다.
 
-각 레이어는 Z축으로 특정한 스팬을 가진다. 예를 들어 첫번 레이어는 0에서 0.27mm까지의 스팬을 가지며 2번째 레이어는 0.27mm에서 0.37mm까지, 3번째 레이어는 0.37mm에서 0.47mm의 스팬을 가진다. 각 레이어의 절단면은 기본적으로 각 레이어의 스팬의 중앙을 지날 것이다. 여기의 첫 레이어에서는 0.135mm 높이로 슬라이스 한다. 레이어는 레이어의 상단 높이에서 프린트할 것이므로 레이어를 프린트하기 전에 `Z0.27`로 이동하는 명령을 둘 것이다. 
+각 레이어는 Z축으로 특정한 스팬을 가진다. 예를 들어 첫번 레이어는 0에서 0.27mm까지의 스팬을, 2번째 레이어는 0.27mm에서 0.37mm까지, 3번째 레이어는 0.37mm에서 0.47mm의 스팬을 가진다. 각 레이어의 절단면은 기본적으로 각 레이어의 스팬의 중앙을 지날 것이다. 여기의 첫 레이어에서는 0.135mm 높이로 슬라이스 한다. 레이어는 레이어의 상단 높이에서 프린트할 것이므로 레이어를 프린트하기 전에 `Z0.27`로 이동하는 명령을 둘 것이다. 
 
-정상적으로는 첫 레이어는 Initial Layer Height라는 별도의 레이어 높이가 있다. 나머지 레이어들은 보통의 Layer Height 설정을 사용한다.
+일반적으로 첫 레이어는 `Initial Layer Height`라는 별도의 레이어 높이가 있다. 나머지 레이어들은 `Layer Height` 설정을 사용한다.
 
 ![Layer Heights](assets/layer_heights.svg)
 
-대안으로 Adaptive Layer Height로는 절단면의 Z 좌표가 모델의 모양에 근거하여 결정된다. Slicing Tolerance를 Inclusive 또는 Exclusive로 설정하면 중간이 아니라 레이어의 경계 부분을 슬라이스할 것이다.
+다른 방법으로 `Adaptive Layer Height`로는 절단면의 Z 좌표가 모델의 모양에 근거하여 결정된다. Slicing Tolerance를 Inclusive 또는 Exclusive로 설정하면 중간이 아니라 레이어의 경계 부분을 슬라이스할 것이다.
 
 삼각형들을 선분들로
 --------
@@ -173,7 +173,6 @@ mesh의 표면이 자신을 교차하면 종종 하나의 좌표에 두 개 이�
 이 에제는 한 쪽 끝 자체로 끝나고 다른 쪽 끝도 느슨하게 연결된 일련의 선분이 있다. 이것은 열린 다각형으로 간주된다. 또한 T- 크로싱은 서로 가장 평행 한 두 선을 연결한다. 세 번째 엔드 포인트는 개방형입니다.
 
 
-
 경로 생성하기<a id="generating_paths"></a>
 ==============
 
@@ -184,15 +183,15 @@ mesh의 표면이 자신을 교차하면 종종 하나의 좌표에 두 개 이�
 
 경로는 프린트 순서와 동일하게 생성된다. 이것은 메모리를 절약하고 아키텍처도 단순하게 만든다. 따라서 경로를 생성하기 전에 순서를 결정해야 한다. 프린트 순서는 상당히 엄격한다.
 
-There is a precedence order for which things are considered more important to group together. This precedence goes as follows.
+좀 더 중요한 것들을 함께 묶기 위한 우선 순위가 존재한다. 우선 순위는 다음과 같다.
 
 1. Each mesh group is printed in the sequence that they are sent to CuraEngine. A mesh group is a group of meshes that will get printed from bottom to top. Normally, your entire scene will consist of one mesh group, but if slicing via the command line or if the "One at a Time" mode is enabled in the front-end, you could have multiple mesh groups. The optimal sequence is determined by the front-end in order to minimise the collision area of each mesh group due to the shape of the print head when the nozzle needs to move back down towards the build plate for each mesh group.
-2. The layers are printed in sequence from bottom to top.
+2. 레이어는 바닥에서 위쪽 순서로 프린트 된다.
 3. Every extruder plan is printed in a certain order. The optimal order in which to print the extruders is determined beforehand in order to minimise the number of extruder switches. For example, if the printer has two extruders, then the first layer might start with the first extruder, then switch to the second extruder. The next layer must then start with the second extruder (so that there is no switch upon the layer transition) and switch to the first extruder. There will then be at most one extruder switch per layer.
 4. Every mesh is printed separately. The order is determined in order to minimise travel moves and switches in configuration.
 5. Every part of a mesh is printed separately. The order is determined in order to minimise travel moves again. The "parts" of a mesh are the disparate zones that originally came from the same 3D model file, but are in this layer separated by air.
 
-Within a plan for an extruder on a layer, there is also a rigid order in which the features are printed. This order is as follows.
+한 레이어 상의 압출기 계획안에는 어떤 특징을 프린트할지 엄격한 순서가 있다. 순서는 다음과 같다.
 
 - Prime blob, if this is the first layer and a prime blob is requested.
 - Prime tower, if the prime tower is enabled and there are any extruder switches in this layer or any higher layer.
@@ -212,7 +211,7 @@ Within a plan for an extruder on a layer, there is also a rigid order in which t
 
 Within a part there is a slight flexibility in the order due to the "Infill Before Walls" setting and the "Outer Before Inner Walls" setting.
 
-벽 생성하기
+Wall 생성하기
 ----------------------
 During the stage where the areas are generated for each feature type, one inset was already generated for every wall. These insets are going to become the centreline for each wall. Their vertex coordinates are eventually going to end up in the g-code as the destination coordinates of moves. Some work needs to be done to plan them properly though.
 
@@ -228,7 +227,7 @@ When generating a wall, CuraEngine also checks for overlap with previously print
 
 Instead of actually reducing the flow rate of this thinner line segment, the speed of movement is increased. Typically a printer will have more short-term control over its velocity than its flow rate.
 
-Infill Patterns
+Infill 패턴
 ----
 Infill patterns are used not only for generating infill, but also for generating support, skin and even ironing. They are CuraEngine's go-to method to fill an area with material. Here the task is to draw lines inside a certain shape to fill that shape with the desired material density.
 
@@ -241,6 +240,7 @@ For lines infill, the shape to fill is crossed with several scan lines at a cert
 Infill lines are optionally connected together. The algorithm to connect infill lines starts connecting two arbitrary adjacent lines. Then it follows the perimeter until it encounters the next crossing and connects that to the crossing after it, and so on until it's passed around the entire perimeter. It skips only the adjacent crossings if they are already part of the same polyline, so that no loops are created. This usually creates one single infill polyline, but this is not guaranteed; there are exceptional shapes that cannot be completely connected in this way.
 
 ![Connected Infill Lines](assets/connected_infill.svg)
+
 
 Filling Small Gaps
 ------------------------
@@ -268,13 +268,14 @@ For this approximation, after printing a line, CuraEngine looks for the nearest 
 
 One slight adjustment needs to be made though because the nozzle cannot accelerate perfectly. Travel moves that move in a line parallel to the line that has just been printed are preferred. There is a weighting scheme to make this consideration based on the sine of the angle between the printed line and the line towards the destination. This reduces overal printing time due to acceleration limitations.
 
-Travelling
+트래블링
 ----
-When moving from A to B, CuraEngine needs to be careful not to make the fragile surface of your print ugly by hitting it with a hot, plastic-covered nozzle in the wrong spots. It employs a couple of techniques to minimise this.
 
-If a retraction is requested while the nozzle happens to be located on a wall, it needs to move inside the mesh a bit further first. Retracting causes the nozzle to pause for a while. During this time it is oozing material and melting any previously printed material it's touching. Inside the model this is less of an issue since it's not visible. The nozzle will move inside, retract there, then move to the infill of its destination part. Similarly, in the destination part it may also not directly go to its destination location if this lies too close to the outside of the print. It must travel to the inside of the mesh first, away from the walls, unretract there and then move to its final destination.
+A에서 B로 이동시 CuraEngine은 뜨겁고 플라스틱이 덮힌 노즐이 깨지기 쉬운 프린트 펴면을 망치지 않도록 조심할 필요가 있다. 이것을 최소화하기 위한 몇가지 기법을 사용한다.
 
-The travel from one part to another will ooze some material even if the material is retracted. That's why CuraEngine will first find the place where the two parts are closest together and make the crossing there instead of at the place where it started. This technique is called combing. It minimises the amount of material that ends up as a blip on the outside of your print. The total travel time is longer, but the travel time outside of the model is shorter. The image below sketches an example of how such a travel would look.
+노즐이 벽에 위치하는 동안 리트랙션이 요청된다면 먼저 mesh 안으로 조금 들어갈 필요가 있다. 리트랙션은 노즐을 잠깐 정지하게 한다. 그 동안에 재료가 튀어나오고 앞서 프린트된 재료가 녹는다. 모델 안에서는 보이지 않으므로 사소한 이슈이다. 노즐이 내부로 들어갈 것이고 거기서 리트랙트한 다음에는 그의 목적 파트의 채움으로 이동한다. 마찬가지로 이것이 프린트 외부에 너무 가깝지 않으면 목적 파트에서는 직접 목적 지점으로 가지 않을 수 있다. 먼저 mesh 내부로 트래블해야 하며 벽에서 떨어지고 거기서 철회한 다음 최종 지점으로 이동한다.
+
+한 파트에서 다른 파트로 트래블하면 어떤 재료는 리트랙션을 해도 샐 것이다. 그래서 Curaegine은 먼저 시작한 지점이 아니라 두 파트가 가장 가까운 지점을 찾고 교차하는 이유이다. 이 기법을 `combing`이라고 한다. 이것은 프린트물의 외부에 흘림으로 나타내는 재료의 양을 최소화한다. 전체 트레블 시간은 더 길지만 모델 외부로의 이동 시간은 더 짧다. 아래의 그림은 그런 트레블이 어떻게 보이는지를 보여준다.
 
 ![Travel Move with Combing](assets/travel_combing.svg)
 
@@ -315,7 +316,6 @@ Infill에서 Skin을 분리하기
 
 그 다음에 CuraEngine은 이 중간 삽입물에 스킨 및 충전재를 채워야한다. Skin을 어디에 둘지와 채우는 장소를 결정해야 한다. 
 
-The basic technique to find areas that need to be filled with bottom skin (for instance) is to look 
 예를 들면 바닥 스킨을 채울 필요가 있는 영역을 찾는 기본 기법은 스킨의 두께에 따라 아래의 여러 레이어들을 살피는 것이다. 하위의 레이어에 공간이 있을 때마다 현재 레이어에 스킨이 있어야 한다.
 
 ![Where to cut](assets/skin_cross_sections.svg) ![Two slices overlaid](assets/skin_overlaid.svg)
@@ -403,22 +403,26 @@ Of course, in practice, X/Y- and Z- distance offsets are both often greater than
 
 
 Inserts<a id="inserts"></a>
-====
-After all paths have been generated, one extra pass is made over these paths. This pass may insert things in the printing plan. Currently the only commands inserted are pre-heating and pre-cooling commands.
 
-Pre-heating and Pre-cooling
+=============================
+
+모든 경로를 생성한 후에 이들 경로에 대해 추가 패스가 하나 만들어진다. 이 패스는 프린팅 플랜에 뭔가를 삽입한다. 현재는 예열과 예냉각 명령 뿐이다.
+
+예열과 예냉각
 ----
-When printing with multiple extruders, the printer should cool down the nozzles that are on stand-by while another nozzle is printing. This prevents the material from degrading due to the heat, which would cause clogging. The nozzle is cooled down to the stand-by temperature. Before the nozzle can be used again, it must be heated back up to printing temperature. This is what the pre-heating procedure is for.
 
-Also, shortly before switching extruders, the active extruder is cooled down slightly. This causes the nozzle to have a somewhat lower temperature during the switching of extruders, which reduces the amount of oozing during this switch. The temperature regulation of CuraEngine for two nozzles then ends up looking something like the image below.
+여러개의 압출기로 프린트할 때 프린터는 다른 노즐이 프린트하는 동안 대기중인 노즐은 냉각을 시켜야 한다. 그래야 열 때문에 재료가 눌어붙어 막히는 것을 막을 수 있다. 노즐은 대기 온도로 냉각된다. 노즐을 다시 사용할 수 있기 전에 프린팅 온도로 가열되어야 한다. 이것이 예열 과정에 관한 것이다.
+
+또한 압출기를 전환하기 바로 전에 활성 압출기는 약간 냉각된다. 이것은 압출기를 전환하는 동안 노즐이 약간 낮은 온도가 돠도록 하여 전환 동안 새는 양을 줄인다. 두개의 노즐에 대한 CuraEngine의 온도 조절 방식을 야래의 그림에서 보여준다.
 
 ![Temperature regulation](assets/temperature_regulation.svg)
 
 There is a machine setting that tells Cura how fast a nozzle can heat up, approximately, in degrees Celsius per second. This is of course a rough approximation since the heating speed varies strongly with the delta between the nozzle temperature and the environment temperature. But it works well enough to estimate the amount of time required to bring the nozzle from stand-by temperature to printing temperature. This pre-heating time is how far before the first extrusion of that nozzle the printer must start heating up.
 
-Inserting Commands
-----
-When it is known how far ahead the nozzle must start heating up, the engine must calculate for each command in the plan how long that command takes to execute. That way it knows where in the plan the heating command must be placed.
+명령 삽입하기
+---------------------
+
+노즐이 얼마나 빨리 가열을 시작해야하는지 알면 엔진은 해당 명령을 실행하는 데 걸리는 시간을 계획에서 각 명령에 대해 계산해야 한다. 이렇게하면 계획에서 가열 명령을 배치해야하는 위치를 알 수 있다.
 
 The time estimates are calculated precisely here, taking everything into account that CuraEngine knows about: velocities, accelerations, jerk, retractions, waiting for minimum layer time, everything. It is not strictly necessary to compute this for every line in the plan. However the total time estimate must be made for the whole print anyway and put in the g-code header, so it is efficient to compute that at the same time.
 
@@ -428,23 +432,24 @@ Once it is known for every line how long it takes to print, CuraEngine will simp
 
 
 Exporting to G-code<a name="gcode_export"></a>
-====
+========================
 
-슬라이싱 프로세스 마지막에 CuraEngine은 원하는 제품을 생산하기 위해 프린터가 수행해야 하는 모든 작업에 대한 완벽한 계획을 수립할 것이다. 이 계획은 CuraEngine의 내부 자료구조로 표현되며 g-code로 번역되어야 한다. 변환은 별도의 쓰레드로 planning 스테이지에서 병렬로 진행한다.
+슬라이싱 프로세스 마지막에 CuraEngine은 원하는 제품을 생산하기 위해 프린터가 수행해야 하는 모든 작업에 대한 완벽한 계획을 수립할 것이다. 이 계획은 CuraEngine의 내부 구조로 표현되며 g-code로 번역되어야 한다. 변환은 별도의 쓰레드로 planning 스테이지에서 병렬로 진행한다.
 
 변환
 ----
-CuraEngine의 내부 자료 구조와 g-code는 1:1 매핑이 있으므로 변환은 매우 단순한다.
 
-* 경로는 `G1` 명령에 목적지 좌표를 첨부하여 변환한다.
-* 트레블은 `G0` 명령에 목적 좌표만 추가하여 변환한다.
+CuraEngine의 내부 구조와 g-code는 1:1 매핑이므로 변환이 매우 단순한다.
+
+* 경로는 `G1`에 목적지 좌표를 붙여 변환한다.
+* 트레블은 `G0`에 목적 좌표만 붙여 변환한다.
 * 가열 명령은 프린터가 대기할 필요가 있는지에 따라  `M104` or `M109` 명령으로 변환된다.
 * 베드 온도는 프린터가 대기할 필요가 있는지에 따라 `M140` or `M190` 명령으로 바꾼다. 
 
-기타 등등 CuraEngine은 수십개의 다른 명령들을 구현한다. CuraEngine은 g-code만 구현하지만 X3G와 같은 다른 포맷을 지원하려면 Cura의 프론트엔트가 g-code를 최종 포맷ㅇ로 변환하도록 조정할 것이다.
+이외에도 CuraEngine은 수십개의 명령을 구현한다. CuraEngine은 g-code만 구현하지만 X3G와 같은 다른 포맷을 지원하려면 Cura의 프론트엔트가 g-code를 최종 포맷으로 변환하도록 조정할 것이다.
 
 Changing State
-----
+---------
 
 경로는 내부 표현에 몇 가지 속성이 있다. 각 경로에는 선 너비, 속도, 팬 속도, 가속, 저크, 레이어 두께 및 흐름이 있다. 이러한 속성(선 너비 및 레이어 두께 제외)이 변경되면 명령을 변경하거나 다른 명령보다 우선해야 한다.
 
@@ -455,7 +460,7 @@ Changing State
 * 이 경로(트레블)에 대해 필라멘트가 압입되어야 하는 경우 별도의 수축 명령을 선행해야 한다. 어떤 g-code의 경우 `G10` 명령을 사용하여 수행한다. 다른 경우에는`E` 매개 변수를 이전보다 낮은 것으로 설정하는`G1` 명령으로 수행된다.
 
 The E parameter
-----
+----------
 
 각 압출 `G1` 명령은 `E` 파라미터가 있다. 이 파라미터는 이동 마킹하는 동안 재료를 얼마나 내보낼지를 나타낸다..
 
