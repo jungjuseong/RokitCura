@@ -1,7 +1,7 @@
 {
     "version": 2,
-    "name": "3#Syringe",
-    "inherits": "invivo_4d6_syringe_base",
+    "name": "R3",
+    "inherits": "rokitbio_extruder",
     "metadata": {
         "machine": "invivo_4d6",
         "position": "3"
@@ -9,8 +9,18 @@
 
     "overrides": {
         "extruder_nr": {
-            "default_value": 3,
-            "maximum_value": "5"
-        }
+            "default_value": 3
+        },
+        "machine_nozzle_offset_x": { "default_value": 0.0 },
+        "machine_nozzle_offset_y": { "default_value": 0.0 },
+        "material_diameter": { "default_value": 1.75 },
+
+        "machine_extruder_start_pos_abs": { "default_value": true },
+        "machine_extruder_start_pos_x": { "default_value": 330 },
+        "machine_extruder_start_pos_y": { "default_value": 237 },
+        "machine_extruder_end_pos_abs": { "default_value": true },
+        "machine_extruder_end_pos_x": { "default_value": 330 },
+        "machine_extruder_end_pos_y": { "default_value": 237 },
+        "machine_nozzle_head_distance": { "default_value": 2.7 }
     }
 }

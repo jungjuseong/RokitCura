@@ -1,20 +1,22 @@
 {
     "version": 2,
     "name": "Dr.Invivo 4D6",
-    "inherits": "rokitbio-printer",
+    "inherits": "rokitbio_printer",
     "metadata": {
+        "author": "IRON",
+        "manufacturer": "RokitBio HealthCare",
+        "category": "RokitBio",
         "visible": true,
-        "author": "clbee",
-        "manufacturer": "Rokit HealthCare",
-        "category": "Other",
         "file_formats": "text/x-gcode",
         "platform": "invivo_4d6_platform.stl",
         "platform_offset": [0, 0, 0],
         "has_machine_quality": true,
         "preferred_quality_type": "normal",
-        "preferred_variant_name": "0.20mm",
         "has_variants": true,
+        "preferred_variant_name": "0.20 AA",
         "variants_name": "Nozzle Gauge",
+        "has_materials": true,
+        "preferred_material": "generic_pla",
         "machine_extruder_trains":
         {
             "0": "invivo_4d6_left",
@@ -24,38 +26,24 @@
             "4": "invivo_4d6_right4",
             "5": "invivo_4d6_right5"
 
-        },
-        "has_materials": true,
-        "preferred_material": "generic_pla"
+        }
     },
     "overrides": {
         "layer_height": { "settable_per_extruder": true },
 
         "machine_name": { "default_value": "Dr. INVIVO 4D6" },
-        "machine_heated_bed": { "default_value": true },
 
         "machine_width": { "default_value": 80 },
         "machine_height": { "default_value": 80 },
-        "machine_depth": { "default_value": 50 },
+        "machine_depth": { "default_value": 80 },
         "machine_shape": { "default_value": "elliptic"},
 
         "infill_pattern": {"value": "'triangles'" },
         "infill_before_walls": {"value": false },
 
-        "default_material_print_temperature": { "value": "215" },
+        "default_material_print_temperature": { "value": "200" },
         "material_print_temperature_layer_0": { "value": "material_print_temperature + 5" },
         "material_standby_temperature": { "value": "material_print_temperature" },
-
-        "switch_extruder_retraction_speeds": {"default_value": 15 },
-        "switch_extruder_retraction_amount": {"value": 1 },
-
-        "wall_thickness": { "value": "1.2" },
-
-        "retraction_amount": { "default_value": 3 },
-        "retraction_speed": { "default_value": 15 },
-        "travel_retract_before_outer_wall": { "default_value": true },
-        "skin_overlap": { "value": "15" },
-        "adhesion_type": { "default_value": "skirt" },
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {
