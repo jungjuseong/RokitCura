@@ -9,16 +9,22 @@ import QtQuick.Controls 2.3 as Controls2
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
+//
+import QtQuick.Layouts 1.3
+
+import "../../Widgets"
+
 
 //
 //  Enable support
 //
 Item
 {
-    id: wellPlateSelector
+    id: cultureDishSelector
+    
     height: childrenRect.height //-
 
-    property real labelColumnWidth: Math.round(width / 3)
+    property real labelColumnWidth: Math.round(width / 3)    
 
     // 1) property is from MachineSettingsPrinterTab.qml 
     property string tooltipText: machineShape.properties.description
@@ -47,17 +53,17 @@ Item
     {
         id: enableSupportContainer
         // 높이 핵심
-        //height: enableSupportRowTitle.height *14     // edit
-        height: UM.Theme.getSize("rokit_buildvolume_Content_widget").height
-
+        //height: UM.Theme.getSize("preparing_setup_widget").height
+        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
+        
         anchors //Item place location
         {
             //left: enableSupportRowTitle.right
             left: parent.left
             right: parent.right
             //verticalCenter: enableSupportRowTitle.verticalCenter
-        }  
-
+        }       
+        
         // Build plate Shape 확인용
         // Text{
         //     id: machineShapeView
@@ -70,14 +76,14 @@ Item
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
         // }
 
-        //Well Plate
-        Rectangle   // 
+        //Culture Slide
+        Rectangle 
         {
-            id: preparingModel2
+            id: preparingModel3
 
-            width: childrenRect.width
-            height : childrenRect.height
-
+            width: UM.Theme.getSize("rokit_culture_slide").width // culture dish's diameter
+            height : UM.Theme.getSize("rokit_culture_slide").height
+            
             anchors
             {
                 // left : parent.left
@@ -87,37 +93,13 @@ Item
                 centerIn: parent
             }
 
-            Column
-            {
-                spacing: UM.Theme.getSize("thin_margin").height // edit
-                Repeater
-                {
-                    id : re1
-                    model: 2
-                    Row
-                    {
-                        spacing: UM.Theme.getSize("thin_margin").height // edit
-                        
-                        Repeater{
-                            id : re2
-                            model: 3
+            visible : true
+            color: UM.Theme.getColor("rokit_build_plate")
 
-                            Rectangle{
-                                width : UM.Theme.getSize("rokit_well_plate_diameter").width
-                                height : width
-
-                                visible : true
-                                radius: width*0.5
-                                color: UM.Theme.getColor("rokit_build_plate")
-
-                                border.width : 1
-                                border.color: UM.Theme.getColor("rokit_build_plate_border")
-                            }
-                        }                  
-                    }
-                }
-            }
+            border.width : 1
+            border.color: UM.Theme.getColor("rokit_build_plate_border")
         }
+
 
         Text //Cura.IconWithText   // TEXT
         {
@@ -131,7 +113,7 @@ Item
                 //bottomMargin: 2
             }
             visible: true   // edit
-            text: catalog.i18nc("@label", "Number of wells") // -culture dish
+            text: catalog.i18nc("@label", "Size(mm)") // -culture slide
             font: UM.Theme.getFont("medium")
             width: labelColumnWidth
         }
@@ -145,14 +127,20 @@ Item
             anchors
             {
                 left: parent.left   // edit
-                leftMargin: UM.Theme.getSize("default_margin").width
                 //right: parent.right
-
-                bottom: parent.bottom
-                //bottomMargin: UM.Theme.getSize("default_margin").width
+                bottom: parent.bottom                
+                leftMargin: UM.Theme.getSize("default_margin").width
+                //rightMargin: UM.Theme.getSize("thick_margin").width
                 //verticalCenter: plate1.verticalCenter
                 horizontalCenter: plate1.horizontalCenter
             }
+
+            // Text{
+            //     id: firstText
+            //     text: qsTr(supportExtruderCombobox.model.get(index).plateIndex)
+            //     anchors.centerIn: parent
+            //     visible: currentIndex == -1
+            // }
 
             enabled: true
             visible: true
@@ -160,84 +148,65 @@ Item
 
             model: ListModel 
             {
-                id: model
+                id: plateModel
+
                 ListElement { 
-                    text: "96"
+                    text: "3800052CL" 
                     plateIndex: 0
-                    widthValue: 20
-                    depthValue: 20
+                    widthValue: 25
+                    depthValue: 50
                     heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
+                    shapeValue: "rectangular"
+                    index: 0
+                    toCenter: 'true'
                 }
                 ListElement { 
-                    text: "48"
+                    text: "3800056CL" 
                     plateIndex: 1
-                    widthValue: 23
-                    depthValue: 23
+                    widthValue: 20
+                    depthValue: 40
                     heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
+                    shapeValue: "rectangular"
+                    index: 1
+                    toCenter: 'true'
                 }
+
                 ListElement { 
-                    text: "24"
+                    text: "3800058CL" 
                     plateIndex: 2
-                    widthValue: 35
-                    depthValue: 35
+                    widthValue: 15
+                    depthValue: 30
                     heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "12"
-                    plateIndex: 3
-                    widthValue: 60
-                    depthValue: 60
-                    heightValue: 15
-
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "6"
-                    plateIndex: 4
-                    widthValue: 90
-                    depthValue: 90
-                    heightValue: 15
-
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
+                    shapeValue: "rectangular"
+                    index: 2
+                    toCenter: 'true'
                 }
             }
-            //buttonGroup: activeButtonGroup
 
-            // INDEX
             currentIndex: 
             {
                 var currentValue = machineShape.properties.value
-                var index = 0 // to set the start index
+                var index = 0 // to reset the selection
                 for (var i = 0; i < model.count; i++)
                 {
                     if (model.get(i).value == currentValue)
                     {
-                        index = i // change the index
+                        index = i
                         break
                     }
                 }
                 return index
-            }  
+            }        
 
-            // 처음에는 리셋
             function getIndexByPosition()
             {
                 var itemIndex = -1  // if position is not found, return -1
                 return itemIndex
-            }
-
-            // active on
+            }     
+            
             onActivated:
             {
                 var newWidthValue = model.get(index).widthValue // width
@@ -251,7 +220,7 @@ Item
                 // }
                 // if (machineDepth.properties.value != newDepthValue){
                 // }
-                // if (machineHeight.properties.value != newHeightValue){
+                // if (machineHeight.properties.value != newHeightValue){                
                 // }
 
 
@@ -264,14 +233,14 @@ Item
                     }
                     else
                     {
-                        machineShape.setPropertyValue("value", newShapeValue)//newValue)
+                        machineShape.setPropertyValue("value", newShapeValue) //newValue)
                         originAtCenter.setPropertyValue("value", newToCenter)
                     }
                     forceUpdateOnChangeFunction()
                     afterOnEditingFinishedFunction()
                 }
 
-                //
+                // setValue 
                 if (setValueFunction !== null)
                 {
                     setWidthValueFunction(newWidthValue)
@@ -282,8 +251,10 @@ Item
                 {
                     machineWidth.setPropertyValue("value", newWidthValue)
                     machineDepth.setPropertyValue("value", newDepthValue)
-                    machineHeight.setPropertyValue("value", newHeightValue)
+                    machineHeight.setPropertyValue("value", newHeightValue)                                
                 }
+
+                // ???
                 forceUpdateOnChangeFunction()
                 afterOnEditingFinishedFunction()
             }
@@ -296,10 +267,9 @@ Item
                 // Sometimes when the value is already changed, the model is still being built.
                 // The when clause ensures that the current index is not updated when this happens.
                 when: supportExtruderCombobox.model.count > 0
-            }                   
+            } 
         }
     }
-
 
     // "X (Width)"
     UM.SettingPropertyProvider  
@@ -331,7 +301,6 @@ Item
         storeIndex: propertyStoreIndex
     }
 
-    // MachineShape
     UM.SettingPropertyProvider
     {
         id: machineShape

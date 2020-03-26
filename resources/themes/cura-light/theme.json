@@ -443,8 +443,8 @@
     },
 
     "sizes": {
-        "rokit_buildvolume_setting_widget" : [28.0, 28.0],
-        "rokit_buildvolume_Content_widget" : [28.0, 28.0],
+        "rokit_build_plate_setting_widget" : [28.0, 28.0],
+        "rokit_build_plate_content_widget" : [28.0, 28.0],
 
         "rokit_combobox_default" : [22, 2.5],
         "rokit_combobox_radius": [0.25, 0.25],

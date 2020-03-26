@@ -9,24 +9,18 @@ import QtQuick.Controls 2.3 as Controls2
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-//
-import QtQuick.Layouts 1.3
-
-import "../../Widgets"
-
 
 //
 //  Enable support
 //
 Item
 {
-    id: cultureDishSelector
-    
+    id: wellPlateSelector
     height: childrenRect.height //-
 
-    property real labelColumnWidth: Math.round(width / 3)    
+    property real labelColumnWidth: Math.round(width / 3)
 
-    // 1
+    // 1) property is from MachineSettingsPrinterTab.qml 
     property string tooltipText: machineShape.properties.description
 
     // callback functions
@@ -37,12 +31,10 @@ Item
     property var setDepthValueFunction: null
     property var setHeightValueFunction: null
 
-    property var memorize: null
-
     // a dummy function for default property values
     function dummy_func() {}
 
-    // 2
+    // 2)
     UM.I18nCatalog { id: catalog; name: "cura" }
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
@@ -51,15 +43,12 @@ Item
 
     property var forceUpdateFunction: manager.forceUpdate
 
-    property int subIndex: -1 // reset
-
     Item
     {
-
         id: enableSupportContainer
         // 높이 핵심
-        //height: UM.Theme.getSize("preparing_setup_widget").height
-        height: UM.Theme.getSize("rokit_buildvolume_Content_widget").height
+        //height: enableSupportRowTitle.height *14     // edit
+        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
 
         anchors //Item place location
         {
@@ -67,8 +56,8 @@ Item
             left: parent.left
             right: parent.right
             //verticalCenter: enableSupportRowTitle.verticalCenter
-        }       
-        
+        }  
+
         // Build plate Shape 확인용
         // Text{
         //     id: machineShapeView
@@ -81,14 +70,14 @@ Item
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
         // }
 
-        //Culture Plate 
-        Rectangle   // circle
+        //Well Plate
+        Rectangle   // 
         {
-            id: preparingModel1
+            id: preparingModel2
 
-            width: UM.Theme.getSize("rokit_culture_dish_diameter").width // culture dish's diameter
-            height : width
-            
+            width: childrenRect.width
+            height : childrenRect.height
+
             anchors
             {
                 // left : parent.left
@@ -98,14 +87,37 @@ Item
                 centerIn: parent
             }
 
-            visible : true
-            radius: width*0.5
-            color: UM.Theme.getColor("rokit_build_plate")
+            Column
+            {
+                spacing: UM.Theme.getSize("thin_margin").height // edit
+                Repeater
+                {
+                    id : re1
+                    model: 2
+                    Row
+                    {
+                        spacing: UM.Theme.getSize("thin_margin").height // edit
+                        
+                        Repeater{
+                            id : re2
+                            model: 3
 
-            border.width : 1
-            border.color: UM.Theme.getColor("rokit_build_plate_border")
+                            Rectangle{
+                                width : UM.Theme.getSize("rokit_well_plate_diameter").width
+                                height : width
+
+                                visible : true
+                                radius: width*0.5
+                                color: UM.Theme.getColor("rokit_build_plate")
+
+                                border.width : 1
+                                border.color: UM.Theme.getColor("rokit_build_plate_border")
+                            }
+                        }                  
+                    }
+                }
+            }
         }
-
 
         Text //Cura.IconWithText   // TEXT
         {
@@ -119,7 +131,7 @@ Item
                 //bottomMargin: 2
             }
             visible: true   // edit
-            text: catalog.i18nc("@label", "Number") // -culture slide
+            text: catalog.i18nc("@label", "Number of wells") // -culture dish
             font: UM.Theme.getFont("medium")
             width: labelColumnWidth
         }
@@ -133,10 +145,11 @@ Item
             anchors
             {
                 left: parent.left   // edit
-                //right: parent.right
-                bottom: parent.bottom                
                 leftMargin: UM.Theme.getSize("default_margin").width
-                //rightMargin: UM.Theme.getSize("thick_margin").width
+                //right: parent.right
+
+                bottom: parent.bottom
+                //bottomMargin: UM.Theme.getSize("default_margin").width
                 //verticalCenter: plate1.verticalCenter
                 horizontalCenter: plate1.horizontalCenter
             }
@@ -147,41 +160,61 @@ Item
 
             model: ListModel 
             {
-                id: plateModel
-
+                id: model
                 ListElement { 
-                    text: "100090" 
+                    text: "96"
                     plateIndex: 0
-                    widthValue: 90
-                    depthValue: 90
-                    heightValue: 15
+                    widthValue: 20
+                    depthValue: 20
+                    heightValue: 10
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
+                    toCenter: 'false'
                 }
                 ListElement { 
-                    text: "100060" 
+                    text: "48"
                     plateIndex: 1
-                    widthValue: 60
-                    depthValue: 60
-                    heightValue: 15
+                    widthValue: 23
+                    depthValue: 23
+                    heightValue: 10
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
+                    toCenter: 'false'
                 }
-
                 ListElement { 
-                    text: "100035" 
+                    text: "24"
                     plateIndex: 2
                     widthValue: 35
                     depthValue: 35
                     heightValue: 10
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
+                    toCenter: 'false'
+                }
+                ListElement { 
+                    text: "12"
+                    plateIndex: 3
+                    widthValue: 60
+                    depthValue: 60
+                    heightValue: 15
+
+                    shapeValue: "elliptic"
+                    toCenter: 'false'
+                }
+                ListElement { 
+                    text: "6"
+                    plateIndex: 4
+                    widthValue: 90
+                    depthValue: 90
+                    heightValue: 15
+
+                    shapeValue: "elliptic"
+                    toCenter: 'false'
                 }
             }
+            //buttonGroup: activeButtonGroup
 
+            // INDEX
             currentIndex: 
             {
                 var currentValue = machineShape.properties.value
@@ -195,14 +228,16 @@ Item
                     }
                 }
                 return index
-            }      
+            }  
 
+            // 처음에는 리셋
             function getIndexByPosition()
             {
                 var itemIndex = -1  // if position is not found, return -1
                 return itemIndex
-            }      
+            }
 
+            // active on
             onActivated:
             {
                 var newWidthValue = model.get(index).widthValue // width
@@ -261,9 +296,10 @@ Item
                 // Sometimes when the value is already changed, the model is still being built.
                 // The when clause ensures that the current index is not updated when this happens.
                 when: supportExtruderCombobox.model.count > 0
-            }         
+            }                   
         }
     }
+
 
     // "X (Width)"
     UM.SettingPropertyProvider  

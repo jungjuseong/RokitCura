@@ -26,7 +26,7 @@ Item
 
     property real labelColumnWidth: Math.round(width / 3)    
 
-    // 1) property is from MachineSettingsPrinterTab.qml 
+    // 1
     property string tooltipText: machineShape.properties.description
 
     // callback functions
@@ -37,10 +37,12 @@ Item
     property var setDepthValueFunction: null
     property var setHeightValueFunction: null
 
+    property var memorize: null
+
     // a dummy function for default property values
     function dummy_func() {}
 
-    // 2)
+    // 2
     UM.I18nCatalog { id: catalog; name: "cura" }
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
@@ -49,13 +51,16 @@ Item
 
     property var forceUpdateFunction: manager.forceUpdate
 
+    property int subIndex: -1 // reset
+
     Item
     {
+
         id: enableSupportContainer
         // 높이 핵심
         //height: UM.Theme.getSize("preparing_setup_widget").height
-        height: UM.Theme.getSize("rokit_buildvolume_Content_widget").height
-        
+        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
+
         anchors //Item place location
         {
             //left: enableSupportRowTitle.right
@@ -76,13 +81,13 @@ Item
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
         // }
 
-        //Culture Slide
-        Rectangle 
+        //Culture Plate 
+        Rectangle   // circle
         {
-            id: preparingModel3
+            id: preparingModel1
 
-            width: UM.Theme.getSize("rokit_culture_slide").width // culture dish's diameter
-            height : UM.Theme.getSize("rokit_culture_slide").height
+            width: UM.Theme.getSize("rokit_culture_dish_diameter").width // culture dish's diameter
+            height : width
             
             anchors
             {
@@ -94,6 +99,7 @@ Item
             }
 
             visible : true
+            radius: width*0.5
             color: UM.Theme.getColor("rokit_build_plate")
 
             border.width : 1
@@ -113,7 +119,7 @@ Item
                 //bottomMargin: 2
             }
             visible: true   // edit
-            text: catalog.i18nc("@label", "Size(mm)") // -culture slide
+            text: catalog.i18nc("@label", "Number") // -culture slide
             font: UM.Theme.getFont("medium")
             width: labelColumnWidth
         }
@@ -135,13 +141,6 @@ Item
                 horizontalCenter: plate1.horizontalCenter
             }
 
-            // Text{
-            //     id: firstText
-            //     text: qsTr(supportExtruderCombobox.model.get(index).plateIndex)
-            //     anchors.centerIn: parent
-            //     visible: currentIndex == -1
-            // }
-
             enabled: true
             visible: true
             textRole: "text"  // this solves that the combobox isn't populated in the first time Cura is started
@@ -151,37 +150,34 @@ Item
                 id: plateModel
 
                 ListElement { 
-                    text: "3800052CL" 
+                    text: "100090" 
                     plateIndex: 0
-                    widthValue: 25
-                    depthValue: 50
-                    heightValue: 10
+                    widthValue: 90
+                    depthValue: 90
+                    heightValue: 15
 
-                    shapeValue: "rectangular"
-                    index: 0
+                    shapeValue: "elliptic"
                     toCenter: 'true'
                 }
                 ListElement { 
-                    text: "3800056CL" 
+                    text: "100060" 
                     plateIndex: 1
-                    widthValue: 20
-                    depthValue: 40
-                    heightValue: 10
+                    widthValue: 60
+                    depthValue: 60
+                    heightValue: 15
 
-                    shapeValue: "rectangular"
-                    index: 1
+                    shapeValue: "elliptic"
                     toCenter: 'true'
                 }
 
                 ListElement { 
-                    text: "3800058CL" 
+                    text: "100035" 
                     plateIndex: 2
-                    widthValue: 15
-                    depthValue: 30
+                    widthValue: 35
+                    depthValue: 35
                     heightValue: 10
 
-                    shapeValue: "rectangular"
-                    index: 2
+                    shapeValue: "elliptic"
                     toCenter: 'true'
                 }
             }
@@ -189,24 +185,24 @@ Item
             currentIndex: 
             {
                 var currentValue = machineShape.properties.value
-                var index = 0 // to reset the selection
+                var index = 0 // to set the start index
                 for (var i = 0; i < model.count; i++)
                 {
                     if (model.get(i).value == currentValue)
                     {
-                        index = i
+                        index = i // change the index
                         break
                     }
                 }
                 return index
-            }        
+            }      
 
             function getIndexByPosition()
             {
                 var itemIndex = -1  // if position is not found, return -1
                 return itemIndex
-            }     
-            
+            }      
+
             onActivated:
             {
                 var newWidthValue = model.get(index).widthValue // width
@@ -220,7 +216,7 @@ Item
                 // }
                 // if (machineDepth.properties.value != newDepthValue){
                 // }
-                // if (machineHeight.properties.value != newHeightValue){                
+                // if (machineHeight.properties.value != newHeightValue){
                 // }
 
 
@@ -233,14 +229,14 @@ Item
                     }
                     else
                     {
-                        machineShape.setPropertyValue("value", newShapeValue) //newValue)
+                        machineShape.setPropertyValue("value", newShapeValue)//newValue)
                         originAtCenter.setPropertyValue("value", newToCenter)
                     }
                     forceUpdateOnChangeFunction()
                     afterOnEditingFinishedFunction()
                 }
 
-                // setValue 
+                //
                 if (setValueFunction !== null)
                 {
                     setWidthValueFunction(newWidthValue)
@@ -251,10 +247,8 @@ Item
                 {
                     machineWidth.setPropertyValue("value", newWidthValue)
                     machineDepth.setPropertyValue("value", newDepthValue)
-                    machineHeight.setPropertyValue("value", newHeightValue)                                
+                    machineHeight.setPropertyValue("value", newHeightValue)
                 }
-
-                // ???
                 forceUpdateOnChangeFunction()
                 afterOnEditingFinishedFunction()
             }
@@ -267,7 +261,7 @@ Item
                 // Sometimes when the value is already changed, the model is still being built.
                 // The when clause ensures that the current index is not updated when this happens.
                 when: supportExtruderCombobox.model.count > 0
-            } 
+            }         
         }
     }
 
@@ -301,6 +295,7 @@ Item
         storeIndex: propertyStoreIndex
     }
 
+    // MachineShape
     UM.SettingPropertyProvider
     {
         id: machineShape

@@ -46,8 +46,8 @@ Item
             height: parent.height
             spacing: 0
 
-            Cura.RokitBuildVolumeSelector {
-                id: rokitBuildVolumeSelector
+            Cura.RokitBuildPlateSelector {
+                id: rokitBuildPlateSelector
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -68,7 +68,7 @@ Item
                 id: printerSetup
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.preferredWidth: itemRow.width - (machineSelection.width + rokitBuildVolumeSelector.width) - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
+                Layout.preferredWidth: itemRow.width - (machineSelection.width + rokitBuildPlateSelector.width) - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
             }
 
             // Separator line

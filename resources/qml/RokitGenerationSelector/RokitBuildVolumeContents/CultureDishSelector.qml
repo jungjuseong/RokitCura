@@ -59,7 +59,7 @@ Item
         id: enableSupportContainer
         // 높이 핵심
         //height: UM.Theme.getSize("preparing_setup_widget").height
-        height: UM.Theme.getSize("rokit_buildvolume_Content_widget").height
+        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
 
         anchors //Item place location
         {

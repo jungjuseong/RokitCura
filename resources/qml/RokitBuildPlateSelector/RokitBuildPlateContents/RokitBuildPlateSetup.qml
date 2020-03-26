@@ -23,8 +23,8 @@ Item
     id: preparingSetup
 
     // 창 임시 면적 값
-    height: UM.Theme.getSize("rokit_buildvolume_setting_widget").height + 2 * padding
-    width: UM.Theme.getSize("rokit_buildvolume_setting_widget").width - 2 * UM.Theme.getSize("wide_margin").width
+    height: UM.Theme.getSize("rokit_build_plate_setting_widget").height + 2 * padding
+    width: UM.Theme.getSize("rokit_build_plate_setting_widget").width - 2 * UM.Theme.getSize("wide_margin").width
     
     property Action configureSettings
 
@@ -71,13 +71,13 @@ Item
 
         Label   // Title Label
         {
-            id: buildVolumeTitle
+            id: buildPlateTitle
             anchors{
                 top: parent.top
                 left: parent.left
             } 
 
-            text: catalog.i18nc("@title:label", "Build Volume Settings")
+            text: catalog.i18nc("@title:label", "Build Plate Settings")
             font: UM.Theme.getFont("medium_bold")
             color: UM.Theme.getColor("text")
             renderType: Text.NativeRendering
@@ -93,7 +93,7 @@ Item
 
             anchors
             {
-                top: buildVolumeTitle.bottom
+                top: buildPlateTitle.bottom
                 topMargin: UM.Theme.getSize("wide_margin").width
                 left: parent.left
                 right: parent.right

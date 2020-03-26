@@ -58,7 +58,7 @@ Item
 
                 Label   // Title Label
                 {
-                    text: catalog.i18nc("@title:label", "Build Volume Settings")
+                    text: catalog.i18nc("@title:label", "Build Plate Settings")
                     font: UM.Theme.getFont("medium_bold")
                     color: UM.Theme.getColor("text")
                     renderType: Text.NativeRendering
