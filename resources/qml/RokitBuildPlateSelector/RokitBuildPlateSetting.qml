@@ -133,7 +133,6 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
             }
-
         }
     }
 }

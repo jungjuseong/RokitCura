@@ -46,8 +46,8 @@ Item
             height: parent.height
             spacing: 0
 
-            Cura.RokitBuildPlateSelector {
-                id: rokitBuildPlateSelector
+            Cura.RokitBuildVolumeSelector {
+                id: rokitBuildVolumeSelector
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -68,7 +68,7 @@ Item
                 id: printerSetup
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.preferredWidth: itemRow.width - (machineSelection.width + rokitBuildPlateSelector.width) - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
+                Layout.preferredWidth: itemRow.width - (machineSelection.width + rokitBuildVolumeSelector.width) - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
             }
 
             // Separator line
@@ -87,6 +87,26 @@ Item
                 children: [printSetupSelector]
                 height: childrenRect.height
                 width: childrenRect.width
+            }
+
+            Rectangle
+            {
+                id: sideBar
+                anchors.left: printSetupSelectorItem.rigth
+                height: parent.height
+                width: UM.Theme.getSize("default_lining").width
+                color: UM.Theme.getColor("lining")
+            }
+
+            Cura.RokitGenerationSelector {
+                id: generationItem
+                anchors.left: sideBar.right
+                
+                headerCornerSide: Cura.RoundedRectangle.Direction.Left
+                Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
+                Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
+                Layout.fillWidth: true
+                Layout.fillHeight: true
             }
         }
 
