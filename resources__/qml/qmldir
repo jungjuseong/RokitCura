@@ -1,6 +1,8 @@
 module Cura
 
 MachineSelector 1.0 MachineSelector.qml
+RokitMachineSelector 1.0 RokitMachineSelector.qml
+
 MachineSelectorButton 1.0 MachineSelectorButton.qml
 CustomConfigurationSelector 1.0 CustomConfigurationSelector.qml
 PrintSetupSelector 1.0 PrintSetupSelector.qml

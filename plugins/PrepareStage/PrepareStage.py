@@ -13,7 +13,7 @@ class PrepareStage(CuraStage):
         Application.getInstance().engineCreatedSignal.connect(self._engineCreated)
 
     def _engineCreated(self):
-        menu_component_path = os.path.join(PluginRegistry.getInstance().getPluginPath("PrepareStage"), "PrepareMenu.qml")
+        menu_component_path = os.path.join(PluginRegistry.getInstance().getPluginPath("PrepareStage"), "RokitPrepareMenu.qml")
         main_component_path = os.path.join(PluginRegistry.getInstance().getPluginPath("PrepareStage"), "PrepareMain.qml")
         self.addDisplayComponent("menu", menu_component_path)
         self.addDisplayComponent("main", main_component_path)
