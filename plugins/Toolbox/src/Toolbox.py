@@ -188,15 +188,16 @@ class Toolbox(QObject, Extension):
         self._application.getCuraAPI().account.loginStateChanged.connect(self._restart)
 
         # On boot we check which packages have updates.
-        if CuraApplication.getInstance().getPreferences().getValue("info/automatic_update_check") and len(installed_package_ids_with_versions) > 0:
-            # Request the latest and greatest!
-            self._makeRequestByType("updates")
+        # if CuraApplication.getInstance().getPreferences().getValue("info/automatic_update_check") and len(installed_package_ids_with_versions) > 0:
+        #     # Request the latest and greatest!
+        #     self._makeRequestByType("updates")
 
 
     def _fetchPackageData(self) -> None:
-        self._makeRequestByType("packages")
-        self._makeRequestByType("authors")
-        self._updateInstalledModels()
+        # self._makeRequestByType("packages")
+        # self._makeRequestByType("authors")
+        # self._updateInstalledModels()
+        return 
 
     # Displays the toolbox
     @pyqtSlot()
