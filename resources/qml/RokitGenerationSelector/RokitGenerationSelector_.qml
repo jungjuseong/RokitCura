@@ -7,7 +7,7 @@ import QtQuick.Controls 2.3
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-import "RokitBuildVolumeContents"
+import "RokitBuildPlateContents"
 
 Cura.ExpandablePopup
 {
@@ -32,9 +32,9 @@ Cura.ExpandablePopup
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
     }
 
-    contentItem: RokitBuildVolumeSetup
+    contentItem: RokitBuildPlateSetting
     {
-        id: rokitBuildVolumeSetup
+        id: rokitBuildPlateSetting
         anchors
         {
             left: parent.left
