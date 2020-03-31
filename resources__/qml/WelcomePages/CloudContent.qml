@@ -91,10 +91,10 @@ Item
                     var full_text = ""
                     var t = ""
 
-                    t = catalog.i18nc("@text", "- Send print jobs to Ultimaker printers outside your local network")
+                    t = catalog.i18nc("@text", "- Send print jobs to RokitBio printers outside your local network")
                     full_text += "<p>" + t + "</p>"
 
-                    t = catalog.i18nc("@text", "- Store your Ultimaker Cura settings in the cloud for use anywhere")
+                    t = catalog.i18nc("@text", "- Store your RokitBio Cura settings in the cloud for use anywhere")
                     full_text += "<p>" + t + "</p>"
 
                     t = catalog.i18nc("@text", "- Get exclusive access to print profiles from leading brands")

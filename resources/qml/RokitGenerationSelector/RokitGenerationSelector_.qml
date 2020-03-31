@@ -32,9 +32,15 @@ Cura.ExpandablePopup
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
     }
 
+<<<<<<< HEAD
     contentItem: RokitBuildPlateSetup
     {
         id: rokitBuildPlateSetup
+=======
+    contentItem: RokitBuildPlateSetting
+    {
+        id: rokitBuildPlateSetting
+>>>>>>> 6478cd340e05eddc260726f86d05442a46b1f71f
         anchors
         {
             left: parent.left
