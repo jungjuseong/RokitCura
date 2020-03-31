@@ -47,7 +47,7 @@ Item
             spacing: 0
 
             Cura.RokitBuildPlateSelector {
-                id: rokitBuildPlateSelector
+                id: rokitBuildPlateItem
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -68,7 +68,7 @@ Item
                 id: printerSetup
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.preferredWidth: itemRow.width - (machineSelection.width + rokitBuildPlateSelector.width) - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
+                Layout.preferredWidth: itemRow.width - (rokitBuildPlateItem.width + printSetupSelectorItem.width + generationItem) - 2 * UM.Theme.getSize("default_lining").width
             }
 
             // Separator line
@@ -98,16 +98,45 @@ Item
                 color: UM.Theme.getColor("lining")
             }
 
+            // Item
+            // {
+            //     id: generationItem
+            //     // This is a work around to prevent the printSetupSelector from having to be re-loaded every time
+            //     // a stage switch is done.
+            //     children: [rokitGenerationSelector]
+            //     height: childrenRect.height
+            //     width: childrenRect.width
+            // }
+
             Cura.RokitGenerationSelector {
                 id: generationItem
                 anchors.left: sideBar.right
-                
+                //headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
+                
+                // width: childrenRect.width
+                // height: childrenRect.height
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
+            // property var rokitGenerationSelector: Cura.RokitGenerationSelector
+            // {
+            //    width: UM.Theme.getSize("rokit_generation_selector_widget").width
+            //    height: UM.Theme.getSize("rokit_generation_selector_widget").height
+            //    headerCornerSide: RoundedRectangle.Direction.Left
+            //    onParentChanged:
+            //    {
+            //        if(stageMenu.oldParent !=null)
+            //        {
+            //            stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
+            //        }
+            //        stageMenu.oldParent = parent
+            //        visible = parent != stageMenu
+            //        parent.Component.destruction.connect(stageMenu.onParentDestroyed)
+            //     }
+            // }
         }
 
         Button

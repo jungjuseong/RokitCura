@@ -365,6 +365,9 @@ UM.MainWindow
                 {
                     printSetupSelector.parent = stageMenu
                     printSetupSelector.visible = false
+
+                    rokitGenerationSelector.parent = stageMenu
+                    rokitGenerationSelector.visible = true
                 }
                 property Item oldParent: null
 
@@ -384,8 +387,26 @@ UM.MainWindow
                        stageMenu.oldParent = parent
                        visible = parent != stageMenu
                        parent.Component.destruction.connect(stageMenu.onParentDestroyed)
-                   }
+                    }
                 }
+
+                // property var rokitGenerationSelector: Cura.RokitGenerationSelector
+                // {
+                //    width: UM.Theme.getSize("rokit_generation_selector_widget").width
+                //    height: UM.Theme.getSize("rokit_generation_selector_widget").height
+                //    headerCornerSide: RoundedRectangle.Direction.Left
+                //    onParentChanged:
+                //    {
+                //        if(stageMenu.oldParent !=null)
+                //        {
+                //            stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
+                //        }
+                //        stageMenu.oldParent = parent
+                //        visible = parent != stageMenu
+                //        parent.Component.destruction.connect(stageMenu.onParentDestroyed)
+                //     }
+                // }
+                
             }
             UM.MessageStack
             {
