@@ -1,0 +1,10 @@
+#IDEs
+.idea
+
+cura_build/*
+jedi_build/*
+build/*
+
+!cura_build/CMakeList.txt
+!jedi_build/CMakeList.txt
+!jedi_build/CPackConfig.cmake
