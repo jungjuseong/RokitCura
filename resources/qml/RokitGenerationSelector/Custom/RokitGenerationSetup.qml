@@ -12,7 +12,7 @@ import ".."
 
 Item
 {
-    id: customPrintSetup
+    id: generationSetup
 
     property real padding: UM.Theme.getSize("default_margin").width
     property bool multipleExtruders: extrudersModel.count > 1
@@ -49,18 +49,6 @@ Item
             color: UM.Theme.getColor("text")
             verticalAlignment: Text.AlignVCenter
         }
-
-        // NoIntentIcon
-        // {
-        //     affected_extruders: Cura.MachineManager.extruderPositionsWithNonActiveIntent
-        //     intent_type: Cura.MachineManager.activeIntentCategory
-        //     anchors.right: intentSelection.left
-        //     anchors.rightMargin: UM.Theme.getSize("narrow_margin").width
-        //     width: Math.round(generationTitleLabel.height * 0.5)
-        //     anchors.verticalCenter: parent.verticalCenter
-        //     height: width
-        //     visible: affected_extruders.length
-        // }
     }
 
     //Build Plate

@@ -7,15 +7,12 @@ import QtQuick.Controls 2.3
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-import "RokitBuildPlateContents"
-
 Cura.ExpandablePopup
 {
     id: buildPlateSelector
 
     contentPadding: UM.Theme.getSize("default_lining").width
     contentAlignment: Cura.ExpandablePopup.ContentAlignment.AlignLeft
-    // width: UM.Theme.getSize("rokit_build_plate_setup_widget").width - 2 * UM.Theme.getSize("default_margin").width
 
     UM.I18nCatalog
     {
@@ -34,7 +31,6 @@ Cura.ExpandablePopup
 
     contentItem: RokitBuildPlateSetup
     {
-        id: rokitBuildPlateSetup
         anchors
         {
             left: parent.left
@@ -43,17 +39,4 @@ Cura.ExpandablePopup
         }
         visible: true
     }
-
-    // 임의 설정 창
-    //contentItem: RokitBuildVolumeSetting
-    // {
-    //     id: rokitBuildVolumeSetting
-    //     anchors
-    //     {
-    //         left: parent.left
-    //         right: parent.right
-    //         top: rokitBuildPlateSetup.bottom
-    //         topMargin: UM.Theme.getSize("wide_margin").width
-    //     }
-    // }
 }

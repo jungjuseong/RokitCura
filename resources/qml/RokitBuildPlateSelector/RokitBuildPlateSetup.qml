@@ -5,38 +5,27 @@ import QtQuick 2.10
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
-import UM 1.2 as UM
-import Cura 1.0 as Cura
-
-//
 import UM 1.3 as UM
 import Cura 1.6 as Cura
-import ".."
-
 import QtQuick.Layouts 1.3
 
-// 중요 요소
-import "../../Widgets"
+import "./Contents"
+import "../Widgets"
 
 Item
 {
-    id: preparingSetup
-
     // 창 임시 면적 값
     height: UM.Theme.getSize("rokit_build_plate_setting_widget").height + 2 * padding
     width: UM.Theme.getSize("rokit_build_plate_setting_widget").width - 2 * UM.Theme.getSize("wide_margin").width
     
     property Action configureSettings
-
     property real padding: UM.Theme.getSize("thick_margin").width
 
     // TODO
     property real firstColumnWidth: Math.round(width / 3)
-
     property int choosing: 0    // 선택하는 탭
 
     // 1
-
     property string tooltipText: machineShape.properties.description
 
     // callback functions
@@ -51,9 +40,7 @@ Item
     UM.I18nCatalog { id: catalog; name: "cura" }
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
-
     property string machineStackId: Cura.MachineManager.activeMachine.id
-
     property var forceUpdateFunction: manager.forceUpdate
 
     Item{
@@ -66,54 +53,35 @@ Item
             right: parent.right
             rightMargin: parent.padding
         }
-        //height: UM.Theme.getSize("print_setup_big_item").height
-        height: childrenRect.height   
-
+        height: childrenRect.height  
         Label   // Title Label
         {
-            id: buildPlateTitle
+            id: buildVolumeTitle
             anchors{
                 top: parent.top
                 left: parent.left
             } 
 
             text: catalog.i18nc("@title:label", "Build Plate Settings")
-            font: UM.Theme.getFont("medium_bold")
+            font: UM.Theme.getFont("large")
             color: UM.Theme.getColor("text")
             renderType: Text.NativeRendering
             width: parent.width
             elide: Text.ElideRight
+            verticalAlignment: Text.AlignVCenter
         }
 
         UM.TabRow
         {
             id: tabBar
-
             visible: true  
-
             anchors
             {
-                top: buildPlateTitle.bottom
+                top: buildVolumeTitle.bottom
                 topMargin: UM.Theme.getSize("wide_margin").width
                 left: parent.left
                 right: parent.right
             }
-
-            // currentIndex: 
-            // {
-            //     var currentValue = machineShape.properties.value
-            //     var index = 0
-            //     for (var i = 0; i < model.count; i++)
-            //     {
-            //         if (model.get(i).value == currentValue)
-            //         {
-            //             index = i
-            //             break
-            //         }
-            //     }
-            //     return index
-            // } 
-
             Repeater
             {
                 id: repeater
@@ -149,36 +117,10 @@ Item
                     onClicked:
                     {
                         choosing = index;
-                        
-                        // var newValue = value 
-                        // if (machineShape.properties.value != newValue)
-                        // {
-                        //     if (setValueFunction !== null)
-                        //     {
-                        //         setValueFunction(newValue)
-                        //     }
-                        //     else
-                        //     {
-                        //         machineShape.setPropertyValue("value", newValue)//newValue)
-                        //         originAtCenter.setPropertyValue("value", toCenter)     
-                        //     }
-                        //     forceUpdateOnChangeFunction()
-                        //     afterOnEditingFinishedFunction()
-                        // }
+                    
                     }       
-                    // default is center
                 }
             }            
-            // // binding
-            // Binding
-            // {
-            //     target: supportExtruderCombobox
-            //     property: "currentIndex"
-            //     value: supportExtruderCombobox.getIndexByPosition(machineShape.properties.value)
-            //     // Sometimes when the value is already changed, the model is still being built.
-            //     // The when clause ensures that the current index is not updated when this happens.
-            //     when: supportExtruderCombobox.model.count > 0
-            // }
         }
     }
 
@@ -186,8 +128,9 @@ Item
     Rectangle
     {
         id: separatorLine
-        anchors{
-            top: tabBar.bottom
+        anchors 
+        {
+            // top: tabBar.bottom
             topMargin: UM.Theme.getSize("thick_margin")
         }
         width: parent.width
@@ -212,53 +155,31 @@ Item
         CultureDishSelector // culture Dish
         {
             id: cultureDishSelector
-            visible: choosing == 0 ? true : false  //
+            visible: choosing === 0 
             anchors.top : parent.top
             width: parent.width
-            //width: Math.round(parent.width / 3.2)
             // TODO Create a reusable component with these properties to not define them separately for each component
             labelColumnWidth: parent.firstColumnWidth
-
-            // Rectangle{
-            //     anchors.fill:parent
-            //     border.width: 2
-            //     border.color: "green"
-            // }
         }
         
         WellPlateSelector // well Plate
         {
             id: wellPlateSelector
-            visible: choosing == 1 ? true : false   //
+            visible: choosing === 1 
             anchors.top : parent.top
             width: parent.width
-            //width: Math.round(parent.width / 3.2)
             // TODO Create a reusable component with these properties to not define them separately for each component
             labelColumnWidth: parent.firstColumnWidth
-
-            // //Identifying Line
-            // Rectangle{
-            //     anchors.fill:parent
-            //     border.width: 2
-            //     border.color: "green"
-            // }
         }   
 
         CultureSlideSelector // culture Slide
         {
             id: cultureSlideSelector
-            visible: choosing == 2 ? true : false  //
+            visible: choosing === 2 
             anchors.top : parent.top
             width: parent.width
-            //width: Math.round(parent.width / 3.2)
             // TODO Create a reusable component with these properties to not define them separately for each component
-            labelColumnWidth: parent.firstColumnWidth   
-
-            // Rectangle{
-            //     anchors.fill:parent
-            //     border.width: 2
-            //     border.color: "green"
-            // }        
+            labelColumnWidth: parent.firstColumnWidth        
         }            
     }
     // SupportSelector

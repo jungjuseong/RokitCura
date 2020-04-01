@@ -20,7 +20,7 @@ import "../../Widgets"
 //
 Item
 {
-    id: cultureDishSelector
+    id: cultureSliderSelector
     
     height: childrenRect.height //-
 
