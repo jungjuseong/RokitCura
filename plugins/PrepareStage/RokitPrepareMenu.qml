@@ -47,7 +47,7 @@ Item
             spacing: 0
 
             Cura.RokitBuildPlateSelector {
-                id: buildPlateItem
+                id: buildPlateSelector
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -68,7 +68,7 @@ Item
                 id: printerSetup
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.preferredWidth: itemRow.width - (rokitBuildPlateItem.width + printSetupSelectorItem.width + generationItem) - 2 * UM.Theme.getSize("default_lining").width
+                Layout.preferredWidth: itemRow.width - (buildPlateSelector.width + printSetupSelectorItem.width + generationItem) - 2 * UM.Theme.getSize("default_lining").width
             }
 
             // Separator line
