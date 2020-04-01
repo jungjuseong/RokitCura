@@ -47,7 +47,7 @@ Item
             spacing: 0
 
             Cura.RokitBuildPlateSelector {
-                id: rokitBuildPlateItem
+                id: buildPlateItem
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width

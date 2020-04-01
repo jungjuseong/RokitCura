@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe",
+    "python.pythonPath": "/Users/user/workspace/Python_3.7.6-PyQt_5.10/bin/python",
     "python.linting.pylintEnabled": true
 }
