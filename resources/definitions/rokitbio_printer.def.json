@@ -7861,7 +7861,7 @@
                     "label": "Vac",
                     "description": "sec of dispensor vacume",
                     "type": "float",
-                    "unit": "s",
+                    "unit": "sec",
                     "default_value": 1,
                     "minimum_value": "1",
                     "maximum_value_warning": "5",
@@ -7871,8 +7871,9 @@
                 },
                 "dispensor_int":
                 {
-                    "label": "Int(pa)",
+                    "label": "Int",
                     "description": "sec of dispensor vacume",
+                    "unit": "kpa",
                     "type": "float",
                     "default_value": 1,
                     "minimum_value": "1",
@@ -7883,8 +7884,9 @@
                 },
                 "dispensor_shot_power":
                 {
-                    "label": "Set.p(pa)",
+                    "label": "Set.p",
                     "description": "SHOT Power",
+                    "unit": "kpa",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
@@ -7896,8 +7898,9 @@
                 },
                 "dispensor_vac_power":
                 {
-                    "label": "Vac.p(pa)",
+                    "label": "Vac.p",
                     "description": "VAC Power",
+                    "unit": "kpa",
                     "type": "float",
                     "minimum_value": "0.5",
                     "maximum_value": "5",
