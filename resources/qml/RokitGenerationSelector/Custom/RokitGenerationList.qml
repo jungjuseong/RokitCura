@@ -87,12 +87,10 @@ Item
                     containerStackId: machineStackId
                     settingKey: "machine_depth"
                     settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "Y (Depth)")
                     labelText: catalog.i18nc("@label", "Material")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
@@ -100,14 +98,12 @@ Item
                 {
                     id: generationNeedleGaugecheck
                     containerStackId: machineStackId
-                    settingKey: "machine_height"
+                    settingKey: "machine_nozzle_id"
                     settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "Z (Height)")
                     labelText: catalog.i18nc("@label", "Needle gauge")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
@@ -115,14 +111,13 @@ Item
                 {
                     id: generationNeedleTemperaturecheck
                     containerStackId: machineStackId
-                    settingKey: "machine_height"
+                    settingKey: "default_material_print_temperature"
                     settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "Z (Height)")
                     labelText: catalog.i18nc("@label", "Needle Temperature")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
+                    unitText: catalog.i18nc("@label", "°C")
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
@@ -130,14 +125,13 @@ Item
                 {
                     id: generationLayerHeightcheck
                     containerStackId: machineStackId
-                    settingKey: "machine_height"
+                    settingKey: "layer_height"
                     settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "Z (Height)")
                     labelText: catalog.i18nc("@label", "Layer height")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
+                    unitText: catalog.i18nc("@label", "mm")
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
@@ -145,14 +139,12 @@ Item
                 {
                     id: generationInfillcheck
                     containerStackId: machineStackId
-                    settingKey: "machine_height"
+                    settingKey: "infill_pattern"   //--
                     settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "Z (Height)")
-                    labelText: catalog.i18nc("@label", "Infill")
+                    labelText: catalog.i18nc("@label", "Infill Pattern")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
@@ -173,7 +165,8 @@ Item
                 {
                     id: generationSupportcheck
                     containerStackId: machineStackId
-                    settingKey: "machine_center_is_zero"
+                    settingKey: "support_enable"
+                    
                     settingStoreIndex: propertyStoreIndex
                     labelText: catalog.i18nc("@label", "Support")
                     labelFont: base.labelFont

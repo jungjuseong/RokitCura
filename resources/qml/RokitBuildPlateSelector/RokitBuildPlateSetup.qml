@@ -20,6 +20,7 @@ Item
     
     property Action configureSettings
     property real padding: UM.Theme.getSize("thick_margin").width
+    property real sidePadding: UM.Theme.getSize("thin_margin").width
 
     // TODO
     property real firstColumnWidth: Math.round(width / 3)
@@ -49,24 +50,25 @@ Item
         anchors{
             top: parent.top
             left: parent.left
-            leftMargin: parent.padding
+            leftMargin: parent.sidePadding
             right: parent.right
-            rightMargin: parent.padding
+            rightMargin: parent.sidePadding
         }
         height: childrenRect.height  
+        
         Label   // Title Label
         {
-            id: buildVolumeTitle
+            id: buildPlateTitle
             anchors{
                 top: parent.top
+                topMargin: UM.Theme.getSize("default_margin").height
                 left: parent.left
             } 
-
-            text: catalog.i18nc("@title:label", "Build Plate Settings")
-            font: UM.Theme.getFont("large")
-            color: UM.Theme.getColor("text")
+            height: contentHeight
+            text: catalog.i18nc("@header", "Build Plate Settings")
+            font: UM.Theme.getFont("medium")
+            color: UM.Theme.getColor("small_button_text")
             renderType: Text.NativeRendering
-            width: parent.width
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
         }
@@ -74,11 +76,12 @@ Item
         UM.TabRow
         {
             id: tabBar
-            visible: true  
+            visible: true
+
             anchors
             {
-                top: buildVolumeTitle.bottom
-                topMargin: UM.Theme.getSize("wide_margin").width
+                top: buildPlateTitle.bottom
+                topMargin: UM.Theme.getSize("default_margin").width
                 left: parent.left
                 right: parent.right
             }
@@ -122,32 +125,61 @@ Item
                 }
             }            
         }
+
+        // 틀 
+        Rectangle
+        {
+            id: borderLine
+            anchors 
+            {
+                top: tabBar.bottom
+                topMargin: -UM.Theme.getSize("default_lining").width
+                left: parent.left
+                leftMargin: parent.sidePadding
+                right: parent.right
+                rightMargin: parent.sidePadding
+            }
+            z: tabBar.z - 1
+
+            border.color: UM.Theme.getColor("lining")
+            border.width: UM.Theme.getSize("default_lining").width
+            width: parent.width
+            height: 255// 수정 필요
+        } 
     }
 
-    // line
-    Rectangle
-    {
-        id: separatorLine
-        anchors 
-        {
-            // top: tabBar.bottom
-            topMargin: UM.Theme.getSize("thick_margin")
-        }
-        width: parent.width
-        height: UM.Theme.getSize("default_lining").width
-        color: UM.Theme.getColor("lining")
-    } 
+    // // line
+    // Rectangle
+    // {
+    //     id: separatorLine
+    //     anchors 
+    //     {
+    //         top: tabBar.bottom
+    //         topMargin: UM.Theme.getSize("thick_margin")
+    //     }
+    //     width: parent.width
+    //     height: UM.Theme.getSize("default_lining").width
+    //     color: UM.Theme.getColor("lining")
+    // } 
+
+    
 
     // 메인 컨텐츠
     Row{
 
         spacing: UM.Theme.getSize("thick_margin").height // edit
+
+        // Rectangle{
+        //     anchors.fill: parent
+        //     border.width: 2
+        //     border.color: "green"
+        // }
         
         anchors
         {
             left: parent.left
             right: parent.right
-            top: separatorLine.bottom
+            top: parent.top
             bottom : parent.bottom //edit --------
             margins: parent.padding
         }

@@ -102,10 +102,10 @@ Item
                             )
                         );
 
-                    updateDragPosition();
+                    //updateDragPosition(); // 임시방편
                 }
             }
-            visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom
+            visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom 
         }
     }
 
