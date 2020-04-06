@@ -8,7 +8,6 @@
         "category": "RokitBio",
         "visible": true,
         "file_formats": "text/x-gcode",
-        "platform": "invivo_4d6_platform.stl",
         "platform_offset": [0, 0, 0],
         "has_machine_quality": true,
         "preferred_quality_type": "normal",
