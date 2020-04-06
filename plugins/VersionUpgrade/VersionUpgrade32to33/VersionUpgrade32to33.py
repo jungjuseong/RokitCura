@@ -3,7 +3,7 @@
 
 import configparser #To parse preference files.
 import io #To serialise the preference files afterwards.
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuplecd 
 
 from UM.VersionUpgrade import VersionUpgrade #We're inheriting from this.
 
