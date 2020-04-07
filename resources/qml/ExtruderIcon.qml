@@ -22,7 +22,7 @@ Item
         id: mainIcon
         anchors.fill: parent
 
-        source: UM.Theme.getIcon("extruder_button")
+        source: index ==0 ? UM.Theme.getIcon("extruder_button") : UM.Theme.getIcon("syringe_button")
         color: extruderEnabled ? materialColor: UM.Theme.getColor("disabled")
     }
 
