@@ -14,6 +14,8 @@ Item
 {
     id: content
 
+    property QtObject settingVisibilityPresetsModel: CuraApplication.getSettingVisibilityPresetsModel()
+
     property int absoluteMinimumHeight: 200 * screenScaleFactor
 
     width: UM.Theme.getSize("print_setup_widget").width - 2 * UM.Theme.getSize("default_margin").width
@@ -41,7 +43,7 @@ Item
         {
             return index
         }
-        return PrintSetupSelectorContents.Mode.Recommended
+        return PrintSetupSelectorContents.Mode.Custom
     }
     onCurrentModeIndexChanged: UM.Preferences.setValue("cura/active_mode", currentModeIndex)
 
@@ -50,7 +52,8 @@ Item
         id: contents
         // Use the visible property instead of checking the currentModeIndex. That creates a binding that
         // evaluates the new height every time the visible property changes.
-        height: recommendedPrintSetup.visible ? recommendedPrintSetup.height : customPrintSetup.height
+        // height: recommendedPrintSetup.visible ? recommendedPrintSetup.height : customPrintSetup.height
+        height: customPrintSetup.height
 
         anchors
         {
@@ -59,17 +62,17 @@ Item
             right: parent.right
         }
 
-        RecommendedPrintSetup
-        {
-            id: recommendedPrintSetup
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                top: parent.top
-            }
-            visible: currentModeIndex == PrintSetupSelectorContents.Mode.Recommended
-        }
+        // RecommendedPrintSetup
+        // {
+        //     id: recommendedPrintSetup
+        //     anchors
+        //     {
+        //         left: parent.left
+        //         right: parent.right
+        //         top: parent.top
+        //     }
+        //     visible: currentModeIndex == PrintSetupSelectorContents.Mode.Recommended
+        // }
 
         CustomPrintSetup
         {
@@ -105,7 +108,7 @@ Item
                     //updateDragPosition(); // 임시방편
                 }
             }
-            visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom 
+            visible: true // currentModeIndex == PrintSetupSelectorContents.Mode.Custom
         }
     }
 
@@ -133,6 +136,7 @@ Item
             right: parent.right
         }
 
+        // Recommendeed로 버튼
         Cura.SecondaryButton
         {
             id: recommendedButton
@@ -144,9 +148,13 @@ Item
             text: catalog.i18nc("@button", "Recommended")
             iconSource: UM.Theme.getIcon("arrow_left")
             visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom
-            onClicked: currentModeIndex = PrintSetupSelectorContents.Mode.Recommended
+            onClicked: {
+                currentModeIndex = PrintSetupSelectorContents.Mode.Recommended
+                settingVisibilityPresetsModel.setActivePreset("rokit-basic"); // 추천
+            }
         }
 
+        // Custom으로 버튼
         Cura.SecondaryButton
         {
             id: customSettingsButton
@@ -162,7 +170,8 @@ Item
             onClicked:
             {
                 currentModeIndex = PrintSetupSelectorContents.Mode.Custom
-                updateDragPosition();
+                settingVisibilityPresetsModel.setActivePreset("basic"); // 커스텀 모드로 변경해야함.
+                //updateDragPosition(); // 업데이트 부분 다 Warning 뜸.
             }
         }
 
@@ -178,7 +187,7 @@ Item
             }
             height: childrenRect.height
             cursorShape: Qt.SplitVCursor
-            visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom
+            visible: true//currentModeIndex == PrintSetupSelectorContents.Mode.Custom
             drag
             {
                 target: parent

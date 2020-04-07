@@ -47,7 +47,7 @@ Item
         {
             id: extruderNumberText
             anchors.centerIn: parent
-            text: index + 1
+            text: index ==0 ? 'L': 'R'+(index) // 익스트루더 번호
             font: UM.Theme.getFont("small")
             color: UM.Theme.getColor("text")
             width: contentWidth
