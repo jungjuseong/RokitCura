@@ -7,16 +7,16 @@ import QtQuick.Controls 2.0
 import UM 1.3 as UM
 import Cura 1.0 as Cura
 
-Cura.ExpandableComponent
+Cura.ExpandablePopup//Component
 {
     id: printSetupSelector
 
-    dragPreferencesNamePrefix: "view/settings"
+    //dragPreferencesNamePrefix: "view/settings"
 
     property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
 
     contentPadding: UM.Theme.getSize("default_lining").width
-    contentHeaderTitle: catalog.i18nc("@label", "Print settings")
+    //contentHeaderTitle: catalog.i18nc("@label", "Print settings")
     enabled: !preSlicedData
     disabledText: catalog.i18nc("@label shown when we load a Gcode file", "Print setup disabled. G-code file can not be modified.")
 

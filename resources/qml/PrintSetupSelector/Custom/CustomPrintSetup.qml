@@ -18,6 +18,25 @@ Item
     property bool multipleExtruders: extrudersModel.count > 1
 
     property var extrudersModel: CuraApplication.getExtrudersModel()
+    
+    Label
+    {
+        id: printSettingTitleLabel
+        anchors
+        {
+            top: parent.top
+            topMargin: UM.Theme.getSize("default_margin").height
+            left: parent.left
+            leftMargin: parent.padding
+            right: parent.right
+        }
+        // text: catalog.i18nc("@header", "Print Settings")
+        text: currentModeIndex == 1? catalog.i18nc("@header", "Print Settings :: Custom") : catalog.i18nc("@header", "Print Settings :: Recommended")
+        font: UM.Theme.getFont("medium")
+        renderType: Text.NativeRendering
+        color: UM.Theme.getColor("small_button_text")
+        verticalAlignment: Text.AlignVCenter
+    }
 
     Item
     {
@@ -26,7 +45,7 @@ Item
 
         anchors
         {
-            top: parent.top
+            top: printSettingTitleLabel.bottom
             topMargin: UM.Theme.getSize("default_margin").height
             left: parent.left
             leftMargin: parent.padding
@@ -39,8 +58,7 @@ Item
             id: profileLabel
             anchors
             {
-                top: parent.top
-                bottom: parent.bottom
+                top: printSettingTitleLabel.bottom
                 left: parent.left
                 right: intentSelection.left
             }
@@ -81,6 +99,7 @@ Item
                 anchors.left: parent.left
                 anchors.right: customisedSettings.left
                 anchors.leftMargin: UM.Theme.getSize("default_margin").width
+                // anchors.verticalCenter: profileLabel.verticalCenter
 
                 Label
                 {

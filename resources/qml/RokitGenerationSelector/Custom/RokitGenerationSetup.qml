@@ -43,10 +43,10 @@ Item
                 left: parent.left
                 right: parent.right
             }
-            text: catalog.i18nc("@label", "Generation")
-            font: UM.Theme.getFont("large")
+            text: catalog.i18nc("@header", "Generation")
+            font: UM.Theme.getFont("medium")
             renderType: Text.NativeRendering
-            color: UM.Theme.getColor("text")
+            color: UM.Theme.getColor("small_button_text")
             verticalAlignment: Text.AlignVCenter
         }
     }
