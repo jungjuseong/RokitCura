@@ -10,6 +10,10 @@ import UM 1.3 as UM
 
 import "Custom"
 
+// Nozzle Temperature Make
+//  Bed Temperature Make
+// Left::Syringe selector
+
 Item
 {
 

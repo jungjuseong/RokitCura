@@ -9,7 +9,7 @@ import Cura 1.0 as Cura
 
 import "Custom"
 
-//
+// 해야할 것
 // 1. slice 버튼 기능 추가
 // 2. ouput priority 옵션 추가
 // 3. build plate 기능 추가

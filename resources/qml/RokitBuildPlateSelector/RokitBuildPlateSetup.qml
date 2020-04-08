@@ -144,7 +144,7 @@ Item
             border.color: UM.Theme.getColor("lining")
             border.width: UM.Theme.getSize("default_lining").width
             width: parent.width
-            height: 255// 수정 필요
+            height: UM.Theme.getSize("rokit_build_plate_content").height // 수정 필요
         } 
     }
 

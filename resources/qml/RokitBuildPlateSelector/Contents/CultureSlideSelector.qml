@@ -106,11 +106,9 @@ Item
             id: enableSupportRowTitle   // text location
             anchors
             {
-                //bottomMargin : UM.Theme.getSize("thick_margin").width
-                //topMargin : 20
                 bottom: supportExtruderCombobox.top
                 left: parent.left
-                //bottomMargin: 2
+                bottomMargin: UM.Theme.getSize("default_margin").width
             }
             visible: true   // edit
             text: catalog.i18nc("@label", "Size(mm)") // -culture slide

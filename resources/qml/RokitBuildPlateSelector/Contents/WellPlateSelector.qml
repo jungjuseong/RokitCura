@@ -123,12 +123,10 @@ Item
         {
             id: enableSupportRowTitle   // text location
             anchors
-            {
-                //bottomMargin : UM.Theme.getSize("thick_margin").width
-                //topMargin : 20
-                bottom: supportExtruderCombobox.top
+            {            
+                bottom: wellPlateButtonRow.top
                 left: parent.left
-                //bottomMargin: 2
+                bottomMargin: UM.Theme.getSize("default_margin").width
             }
             visible: true   // edit
             text: catalog.i18nc("@label", "Number of wells") // -culture dish
@@ -136,167 +134,165 @@ Item
             width: labelColumnWidth
         }
 
-        Cura.ComboBox
-        {
-            id: supportExtruderCombobox
-
-            height: UM.Theme.getSize("rokit_combobox_default").height
-            width: UM.Theme.getSize("rokit_combobox_default").width
+        Row{
+            id: wellPlateButtonRow
             anchors
             {
                 left: parent.left   // edit
                 leftMargin: UM.Theme.getSize("default_margin").width
-                //right: parent.right
-
                 bottom: parent.bottom
-                //bottomMargin: UM.Theme.getSize("default_margin").width
-                //verticalCenter: plate1.verticalCenter
                 horizontalCenter: plate1.horizontalCenter
             }
+            spacing: 0.5
 
-            enabled: true
-            visible: true
-            textRole: "text"  // this solves that the combobox isn't populated in the first time Cura is started
+            ExclusiveGroup{ id: wellPlateExclusive}
 
-            model: ListModel 
-            {
-                id: model
-                ListElement { 
-                    text: "96"
-                    plateIndex: 0
-                    widthValue: 20
-                    depthValue: 20
-                    heightValue: 10
+            Repeater{
+                model: ListModel 
+                {
+                    id: model
+                    ListElement { 
+                        text: "96"
+                        plateIndex: 0
+                        widthValue: 20
+                        depthValue: 20
+                        heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "48"
-                    plateIndex: 1
-                    widthValue: 23
-                    depthValue: 23
-                    heightValue: 10
+                        shapeValue: "elliptic"
+                        toCenter: 'false'
+                    }
+                    ListElement { 
+                        text: "48"
+                        plateIndex: 1
+                        widthValue: 23
+                        depthValue: 23
+                        heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "24"
-                    plateIndex: 2
-                    widthValue: 35
-                    depthValue: 35
-                    heightValue: 10
+                        shapeValue: "elliptic"
+                        toCenter: 'false'
+                    }
+                    ListElement { 
+                        text: "24"
+                        plateIndex: 2
+                        widthValue: 35
+                        depthValue: 35
+                        heightValue: 10
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "12"
-                    plateIndex: 3
-                    widthValue: 60
-                    depthValue: 60
-                    heightValue: 15
+                        shapeValue: "elliptic"
+                        toCenter: 'false'
+                    }
+                    ListElement { 
+                        text: "12"
+                        plateIndex: 3
+                        widthValue: 60
+                        depthValue: 60
+                        heightValue: 15
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
-                }
-                ListElement { 
-                    text: "6"
-                    plateIndex: 4
-                    widthValue: 90
-                    depthValue: 90
-                    heightValue: 15
+                        shapeValue: "elliptic"
+                        toCenter: 'false'
+                    }
+                    ListElement { 
+                        text: "6"
+                        plateIndex: 4
+                        widthValue: 90
+                        depthValue: 90
+                        heightValue: 15
 
-                    shapeValue: "elliptic"
-                    toCenter: 'false'
+                        shapeValue: "elliptic"
+                        toCenter: 'false'
+                    }
+                }                
+
+                delegate: Button{
+                    
+                    id: wellPlateButton
+                    text: model.text
+                    height: UM.Theme.getSize("rokit_well_plate_button").height
+                    width: UM.Theme.getSize("rokit_well_plate_button").width
+                    exclusiveGroup: wellPlateExclusive
+                    checkable: true
+                    
+                    // contentItem: Label
+                    // {
+                    //     id: buttonText
+                    //     text: wellPlateButton.text
+                    //     color: UM.Theme.getColor("text")
+                    //     font: UM.Theme.getFont("medium")
+                    //     renderType: Text.NativeRendering
+                    //     verticalAlignment: Text.AlignVCenter
+                    //     //elide: Text.ElideRight
+                    // }
+
+                    // background: Rectangle
+                    // {
+                    //     id: backgroundRect
+                    //     color: wellPlateButton.hovered ? UM.Theme.getColor("action_button_hovered") : "transparent"
+                    //     radius: UM.Theme.getSize("action_button_radius").width
+                    //     border.width: UM.Theme.getSize("default_lining").width
+                    //     border.color: wellPlateButton.checked ? UM.Theme.getColor("primary") : "transparent"
+                    // }
+
+                    onClicked:
+                    {
+                        var newWidthValue = widthValue // width
+                        var newDepthValue = depthValue // depth
+                        var newHeightValue = heightValue // height
+                        var newShapeValue = shapeValue // shpae
+                        var newToCenter = toCenter // shpae
+
+
+                        // if (machineWidth.properties.value != newWidthValue){
+                        // }
+                        // if (machineDepth.properties.value != newDepthValue){
+                        // }
+                        // if (machineHeight.properties.value != newHeightValue){
+                        // }
+
+
+                        if (machineShape.properties.value != newShapeValue || originAtCenter.properties.value != newToCenter)
+                        {
+                            if (setValueFunction !== null)
+                            {
+                                setValueFunction(newShapeValue)
+                                setValueFunction(newToCenter)
+                            }
+                            else
+                            {
+                                machineShape.setPropertyValue("value", newShapeValue)//newValue)
+                                originAtCenter.setPropertyValue("value", newToCenter)
+                            }
+                            forceUpdateOnChangeFunction()
+                            afterOnEditingFinishedFunction()
+                        }
+
+                        //
+                        if (setValueFunction !== null)
+                        {
+                            setWidthValueFunction(newWidthValue)
+                            setDepthValueFunction(newDepthValue)
+                            setHeightValueFunction(newHeightValue)
+                        }
+                        else
+                        {
+                            machineWidth.setPropertyValue("value", newWidthValue)
+                            machineDepth.setPropertyValue("value", newDepthValue)
+                            machineHeight.setPropertyValue("value", newHeightValue)
+                        }
+                        forceUpdateOnChangeFunction()
+                        afterOnEditingFinishedFunction()
+                    }
+
+                    Binding //응용
+                    {
+                        target: supportExtruderCombobox
+                        property: "currentIndex"
+                        value: supportExtruderCombobox.getIndexByPosition()
+                        // Sometimes when the value is already changed, the model is still being built.
+                        // The when clause ensures that the current index is not updated when this happens.
+                        when: supportExtruderCombobox.model.count > 0
+                    }   
                 }
             }
-            //buttonGroup: activeButtonGroup
-
-            // INDEX
-            currentIndex: 
-            {
-                var currentValue = machineShape.properties.value
-                var index = 0 // to set the start index
-                for (var i = 0; i < model.count; i++)
-                {
-                    if (model.get(i).value == currentValue)
-                    {
-                        index = i // change the index
-                        break
-                    }
-                }
-                return index
-            }  
-
-            // 처음에는 리셋
-            function getIndexByPosition()
-            {
-                var itemIndex = -1  // if position is not found, return -1
-                return itemIndex
-            }
-
-            // active on
-            onActivated:
-            {
-                var newWidthValue = model.get(index).widthValue // width
-                var newDepthValue = model.get(index).depthValue // depth
-                var newHeightValue = model.get(index).heightValue // height
-                var newShapeValue = model.get(index).shapeValue // shpae
-                var newToCenter = model.get(index).toCenter // shpae
-
-
-                // if (machineWidth.properties.value != newWidthValue){
-                // }
-                // if (machineDepth.properties.value != newDepthValue){
-                // }
-                // if (machineHeight.properties.value != newHeightValue){
-                // }
-
-
-                if (machineShape.properties.value != newShapeValue || originAtCenter.properties.value != newToCenter)
-                {
-                    if (setValueFunction !== null)
-                    {
-                        setValueFunction(newShapeValue)
-                        setValueFunction(newToCenter)
-                    }
-                    else
-                    {
-                        machineShape.setPropertyValue("value", newShapeValue)//newValue)
-                        originAtCenter.setPropertyValue("value", newToCenter)
-                    }
-                    forceUpdateOnChangeFunction()
-                    afterOnEditingFinishedFunction()
-                }
-
-                //
-                if (setValueFunction !== null)
-                {
-                    setWidthValueFunction(newWidthValue)
-                    setDepthValueFunction(newDepthValue)
-                    setHeightValueFunction(newHeightValue)
-                }
-                else
-                {
-                    machineWidth.setPropertyValue("value", newWidthValue)
-                    machineDepth.setPropertyValue("value", newDepthValue)
-                    machineHeight.setPropertyValue("value", newHeightValue)
-                }
-                forceUpdateOnChangeFunction()
-                afterOnEditingFinishedFunction()
-            }
-
-            Binding //응용
-            {
-                target: supportExtruderCombobox
-                property: "currentIndex"
-                value: supportExtruderCombobox.getIndexByPosition()
-                // Sometimes when the value is already changed, the model is still being built.
-                // The when clause ensures that the current index is not updated when this happens.
-                when: supportExtruderCombobox.model.count > 0
-            }                   
         }
     }
 
