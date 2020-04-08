@@ -11,6 +11,7 @@
         "extruder_nr": {
             "default_value": 5
         },
+        "machine_extruder_type": { "dafault_value": "syringe" },
         "machine_nozzle_offset_x": { "default_value": 0.0 },
         "machine_nozzle_offset_y": { "default_value": 0.0 },
         "material_diameter": { "default_value": 1.75 },
