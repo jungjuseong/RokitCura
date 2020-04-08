@@ -7770,7 +7770,8 @@
                     {
                         "culture_dish": "Culture Dish",
                         "well_plate": "Well Plate",
-                        "culture_slide": "Culture Slide"
+                        "culture_slide": "Culture Slide",
+                        "none": "None"
                     },
                     "default_value": "dish",
                     "settable_per_extruder": false
