@@ -7773,7 +7773,7 @@
                         "culture_slide": "Culture Slide",
                         "none": "None"
                     },
-                    "default_value": "dish",
+                    "default_value": "Culture Dish",
                     "settable_per_extruder": false
                 },
                 "culture_dish_category_number":
@@ -7811,7 +7811,7 @@
                         "48": "48",
                         "96": "96"
                     },
-                    "default_value": "96",
+                    "default_value": "6",
                     "settable_per_extruder": false
                 },
                 "culture_slide_category_number":

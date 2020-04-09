@@ -70,6 +70,18 @@ Item
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
         // }
 
+        //Build plate Shape 확인용
+        // Text{
+        //     id: machineShapeView
+        //     anchors{
+        //         right: parent.right
+        //         bottom: parent.bottom
+        //         bottomMargin: 45
+        //     }
+        //     font: UM.Theme.getFont("large")
+        //     text: qsTr(wellPlateNumber.properties.value)//+ ", "+ plateIndex)
+        // }
+
         //Well Plate
         Rectangle   // 
         {
@@ -212,6 +224,7 @@ Item
                     exclusiveGroup: wellPlateExclusive
                     checkable: true
                     
+                    // 나중에 쓸 코드
                     // contentItem: Label
                     // {
                     //     id: buttonText
@@ -239,7 +252,10 @@ Item
                         var newHeightValue = heightValue // height
                         var newShapeValue = shapeValue // shpae
                         var newToCenter = toCenter // shpae
+                        var wellPlateNum = text
 
+                        buildPlateType.setPropertyValue("value", "Well Plate")
+                        wellPlateNumber.setPropertyValue("value", wellPlateNum)
 
                         // if (machineWidth.properties.value != newWidthValue){
                         // }
@@ -248,7 +264,7 @@ Item
                         // if (machineHeight.properties.value != newHeightValue){
                         // }
 
-
+                        // 1) 모양, 센터, 플레이트 네임 설정
                         if (machineShape.properties.value != newShapeValue || originAtCenter.properties.value != newToCenter)
                         {
                             if (setValueFunction !== null)
@@ -265,7 +281,7 @@ Item
                             afterOnEditingFinishedFunction()
                         }
 
-                        //
+                        // 2) 좌표 설정
                         if (setValueFunction !== null)
                         {
                             setWidthValueFunction(newWidthValue)
@@ -282,15 +298,15 @@ Item
                         afterOnEditingFinishedFunction()
                     }
 
-                    Binding //응용
-                    {
-                        target: supportExtruderCombobox
-                        property: "currentIndex"
-                        value: supportExtruderCombobox.getIndexByPosition()
-                        // Sometimes when the value is already changed, the model is still being built.
-                        // The when clause ensures that the current index is not updated when this happens.
-                        when: supportExtruderCombobox.model.count > 0
-                    }   
+                    // Binding //응용
+                    // {
+                    //     target: supportExtruderCombobox
+                    //     property: "currentIndex"
+                    //     value: supportExtruderCombobox.getIndexByPosition()
+                    //     // Sometimes when the value is already changed, the model is still being built.
+                    //     // The when clause ensures that the current index is not updated when this happens.
+                    //     when: supportExtruderCombobox.model.count > 0
+                    // }   
                 }
             }
         }
@@ -345,6 +361,26 @@ Item
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_center_is_zero"
         watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Build plate type"
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "build_plate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Well plate Number"
+    UM.SettingPropertyProvider  
+    {
+        id: wellPlateNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "well_plate_number"
+        watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }
 }

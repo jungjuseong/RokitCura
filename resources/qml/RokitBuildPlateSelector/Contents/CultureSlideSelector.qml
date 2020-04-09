@@ -76,6 +76,18 @@ Item
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
         // }
 
+        // Build plate 
+        // Text{
+        //     id: machineShapeView
+        //     anchors{
+        //         right: parent.right
+        //         bottom: parent.bottom
+        //         bottomMargin: 45
+        //     }
+        //     font: UM.Theme.getFont("large")
+        //     text: qsTr(buildPlateType.properties.value)//+ ", "+ plateIndex)
+        // }
+
         //Culture Slide
         Rectangle 
         {
@@ -106,7 +118,7 @@ Item
             id: enableSupportRowTitle   // text location
             anchors
             {
-                bottom: supportExtruderCombobox.top
+                bottom: cultureSlideCombobox.top
                 left: parent.left
                 bottomMargin: UM.Theme.getSize("default_margin").width
             }
@@ -118,7 +130,7 @@ Item
 
         Cura.ComboBox
         {
-            id: supportExtruderCombobox
+            id: cultureSlideCombobox
 
             height: UM.Theme.getSize("rokit_combobox_default").height
             width: UM.Theme.getSize("rokit_combobox_default").width
@@ -135,7 +147,7 @@ Item
 
             // Text{
             //     id: firstText
-            //     text: qsTr(supportExtruderCombobox.model.get(index).plateIndex)
+            //     text: qsTr(cultureSlideCombobox.model.get(index).plateIndex)
             //     anchors.centerIn: parent
             //     visible: currentIndex == -1
             // }
@@ -212,8 +224,10 @@ Item
                 var newHeightValue = model.get(index).heightValue // height
                 var newShapeValue = model.get(index).shapeValue // shpae
                 var newToCenter = model.get(index).toCenter // shpae
+                var cultureSlideNum = model.get(index).text // shpae
 
-
+                buildPlateType.setPropertyValue("value", "Culture Slide")
+                cultureSlideNumber.setPropertyValue("value", cultureSlideNum)
                 // if (machineWidth.properties.value != newWidthValue){
                 // }
                 // if (machineDepth.properties.value != newDepthValue){
@@ -259,12 +273,12 @@ Item
 
             Binding //응용
             {
-                target: supportExtruderCombobox
+                target: cultureSlideCombobox
                 property: "currentIndex"
-                value: supportExtruderCombobox.getIndexByPosition()
+                value: cultureSlideCombobox.getIndexByPosition()
                 // Sometimes when the value is already changed, the model is still being built.
                 // The when clause ensures that the current index is not updated when this happens.
-                when: supportExtruderCombobox.model.count > 0
+                when: cultureSlideCombobox.model.count > 0
             } 
         }
     }
@@ -316,6 +330,26 @@ Item
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_center_is_zero"
         watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Build plate type"
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "build_plate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Culture Slide Num"
+    UM.SettingPropertyProvider  
+    {
+        id: cultureSlideNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "culture_slide_category_number"
+        watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }
 }

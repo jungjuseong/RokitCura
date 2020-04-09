@@ -210,6 +210,92 @@ Item
             Row  // material
             {
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                visible: tabBar.currentIndex == 0? true: false && Cura.MachineManager.activeMachine.hasMaterials
+
+                Label
+                {
+                    text: catalog.i18nc("@label", "Extruder Type")
+                    verticalAlignment: Text.AlignVCenter
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: selectors.textWidth
+                    renderType: Text.NativeRendering
+                }
+
+                // Cura.ComboBox{
+                //     id: extruderTypeButton
+
+                //     width: UM.Theme.getSize("rokit_combobox_default").width
+                //     height: parent.height
+
+                //     model: ListModel{
+                //         ListElement{name :"fff"}
+                //         ListElement{name :"Hot"}
+                //         ListElement{name :"syr"}
+                //     }
+
+                //     onActivated:
+                //     {
+                        
+                //     }
+
+                //     delegate: Rectangle{
+                //         width: parent.width
+                //         height: parent.height
+                //         text: name
+                //     }
+                // }
+
+                // OldControls.ToolButton
+                // {
+                //     id: extruderTypeButton
+
+                //     property bool valueError: Cura.MachineManager.activeStack !== null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "compatible", "") !== "True" : true
+                //     property bool valueWarning: !Cura.MachineManager.isActiveQualitySupported
+
+                //     text: Cura.MachineManager.activeStack !== null ? Cura.MachineManager.activeStack.material.name : ""
+                //     // tooltip: text
+                //     enabled: tabBar.currentIndex == 0? true: false
+
+                //     width: UM.Theme.getSize("rokit_combobox_default").width
+                //     height: parent.height
+
+                //     style: UM.Theme.styles.print_setup_header_button
+                //     activeFocusOnPress: true
+                    
+                //     // menu: Cura.MaterialMenu
+                //     // {
+                //     //     extruderIndex: Cura.ExtruderManager.activeExtruderIndex
+                //     //     updateModels: materialSelection.visible
+                //     // }
+                // }
+                // Item
+                // {
+                //     width: instructionButton.width + 2 * UM.Theme.getSize("default_margin").width
+                //     height: instructionButton.visible ? materialSelection.height: 0
+                //     Button
+                //     {
+                //         id: instructionButton
+                //         hoverEnabled: true
+                //         contentItem: Item {}
+                //         height: 0.5 * materialSelection.height
+                //         width: height
+                //         anchors.centerIn: parent
+                //         background: UM.RecolorImage
+                //         {
+                //             source: UM.Theme.getIcon("printing_guideline")
+                //             color: instructionButton.hovered ? UM.Theme.getColor("primary") : UM.Theme.getColor("icon")
+                //         }
+                //         visible: selectors.instructionLink != ""
+                //         onClicked:Qt.openUrlExternally(selectors.instructionLink)
+                //     }
+                // }
+            }
+
+            Row  // material
+            {
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
                 Label

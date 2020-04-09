@@ -51,8 +51,6 @@ Item
 
     property var forceUpdateFunction: manager.forceUpdate
 
-    property int subIndex: -1 // reset
-
     Item
     {
 
@@ -69,7 +67,7 @@ Item
             //verticalCenter: enableSupportRowTitle.verticalCenter
         }       
         
-        // Build plate Shape 확인용
+        //// Build plate Shape 확인용
         // Text{
         //     id: machineShapeView
         //     anchors{
@@ -79,6 +77,18 @@ Item
         //     }
         //     font: UM.Theme.getFont("large")
         //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
+        // }
+
+        //Build plate Shape 확인용 ********
+        // Text{
+        //     id: machineShapeView
+        //     anchors{
+        //         right: parent.right
+        //         bottom: parent.bottom
+        //         bottomMargin: 45
+        //     }
+        //     font: UM.Theme.getFont("large")
+        //     text: qsTr("current Index:" + cultureDishCombobox.currentIndex)//+ ", "+ plateIndex)
         // }
 
         //Culture Plate 
@@ -112,7 +122,7 @@ Item
             id: enableSupportRowTitle   // text location
             anchors
             {
-                bottom: supportExtruderCombobox.top
+                bottom: cultureDishCombobox.top
                 left: parent.left
                 bottomMargin: UM.Theme.getSize("default_margin").width
             }
@@ -124,7 +134,7 @@ Item
 
         Cura.ComboBox
         {
-            id: supportExtruderCombobox
+            id: cultureDishCombobox
 
             height: UM.Theme.getSize("rokit_combobox_default").height
             width: UM.Theme.getSize("rokit_combobox_default").width
@@ -181,8 +191,12 @@ Item
             }
 
             currentIndex: 
-            {
+            {                
                 var currentValue = machineShape.properties.value
+
+                // if (resetPlateModel == -1)
+                //     var index = -1
+                // else
                 var index = 0 // to set the start index
                 for (var i = 0; i < model.count; i++)
                 {
@@ -207,9 +221,12 @@ Item
                 var newDepthValue = model.get(index).depthValue // depth
                 var newHeightValue = model.get(index).heightValue // height
                 var newShapeValue = model.get(index).shapeValue // shpae
-                var newToCenter = model.get(index).toCenter // shpae
+                var newToCenter = model.get(index).toCenter // toCenter
+                var cultureDishNum = model.get(index).text // Model num
+                
 
-
+                buildPlateType.setPropertyValue("value", "Culture Dish")
+                cultureDishNumber.setPropertyValue("value", cultureDishNum)
                 // if (machineWidth.properties.value != newWidthValue){
                 // }
                 // if (machineDepth.properties.value != newDepthValue){
@@ -253,13 +270,13 @@ Item
 
             Binding //응용
             {
-                target: supportExtruderCombobox
+                target: cultureDishCombobox
                 property: "currentIndex"
-                value: supportExtruderCombobox.getIndexByPosition()
+                value: cultureDishCombobox.getIndexByPosition()
                 // Sometimes when the value is already changed, the model is still being built.
                 // The when clause ensures that the current index is not updated when this happens.
-                when: supportExtruderCombobox.model.count > 0
-            }         
+                when: cultureDishCombobox.model.count > 0
+            }
         }
     }
 
@@ -311,6 +328,26 @@ Item
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_center_is_zero"
         watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Build plate type"
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "build_plate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Culture dish Num"
+    UM.SettingPropertyProvider  
+    {
+        id: cultureDishNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "culture_dish_category_number"
+        watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }
 }
