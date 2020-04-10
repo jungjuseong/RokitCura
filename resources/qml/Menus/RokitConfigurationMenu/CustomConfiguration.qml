@@ -10,8 +10,17 @@ import UM 1.3 as UM
 
 import "Custom"
 
+// Nozzle Temperature Make
+//  Bed Temperature Make
+// Left::Syringe selector
+
 Item
 {
+
+    property string machineStackId: Cura.MachineManager.activeMachine.id
+    property var forceUpdateFunction: manager.forceUpdate
+    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
+
     UM.I18nCatalog
     {
         id: catalog
@@ -201,6 +210,92 @@ Item
             Row  // material
             {
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                visible: tabBar.currentIndex == 0? true: false && Cura.MachineManager.activeMachine.hasMaterials
+
+                Label
+                {
+                    text: catalog.i18nc("@label", "Extruder Type")
+                    verticalAlignment: Text.AlignVCenter
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: selectors.textWidth
+                    renderType: Text.NativeRendering
+                }
+
+                // Cura.ComboBox{
+                //     id: extruderTypeButton
+
+                //     width: UM.Theme.getSize("rokit_combobox_default").width
+                //     height: parent.height
+
+                //     model: ListModel{
+                //         ListElement{name :"fff"}
+                //         ListElement{name :"Hot"}
+                //         ListElement{name :"syr"}
+                //     }
+
+                //     onActivated:
+                //     {
+                        
+                //     }
+
+                //     delegate: Rectangle{
+                //         width: parent.width
+                //         height: parent.height
+                //         text: name
+                //     }
+                // }
+
+                // OldControls.ToolButton
+                // {
+                //     id: extruderTypeButton
+
+                //     property bool valueError: Cura.MachineManager.activeStack !== null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "compatible", "") !== "True" : true
+                //     property bool valueWarning: !Cura.MachineManager.isActiveQualitySupported
+
+                //     text: Cura.MachineManager.activeStack !== null ? Cura.MachineManager.activeStack.material.name : ""
+                //     // tooltip: text
+                //     enabled: tabBar.currentIndex == 0? true: false
+
+                //     width: UM.Theme.getSize("rokit_combobox_default").width
+                //     height: parent.height
+
+                //     style: UM.Theme.styles.print_setup_header_button
+                //     activeFocusOnPress: true
+                    
+                //     // menu: Cura.MaterialMenu
+                //     // {
+                //     //     extruderIndex: Cura.ExtruderManager.activeExtruderIndex
+                //     //     updateModels: materialSelection.visible
+                //     // }
+                // }
+                // Item
+                // {
+                //     width: instructionButton.width + 2 * UM.Theme.getSize("default_margin").width
+                //     height: instructionButton.visible ? materialSelection.height: 0
+                //     Button
+                //     {
+                //         id: instructionButton
+                //         hoverEnabled: true
+                //         contentItem: Item {}
+                //         height: 0.5 * materialSelection.height
+                //         width: height
+                //         anchors.centerIn: parent
+                //         background: UM.RecolorImage
+                //         {
+                //             source: UM.Theme.getIcon("printing_guideline")
+                //             color: instructionButton.hovered ? UM.Theme.getColor("primary") : UM.Theme.getColor("icon")
+                //         }
+                //         visible: selectors.instructionLink != ""
+                //         onClicked:Qt.openUrlExternally(selectors.instructionLink)
+                //     }
+                // }
+            }
+
+            Row  // material
+            {
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
                 Label
@@ -292,6 +387,134 @@ Item
                 }
             }
 
+            Row // nozzle temperature
+            {
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                visible: Cura.MachineManager.activeMachine.hasVariants                
+
+                Label
+                {
+                    //text: Cura.MachineManager.activeDefinitionVariantsName
+                    text: extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle Temperature" : "Needle Temperatures"
+
+                    verticalAlignment: Text.AlignVCenter
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: selectors.textWidth
+                    renderType: Text.NativeRendering
+                }
+
+                // 방법1
+                // Cura.NumericTextFieldWithUnit  // "X (Width)" -> "File"
+                // {
+                //     id: generationFilecheck
+                //     containerStackId: machineStackId
+                //     settingKey: "material_print_temperature"
+                //     settingStoreIndex: propertyStoreIndex
+                //     labelText: catalog.i18nc("@label", "Nozzle Temperature")
+                //     labelFont: base.labelFont
+                //     labelWidth: base.labelWidth
+                //     controlWidth: base.controlWidth
+                //     unitText: catalog.i18nc("@label", "°C")
+                //     forceUpdateOnChangeFunction: forceUpdateFunction
+                // }
+
+                // 방법2
+                // TextField
+                // {
+                //     id: nozzleTemperatureTextField
+                //     height: parent.height
+                //     width: selectors.controlWidth
+                    
+
+                //     background: Rectangle{
+                //         anchors.fill: parent
+                //         border.color: UM.Theme.getColor("setting_control_disabled_border")
+                //     }
+
+                //     hoverEnabled: true
+                //     selectByMouse: true
+                //     font: UM.Theme.getFont("default")
+                //     color: UM.Theme.getColor("text")
+                //     renderType: Text.NativeRendering
+
+                //     text:{
+                //         const value = propertyProvider.properties.value
+                //         return value ? value : ""
+                //     }
+
+                //     onEditingFinished: editingFinishedFunction()
+
+                //     property var editingFinishedFunction: defaultEditingFinishedFunction
+
+                //     function defaultEditingFinishedFunction()
+                //     {
+                //         if (propertyProvider && text != propertyProvider.properties.value)
+                //         {
+                            
+                //             if (setValueFunction !== null)
+                //             {
+                //                 setValueFunction(text)
+                //             }
+                //             else
+                //             {
+                //                 propertyProvider.setPropertyValue("value", text)
+                //             }
+                //             forceUpdateOnChangeFunction()
+                //             afterOnEditingFinishedFunction()
+                //         }
+                //     }
+
+                //     Label
+                //     {
+                //         id: unitLabel
+                //         anchors.right: parent.right
+                //         anchors.rightMargin: Math.round(UM.Theme.getSize("setting_unit_margin").width)
+                //         anchors.verticalCenter: parent.verticalCenter
+                //         text: "°C"//unitText // unit
+                //         textFormat: Text.PlainText
+                //         verticalAlignment: Text.AlignVCenter
+                //         renderType: Text.NativeRendering
+                //         color: UM.Theme.getColor("setting_unit")
+                //         font: UM.Theme.getFont("default")
+                //     }
+                // }
+            }
+
+            Row // bed temperature
+            {
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                visible: Cura.MachineManager.activeMachine.hasVariants
+
+                Label
+                {
+                    //text: Cura.MachineManager.activeDefinitionVariantsName
+                    text: catalog.i18nc("@label", "Bed Temperature")
+
+                    verticalAlignment: Text.AlignVCenter
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: selectors.textWidth
+                    renderType: Text.NativeRendering
+                }
+
+                // OldControls.ToolButton
+                // {
+                //     id: variantSelection
+                //     text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
+                //     tooltip: text
+                //     height: parent.height
+                //     width: selectors.controlWidth
+                //     style: UM.Theme.styles.print_setup_header_button
+                //     activeFocusOnPress: true
+                //     enabled: enabledCheckbox.checked
+
+                //     //menu: Cura.NozzleMenu { extruderIndex: Cura.ExtruderManager.activeExtruderIndex }
+                // }
+            }
+
             Row
             {
                 id: warnings
@@ -344,5 +567,14 @@ Item
                 }
             }
         }
+    }
+
+    UM.SettingPropertyProvider
+    {
+        id: propertyProvider
+        containerStack: Cura.MachineManager.activeMachine
+        key: "material_print_temperature"
+        watchedProperties: [ "value", "description" ]
+        storeIndex: propertyStoreIndex
     }
 }

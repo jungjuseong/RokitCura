@@ -22,7 +22,7 @@ Item
         id: mainIcon
         anchors.fill: parent
 
-        source: UM.Theme.getIcon("extruder_button")
+        source: index ==0 ? UM.Theme.getIcon("extruder_button") : UM.Theme.getIcon("hk_syringe_button")
         color: extruderEnabled ? materialColor: UM.Theme.getColor("disabled")
     }
 
@@ -47,8 +47,8 @@ Item
         {
             id: extruderNumberText
             anchors.centerIn: parent
-            text: index + 1
-            font: UM.Theme.getFont("small")
+            text: index ==0 ? 'L': (index) // 익스트루더 번호
+            font: UM.Theme.getFont("default")
             color: UM.Theme.getColor("text")
             width: contentWidth
             height: contentHeight

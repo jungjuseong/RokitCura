@@ -66,7 +66,7 @@ Item
                     elide: Text.ElideRight
                 }
 
-                Cura.NumericTextFieldWithUnit  // "X (Width)" -> "File"
+                Cura.NumericTextFieldWithUnit  // "File"
                 {
                     id: generationFilecheck
                     containerStackId: machineStackId
@@ -81,7 +81,15 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Y (Depth)" -> "Material"
+                // Rectangle
+                // {
+                //     id: a
+                //     width: parent.width
+                //     height: UM.Theme.getSize("default_lining").height
+                //     color: UM.Theme.getColor("lining")
+                // }
+
+                Cura.NumericTextFieldWithUnit  // "Material"
                 {
                     id: generationMaterialcheck
                     containerStackId: machineStackId
@@ -94,7 +102,7 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Z (Height)" -> "Needle gauge"
+                Cura.NumericTextFieldWithUnit  // "Needle gauge"
                 {
                     id: generationNeedleGaugecheck
                     containerStackId: machineStackId
@@ -107,7 +115,7 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Z (Height)" -> "Needle Temperature"
+                Cura.NumericTextFieldWithUnit  // "Needle Temperature"
                 {
                     id: generationNeedleTemperaturecheck
                     containerStackId: machineStackId
@@ -121,7 +129,7 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Z (Height)" -> "Layer height"
+                Cura.NumericTextFieldWithUnit  // "Layer height"
                 {
                     id: generationLayerHeightcheck
                     containerStackId: machineStackId
@@ -135,7 +143,7 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Z (Height)" -> "infill"
+                Cura.NumericTextFieldWithUnit  // "infill"
                 {
                     id: generationInfillcheck
                     containerStackId: machineStackId
@@ -148,7 +156,7 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                // Cura.ComboBoxWithOptions  // "Build plate shape"
+                // Cura.ComboBoxWithOptions  // "Build plate shape" // 콤보박스
                 // {
                 //     id: buildPlateShapeComboBox
                 //     containerStackId: machineStackId
@@ -161,7 +169,7 @@ Item
                 //     forceUpdateOnChangeFunction: forceUpdateFunction
                 // }
 
-                Cura.SimpleCheckBox  // "Origin at center" -> "Support"
+                Cura.SimpleCheckBox  // "Support"
                 {
                     id: generationSupportcheck
                     containerStackId: machineStackId
@@ -171,6 +179,137 @@ Item
                     labelText: catalog.i18nc("@label", "Support")
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                Cura.SimpleCheckBox  // "Adhesion"
+                {
+                    id: generationAdhesioncheck
+                    containerStackId: machineStackId
+                    settingKey: "support_enable"
+                    
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Adhesion")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                // Rectangle
+                // {
+                //     width: parent.width
+                //     height: UM.Theme.getSize("default_lining").height
+                //     color: UM.Theme.getColor("lining")
+                // }
+
+                Cura.NumericTextFieldWithUnit  // "Vacuum"
+                {
+                    id: generationVacuumcheck
+                    containerStackId: machineStackId
+                    settingKey: "dispensor_vac"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Vac")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                Cura.NumericTextFieldWithUnit  // "Interval"
+                {
+                    id: generationIntervalcheck
+                    containerStackId: machineStackId
+                    settingKey: "dispensor_int"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Int")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                Cura.NumericTextFieldWithUnit  // "Set.p"
+                {
+                    id: generationSetPcheck
+                    containerStackId: machineStackId
+                    settingKey: "dispensor_shot_power"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Set.p")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                Cura.NumericTextFieldWithUnit  // "Vac.p"
+                {
+                    id: generationVacPcheck
+                    containerStackId: machineStackId
+                    settingKey: "dispensor_vac_power"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Vac.p")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                // Rectangle
+                // {
+                //     width: parent.width
+                //     height: UM.Theme.getSize("default_lining").height
+                //     color: UM.Theme.getColor("lining")
+                // }
+
+                Cura.NumericTextFieldWithUnit  // "Layers"
+                {
+                    id: generationLayerscheck
+                    containerStackId: machineStackId
+                    settingKey: "uv_per_layers"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Layers")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                // Cura.NumericTextFieldWithUnit  // "Power"
+                // {
+                //     id: generationPowercheck
+                //     containerStackId: machineStackId
+                //     settingKey: "infill_pattern"   //--
+                //     settingStoreIndex: propertyStoreIndex
+                //     labelText: catalog.i18nc("@label", "Power")
+                //     labelFont: base.labelFont
+                //     labelWidth: base.labelWidth
+                //     controlWidth: base.controlWidth
+                //     forceUpdateOnChangeFunction: forceUpdateFunction
+                // }
+
+                Cura.NumericTextFieldWithUnit  // "Time"
+                {
+                    id: generationTimecheck
+                    containerStackId: machineStackId
+                    settingKey: "uv_time"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Time")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+                }
+
+                Cura.NumericTextFieldWithUnit  // "Dimming"
+                {
+                    id: generationDimmingcheck
+                    containerStackId: machineStackId
+                    settingKey: "uv_dimming"   //--
+                    settingStoreIndex: propertyStoreIndex
+                    labelText: catalog.i18nc("@label", "Dimming")
+                    labelFont: base.labelFont
+                    labelWidth: base.labelWidth
+                    controlWidth: base.controlWidth
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
             }

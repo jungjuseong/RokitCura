@@ -190,6 +190,22 @@
                     "settable_per_extruder": true,
                     "settable_per_meshgroup": false,
                     "settable_globally": false
+               },
+               "machine_extruder_type": {
+                    "label": "Extruder Type",
+                    "description": "affects the dispensor commands",
+                    "type": "enum",
+                    "options": 
+                    {
+                        "fff_extruder": "FFF Extruder",
+                        "hot_melt": "Hot Melt",
+                        "syringe": "Syringe"
+                    },
+                    "default_value": "fff_extruder",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true,
+                    "settable_per_meshgroup": false,
+                    "settable_globally": false
                }
             }
         },

@@ -13,7 +13,7 @@ Cura.ExpandablePopup // 팝업 형태로 변경
 
     //dragPreferencesNamePrefix: "view/settings"
 
-    //property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
+    property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
 
     contentPadding: UM.Theme.getSize("default_lining").width
     //contentHeaderTitle: catalog.i18nc("@label", "Generation")

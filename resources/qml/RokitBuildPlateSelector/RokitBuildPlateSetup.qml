@@ -24,7 +24,6 @@ Item
 
     // TODO
     property real firstColumnWidth: Math.round(width / 3)
-    property int choosing: 0    // 선택하는 탭
 
     // 1
     property string tooltipText: machineShape.properties.description
@@ -43,6 +42,9 @@ Item
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
     property string machineStackId: Cura.MachineManager.activeMachine.id
     property var forceUpdateFunction: manager.forceUpdate
+
+    property int choosing: 0    // 선택하는 탭
+    property int resetPlateModel: 0    
 
     Item{
         id: tabSpace
@@ -65,12 +67,22 @@ Item
                 left: parent.left
             } 
             height: contentHeight
-            text: catalog.i18nc("@header", "Build Plate Settings")
+            text: catalog.i18nc("@header", "Build Plate Settings")// + resetPlateModel)
             font: UM.Theme.getFont("medium")
             color: UM.Theme.getColor("small_button_text")
             renderType: Text.NativeRendering
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
+        }
+
+        Text{
+            id: machineShapeView
+            anchors{
+                right: parent.right
+                verticalCenter: buildPlateTitle.verticalCenter
+            }
+            font: UM.Theme.getFont("medium")
+            text: qsTr(buildPlateType.properties.value)//+ ", "+ plateIndex)
         }
 
         UM.TabRow
@@ -94,19 +106,19 @@ Item
                     ListElement{
                         name: "Culture dish"
                         value: "elliptic"
-                        index: 0
+                        number: 0
                         toCenter: 'true'
                     }
                     ListElement{
                         name: "Well plate"
                         value: "elliptic"
-                        index: 1
+                        number: 1
                         toCenter: 'true'
                     }
                     ListElement{
                         name: "Culture slide"
                         value: "rectangular"
-                        index: 2
+                        number: 2
                         toCenter: 'false'
                     }
                 }
@@ -116,11 +128,11 @@ Item
                         text: catalog.i18nc("@label", name) // -culture slide
                         anchors.centerIn: parent
                     }
-
-                    onClicked:
+                    onClicked: // Buil Plate 타입 설정
                     {
-                        choosing = index;
-                    
+                        choosing = number;
+                        // resetPlateModel = -1
+                        // currentIndex = -1
                     }       
                 }
             }            
@@ -144,36 +156,14 @@ Item
             border.color: UM.Theme.getColor("lining")
             border.width: UM.Theme.getSize("default_lining").width
             width: parent.width
-            height: 255// 수정 필요
+            height: UM.Theme.getSize("rokit_build_plate_content").height // 수정 필요
         } 
     }
-
-    // // line
-    // Rectangle
-    // {
-    //     id: separatorLine
-    //     anchors 
-    //     {
-    //         top: tabBar.bottom
-    //         topMargin: UM.Theme.getSize("thick_margin")
-    //     }
-    //     width: parent.width
-    //     height: UM.Theme.getSize("default_lining").width
-    //     color: UM.Theme.getColor("lining")
-    // } 
-
-    
 
     // 메인 컨텐츠
     Row{
 
         spacing: UM.Theme.getSize("thick_margin").height // edit
-
-        // Rectangle{
-        //     anchors.fill: parent
-        //     border.width: 2
-        //     border.color: "green"
-        // }
         
         anchors
         {
@@ -234,6 +224,16 @@ Item
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_center_is_zero"
         watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Build plate type"
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "build_plate_type"
+        watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }
 }

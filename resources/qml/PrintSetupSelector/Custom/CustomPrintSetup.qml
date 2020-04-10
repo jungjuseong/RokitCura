@@ -30,7 +30,8 @@ Item
             leftMargin: parent.padding
             right: parent.right
         }
-        text: catalog.i18nc("@header", "Print Settings")
+        // text: catalog.i18nc("@header", "Print Settings")
+        text: currentModeIndex == 1? catalog.i18nc("@header", "Print Settings :: Custom") : catalog.i18nc("@header", "Print Settings :: Recommended")
         font: UM.Theme.getFont("medium")
         renderType: Text.NativeRendering
         color: UM.Theme.getColor("small_button_text")

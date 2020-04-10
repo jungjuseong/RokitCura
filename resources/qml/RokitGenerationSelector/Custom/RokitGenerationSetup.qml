@@ -91,22 +91,23 @@ Item
             verticalAlignment: Text.AlignVCenter
         }
 
-        Text
-        {
+        Text{
             id: buildPlateCheckValue
-            anchors
-            {
-                top: parent.top
-                bottom: parent.bottom
+            anchors{
                 right: parent.right
                 rightMargin: UM.Theme.getSize("default_margin").width
-                //verticalCenter: parent.verticalCenter
+                verticalCenter: parent.verticalCenter
             }
-            text: catalog.i18nc("@label", "Culture Dish : 100090")
             font: UM.Theme.getFont("medium")
-            renderType: Text.NativeRendering
-            color: UM.Theme.getColor("text")
-            verticalAlignment: Text.AlignVCenter
+
+            text: {
+                if(buildPlateType.properties.value =="Culture Dish") //+ ", "+ plateIndex)
+                    return buildPlateType.properties.value + " : " + cultureDishNumber.properties.value
+                if(buildPlateType.properties.value =="Well Plate") //+ ", "+ plateIndex)
+                    return buildPlateType.properties.value + " : " + wellPlateNumber.properties.value
+                if(buildPlateType.properties.value =="Culture Dish") //+ ", "+ plateIndex)
+                    return buildPlateType.properties.value + " : " + cultureSlideNumber.properties.value
+            }
         }
     }
 
@@ -206,12 +207,6 @@ Item
                 // Compensate for the negative margin in the parent
                 bottomMargin: UM.Theme.getSize("default_lining").width
             }
-
-            // Rectangle{
-            //     anchors.fill: parent
-            //     border.width: 2
-            //     border.color: "green"
-            // }
         }
 
         // Cura.RokitGenerationSettingView
@@ -227,5 +222,44 @@ Item
         //         bottomMargin: UM.Theme.getSize("default_lining").width
         //     }
         // }
+    }
+
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "build_plate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Culture dish Num"
+    UM.SettingPropertyProvider  
+    {
+        id: cultureDishNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "culture_dish_category_number"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // "Well plate Number"
+    UM.SettingPropertyProvider  
+    {
+        id: wellPlateNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "well_plate_number"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }    
+
+    // "Culture Slide Num"
+    UM.SettingPropertyProvider  
+    {
+        id: cultureSlideNumber
+        containerStack: Cura.MachineManager.activeMachine
+        key: "culture_slide_category_number"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
     }
 }

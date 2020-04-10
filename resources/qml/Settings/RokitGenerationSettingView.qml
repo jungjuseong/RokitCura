@@ -25,7 +25,7 @@ Item
     property Action configureSettings
     property bool findingSettings
 
-    // 프로파일 
+    // Searching settings 텍스트 칸
     // Rectangle
     // {
     //     id: filterContainer
@@ -64,7 +64,6 @@ Item
     //         repeat: false
     //     }
 
-    //     // 프로파일 확인 버튼
 
     //     // TextField
     //     // {

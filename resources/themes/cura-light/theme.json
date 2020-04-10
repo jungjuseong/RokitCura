@@ -445,6 +445,7 @@
     "sizes": {
         "rokit_build_plate_setting_widget" : [28.0, 28.0],
         "rokit_build_plate_content_widget" : [28.0, 28.0],
+        "rokit_build_plate_content" : [28.0, 25.5],
 
         "rokit_combobox_default" : [20, 2.5],
         "rokit_combobox_radius": [0.25, 0.25],
@@ -455,6 +456,8 @@
 
         "rokit_generation_selector_widget": [20.0, 4.0],
         "rokit_generation_selector_widget_content": [25.0, 32.0],
+
+        "rokit_well_plate_button" : [4, 2.5],
     
         "window_minimum_size": [80, 48],
         "large_popup_dialog": [48, 40],

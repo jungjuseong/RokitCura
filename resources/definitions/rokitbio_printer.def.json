@@ -7755,6 +7755,81 @@
             }
         },
 
+        "build_plate": 
+        {
+            "label": "Build Plate",
+            "type": "category",
+            "icon": "category_support",
+            "description": "Build Plate Settings",
+            "children": {
+                "build_plate_type": {
+                    "label": "Build Plate type",
+                    "description": "Build Plate type",
+                    "type": "enum",
+                    "options":
+                    {
+                        "culture_dish": "Culture Dish",
+                        "well_plate": "Well Plate",
+                        "culture_slide": "Culture Slide",
+                        "none": "None"
+                    },
+                    "default_value": "Culture Dish",
+                    "settable_per_extruder": false
+                },
+                "culture_dish_category_number":
+                {
+                    "label": "Culture Dish Cat. No.",
+                    "description": "Culture Dish Category number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "11035": "11035",
+                        "11060": "11060",
+                        "11090": "11090",
+                        "11150": "11150",
+                        "11151": "11151",
+                        "20035": "20035",
+                        "20060": "20060",
+                        "20100": "20100",
+                        "20101": "20101",
+                        "20150": "20150",
+                        "20151": "20151"
+                    },
+                    "default_value": "11035",
+                    "settable_per_extruder": false
+                },
+                "well_plate_number":
+                {
+                    "label": "Number of Well plate",
+                    "description": "Well plate number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "6": "6",
+                        "12": "12",
+                        "24": "24",
+                        "48": "48",
+                        "96": "96"
+                    },
+                    "default_value": "6",
+                    "settable_per_extruder": false
+                },
+                "culture_slide_category_number":
+                {
+                    "label": "Culture Slide Cat. No",
+                    "description": "Culture Slide Category Number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "3800052CL": "3800052CL",
+                        "3800056CL": "3800056CL",
+                        "3800058CL": "3800058CL"
+                    },
+                    "default_value": "3800052CL",
+                    "settable_per_extruder": false
+                }
+            }
+        },
         "uv":
         {
             "label": "UV",

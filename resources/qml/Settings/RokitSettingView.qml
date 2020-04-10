@@ -185,6 +185,7 @@ Item
             label: Label {}
         }
 
+        // Recommended 모드와 custom 모드 결정 메뉴
         menu: SettingVisibilityPresetsMenu
         {
             onCollapseAllCategories:
