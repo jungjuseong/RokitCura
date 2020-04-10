@@ -20,16 +20,10 @@ Item
     id: content
 
     property int absoluteMinimumHeight: 200 * screenScaleFactor
-
     property var listHeight: 300  // --
 
     width: UM.Theme.getSize("print_setup_widget").width - 2 * UM.Theme.getSize("default_margin").width
     height: contents.height + buttonRow.height
-
-    enum Mode
-    {
-        Custom = 1
-    }
 
     // Catch all mouse events
     MouseArea
@@ -37,19 +31,6 @@ Item
         anchors.fill: parent
         hoverEnabled: true
     }
-
-    // Set the current mode index to the value that is stored in the preferences or Recommended mode otherwise.
-    property int currentModeIndex:
-    {
-        var index = Math.round(UM.Preferences.getValue("cura/active_mode"))
-
-        if (index != null && !isNaN(index))
-        {
-            return index
-        }
-        return RokitGenerationContents.Mode.Custom
-    }
-    onCurrentModeIndexChanged: UM.Preferences.setValue("cura/active_mode", currentModeIndex)
 
     Item
     {
@@ -96,11 +77,9 @@ Item
                                 base.height - (rokitGenerationSetup.mapToItem(null, 0, 0).y + buttonRow.height + UM.Theme.getSize("default_margin").height)
                             )
                         );
-
-                    //updateDragPosition();
                 }
             }
-            visible: currentModeIndex == RokitGenerationContents.Mode.Custom
+            visible: true
         }
     }
 
@@ -128,123 +107,13 @@ Item
             right: parent.right
         }
 
-        // Output priority
-        // Item{
-        //     id: outputPriority
-        //     height: childrenRect.height
-
-        //     anchors{
-        //         left: parent.left
-        //         right: generationButton.left
-        //         //anchors.verticalCenter: parent.verticalCenter
-        //     }
-
-        //     Label
-        //     {
-        //         id: outputPriorityLabel
-        //         anchors.left: parent.left
-        //         //anchors.verticalCenter: parent.verticalCenter
-
-        //         text: catalog.i18nc("@label", "Output priority")
-        //         visible: true
-        //         font: UM.Theme.getFont("medium")
-        //         color: UM.Theme.getColor("text")
-        //         renderType: Text.NativeRendering
-        //     }
-
-        //     CheckBox{
-        //         id : outputPriorityCheckBox
-        //         anchors.left: outputPriorityLabel.right
-        //         leftMargin: parent.padding
-        //     }
-        // }
-
-        // slice 버튼을 심어 넣어야 함.
-        Cura.SecondaryButton
+        Cura.ActionPanelWidget
         {
-            id: generationButton
-            anchors.top: parent.top
-            anchors.right: parent.right //--
-            anchors.margins: parent.padding
-            leftPadding: UM.Theme.getSize("default_margin").width
-            rightPadding: UM.Theme.getSize("default_margin").width
-            text: catalog.i18nc("@button", "Generation")
-            //iconSource: UM.Theme.getIcon("arrow_left")
-            visible: true
-            onClicked: currentModeIndex = RokitGenerationContents.Mode.Recommended
-        }
-
-        //Invisible area at the bottom with which you can resize the panel.
-        MouseArea
-        {
-            id: draggableArea
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
-            height: childrenRect.height
-            cursorShape: Qt.SplitVCursor
-            visible: currentModeIndex == RokitGenerationContents.Mode.Custom
-            drag
-            {
-                target: parent
-                axis: Drag.YAxis
-            }
-            onMouseYChanged:
-            {
-                if(drag.active)
-                {
-                    // position of mouse relative to dropdown  align vertical centre of mouse area to cursor
-                    //      v------------------------------v   v------------v
-                    var h = mouseY + buttonRow.y + content.y - height / 2 | 0;
-                    if(h < absoluteMinimumHeight) //Enforce a minimum size.
-                    {
-                        h = absoluteMinimumHeight;
-                    }
-
-                    //Absolute mouse Y position in the window, to prevent it from going outside the window.
-                    var mouse_absolute_y = mapToGlobal(mouseX, mouseY).y - UM.Preferences.getValue("general/window_top");
-                    if(mouse_absolute_y > base.height)
-                    {
-                        h -= mouse_absolute_y - base.height;
-                    }
-                    // Enforce a minimum size (again).
-                    // This is a bit of a hackish way to do it, but we've seen some ocasional reports that the size
-                    // could get below the the minimum height.
-                    if(h < absoluteMinimumHeight)
-                    {
-                        h = absoluteMinimumHeight;
-                    }
-                    UM.Preferences.setValue("view/generation_settings_list_height", h);
-                }
-            }
-
-            Rectangle
-            {
-                width: parent.width
-                height: UM.Theme.getSize("narrow_margin").height
-                color: UM.Theme.getColor("secondary")
-
-                Rectangle
-                {
-                    anchors.bottom: parent.top
-                    width: parent.width
-                    height: UM.Theme.getSize("default_lining").height
-                    color: UM.Theme.getColor("lining")
-                }
-
-                UM.RecolorImage
-                {
-                    width: UM.Theme.getSize("drag_icon").width
-                    height: UM.Theme.getSize("drag_icon").height
-                    anchors.centerIn: parent
-
-                    source: UM.Theme.getIcon("resize")
-                    color: UM.Theme.getColor("small_button_text")
-                }
-            }
+            id: actionPanelWidget
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: UM.Theme.getSize("thick_margin").width
+            anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
         }
     }
 }

@@ -28,8 +28,8 @@ class LocalFileOutputDevice(OutputDevice):
         super().__init__("local_file")
 
         self.setName(catalog.i18nc("@item:inmenu", "Local File"))
-        self.setShortDescription(catalog.i18nc("@action:button Preceded by 'Ready to'.", "Save to File"))
-        self.setDescription(catalog.i18nc("@info:tooltip", "Save to File"))
+        self.setShortDescription(catalog.i18nc("@action:button Preceded by 'Ready to'.", "Sav9e to File"))
+        self.setDescription(catalog.i18nc("@info:tooltip", "Sav0e to File"))
         self.setIconName("save")
 
         self._writing = False
@@ -50,7 +50,7 @@ class LocalFileOutputDevice(OutputDevice):
         # Set up and display file dialog
         dialog = QFileDialog()
 
-        dialog.setWindowTitle(catalog.i18nc("@title:window", "Save to File"))
+        dialog.setWindowTitle(catalog.i18nc("@title:window", " to File"))
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
 

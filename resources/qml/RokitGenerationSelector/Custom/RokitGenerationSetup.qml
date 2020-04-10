@@ -66,13 +66,13 @@ Item
             rightMargin: parent.padding
         }
 
-        Rectangle{
+        Rectangle {
             anchors.fill: parent
             border.width: 1
             border.color: UM.Theme.getColor("lining")
         }
 
-        // Build Plate 부분
+        // Build Plate
         Label
         {
             id: buildPlateCheckLabel
@@ -91,7 +91,7 @@ Item
             verticalAlignment: Text.AlignVCenter
         }
 
-        Text{
+        Text {
             id: buildPlateCheckValue
             anchors{
                 right: parent.right
@@ -101,12 +101,16 @@ Item
             font: UM.Theme.getFont("medium")
 
             text: {
-                if(buildPlateType.properties.value =="Culture Dish") //+ ", "+ plateIndex)
-                    return buildPlateType.properties.value + " : " + cultureDishNumber.properties.value
-                if(buildPlateType.properties.value =="Well Plate") //+ ", "+ plateIndex)
-                    return buildPlateType.properties.value + " : " + wellPlateNumber.properties.value
-                if(buildPlateType.properties.value =="Culture Dish") //+ ", "+ plateIndex)
-                    return buildPlateType.properties.value + " : " + cultureSlideNumber.properties.value
+                var productNo = ""
+                const plateType = buildPlateType.properties.value
+                if (plateType === "Culture Dish") 
+                    productNo = cultureDishNumber.properties.value
+                else if (plateType === "Well Plate") 
+                    productNo = wellPlateNumber.properties.value
+                else if (plateType === "Culture Slide") 
+                    productNo = cultureSlideNumber.properties.value
+                
+                return plateType + ":" + productNo
             }
         }
     }

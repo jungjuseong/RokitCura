@@ -22,7 +22,6 @@ Item
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
-    property var forceUpdateFunction: manager.forceUpdate
     
     Cura.RoundedRectangle
     {
@@ -45,162 +44,39 @@ Item
                 margins: UM.Theme.getSize("default_margin").width
             }
             spacing: UM.Theme.getSize("default_margin").width
-            
-            // =======================================
-            // "Build Plate Settings"
-            // =======================================
+
             Column
             {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
                 spacing: base.columnSpacing + 5
-
-                Label   // Title Label
+                
+                Label  // "Model"
                 {
-                    text: catalog.i18nc("@title:label", "Build Volume Settings")
-                    font: UM.Theme.getFont("medium_bold")
+                    id: model
+                    text: catalog.i18nc("@label", "Model: abc.stl")
+                    font: base.labelFont
                     color: UM.Theme.getColor("text")
                     renderType: Text.NativeRendering
-                    width: parent.width
-                    elide: Text.ElideRight
+                    width: base.labelWidth
                 }
 
-                Cura.NumericTextFieldWithUnit  // "File"
+                Label  // "Material"
                 {
-                    id: generationFilecheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_width"
-                    settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "X (Width)")
-                    labelText: catalog.i18nc("@label", "File")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: model2
+                    text: catalog.i18nc("@label", "Material: ") + machineStackId.properties.value
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
 
-                // Rectangle
-                // {
-                //     id: a
-                //     width: parent.width
-                //     height: UM.Theme.getSize("default_lining").height
-                //     color: UM.Theme.getColor("lining")
-                // }
-
-                Cura.NumericTextFieldWithUnit  // "Material"
+                Label  // "Needle gauge"
                 {
-                    id: generationMaterialcheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_depth"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Material")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: needleGauge
+                    text: catalog.i18nc("@label", "Needle gauge: ")
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
-
-                Cura.NumericTextFieldWithUnit  // "Needle gauge"
-                {
-                    id: generationNeedleGaugecheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_nozzle_id"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Needle gauge")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                Cura.NumericTextFieldWithUnit  // "Needle Temperature"
-                {
-                    id: generationNeedleTemperaturecheck
-                    containerStackId: machineStackId
-                    settingKey: "default_material_print_temperature"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Needle Temperature")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    unitText: catalog.i18nc("@label", "°C")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                Cura.NumericTextFieldWithUnit  // "Layer height"
-                {
-                    id: generationLayerHeightcheck
-                    containerStackId: machineStackId
-                    settingKey: "layer_height"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Layer height")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    unitText: catalog.i18nc("@label", "mm")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                Cura.NumericTextFieldWithUnit  // "infill"
-                {
-                    id: generationInfillcheck
-                    containerStackId: machineStackId
-                    settingKey: "infill_pattern"   //--
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Infill Pattern")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                // Cura.ComboBoxWithOptions  // "Build plate shape" // 콤보박스
-                // {
-                //     id: buildPlateShapeComboBox
-                //     containerStackId: machineStackId
-                //     settingKey: "machine_shape"
-                //     settingStoreIndex: propertyStoreIndex
-                //     labelText: catalog.i18nc("@label", "Build plate shape")
-                //     labelFont: base.labelFont
-                //     labelWidth: base.labelWidth
-                //     controlWidth: base.controlWidth
-                //     forceUpdateOnChangeFunction: forceUpdateFunction
-                // }
-
-                Cura.SimpleCheckBox  // "Support"
-                {
-                    id: generationSupportcheck
-                    containerStackId: machineStackId
-                    settingKey: "support_enable"
-                    
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Support")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                Cura.SimpleCheckBox  // "Adhesion"
-                {
-                    id: generationAdhesioncheck
-                    containerStackId: machineStackId
-                    settingKey: "support_enable"
-                    
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Adhesion")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
-
-                // Rectangle
-                // {
-                //     width: parent.width
-                //     height: UM.Theme.getSize("default_lining").height
-                //     color: UM.Theme.getColor("lining")
-                // }
 
                 Cura.NumericTextFieldWithUnit  // "Vacuum"
                 {
@@ -254,13 +130,6 @@ Item
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                // Rectangle
-                // {
-                //     width: parent.width
-                //     height: UM.Theme.getSize("default_lining").height
-                //     color: UM.Theme.getColor("lining")
-                // }
-
                 Cura.NumericTextFieldWithUnit  // "Layers"
                 {
                     id: generationLayerscheck
@@ -273,19 +142,6 @@ Item
                     controlWidth: base.controlWidth
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
-
-                // Cura.NumericTextFieldWithUnit  // "Power"
-                // {
-                //     id: generationPowercheck
-                //     containerStackId: machineStackId
-                //     settingKey: "infill_pattern"   //--
-                //     settingStoreIndex: propertyStoreIndex
-                //     labelText: catalog.i18nc("@label", "Power")
-                //     labelFont: base.labelFont
-                //     labelWidth: base.labelWidth
-                //     controlWidth: base.controlWidth
-                //     forceUpdateOnChangeFunction: forceUpdateFunction
-                // }
 
                 Cura.NumericTextFieldWithUnit  // "Time"
                 {
