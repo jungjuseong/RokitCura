@@ -19,6 +19,38 @@
             "description": "Machine specific settings",
             "children":
             {
+                "build_volume_temperature":
+                {
+                    "label": "Build Volume Temperature",
+                    "description": "The temperature of the environment to print in. If this is 0, the build volume temperature will not be adjusted.",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 0,
+                    "resolve": "min(extruderValues('build_volume_temperature'))",
+                    "minimum_value": "-273.15",
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "285",
+                    "enabled": "machine_heated_build_volume",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true,
+                    "settable_globally": false
+                },
+                "material_print_temperature":
+                {
+                    "label": "Printing Temperature",
+                    "description": "The temperature used for printing.",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 200,
+                    "value": "default_material_print_temperature",
+                    "minimum_value": "0",
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "210",
+                    "maximum_value": "220",
+                    "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
                 "extruder_nr":
                 {
                     "label": "Extruder",
@@ -264,6 +296,87 @@
                     "minimum_value_warning": "0.4",
                     "maximum_value_warning": "3.5",
                     "enabled": "machine_gcode_flavor != \"UltiGCode\"",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "default_material_bed_temperature":
+                {
+                    "label": "Default Build Plate Temperature",
+                    "description": "The default temperature used for the heated build plate. This should be the \"base\" temperature of a build plate. All other print temperatures should use offsets based on this value",
+                    "unit": "°C",
+                    "type": "float",
+                    "resolve": "max(extruderValues('default_material_bed_temperature'))",
+                    "default_value": 60,
+                    "minimum_value": "-273.15",
+                    "minimum_value_warning": "build_volume_temperature",
+                    "maximum_value_warning": "130",
+                    "maximum_value": "200",
+                    "enabled": false,
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "material_bed_temperature":
+                {
+                    "label": "Build Plate Temperature",
+                    "description": "The temperature used for the heated build plate. If this is 0, the bed temperature will not be adjusted.",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 60,
+                    "value": "default_material_bed_temperature",
+                    "resolve": "max(extruderValues('material_bed_temperature'))",
+                    "minimum_value": "-273.15",
+                    "minimum_value_warning": "build_volume_temperature",
+                    "maximum_value_warning": "130",
+                    "maximum_value": "200",
+                    "enabled": "machine_heated_bed and machine_gcode_flavor != \"UltiGCode\"",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "default_material_print_temperature":
+                {
+                    "label": "Default Printing Temperature",
+                    "description": "The default temperature used for printing. This should be the \"base\" temperature of a material. All other print temperatures should use offsets based on this value",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 210,
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "285",
+                    "maximum_value": "365",
+                    "enabled": false,
+                    "settable_per_extruder": true,
+                    "settable_per_mesh": false,
+                    "minimum_value": "-273.15"
+                },
+                "build_volume_temperature":
+                {
+                    "label": "Build Volume Temperature",
+                    "description": "The temperature of the environment to print in. If this is 0, the build volume temperature will not be adjusted.",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 0,
+                    "resolve": "min(extruderValues('build_volume_temperature'))",
+                    "minimum_value": "-273.15",
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "285",
+                    "enabled": "machine_heated_build_volume",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false
+                },
+                "material_print_temperature":
+                {
+                    "label": "Printing Temperature",
+                    "description": "The temperature used for printing.",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 200,
+                    "value": "default_material_print_temperature",
+                    "minimum_value": "0",
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "210",
+                    "maximum_value": "220",
+                    "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 }

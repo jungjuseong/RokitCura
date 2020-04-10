@@ -2128,21 +2128,6 @@
             "type": "category",
             "children":
             {
-                "default_material_print_temperature":
-                {
-                    "label": "Default Printing Temperature",
-                    "description": "The default temperature used for printing. This should be the \"base\" temperature of a material. All other print temperatures should use offsets based on this value",
-                    "unit": "°C",
-                    "type": "float",
-                    "default_value": 210,
-                    "minimum_value_warning": "0",
-                    "maximum_value_warning": "285",
-                    "maximum_value": "365",
-                    "enabled": false,
-                    "settable_per_extruder": true,
-                    "settable_per_mesh": false,
-                    "minimum_value": "-273.15"
-                },
                 "build_volume_temperature":
                 {
                     "label": "Build Volume Temperature",
@@ -2158,6 +2143,21 @@
                     "settable_per_mesh": false,
                     "settable_per_extruder": false
                 },
+                "default_material_print_temperature":
+                {
+                    "label": "Default Printing Temperature",
+                    "description": "The default temperature used for printing. This should be the \"base\" temperature of a material. All other print temperatures should use offsets based on this value",
+                    "unit": "°C",
+                    "type": "float",
+                    "default_value": 210,
+                    "minimum_value_warning": "0",
+                    "maximum_value_warning": "285",
+                    "minimum_value": "0",
+                    "maximum_value": "250",
+                    "enabled": false,
+                    "settable_per_extruder": true,
+                    "settable_per_mesh": false
+                },
                 "material_print_temperature":
                 {
                     "label": "Printing Temperature",
@@ -2166,10 +2166,10 @@
                     "type": "float",
                     "default_value": 210,
                     "value": "default_material_print_temperature",
-                    "minimum_value": "-273.15",
+                    "minimum_value": "0",
                     "minimum_value_warning": "0",
-                    "maximum_value_warning": "285",
-                    "maximum_value": "365",
+                    "maximum_value_warning": "210",
+                    "maximum_value": "220",
                     "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true

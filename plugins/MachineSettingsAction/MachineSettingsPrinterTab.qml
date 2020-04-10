@@ -140,6 +140,20 @@ Item
                 forceUpdateOnChangeFunction: forceUpdateFunction
             }
 
+            Cura.NumericTextFieldWithUnit  // "material_bed_temperature"
+            {
+                id: materialBedTemperatureField
+                containerStackId: machineStackId
+                settingKey: "material_bed_temperature"
+                settingStoreIndex: propertyStoreIndex
+                labelText: catalog.i18nc("@label", "Build Plate Temperature")
+                labelFont: base.labelFont
+                labelWidth: base.labelWidth
+                controlWidth: base.controlWidth
+                forceUpdateOnChangeFunction: forceUpdateFunction
+                afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
+            }
+
             Cura.SimpleCheckBox  // "Heated build volume"
             {
                 id: heatedVolumeCheckBox
@@ -168,6 +182,8 @@ Item
                 // I don't remember exactly what.
                 afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
             }
+
+
         }
 
         // =======================================
