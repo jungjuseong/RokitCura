@@ -28,7 +28,6 @@ Item
     property int labelWidth: (columnWidth * 2 / 3 - UM.Theme.getSize("default_margin").width * 2) | 0
     property int controlWidth: (columnWidth / 3) | 0
     property var labelFont: UM.Theme.getFont("default")
-    property int controlHeight: 25
 
 
     UM.I18nCatalog
@@ -338,11 +337,10 @@ Item
                     containerStackId: machineStackId
                     settingKey: "material_print_temperature"
                     settingStoreIndex: propertyStoreIndex
-                    labelText: (extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle" : "Needle") + " Temp." //catalog.i18nc("@label", "Build Plate Temp.")
+                    labelText: (extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle" : "Needle") + " Temp."
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    controlHeight: base.controlHeight
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
@@ -363,7 +361,6 @@ Item
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    controlHeight: base.controlHeight
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata

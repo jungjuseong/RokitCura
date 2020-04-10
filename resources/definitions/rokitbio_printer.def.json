@@ -17,7 +17,7 @@
         "preferred_quality_type": "normal",
         "machine_extruder_trains":
         {
-            "0": "fdmextruder"
+            "0": "rokitbio_extruder"
         },
         "supports_usb_connection": false,
         "supports_network_connection": false
