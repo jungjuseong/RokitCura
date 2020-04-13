@@ -24,7 +24,6 @@
             "3": "invivo_4d6_right3",
             "4": "invivo_4d6_right4",
             "5": "invivo_4d6_right5"
-
         }
     },
     "overrides": {
@@ -41,10 +40,6 @@
         "infill_before_walls": {"value": false },
         
         "adhesion_type": { "default_value": "none" },
-
-        "default_material_print_temperature": { "value": "200" },
-        "material_print_temperature_layer_0": { "value": "material_print_temperature + 5" },
-        "material_standby_temperature": { "value": "material_print_temperature" },
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {

@@ -15,15 +15,6 @@
         "machine_nozzle_offset_x": { "default_value": 0.0 },
         "machine_nozzle_offset_y": { "default_value": 0.0 },
         "material_diameter": { "default_value": 1.75 },
-        "material_print_temperature": {
-            "label": "Needle Temperature",
-            "description": "The temperature used for printing.",
-            "default_value": 30,
-            "minimum_value": "0",
-            "minimum_value_warning": "10",
-            "maximum_value_warning": "40",
-            "maximum_value": "60"
-        },
         "machine_extruder_start_pos_abs": { "default_value": true },
         "machine_extruder_start_pos_x": { "default_value": 330 },
         "machine_extruder_start_pos_y": { "default_value": 237 },

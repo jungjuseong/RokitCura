@@ -22,7 +22,6 @@ Item
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
-    property var forceUpdateFunction: manager.forceUpdate
     
     Cura.RoundedRectangle
     {
@@ -45,41 +44,13 @@ Item
                 margins: UM.Theme.getSize("default_margin").width
             }
             spacing: UM.Theme.getSize("default_margin").width
-            
-            // =======================================
-            // "Build Plate Settings"
-            // =======================================
+
             Column
             {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
                 spacing: base.columnSpacing + 5
-
-                // Label   // Title Label
-                // {
-                //     text: catalog.i18nc("@title:label", "Build Volume Settings")
-                //     font: UM.Theme.getFont("medium_bold")
-                //     color: UM.Theme.getColor("text")
-                //     renderType: Text.NativeRendering
-                //     width: parent.width
-                //     elide: Text.ElideRight
-                // }
-
-                Cura.NumericTextFieldWithUnit  // "File"
-                {
-                    id: generationFilecheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_width"
-                    settingStoreIndex: propertyStoreIndex
-                    //labelText: catalog.i18nc("@label", "X (Width)")
-                    labelText: catalog.i18nc("@label", "File")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    //unitText: catalog.i18nc("@label", "mm")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
-                }
 
                 Rectangle{
                     width:  UM.Theme.getSize("rokit_big_item").width
@@ -110,32 +81,31 @@ Item
                     controlWidth: base.controlWidth
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
-
-                Cura.NumericTextFieldWithUnit  // "Needle gauge"
+                
+                Label  // "Model"
                 {
-                    id: generationNeedleGaugecheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_nozzle_id"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Needle gauge")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: model
+                    text: catalog.i18nc("@label", "Model: abc.stl")
+                    font: base.labelFont
+                    color: UM.Theme.getColor("text")
+                    renderType: Text.NativeRendering
+                    width: base.labelWidth
                 }
 
-                Cura.NumericTextFieldWithUnit  // "Needle Temperature"
+                Label  // "Material"
                 {
-                    id: generationNeedleTemperaturecheck
-                    containerStackId: machineStackId
-                    settingKey: "default_material_print_temperature"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Needle Temperature")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    unitText: catalog.i18nc("@label", "°C")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: model2
+                    text: catalog.i18nc("@label", "Material: ") //+ machineStackId.properties.value
+                    font: base.labelFont
+                    width: base.labelWidth
+                }
+
+                Label  // "Needle gauge"
+                {
+                    id: needleGauge
+                    text: catalog.i18nc("@label", "Needle gauge: ")
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
 
                 Rectangle{
@@ -181,19 +151,6 @@ Item
                     controlWidth: base.controlWidth
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
-
-                // Cura.ComboBoxWithOptions  // "Build plate shape" // 콤보박스
-                // {
-                //     id: buildPlateShapeComboBox
-                //     containerStackId: machineStackId
-                //     settingKey: "machine_shape"
-                //     settingStoreIndex: propertyStoreIndex
-                //     labelText: catalog.i18nc("@label", "Build plate shape")
-                //     labelFont: base.labelFont
-                //     labelWidth: base.labelWidth
-                //     controlWidth: base.controlWidth
-                //     forceUpdateOnChangeFunction: forceUpdateFunction
-                // }
 
                 Cura.SimpleCheckBox  // "Support"
                 {
