@@ -147,6 +147,12 @@
 
     "colors": {
 
+        "rokit_build_plate": [249, 249, 249, 255],
+        "rokit_build_plate_border": [226, 226, 226, 255],
+
+        "rokit_generation_title_background": [249, 249, 249, 255],
+
+
         "main_background": [255, 255, 255, 255],
         "wide_lining": [245, 245, 245, 255],
         "thick_lining": [180, 180, 180, 255],
@@ -369,8 +375,6 @@
         "model_selection_outline": [50, 130, 255, 255],
         "model_non_printing": [122, 122, 122, 255],
 
-        "xray_error_dark": [255,  0,  0, 255],
-        "xray_error_light": [255,  255,  0, 255],
         "xray": [26,  26,  62, 255],
         "xray_error": [255,  0,  0, 255],
 
@@ -442,6 +446,26 @@
     },
 
     "sizes": {
+        "rokit_build_plate_setting_widget" : [28.0, 28.0],
+        "rokit_build_plate_content_widget" : [28.0, 28.0],
+        "rokit_build_plate_content" : [28.0, 25.5],
+
+        "rokit_combobox_default" : [20, 2.5],
+        "rokit_combobox_radius": [0.25, 0.25],
+        
+        "rokit_culture_dish_diameter": [13, 13],
+        "rokit_well_plate_diameter": [6, 6],
+        "rokit_culture_slide": [7, 13],
+
+        "rokit_generation_selector_widget": [20.0, 4.0],
+        "rokit_generation_selector_widget_content": [25.0, 32.0],
+
+        "rokit_well_plate_button" : [4, 2.5],
+
+        "rokit_setting_control": [3.0, 2.0],
+
+        "rokit_big_item": [32, 2.5],
+    
         "window_minimum_size": [80, 48],
         "large_popup_dialog": [48, 40],
         "popup_dialog": [40, 36],

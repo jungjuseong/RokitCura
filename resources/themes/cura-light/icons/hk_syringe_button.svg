@@ -1,0 +1,10 @@
+<svg id="레이어_1" data-name="레이어 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73.17 73.57">
+  <title>주사기 아이콘2</title>
+  <rect x="4.62" y="30.18" width="19.7" height="6.3" fill="none"/>
+  <rect x="4.62" y="21.79" width="19.7" height="5.25" fill="none"/>
+  <rect x="5.77" y="41.72" width="24.66" height="5.54" fill="none"/>
+  <rect x="5.77" y="22.96" width="24.6" height="5.53" fill="none"/>
+  <rect x="5.77" y="31.79" width="24.6" height="6.64" fill="none"/>
+  <polygon points="67.19 7.44 67.19 0 67 0 5.69 0 5.5 0 5.5 7.44 14.27 7.44 58.9 7.44 67.19 7.44"/>
+  <path d="M67.51,13.58H0v6.63H5.65v28c0,4.12,7.63,7.67,18.53,9.23V61h7.74v6.94l9.33,5.66V61H49V57.44c10.9-1.56,18.52-5.11,18.52-9.23v-28h5.66V13.58ZM5.77,23l24.6,0V28.5l-24.6,0Zm0,8.84h24.6v6.64H5.77ZM30.42,47.25H5.77V41.72H30.42Z"/>
+</svg>

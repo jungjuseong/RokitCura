@@ -152,7 +152,7 @@ Item
         {
             CuraApplication.resetWorkspace()
             Cura.Actions.resetProfile.trigger()
-            UM.Controller.setActiveStage("PrepareStage")
+            UM.Controller.setActiveStage("RokitPrepareStage")
         }
     }
 

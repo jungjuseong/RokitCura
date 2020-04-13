@@ -170,7 +170,7 @@ Cura.ExpandablePopup
                 visible: popupItem.configuration_method == ConfigurationMenu.ConfigurationMethod.Auto
             }
 
-            CustomConfiguration
+            RokitCustomConfiguration
             {
                 id: customConfiguration
                 visible: popupItem.configuration_method == ConfigurationMenu.ConfigurationMethod.Custom

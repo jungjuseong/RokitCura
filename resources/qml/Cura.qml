@@ -197,7 +197,7 @@ UM.MainWindow
             }
         }
 
-        MainWindowHeader
+        RokitMainWindowHeader
         {
             id: mainWindowHeader
             anchors

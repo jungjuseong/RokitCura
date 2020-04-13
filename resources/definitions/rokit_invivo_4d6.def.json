@@ -1,0 +1,175 @@
+{
+    "version": 2,
+    "name": "Dr.Invivo 4D6",
+    "inherits": "rokit",
+    "metadata": {
+        "author": "IRON",
+        "manufacturer": "Rokit HealthCare",
+        "visible": true,
+        "file_formats": "text/x-gcode",
+        "platform_offset": [0, 0, 0],
+        "has_machine_quality": true,
+        "preferred_quality_type": "normal",
+        "has_variants": true,
+        "variants_name": "Nozzle Gauge",
+        "has_materials": true,
+        "preferred_material": "generic_pla",
+        "preferred_variant_name": "Syringe 0.25",
+        "preferred_variant_buildplate_name": "Culture Dish",
+        "supports_network_connection": false,
+        "machine_extruder_trains":
+        {
+            "0": "rokit_invivo_4d6_left",
+            "1": "rokit_invivo_4d6_right1",
+            "2": "rokit_invivo_4d6_right2",
+            "3": "rokit_invivo_4d6_right3",
+            "4": "rokit_invivo_4d6_right4",
+            "5": "rokit_invivo_4d6_right5"
+        },
+        "firmware_update_info": {
+            "id": 9051,
+            "check_urls": ["https://software.rokithealthcare.com/releases/firmware/9051/stable/um-update.swu.version"],
+            "update_url": "https://rokithealthcare.com/firmware"
+        },
+        "exclude_materials": [
+            "chromatik_pla",
+            "dsm_arnitel2045_175","dsm_novamid1070_175",
+            "emotiontech_abs","emotiontech_asax","emotiontech_hips","emotiontech_petg","emotiontech_pla","emotiontech_pva-m",
+            "emotiontech_pva-oks","emotiontech_pva-s","emotiontech_tpu98a","emotiontech_pva-s","emotiontech_tpu98a",
+            "eSUN_PETG_Black", "eSUN_PETG_Grey", "eSUN_PETG_Purple", "eSUN_PLA_PRO_Black", "eSUN_PLA_PRO_Grey", "eSUN_PLA_PRO_Purple", "eSUN_PLA_PRO_White",
+            "fabtotum_abs","fabtotum_nylon","fabtotum_pla","fabtotum_tpu",
+            "fiberlogy_hd_pla",
+            "filo3d_pla","filo3d_pla_green","filo3d_pla_red",
+            "imade3d_petg_175","imade3d_pla_175","imade3d_petg_green", "imade3d_petg_pink", "imade3d_pla_green", "imade3d_pla_pink", 
+            "innofill_innoflex60_175",
+            "leapfrog_abs_natural","leapfrog_epla_natural","leapfrog_pva_natural",
+            "octofiber_pla",
+            "polyflex_pla", "polymax_pla", "polyplus_pla", "polywood_pla",
+            "redd_abs","redd_asa","redd_hips","redd_nylon","redd_petg","redd_pla","redd_tpe",
+            "tizyx_abs", "tizyx_pla","tizyx_flex","tizyx_petg","tizyx_pva","tizyx_pla_bois",
+            "generic_abs",
+            "generic_bam",
+            "generic_cffcpe",
+            "generic_cffpa",
+            "generic_cpe",
+            "generic_cpe_plus",
+            "generic_gffcpe",
+            "generic_gffpa",
+            "generic_hips",
+            "generic_nylon",
+            "generic_pc",
+            "generic_petg",
+            "generic_pla",
+            "generic_pp",
+            "generic_pva",
+            "generic_tough_pla",
+            "generic_tpu",
+            "ultimaker_abs_black","ultimaker_abs_blue","ultimaker_abs_green","ultimaker_abs_grey","ultimaker_abs_orange","ultimaker_abs_pearl-gold", 
+            "ultimaker_abs_red","ultimaker_abs_silver-metallic","ultimaker_abs_white","ultimaker_abs_yellow", 
+            "ultimaker_bam", "ultimaker_cpe_black","ultimaker_cpe_blue","ultimaker_cpe_dark-grey","ultimaker_cpe_green","ultimaker_cpe_light-grey", 
+            "ultimaker_cpe_plus_black","ultimaker_cpe_plus_transparent","ultimaker_cpe_plus_white", "ultimaker_cpe_red", "ultimaker_cpe_transparent", "ultimaker_cpe_white", "ultimaker_cpe_yellow", 
+            "ultimaker_nylon_black", "ultimaker_nylon_transparent", "ultimaker_pc_black", "ultimaker_pc_transparent", 
+            "ultimaker_pc_white", "ultimaker_pla_black", "ultimaker_pla_blue", "ultimaker_pla_green", "ultimaker_pla_magenta", 
+            "ultimaker_pla_orange", "ultimaker_pla_pearl-white", "ultimaker_pla_red", "ultimaker_pla_silver-metallic", 
+            "ultimaker_pla_transparent","ultimaker_pla_white","ultimaker_pla_yellow", "ultimaker_pp_transparent", "ultimaker_pva", "ultimaker_tough_pla_black", "ultimaker_tough_pla_green", "ultimaker_tough_pla_red", "ultimaker_tough_pla_white", "ultimaker_tpu_black", "ultimaker_tpu_blue", "ultimaker_tpu_red", "ultimaker_tpu_white", "verbatim_bvoh_175", "Vertex_Delta_ABS", "Vertex_Delta_PET", "Vertex_Delta_PLA", "Vertex_Delta_TPU", 
+            "verbatim_bvoh_175",
+            "Vertex_Delta_ABS","Vertex_Delta_PET","Vertex_Delta_PLA_Glitter","Vertex_Delta_PLA_Mat",
+            "Vertex_Delta_PLA_Satin","Vertex_Delta_PLA_Wood","Vertex_Delta_PLA","Vertex_Delta_TPU",
+            "zyyx_pro_flex", 
+            "zyyx_pro_pla",
+            "tizyx_pla",
+            "tizyx_abs",
+            "tizyx_pla_bois" 
+        ]
+
+    },
+    "overrides": {
+        "machine_buildplate_type":
+        {
+            "default_value": "culture_dish",
+            "type": "enum",
+            "options":
+            {
+                "culture_dish": "Culture Dish",
+                "wall_plate": "Well Plate",
+                "culture_slide": "Culture Slide"
+            },
+            "children": {
+                "culture_dish_category_number":
+                {
+                    "label": "Culture Dish Cat. No.",
+                    "description": "Culture Dish Category number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "11035": "11035",
+                        "11060": "11060",
+                        "11090": "11090",
+                        "11150": "11150",
+                        "11151": "11151",
+                        "20035": "20035",
+                        "20060": "20060",
+                        "20100": "20100",
+                        "20101": "20101",
+                        "20150": "20150",
+                        "20151": "20151"
+                    },
+                    "default_value": "11035"
+                },
+                "well_plate_number":
+                {
+                    "label": "Number of Well plate",
+                    "description": "Well plate number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "6": "6",
+                        "12": "12",
+                        "24": "24",
+                        "48": "48",
+                        "96": "96"
+                    },
+                    "default_value": "96"
+                },
+                "culture_slide_category_number":
+                {
+                    "label": "Culture Slide Cat. No",
+                    "description": "Culture Slide Category Number",
+                    "type": "enum",
+                    "options":
+                    {
+                        "3800052CL": "3800052CL",
+                        "3800056CL": "3800056CL",
+                        "3800058CL": "3800058CL"
+                    },
+                    "default_value": "3800052CL"
+                }
+            }
+        },
+        "layer_height": { "settable_per_extruder": true },
+
+        "machine_name": { "default_value": "Dr. INVIVO 4D6" },
+
+        "machine_width": { "default_value": 80 },
+        "machine_height": { "default_value": 80 },
+        "machine_depth": { "default_value": 80 },
+        "machine_shape": { "default_value": "elliptic"},
+
+        "default_material_bed_temperature": { "settable_per_extruder": true },
+        "material_bed_temperature": { "settable_per_extruder": true },
+
+        "infill_pattern": {"value": "'triangles'" },
+        "infill_before_walls": {"value": false },
+        
+        "adhesion_type": { "default_value": "none" },
+
+        "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
+        "machine_start_gcode": {
+            "default_value": ";(**** start of start-gcode for Edison Bio NK 1.57.70.0 BI-P2-01-999999-9990 ****)\nG21; set units to mm,\nG90; set positioning to absolute\n;M104 S0 T0 (set extruder temperature)\nG92 Z0\nG1 Z20 F120\nG28 X Y F1000 (home XY axes maximum)\nG28 Z F120 (home Z axis minimum)\nM1010 S1\nG95 P2\n;G1 Z20 F1500\n;G1 X119 Y20 F800\n;M109 S0 T0 ;wait for extruder to reach temperature\n;M106 P4 S255 ;uv led1\n;M106 P3 S255 ;uv led2\nM1015 P0 F60.0 E-0.5\nG92 E0 (Set E to 0 again)\nT0 ;Switch to the first extruder\n;(**** end of start-gcode ****)"
+        },
+        "machine_end_gcode": {
+            "default_value": ";(**** start of end-gcode for Edison Bio NK 1.57.70.0 BI-P2-01-999999-9990 ****)\nM73 P100\n;end progress\nM104 T0 S0\n;extruder heater off\nM106 P4 S0 ;uv led1\nM106 P3 S0;uv led2\nM1010 S0 ; TM ;(**** end of end-gcode ****)"
+        },
+        "machine_extruder_count": { "default_value": 6 }
+    }
+}
