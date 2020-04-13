@@ -209,7 +209,7 @@ UM.TooltipArea
             verticalAlignment: Text.AlignVCenter
             renderType: Text.NativeRendering
             color: UM.Theme.getColor("setting_unit")
-            font: UM.Theme.getFont("default")
+            font: UM.Theme.getFont("small")
         }
     }
 }

@@ -403,8 +403,9 @@ Item
                     settingStoreIndex: propertyStoreIndex
                     labelText: (leftSyringe ==false && extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle" : "Needle") + " Temp."
                     labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
+                    labelWidth: base.labelWidth *2.3
+                    controlWidth: base.controlWidth *2
+                    unitText: catalog.i18nc("@label", "°C")
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
@@ -423,8 +424,9 @@ Item
                     settingStoreIndex: propertyStoreIndex
                     labelText: catalog.i18nc("@label", "Build Plate Temp.")
                     labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
+                    labelWidth: base.labelWidth *2.3
+                    controlWidth: base.controlWidth *2
+                    unitText: catalog.i18nc("@label", "°C")
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
