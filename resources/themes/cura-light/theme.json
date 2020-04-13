@@ -150,6 +150,9 @@
         "rokit_build_plate": [249, 249, 249, 255],
         "rokit_build_plate_border": [226, 226, 226, 255],
 
+        "rokit_generation_title_background": [249, 249, 249, 255],
+
+
         "main_background": [255, 255, 255, 255],
         "wide_lining": [245, 245, 245, 255],
         "thick_lining": [180, 180, 180, 255],
@@ -458,6 +461,10 @@
         "rokit_generation_selector_widget_content": [25.0, 32.0],
 
         "rokit_well_plate_button" : [4, 2.5],
+
+        "rokit_setting_control": [3.0, 2.0],
+
+        "rokit_big_item": [32, 2.5],
     
         "window_minimum_size": [80, 48],
         "large_popup_dialog": [48, 40],

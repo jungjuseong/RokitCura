@@ -28,7 +28,8 @@ Item
     property int labelWidth: (columnWidth * 2 / 3 - UM.Theme.getSize("default_margin").width * 2) | 0
     property int controlWidth: (columnWidth / 3) | 0
     property var labelFont: UM.Theme.getFont("default")
-    property int controlHeight: 25
+    
+    property bool leftSyringe: null
 
 
     UM.I18nCatalog
@@ -219,9 +220,11 @@ Item
 
             Row  // Extuder Type
             {
+                id: extruderTypeItem
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: tabBar.currentIndex == 0? true: false && Cura.MachineManager.activeMachine.hasMaterials
-
+                enabled: tabBar.currentIndex == 0? true: false && Cura.MachineManager.activeMachine.hasMaterials
+                
                 Label
                 {
                     text: catalog.i18nc("@label", "Extruder Type")
@@ -231,6 +234,65 @@ Item
                     height: parent.height
                     width: selectors.textWidth
                     renderType: Text.NativeRendering
+                }
+
+                Cura.ComboBox{
+                    id: comboBox
+                    visible: True
+
+                    width: selectors.controlWidth
+                    height: parent.height
+                    textRole: "name"
+
+                    baselineOffset: null
+
+                    model: ListModel{
+                        id: leftExtruderModel
+
+                        ListElement{name: "FFF Extruder"; index: 0}
+                        ListElement{name: "Hot melt"; index: 1}
+                        ListElement{name: "Syringe"; index: 2}
+                    }
+
+                    // currentIndex:
+                    // {
+                    //     var currentValue = propertyProvider.properties.value
+                    //     var index = 0
+                    //     for (var i = 0; i < model.count; i++)
+                    //     {
+                    //         if (model.get(i).value == currentValue)
+                    //         {
+                    //             index = i
+                    //             break
+                    //         }
+                    //     }
+                    //     return index
+                    // }
+
+                    onActivated:
+                    {
+                        var newValue = model.get(index).name
+                        if(newValue=="Syringe")
+                            leftSyringe = true
+                        else
+                            leftSyringe = false
+
+                        leftExtruderType.setPropertyValue("value", newValue)
+                        
+                        // if (propertyProvider.properties.value != newValue)
+                        // {
+                        //     if (setValueFunction !== null)
+                        //     {
+                        //         setValueFunction(newValue)
+                        //     }
+                        //     else
+                        //     {
+                        //         propertyProvider.setPropertyValue("value", newValue)
+                        //     }
+                        //     forceUpdateOnChangeFunction()
+                        //     afterOnEditingFinishedFunction()
+                        // }
+                    }
                 }
             }
 
@@ -303,7 +365,8 @@ Item
                 Label
                 {
                     //text: Cura.MachineManager.activeDefinitionVariantsName
-                    text: extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle Guage" : "Needle Gauge"
+                    // Left 이면서 주사기(True상태)가 아니어야 <Nozzle>
+                    text: leftSyringe ==false && extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle Guage" : "Needle Gauge"
 
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
@@ -338,11 +401,10 @@ Item
                     containerStackId: machineStackId
                     settingKey: "material_print_temperature"
                     settingStoreIndex: propertyStoreIndex
-                    labelText: (extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle" : "Needle") + " Temp." //catalog.i18nc("@label", "Build Plate Temp.")
+                    labelText: (leftSyringe ==false && extrudersModel.items[tabBar.currentIndex].name === "Left" ? "Nozzle" : "Needle") + " Temp."
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    controlHeight: base.controlHeight
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
@@ -363,7 +425,6 @@ Item
                     labelFont: base.labelFont
                     labelWidth: base.labelWidth
                     controlWidth: base.controlWidth
-                    controlHeight: base.controlHeight
 
                     forceUpdateOnChangeFunction: forceUpdateFunction
                     afterOnEditingFinishedFunction: manager.updateHasMaterialsMetadata
@@ -430,6 +491,16 @@ Item
         containerStack: Cura.MachineManager.activeMachine
         key: "material_print_temperature"
         watchedProperties: [ "value", "description" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Left Extruder Type
+    UM.SettingPropertyProvider
+    {
+        id: leftExtruderType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "left_extruder_type"
+        watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 }

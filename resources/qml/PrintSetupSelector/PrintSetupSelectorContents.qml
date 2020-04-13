@@ -141,12 +141,13 @@ Item
         {
             id: recommendedButton
             anchors.top: parent.top
-            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.margins: parent.padding
             leftPadding: UM.Theme.getSize("default_margin").width
             rightPadding: UM.Theme.getSize("default_margin").width
             text: catalog.i18nc("@button", "Recommended")
-            iconSource: UM.Theme.getIcon("arrow_left")
+            iconSource: UM.Theme.getIcon("arrow_right")
+            isIconOnRightSide: true
             visible: currentModeIndex == PrintSetupSelectorContents.Mode.Custom
             onClicked: {
                 currentModeIndex = PrintSetupSelectorContents.Mode.Recommended

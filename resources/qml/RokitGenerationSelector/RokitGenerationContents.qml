@@ -128,37 +128,6 @@ Item
             right: parent.right
         }
 
-        // Output priority
-        // Item{
-        //     id: outputPriority
-        //     height: childrenRect.height
-
-        //     anchors{
-        //         left: parent.left
-        //         right: generationButton.left
-        //         //anchors.verticalCenter: parent.verticalCenter
-        //     }
-
-        //     Label
-        //     {
-        //         id: outputPriorityLabel
-        //         anchors.left: parent.left
-        //         //anchors.verticalCenter: parent.verticalCenter
-
-        //         text: catalog.i18nc("@label", "Output priority")
-        //         visible: true
-        //         font: UM.Theme.getFont("medium")
-        //         color: UM.Theme.getColor("text")
-        //         renderType: Text.NativeRendering
-        //     }
-
-        //     CheckBox{
-        //         id : outputPriorityCheckBox
-        //         anchors.left: outputPriorityLabel.right
-        //         leftMargin: parent.padding
-        //     }
-        // }
-
         // slice 버튼을 심어 넣어야 함.
         Cura.SecondaryButton
         {

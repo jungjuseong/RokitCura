@@ -16,14 +16,23 @@ Item
     property color materialColor
     property alias textColor: extruderNumberText.color
     property bool extruderEnabled: true
+    property bool leftSyringeMode : customConfiguration.leftSyringe
 
     UM.RecolorImage
     {
         id: mainIcon
         anchors.fill: parent
 
+        // left 에서 주사기 모드 조건 추가
+        // source: {
+        //     if(index ==0 && leftSyringeMode == false)
+        //         UM.Theme.getIcon("extruder_button") 
+        //     else
+        //         UM.Theme.getIcon("hk_syringe_button")
+        // }
         source: index ==0 ? UM.Theme.getIcon("extruder_button") : UM.Theme.getIcon("hk_syringe_button")
         color: extruderEnabled ? materialColor: UM.Theme.getColor("disabled")
+        // customConfiguration.leftSyringe == false &&
     }
 
     Rectangle

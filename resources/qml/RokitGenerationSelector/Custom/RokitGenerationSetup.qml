@@ -55,7 +55,7 @@ Item
     Item{
         id: buildPlateCheck
 
-        height: buildPlateCheckLabel.height + 2* parent.padding
+        height: buildPlateCheckLabel.height + 2* UM.Theme.getSize("thin_margin").height
 
         anchors{
             top: intent.bottom
@@ -78,11 +78,9 @@ Item
             id: buildPlateCheckLabel
             anchors
             {
-                top: parent.top
-                bottom: parent.bottom
                 left: parent.left
                 leftMargin: UM.Theme.getSize("default_margin").width
-                //verticalCenter: parent.verticalCenter
+                verticalCenter: parent.verticalCenter
             }
             text: catalog.i18nc("@label", "Build Plate")
             font: UM.Theme.getFont("medium")
