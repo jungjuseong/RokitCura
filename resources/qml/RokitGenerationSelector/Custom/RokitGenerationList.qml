@@ -22,6 +22,8 @@ Item
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
+
+    Cura.ObjectsModel { id: objectsModel }
     
     Cura.RoundedRectangle
     {
@@ -67,25 +69,14 @@ Item
                         }
                         text: "Material"
                     }
-                }               
-
-                Cura.NumericTextFieldWithUnit  // "Material"
-                {
-                    id: generationMaterialcheck
-                    containerStackId: machineStackId
-                    settingKey: "machine_depth"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Material")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
                 }
                 
                 Label  // "Model"
                 {
                     id: model
-                    text: catalog.i18nc("@label", "Model: abc.stl")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Model: "+ objectsModel.name)
                     font: base.labelFont
                     color: UM.Theme.getColor("text")
                     renderType: Text.NativeRendering
@@ -94,16 +85,20 @@ Item
 
                 Label  // "Material"
                 {
-                    id: model2
-                    text: catalog.i18nc("@label", "Material: ") //+ machineStackId.properties.value
+                    id: materialLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Material: "+ Cura.MachineManager.activeStack.material.name)
                     font: base.labelFont
                     width: base.labelWidth
                 }
 
                 Label  // "Needle gauge"
                 {
-                    id: needleGauge
-                    text: catalog.i18nc("@label", "Needle gauge: ")
+                    id: needleGaugeLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Needle gauge: " + Cura.MachineManager.activeStack.variant.name)
                     font: base.labelFont
                     width: base.labelWidth
                 }
@@ -121,63 +116,69 @@ Item
                             left: parent.left
                             leftMargin: UM.Theme.getSize("default_margin").width 
                         }
-                        text: "Print Setting"
+                        text: "Print Settings"
                     }
                 } 
 
-                Cura.NumericTextFieldWithUnit  // "Layer height"
+                Label  // "Layer Height"
                 {
-                    id: generationLayerHeightcheck
-                    containerStackId: machineStackId
-                    settingKey: "layer_height"
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Layer height")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    unitText: catalog.i18nc("@label", "mm")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: layerHeightLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Layer height: " + layerHeight.properties.value + "mm")
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
 
-                Cura.NumericTextFieldWithUnit  // "infill"
+                Label  // "Infill Pattern"
                 {
-                    id: generationInfillcheck
-                    containerStackId: machineStackId
-                    settingKey: "infill_pattern"   //--
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Infill Pattern")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    controlWidth: base.controlWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: infillPatternLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Infill Pattern: " + infillPattern.properties.value)
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
 
-                Cura.SimpleCheckBox  // "Support"
+                Cura.RokitSimpleCheckBox  // "Support"
                 {
                     id: generationSupportcheck
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     containerStackId: machineStackId
                     settingKey: "support_enable"
                     
                     settingStoreIndex: propertyStoreIndex
                     labelText: catalog.i18nc("@label", "Support")
                     labelFont: base.labelFont
-                    labelWidth: base.labelWidth
+                    labelWidth: base.labelWidth *1.7
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.SimpleCheckBox  // "Adhesion"
+                Label  // "Adhesion type"
                 {
-                    id: generationAdhesioncheck
-                    containerStackId: machineStackId
-                    settingKey: "support_enable"
-                    
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Adhesion")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: adhesionTypeLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Adhesion Type: " + adhesionType.properties.value)
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
 
+                // Cura.RokitSimpleCheckBox  // "Adhesion"
+                // {
+                //     id: generationAdhesioncheck
+                //     containerStackId: machineStackId
+                //     settingKey: "adhesion_type"
+                    
+                //     settingStoreIndex: propertyStoreIndex
+                //     labelText: catalog.i18nc("@label", "Adhesion")
+                //     labelFont: base.labelFont
+                //     labelWidth: base.labelWidth *1.8
+                //     forceUpdateOnChangeFunction: forceUpdateFunction
+                // }
+
+                // Dispensor
                 Rectangle{
                     width:  UM.Theme.getSize("rokit_big_item").width
                     height: UM.Theme.getSize("rokit_big_item").height
@@ -198,7 +199,7 @@ Item
                 Row{
                     spacing: UM.Theme.getSize("default_margin")
                     
-                    Cura.TextFieldWithUnit  // "Vacuum"
+                    Cura.RokitTextFieldWithUnit  // "Vacuum"
                     {
                         id: generationVacuumcheck
                         containerStackId: machineStackId
@@ -206,17 +207,18 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Vac")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth/7
-                        controlWidth: base.controlWidth/3
+                        labelWidth: base.labelWidth/6.4
+                        controlWidth: base.controlWidth/2.5
+                        unitText: catalog.i18nc("@label", "sec")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
 
                     Rectangle{
-                        width:  UM.Theme.getSize("wide_margin").width
+                        width:  UM.Theme.getSize("default_margin").width
                         height: parent.height
                     }
 
-                    Cura.TextFieldWithUnit  // "Interval"
+                    Cura.RokitTextFieldWithUnit  // "Interval"
                     {
                         id: generationIntervalcheck
                         containerStackId: machineStackId
@@ -224,18 +226,19 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Int")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth/7
-                        controlWidth: base.controlWidth/3
+                        labelWidth: base.labelWidth/6.8
+                        controlWidth: base.controlWidth/2.5
+                        unitText: catalog.i18nc("@label", "kpa")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
 
                     Rectangle{
-                        width:  UM.Theme.getSize("wide_margin").width
+                        width:  UM.Theme.getSize("default_margin").width
                         height: parent.height
                     }
 
 
-                    Cura.TextFieldWithUnit  // "Set.p"
+                    Cura.RokitTextFieldWithUnit  // "Set.p"
                     {
                         id: generationSetPcheck
                         containerStackId: machineStackId
@@ -243,18 +246,19 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Set.p")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth/5
-                        controlWidth: base.controlWidth/3
+                        labelWidth: base.labelWidth/4.7
+                        controlWidth: base.controlWidth/2.5
+                        unitText: catalog.i18nc("@label", "kpa")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
 
                     Rectangle{
-                        width:  UM.Theme.getSize("wide_margin").width
+                        width:  UM.Theme.getSize("default_margin").width
                         height: parent.height
                     }
 
 
-                    Cura.TextFieldWithUnit  // "Vac.p"
+                    Cura.RokitTextFieldWithUnit  // "Vac.p"
                     {
                         id: generationVacPcheck
                         containerStackId: machineStackId
@@ -262,8 +266,9 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Vac.p")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth/5
-                        controlWidth: base.controlWidth/3
+                        labelWidth: base.labelWidth/4.7
+                        controlWidth: base.controlWidth/2.5
+                        unitText: catalog.i18nc("@label", "kpa")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
                 }
@@ -289,7 +294,7 @@ Item
                 Row{
                     //spacing: UM.Theme.getSize("narrow_margin")
 
-                    Cura.TextFieldWithUnit  // "Layers"
+                    Cura.RokitTextFieldWithUnit  // "Layers"
                     {
                         id: generationLayerscheck
                         containerStackId: machineStackId
@@ -297,8 +302,8 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Layers")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth / 3.2
-                        controlWidth: base.controlWidth/2.5
+                        labelWidth: base.labelWidth / 3.5
+                        controlWidth: base.controlWidth/2.1
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
 
@@ -307,20 +312,7 @@ Item
                         height: parent.height
                     }
 
-                    // Cura.NumericTextFieldWithUnit  // "Power"
-                    // {
-                    //     id: generationPowercheck
-                    //     containerStackId: machineStackId
-                    //     settingKey: "infill_pattern"   //--
-                    //     settingStoreIndex: propertyStoreIndex
-                    //     labelText: catalog.i18nc("@label", "Power")
-                    //     labelFont: base.labelFont
-                    //     labelWidth: base.labelWidth
-                    //     controlWidth: base.controlWidth
-                    //     forceUpdateOnChangeFunction: forceUpdateFunction
-                    // }
-
-                    Cura.TextFieldWithUnit  // "Time"
+                    Cura.RokitTextFieldWithUnit  // "Time"
                     {
                         id: generationTimecheck
                         containerStackId: machineStackId
@@ -328,8 +320,9 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Time")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth / 3.2
-                        controlWidth: base.controlWidth/2.5
+                        labelWidth: base.labelWidth / 4.2
+                        controlWidth: base.controlWidth/2.1
+                        unitText: catalog.i18nc("@label", "sec")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
 
@@ -338,7 +331,7 @@ Item
                         height: parent.height
                     }
 
-                    Cura.TextFieldWithUnit  // "Dimming"
+                    Cura.RokitTextFieldWithUnit  // "Dimming"
                     {
                         id: generationDimmingcheck
                         containerStackId: machineStackId
@@ -346,8 +339,9 @@ Item
                         settingStoreIndex: propertyStoreIndex
                         labelText: catalog.i18nc("@label", "Dimming")
                         labelFont: base.labelFont
-                        labelWidth: base.labelWidth / 2.3
-                        controlWidth: base.controlWidth/2.5
+                        labelWidth: base.labelWidth / 2.7
+                        controlWidth: base.controlWidth /2.1
+                        unitText: catalog.i18nc("@label", "%")
                         forceUpdateOnChangeFunction: forceUpdateFunction
                     }
                 }
@@ -361,7 +355,37 @@ Item
     {
         id: leftExtruderType
         containerStack: Cura.MachineManager.activeMachine
-        key: "left_extruder_type"
+        key: "left_extruder_type" //     key: "machine_nozzle_size"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Layer height
+    UM.SettingPropertyProvider
+    {
+        id: layerHeight
+        containerStack: Cura.MachineManager.activeMachine
+        key: "layer_height"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Infill pattern
+    UM.SettingPropertyProvider
+    {
+        id: infillPattern
+        containerStack: Cura.MachineManager.activeMachine
+        key: "infill_pattern"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Adhesion pattern
+    UM.SettingPropertyProvider
+    {
+        id: adhesionType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "adhesion_type"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }

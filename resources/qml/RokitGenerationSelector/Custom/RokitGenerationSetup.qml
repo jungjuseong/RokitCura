@@ -52,8 +52,7 @@ Item
     }
 
     //Build Plate
-    Item 
-    {
+    Item{
         id: buildPlateCheck
 
         height: buildPlateCheckLabel.height + 2* UM.Theme.getSize("thin_margin").height
@@ -210,20 +209,6 @@ Item
                 bottomMargin: UM.Theme.getSize("default_lining").width
             }
         }
-
-        // Cura.RokitGenerationSettingView
-        // {
-        //     anchors
-        //     {
-        //         fill: parent
-        //         topMargin: UM.Theme.getSize("default_margin").height
-        //         leftMargin: UM.Theme.getSize("default_margin").width
-        //         // Small space for the scrollbar
-        //         rightMargin: UM.Theme.getSize("narrow_margin").width
-        //         // Compensate for the negative margin in the parent
-        //         bottomMargin: UM.Theme.getSize("default_lining").width
-        //     }
-        // }
     }
 
     UM.SettingPropertyProvider  
