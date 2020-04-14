@@ -7834,7 +7834,7 @@
         {
             "label": "UV",
             "type": "category",
-            "icon": "category_support",
+            "icon": "category_uv",
             "description": "UV enable",
             "children":
             {
@@ -7905,7 +7905,7 @@
         {
             "label": "Dispensor",
             "type": "category",
-            "icon": "category_support",
+            "icon": "category_dispensor",
             "description": "Dispensor Settings",
             "children":
             {

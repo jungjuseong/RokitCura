@@ -74,6 +74,8 @@ Item
                 Label  // "Model"
                 {
                     id: model
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: catalog.i18nc("@label", "Model: "+ objectsModel.name)
                     font: base.labelFont
                     color: UM.Theme.getColor("text")
@@ -84,6 +86,8 @@ Item
                 Label  // "Material"
                 {
                     id: materialLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: catalog.i18nc("@label", "Material: "+ Cura.MachineManager.activeStack.material.name)
                     font: base.labelFont
                     width: base.labelWidth
@@ -92,6 +96,8 @@ Item
                 Label  // "Needle gauge"
                 {
                     id: needleGaugeLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: catalog.i18nc("@label", "Needle gauge: " + Cura.MachineManager.activeStack.variant.name)
                     font: base.labelFont
                     width: base.labelWidth
@@ -117,6 +123,8 @@ Item
                 Label  // "Layer Height"
                 {
                     id: layerHeightLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: catalog.i18nc("@label", "Layer height: " + layerHeight.properties.value + "mm")
                     font: base.labelFont
                     width: base.labelWidth
@@ -125,6 +133,8 @@ Item
                 Label  // "Infill Pattern"
                 {
                     id: infillPatternLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: catalog.i18nc("@label", "Infill Pattern: " + infillPattern.properties.value)
                     font: base.labelFont
                     width: base.labelWidth
@@ -133,28 +143,40 @@ Item
                 Cura.RokitSimpleCheckBox  // "Support"
                 {
                     id: generationSupportcheck
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     containerStackId: machineStackId
                     settingKey: "support_enable"
                     
                     settingStoreIndex: propertyStoreIndex
                     labelText: catalog.i18nc("@label", "Support")
                     labelFont: base.labelFont
-                    labelWidth: base.labelWidth *1.8
+                    labelWidth: base.labelWidth *1.7
                     forceUpdateOnChangeFunction: forceUpdateFunction
                 }
 
-                Cura.RokitSimpleCheckBox  // "Adhesion"
+                Label  // "Adhesion type"
                 {
-                    id: generationAdhesioncheck
-                    containerStackId: machineStackId
-                    settingKey: "support_enable"
-                    
-                    settingStoreIndex: propertyStoreIndex
-                    labelText: catalog.i18nc("@label", "Adhesion")
-                    labelFont: base.labelFont
-                    labelWidth: base.labelWidth *1.8
-                    forceUpdateOnChangeFunction: forceUpdateFunction
+                    id: adhesionTypeLabel
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Adhesion Type: " + adhesionType.properties.value)
+                    font: base.labelFont
+                    width: base.labelWidth
                 }
+
+                // Cura.RokitSimpleCheckBox  // "Adhesion"
+                // {
+                //     id: generationAdhesioncheck
+                //     containerStackId: machineStackId
+                //     settingKey: "adhesion_type"
+                    
+                //     settingStoreIndex: propertyStoreIndex
+                //     labelText: catalog.i18nc("@label", "Adhesion")
+                //     labelFont: base.labelFont
+                //     labelWidth: base.labelWidth *1.8
+                //     forceUpdateOnChangeFunction: forceUpdateFunction
+                // }
 
                 // Dispensor
                 Rectangle{
@@ -358,12 +380,13 @@ Item
         storeIndex: propertyStoreIndex
     }
 
-    // UM.SettingPropertyProvider
-    // {
-    //     id: nozzleGauge
-    //     containerStack: Cura.MachineManager.activeMachine
-    //     key: "preferred_variant_name"
-    //     watchedProperties: [ "value" ]
-    //     storeIndex: propertyStoreIndex
-    // }
+    // Adhesion pattern
+    UM.SettingPropertyProvider
+    {
+        id: adhesionType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "adhesion_type"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
 }
