@@ -23,7 +23,7 @@ Cura.ExpandablePopup
     headerItem: Cura.IconWithText
     {
         text: "Build Plate"
-        source: UM.Theme.getIcon("printer_single")
+        source: UM.Theme.getIcon("buildplate")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0

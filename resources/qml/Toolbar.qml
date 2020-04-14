@@ -134,7 +134,7 @@ Item
                 height: childrenRect.height
                 model: extrudersModel.items.length > 1 ? extrudersModel : 0
 
-                delegate: ExtruderButton
+                delegate: RokitExtruderButton
                 {
                     extruder: model
                     isTopElement: extrudersModel.getItem(0).id == model.id

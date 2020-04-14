@@ -52,7 +52,8 @@ Item
     }
 
     //Build Plate
-    Item{
+    Item 
+    {
         id: buildPlateCheck
 
         height: buildPlateCheckLabel.height + 2* UM.Theme.getSize("thin_margin").height
@@ -137,11 +138,10 @@ Item
             {
                 contentItem: Item
                 {
-                    Cura.ExtruderIcon
+                    Cura.RokitExtruderIcon
                     {
                         anchors.horizontalCenter: parent.horizontalCenter
                         materialColor: model.color
-                        extruderEnabled: model.enabled
                     }
                 }
                 onClicked:

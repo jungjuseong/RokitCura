@@ -462,7 +462,7 @@ class CuraApplication(QtApplication):
             "Toolbox", #This contains the interface to enable/disable plug-ins, so if you disable it you can't enable it back.
             "RokitPrepareStage", #Cura is useless without this one since you can't load models.
             "PreviewStage", #This shows the list of the plugin views that are installed in Cura.
-            "MonitorStage", #Major part of Cura's functionality.
+            #"MonitorStage", #Major part of Cura's functionality.
             "LocalFileOutputDevice", #Major part of Cura's functionality.
             "LocalContainerProvider", #Cura is useless without any profiles or setting definitions.
 

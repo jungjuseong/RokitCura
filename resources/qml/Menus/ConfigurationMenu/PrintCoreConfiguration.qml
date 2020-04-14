@@ -15,12 +15,11 @@ Item
     height: information.height
 
     //Extruder icon.
-    Cura.ExtruderIcon
+    Cura.RokitExtruderIcon
     {
         id: icon
         materialColor: printCoreConfiguration !== null ? printCoreConfiguration.material.color : ""
         anchors.verticalCenter: parent.verticalCenter
-        extruderEnabled: printCoreConfiguration !== null && printCoreConfiguration.material.brand !== "" && printCoreConfiguration.hotendID !== ""
     }
 
     Column

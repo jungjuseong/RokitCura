@@ -251,7 +251,7 @@ Item
                     width: selectors.controlWidth
                     style: UM.Theme.styles.print_setup_header_button
                     activeFocusOnPress: true
-                    menu: Cura.NozzleMenu { extruderIndex: Cura.ExtruderManager.activeExtruderIndex }
+                    menu: Cura.RokitNozzleMenu { extruderIndex: Cura.ExtruderManager.activeExtruderIndex }
                 }
             }
 

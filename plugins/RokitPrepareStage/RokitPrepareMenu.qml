@@ -63,7 +63,7 @@ Item
                 color: UM.Theme.getColor("lining")
             }
 
-            Cura.ConfigurationMenu
+            Cura.RokitConfigurationMenu
             {
                 id: printerSetup
                 Layout.fillHeight: true

@@ -7,17 +7,18 @@ import QtQuick.Controls 2.0
 import UM 1.3 as UM
 import Cura 1.0 as Cura
 
-Cura.ExpandablePopup // 팝업 형태로 변경
+Cura.ExpandableComponent
 {
-    id: rokitGenerationSelector
+    id: printSetupSelector
 
-    //dragPreferencesNamePrefix: "view/settings"
+    dragPreferencesNamePrefix: "view/settings"
 
     property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
 
     contentPadding: UM.Theme.getSize("default_lining").width
-    //contentHeaderTitle: catalog.i18nc("@label", "Generation")
+    contentHeaderTitle: catalog.i18nc("@label", "Layer quality")
     enabled: !preSlicedData
+    disabledText: catalog.i18nc("@label shown when we load a Gcode file", "Print setup disabled. G-code file can not be modified.")
 
     UM.I18nCatalog
     {
@@ -27,8 +28,8 @@ Cura.ExpandablePopup // 팝업 형태로 변경
 
     headerItem: Cura.IconWithText
     {
-        text: "Generation"
-        source: UM.Theme.getIcon("check")
+        text: "Layer Quality"
+        source: UM.Theme.getIcon("category_layer_height")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
@@ -36,7 +37,7 @@ Cura.ExpandablePopup // 팝업 형태로 변경
 
     property var extrudersModel: CuraApplication.getExtrudersModel()
 
-    contentItem: RokitGenerationContents {}
+    contentItem: RokitPrintSetupSelectorContents {}
 
     onExpandedChanged: UM.Preferences.setValue("view/settings_visible", expanded)
     Component.onCompleted: expanded = UM.Preferences.getValue("view/settings_visible")

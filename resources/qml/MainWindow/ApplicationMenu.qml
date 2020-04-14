@@ -47,7 +47,7 @@ Item
 
         ViewMenu { title: catalog.i18nc("@title:menu menubar:toplevel", "&View") }
 
-        SettingsMenu { title: catalog.i18nc("@title:menu menubar:toplevel", "&Settings") }
+        RokitSettingsMenu { title: catalog.i18nc("@title:menu menubar:toplevel", "&Settings") }
 
         Menu
         {

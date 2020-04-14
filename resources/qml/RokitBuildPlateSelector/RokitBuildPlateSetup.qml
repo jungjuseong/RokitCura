@@ -46,7 +46,7 @@ Item
     property int choosing: 0    // 선택하는 탭
     property int resetPlateModel: 0    
 
-    Item{
+    Item {
         id: tabSpace
 
         anchors{
@@ -161,7 +161,7 @@ Item
     }
 
     // 메인 컨텐츠
-    Row{
+    Row {
 
         spacing: UM.Theme.getSize("thick_margin").height // edit
         

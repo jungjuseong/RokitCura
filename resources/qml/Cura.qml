@@ -370,7 +370,7 @@ UM.MainWindow
 
                 // The printSetupSelector is defined here so that the setting list doesn't need to get re-instantiated
                 // Every time the stage is changed.
-                property var printSetupSelector: Cura.PrintSetupSelector
+                property var printSetupSelector: Cura.RokitPrintSetupSelector
                 {
                    width: UM.Theme.getSize("print_setup_widget").width
                    height: UM.Theme.getSize("stage_menu").height

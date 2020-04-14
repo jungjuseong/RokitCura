@@ -22,7 +22,7 @@ Menu
     Instantiator
     {
         model: nozzleModel
-
+        
         MenuItem
         {
             text: model.hotend_name

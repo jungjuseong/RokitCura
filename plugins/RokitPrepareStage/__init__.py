@@ -9,7 +9,7 @@ i18n_catalog = i18nCatalog("cura")
 def getMetaData():
     return {
         "stage": {
-            "name": i18n_catalog.i18nc("@item:inmenu", "R-Prepare"),
+            "name": i18n_catalog.i18nc("@item:inmenu", "Prepare"),
             "weight": 10
         }
     }
