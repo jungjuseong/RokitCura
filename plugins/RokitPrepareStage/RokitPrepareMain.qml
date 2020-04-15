@@ -13,12 +13,5 @@ Item
 {
     id: prepareMain
 
-    Cura.ActionPanelWidget
-    {
-        id: actionPanelWidget
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: UM.Theme.getSize("thick_margin").width
-        anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
-    }
+
 }

@@ -233,7 +233,7 @@ Item
 
                 Label
                 {
-                    text: Cura.MachineManager.activeDefinitionVariantsName
+                    text: (extrudersModel.items[tabBar.currentIndex].name === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")

@@ -521,7 +521,7 @@ class CuraApplication(QtApplication):
         preferences.addPreference("cura/show_list_of_objects", False)
         preferences.addPreference("view/settings_list_height", 400)
 
-        preferences.addPreference("view/generation_settings_list_height", 550)
+        preferences.addPreference("view/generation_settings_list_height", 580)
 
         preferences.addPreference("view/settings_visible", False)
         preferences.addPreference("view/settings_xpos", 0)
@@ -871,7 +871,7 @@ class CuraApplication(QtApplication):
         self._setLoadingHint(self._i18n_catalog.i18nc("@info:progress", "Loading interface..."))
 
         # Initialize QML engine
-        self.setMainQml(Resources.getPath(self.ResourceTypes.QmlFiles, "Cura.qml"))
+        self.setMainQml(Resources.getPath(self.ResourceTypes.QmlFiles, "RokitCura.qml"))
         self._qml_import_paths.append(Resources.getPath(self.ResourceTypes.QmlFiles))
         self._setLoadingHint(self._i18n_catalog.i18nc("@info:progress", "Initializing engine..."))
         self.initializeEngine()

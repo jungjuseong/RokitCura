@@ -49,10 +49,28 @@ Item
 
             Column
             {
+                id: selectors
+
+                padding: UM.Theme.getSize("default_margin").width
+                spacing: UM.Theme.getSize("default_margin").height  // base.columnSpacing + 5
+
+
+                readonly property real paddedWidth: parent.width - padding * 2
+                property real textWidth: Math.round(paddedWidth * 0.3)
+                property real controlWidth:
+                {
+                    if(instructionLink == "")
+                    {
+                        return paddedWidth - textWidth
+                    }
+                    else
+                    {
+                        return paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width
+                    }
+                }
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
-                spacing: base.columnSpacing + 5
 
                 Rectangle{
                     width:  UM.Theme.getSize("rokit_big_item").width
@@ -71,17 +89,6 @@ Item
                     }
                 }
                 
-                Label  // "Model"
-                {
-                    id: model
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    text: catalog.i18nc("@label", "Model: "+ objectsModel.name)
-                    font: base.labelFont
-                    color: UM.Theme.getColor("text")
-                    renderType: Text.NativeRendering
-                    width: base.labelWidth
-                }
 
                 Label  // "Material"
                 {
@@ -102,6 +109,28 @@ Item
                     font: base.labelFont
                     width: base.labelWidth
                 }
+
+
+                Label  // "Material Print Temperature"
+                {
+                    id: printTemperature
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Print Temperature: " + materialPrintTemperature.properties.value)
+                    font: base.labelFont
+                    width: base.labelWidth
+                }
+
+                Label  // "Material Bed Temperature"
+                {
+                    id: bedTemperature
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: catalog.i18nc("@label", "Bed Temperature: " + materialBedTemperature.properties.value)
+                    font: base.labelFont
+                    width: base.labelWidth
+                }
+
 
                 Rectangle{
                     width:  UM.Theme.getSize("rokit_big_item").width
@@ -164,19 +193,6 @@ Item
                     font: base.labelFont
                     width: base.labelWidth
                 }
-
-                // Cura.RokitSimpleCheckBox  // "Adhesion"
-                // {
-                //     id: generationAdhesioncheck
-                //     containerStackId: machineStackId
-                //     settingKey: "adhesion_type"
-                    
-                //     settingStoreIndex: propertyStoreIndex
-                //     labelText: catalog.i18nc("@label", "Adhesion")
-                //     labelFont: base.labelFont
-                //     labelWidth: base.labelWidth *1.8
-                //     forceUpdateOnChangeFunction: forceUpdateFunction
-                // }
 
                 // Dispensor
                 Rectangle{
@@ -350,16 +366,6 @@ Item
         }
     }
 
-    // Left Extruder Type
-    UM.SettingPropertyProvider
-    {
-        id: leftExtruderType
-        containerStack: Cura.MachineManager.activeMachine
-        key: "left_extruder_type" //     key: "machine_nozzle_size"
-        watchedProperties: [ "value" ]
-        storeIndex: propertyStoreIndex
-    }
-
     // Layer height
     UM.SettingPropertyProvider
     {
@@ -386,6 +392,26 @@ Item
         id: adhesionType
         containerStack: Cura.MachineManager.activeMachine
         key: "adhesion_type"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Material Print Temperature
+    UM.SettingPropertyProvider
+    {
+        id: materialPrintTemperature
+        containerStack: Cura.MachineManager.activeMachine
+        key: "material_print_temperature"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // Material Bed Temperature
+    UM.SettingPropertyProvider
+    {
+        id: materialBedTemperature
+        containerStack: Cura.MachineManager.activeMachine
+        key: "material_bed_temperature"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
