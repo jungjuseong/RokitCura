@@ -13,12 +13,7 @@ Item
     id: base
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
-    property var forceUpdateFunction: manager.forceUpdate
-
-    function updateMaterialDiameter()
-    {
-        manager.updateMaterialForDiameter(extruderPosition)
-    }
+    property var forceUpdateFunction: manager.forceUpdate 
 
     UM.I18nCatalog
     {

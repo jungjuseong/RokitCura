@@ -7,17 +7,9 @@ import QtQuick.Controls 2.0
 import UM 1.3 as UM
 import Cura 1.0 as Cura
 
-Cura.ExpandablePopup // 팝업 형태로 변경
+Cura.ExpandablePopup
 {
     id: rokitGenerationSelector
-
-    //dragPreferencesNamePrefix: "view/settings"
-
-    property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
-
-    contentPadding: UM.Theme.getSize("default_lining").width
-    //contentHeaderTitle: catalog.i18nc("@label", "Generation")
-    enabled: !preSlicedData
 
     UM.I18nCatalog
     {
@@ -39,5 +31,4 @@ Cura.ExpandablePopup // 팝업 형태로 변경
     contentItem: RokitGenerationContents {}
 
     onExpandedChanged: UM.Preferences.setValue("view/settings_visible", expanded)
-    Component.onCompleted: expanded = UM.Preferences.getValue("view/settings_visible")
 }

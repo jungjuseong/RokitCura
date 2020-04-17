@@ -37,7 +37,7 @@ Item
 
         RowLayout
         {
-            id: itemRow
+            id: items
 
             anchors.left: openFileButton.right
             anchors.right: parent.right
@@ -46,8 +46,8 @@ Item
             height: parent.height
             spacing: 0
 
-             Cura.RokitBuildPlateSelector {
-                id: buildPlateSelector
+            Cura.RokitBuildPlateSelector {
+                id: plateSelector
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
                 Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
@@ -65,10 +65,10 @@ Item
 
             Cura.RokitConfigurationMenu
             {
-                id: printerSetup
+                id: configurationMenu
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.preferredWidth: itemRow.width - buildPlateSelector.width - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
+                //Layout.preferredWidth: items.width - plateSelector.width - layerSelector.width - generationMenu.width - 2 * UM.Theme.getSize("default_lining").width
             }
 
             // Separator line
@@ -81,34 +81,40 @@ Item
 
             Item
             {
-                id: printSetupSelectorItem
-                // This is a work around to prevent the printSetupSelector from having to be re-loaded every time
-                // a stage switch is done.
+                id: layerSelector
+                // prevent the printSetupSelector from having to be re-loaded every time a stage switch is done.
                 children: [printSetupSelector]
                 height: childrenRect.height
                 width: childrenRect.width
             }
-                        Rectangle
+
+            // Separator line
+            Rectangle
             {
                 id: sideBar
-                anchors.left: printSelector.right
+                anchors.left: layerSelector.right
                 height: parent.height
                 width: UM.Theme.getSize("default_lining").width
                 color: UM.Theme.getColor("lining")
             }
 
-            Cura.RokitGenerationSelector {
-                id: generationSelector
-                anchors.left: sideBar.right
-                //headerCornerSide: Cura.RoundedRectangle.Direction.Left
-                headerCornerSide: Cura.RoundedRectangle.Direction.Left
-                
-                // width: childrenRect.width
-                // height: childrenRect.height
-                Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
-                Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
-                Layout.fillWidth: true
+            //Cura.RokitGenerationSelector {
+            //    id: generationSelector
+            //    anchors.left: sideBar.right
+            //    headerCornerSide: Cura.RoundedRectangle.Direction.Left
+
+            //    Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width
+            //    Layout.maximumWidth: UM.Theme.getSize("machine_selector_widget").width
+            //    Layout.fillWidth: true
+            //    Layout.fillHeight: true
+            //}
+
+            Cura.RokitGenerationMenu
+            {
+                id: generationMenu
                 Layout.fillHeight: true
+                Layout.fillWidth: true
+                //Layout.preferredWidth: itemRow.width - buildPlateSelector.width - printSetupSelectorItem.width - 2 * UM.Theme.getSize("default_lining").width
             }
         }
 

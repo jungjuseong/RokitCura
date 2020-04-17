@@ -19,6 +19,10 @@ Item
 
     property var extrudersModel: CuraApplication.getExtrudersModel()
 
+    Item
+    {
+        id: intent
+    }
 
     UM.TabRow
     {

@@ -17,7 +17,7 @@ Cura.ExpandablePopup
 {
     id: base
 
-    property var extrudersModel: CuraApplication.getExtrudersModel()
+    property var extrudersModel:  Cura.ExtrudersModel{}  // CuraApplication.getExtrudersModel()
 
     UM.I18nCatalog
     {
