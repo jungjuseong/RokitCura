@@ -16,6 +16,12 @@ Rectangle {
     border.color: UM.Theme.getColor("setting_control_border")
     radius: UM.Theme.getSize("rokit_combobox_radius").height 
     color: UM.Theme.getColor("primary")
+    anchors
+    {
+        left: parents.left
+        right: parents.right
+        margins: UM.Theme.getSize("default_margin").width
+    }
 
     Text {
         anchors{

@@ -7,15 +7,14 @@ import QtQuick.Controls 2.0
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Label
-{
+Label {
     property string name: "Label"
 
     text: name
     verticalAlignment: Text.AlignVCenter
-    font: UM.Theme.getFont("default")
+    font: base.labelFont
     color: UM.Theme.getColor("text")
     height: parent.height
-    width: selectors.textWidth
+    width: base.textWidth
     renderType: Text.NativeRendering
 }
