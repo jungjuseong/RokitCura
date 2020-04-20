@@ -7,7 +7,7 @@ Rokit Cura
 - base source - Cura 4.6 branch
 - 변경된 코드는 prefix로 파일이름에 Rokit을 붙임
 - Stage는 조작이 안되어 pulgins의 Prepare, Monitor는 삭제
-- 테마는 cura-light를 사용
+- 테마는 rokit-light를 사용
 - 
 
 This is the new, shiny frontend for Cura. Check [daid/LegacyCura](https://github.com/daid/LegacyCura) for the legacy Cura that everyone knows and loves/hates. We re-worked the whole GUI code at Ultimaker, because the old code started to become unmaintainable.

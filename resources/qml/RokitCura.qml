@@ -16,44 +16,31 @@ import "Menus"
 import "MainWindow"
 import "WelcomePages"
 
-UM.MainWindow
-{
+UM.MainWindow {
     id: base
 
     // Cura application window title
-    title:
+    title: 
     {
-        let result = "";
-        if(PrintInformation !== null && PrintInformation.jobName != "")
-        {
-            result += PrintInformation.jobName + " - ";
-        }
-        result += CuraApplication.applicationDisplayName;
-        return result;
+        const title = (PrintInformation !== null && PrintInformation.jobName != "") ? PrintInformation.jobName + " - " : ""
+        return title + CuraApplication.applicationDisplayName;
     }
 
     backgroundColor: UM.Theme.getColor("viewport_background")
 
-    UM.I18nCatalog
-    {
-        id: catalog
-        name: "cura"
-    }
+    UM.I18nCatalog { id: catalog; name: "cura" }
 
-    function showTooltip(item, position, text)
-    {
+    function showTooltip(item, position, text) {
         tooltip.text = text;
         position = item.mapToItem(backgroundItem, position.x - UM.Theme.getSize("default_arrow").width, position.y);
         tooltip.show(position);
     }
 
-    function hideTooltip()
-    {
+    function hideTooltip() {
         tooltip.hide();
     }
 
-    Rectangle
-    {
+    Rectangle {
         id: greyOutBackground
         anchors.fill: parent
         visible: welcomeDialogItem.visible
@@ -71,24 +58,20 @@ UM.MainWindow
         }
     }
 
-    WelcomeDialogItem
-    {
+    WelcomeDialogItem {
         id: welcomeDialogItem
         visible: true  // True, so if somehow no preferences are found/loaded, it's shown anyway.
         z: greyOutBackground.z + 1
     }
 
-    Component.onCompleted:
-    {
+    Component.onCompleted: {
         CuraApplication.setMinimumWindowSize(UM.Theme.getSize("window_minimum_size"))
         CuraApplication.purgeWindows()
     }
 
-    Connections
-    {
+    Connections {
         target: CuraApplication
-        onInitializationFinished:
-        {
+        onInitializationFinished: {
             // Workaround silly issues with QML Action's shortcut property.
             //
             // Currently, there is no way to define shortcuts as "Application Shortcut".
@@ -101,14 +84,7 @@ UM.MainWindow
             // This has been fixed for QtQuick Controls 2 since the Shortcut item has a context property.
             Cura.Actions.parent = backgroundItem
 
-            if (CuraApplication.shouldShowWelcomeDialog())
-            {
-                welcomeDialogItem.visible = true
-            }
-            else
-            {
-                welcomeDialogItem.visible = false
-            }
+            welcomeDialogItem.visible = (CuraApplication.shouldShowWelcomeDialog()) ? true : false
 
             // Reuse the welcome dialog item to show "What's New" only.
             if (CuraApplication.shouldShowWhatsNewDialog())
@@ -120,8 +96,7 @@ UM.MainWindow
         }
     }
 
-    Item
-    {
+    Item  {
         id: backgroundItem
         anchors.fill: parent
 
@@ -135,22 +110,18 @@ UM.MainWindow
         }
 
         //DeleteSelection on the keypress backspace event
-        Keys.onPressed:
-        {
-            if (event.key == Qt.Key_Backspace)
-            {
+        Keys.onPressed: {
+            if (event.key == Qt.Key_Backspace) {
                 Cura.Actions.deleteSelection.trigger()
             }
         }
 
-        ApplicationMenu
-        {
-            id: applicationMenu
-            window: base
-        }
+        //ApplicationMenu {
+        //    id: applicationMenu
+        //    window: base
+        //}
 
-        Item
-        {
+        Item {
             id: headerBackground
             anchors
             {
@@ -160,25 +131,20 @@ UM.MainWindow
             }
             height: stageMenu.source != "" ? Math.round(mainWindowHeader.height + stageMenu.height / 2) : mainWindowHeader.height
 
-            LinearGradient
-            {
+            LinearGradient {
                 anchors.fill: parent
                 start: Qt.point(0, 0)
                 end: Qt.point(parent.width, 0)
-                gradient: Gradient
-                {
-                    GradientStop
-                    {
+                gradient: Gradient {
+                    GradientStop {
                         position: 0.0
                         color: UM.Theme.getColor("main_window_header_background")
                     }
-                    GradientStop
-                    {
+                    GradientStop {
                         position: 0.5
                         color: UM.Theme.getColor("main_window_header_background_gradient")
                     }
-                    GradientStop
-                    {
+                    GradientStop {
                         position: 1.0
                         color: UM.Theme.getColor("main_window_header_background")
                     }
@@ -186,8 +152,7 @@ UM.MainWindow
             }
 
             // This is a placehoder for adding a pattern in the header
-            Image
-            {
+            Image {
                 id: backgroundPattern
                 anchors.fill: parent
                 fillMode: Image.Tile
@@ -197,54 +162,50 @@ UM.MainWindow
             }
         }
 
-        RokitMainWindowHeader
-        {
+        RokitMainWindowHeader {
             id: mainWindowHeader
-            anchors
-            {
+            anchors {
                 left: parent.left
                 right: parent.right
                 top: applicationMenu.bottom
             }
         }
 
-        Item
-        {
+        Item {
             id: contentItem
 
-            anchors
-            {
+            anchors {
                 top: mainWindowHeader.bottom
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
             }
 
+            Image {
+                z: 0
+                opacity: 0.4
+                source: "../images/rokit-background-dna.png"
+            }
+
             Keys.forwardTo: applicationMenu
 
-            DropArea
-            {
+            DropArea {
                 // The drop area is here to handle files being dropped onto Cura.
                 anchors.fill: parent
-                onDropped:
-                {
-                    if (drop.urls.length > 0)
-                    {
+                onDropped: {
+                    if (drop.urls.length > 0) {
 
                         var nonPackages = [];
-                        for (var i = 0; i < drop.urls.length; i++)
-                        {
+                        for (var i = 0; i < drop.urls.length; i++) {
                             var filename = drop.urls[i];
-                            if (filename.toLowerCase().endsWith(".curapackage"))
-                            {
+                            if (filename.toLowerCase().endsWith(".curapackage")) {
                                 // Try to install plugin & close.
                                 CuraApplication.installPackageViaDragAndDrop(filename);
                                 packageInstallDialog.text = catalog.i18nc("@label", "This package will be installed after restarting.");
                                 packageInstallDialog.icon = StandardIcon.Information;
                                 packageInstallDialog.open();
                             }
-                            else
-                            {
+                            else {
                                 nonPackages.push(filename);
                             }
                         }
@@ -253,8 +214,7 @@ UM.MainWindow
                 }
             }
 
-            ObjectSelector
-            {
+            ObjectSelector {
                 id: objectSelector
                 visible: CuraApplication.platformActivity
                 anchors
@@ -267,8 +227,7 @@ UM.MainWindow
                 }
             }
 
-            JobSpecs
-            {
+            JobSpecs {
                 id: jobSpecs
                 visible: CuraApplication.platformActivity
                 anchors
@@ -282,8 +241,7 @@ UM.MainWindow
                 }
             }
 
-            ViewOrientationControls
-            {
+            ViewOrientationControls {
                 id: viewOrientationControls
 
                 anchors
@@ -294,8 +252,7 @@ UM.MainWindow
                 }
             }
 
-            Toolbar
-            {
+            Toolbar {
                 // The toolbar is the left bar that is populated by all the tools (which are dynamicly populated by
                 // plugins)
                 id: toolbar
@@ -320,13 +277,11 @@ UM.MainWindow
                 anchors.bottom: main.bottom
             }
 
-            Loader
-            {
+            Loader {
                 // A stage can control this area. If nothing is set, it will therefore show the 3D view.
                 id: main
 
-                anchors
-                {
+                anchors {
                     // Align to the top of the stageMenu since the stageMenu may not exist
                     top: stageMenu.source ? stageMenu.verticalCenter : parent.top
                     left: parent.left
@@ -343,8 +298,7 @@ UM.MainWindow
                 }
             }
 
-            Loader
-            {
+            Loader  {
                 // The stage menu is, as the name implies, a menu that is defined by the active stage.
                 // Note that this menu does not need to be set at all! It's perfectly acceptable to have a stage
                 // without this menu!
@@ -387,8 +341,7 @@ UM.MainWindow
                    }
                 }
             }
-            UM.MessageStack
-            {
+            UM.MessageStack {
                 anchors
                 {
                     horizontalCenter: parent.horizontalCenter
@@ -417,15 +370,13 @@ UM.MainWindow
             }
         }
 
-        PrintSetupTooltip
-        {
+        PrintSetupTooltip {
             id: tooltip
             sourceWidth: UM.Theme.getSize("print_setup_widget").width
         }
     }
 
-    UM.PreferencesDialog
-    {
+    UM.PreferencesDialog {
         id: preferences
 
         Component.onCompleted:
@@ -455,20 +406,17 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.preferences
         onTriggered: preferences.visible = true
     }
 
-    Connections
-    {
+    Connections  {
         target: CuraApplication
         onShowPreferencesWindow: preferences.visible = true
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.addProfile
         onTriggered:
         {
@@ -479,8 +427,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.configureMachines
         onTriggered:
         {
@@ -489,8 +436,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.manageProfiles
         onTriggered:
         {
@@ -499,8 +445,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.manageMaterials
         onTriggered:
         {
@@ -509,8 +454,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.configureSettingVisibility
         onTriggered:
         {
@@ -523,8 +467,7 @@ UM.MainWindow
         }
     }
 
-    Timer
-    {
+    Timer {
         id: createProfileTimer
         repeat: false
         interval: 1
@@ -534,8 +477,7 @@ UM.MainWindow
 
     // BlurSettings is a way to force the focus away from any of the setting items.
     // We need to do this in order to keep the bindings intact.
-    Connections
-    {
+    Connections {
         target: Cura.MachineManager
         onBlurSettings:
         {
@@ -543,13 +485,11 @@ UM.MainWindow
         }
     }
 
-    ContextMenu
-    {
+    ContextMenu {
         id: contextMenu
     }
 
-    onPreClosing:
-    {
+    onPreClosing: {
         close.accepted = CuraApplication.getIsAllChecksPassed();
         if (!close.accepted)
         {
@@ -557,8 +497,7 @@ UM.MainWindow
         }
     }
 
-    MessageDialog
-    {
+    MessageDialog  {
         id: exitConfirmationDialog
         title: catalog.i18nc("@title:window %1 is the application name", "Closing %1").arg(CuraApplication.applicationDisplayName)
         text: catalog.i18nc("@label %1 is the application name", "Are you sure you want to exit %1?").arg(CuraApplication.applicationDisplayName)
@@ -578,8 +517,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections  {
         target: CuraApplication
         onShowConfirmExitDialog:
         {
@@ -588,26 +526,22 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.quit
         onTriggered: CuraApplication.checkAndExitApplication();
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.toggleFullScreen
         onTriggered: base.toggleFullscreen()
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.Actions.exitFullScreen
         onTriggered: base.exitFullscreen()
     }
 
-    FileDialog
-    {
+    FileDialog {
         id: openDialog;
 
         //: File open dialog title
@@ -714,16 +648,14 @@ UM.MainWindow
         }
     }
 
-    MessageDialog
-    {
+    MessageDialog  {
         id: packageInstallDialog
         title: catalog.i18nc("@window:title", "Install Package");
         standardButtons: StandardButton.Ok
         modality: Qt.ApplicationModal
     }
 
-    MessageDialog
-    {
+    MessageDialog  {
         id: infoMultipleFilesWithGcodeDialog
         title: catalog.i18nc("@title:window", "Open File(s)")
         icon: StandardIcon.Information
@@ -741,24 +673,20 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.open
         onTriggered: openDialog.open()
     }
 
-    OpenFilesIncludingProjectsDialog
-    {
+    OpenFilesIncludingProjectsDialog  {
         id: openFilesIncludingProjectsDialog
     }
 
-    AskOpenAsProjectOrModelsDialog
-    {
+    AskOpenAsProjectOrModelsDialog  {
         id: askOpenAsProjectOrModelsDialog
     }
 
-    Connections
-    {
+    Connections  {
         target: CuraApplication
         onOpenProjectFile:
         {
@@ -767,8 +695,7 @@ UM.MainWindow
         }
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.showProfileFolder
         onTriggered:
         {
@@ -785,8 +712,7 @@ UM.MainWindow
         }
     }
 
-    MessageDialog
-    {
+    MessageDialog  {
         id: messageDialog
         modality: Qt.ApplicationModal
         onAccepted: CuraApplication.messageBoxClosed(clickedButton)
@@ -799,8 +725,7 @@ UM.MainWindow
         onYes: CuraApplication.messageBoxClosed(clickedButton)
     }
 
-    Connections
-    {
+    Connections  {
         target: CuraApplication
         onShowMessageBox:
         {
@@ -814,13 +739,11 @@ UM.MainWindow
         }
     }
 
-    DiscardOrKeepProfileChangesDialog
-    {
+    DiscardOrKeepProfileChangesDialog  {
         id: discardOrKeepProfileChangesDialog
     }
 
-    Connections
-    {
+    Connections  {
         target: CuraApplication
         onShowDiscardOrKeepProfileChanges:
         {
@@ -828,30 +751,26 @@ UM.MainWindow
         }
     }
 
-    Cura.WizardDialog
-    {
+    Cura.WizardDialog  {
         id: addMachineDialog
         title: catalog.i18nc("@title:window", "Add Printer")
         model: CuraApplication.getAddPrinterPagesModel()
         progressBarVisible: false
     }
 
-    Cura.WizardDialog
-    {
+    Cura.WizardDialog  {
         id: whatsNewDialog
         title: catalog.i18nc("@title:window", "What's New")
         model: CuraApplication.getWhatsNewPagesModel()
         progressBarVisible: false
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.whatsNew
         onTriggered: whatsNewDialog.show()
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.addMachine
         onTriggered:
         {
@@ -861,19 +780,16 @@ UM.MainWindow
         }
     }
 
-    AboutDialog
-    {
+    AboutDialog {
         id: aboutDialog
     }
 
-    Connections
-    {
+    Connections  {
         target: Cura.Actions.about
         onTriggered: aboutDialog.visible = true;
     }
 
-    Timer
-    {
+    Timer {
         id: startupTimer
         interval: 100
         repeat: false
@@ -896,8 +812,7 @@ UM.MainWindow
      * \param class_name (str) The name of the class to check against. Has to be
      * the QtObject class name, not the QML entity name.
      */
-    function qmlTypeOf(obj, class_name)
-    {
+    function qmlTypeOf(obj, class_name) {
         //className plus "(" is the class instance without modification.
         //className plus "_QML" is the class instance with user-defined properties.
         var str = obj.toString();

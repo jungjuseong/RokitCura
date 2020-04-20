@@ -11,7 +11,7 @@
         "has_machine_quality": true,
         "preferred_quality_type": "normal",
         "has_variants": true,
-        "variants_name": "Nozzle Gauge",
+        "variants_name": "Nozzle Type",
         "has_materials": true,
         "preferred_material": "generic_pla",
         "preferred_variant_name": "Syringe 0.25",
