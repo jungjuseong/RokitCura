@@ -154,7 +154,10 @@
         "machine_height": { "default_value": 80 },
         "machine_depth": { "default_value": 80 },
         "machine_shape": { "default_value": "elliptic"},
-
+        "machine_center_is_zero":
+        {
+            "default_value": false
+        },
         "default_material_bed_temperature": { "settable_per_extruder": true },
         "material_bed_temperature": { "settable_per_extruder": true },
 

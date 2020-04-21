@@ -169,7 +169,6 @@ Item
 
                     shapeValue: "rectangular"
                     index: 0
-                    toCenter: 'true'
                 }
                 ListElement { 
                     text: "3800056CL" 
@@ -180,7 +179,6 @@ Item
 
                     shapeValue: "rectangular"
                     index: 1
-                    toCenter: 'true'
                 }
 
                 ListElement { 
@@ -192,7 +190,6 @@ Item
 
                     shapeValue: "rectangular"
                     index: 2
-                    toCenter: 'true'
                 }
             }
 

@@ -57,31 +57,7 @@ Item
             right: parent.right
             //verticalCenter: enableSupportRowTitle.verticalCenter
         }  
-
-        // Build plate Shape 확인용
-        // Text{
-        //     id: machineShapeView
-        //     anchors{
-        //         right: parent.right
-        //         bottom: parent.bottom
-        //         bottomMargin: 45
-        //     }
-        //     font: UM.Theme.getFont("large")
-        //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
-        // }
-
-        //Build plate Shape 확인용
-        // Text{
-        //     id: machineShapeView
-        //     anchors{
-        //         right: parent.right
-        //         bottom: parent.bottom
-        //         bottomMargin: 45
-        //     }
-        //     font: UM.Theme.getFont("large")
-        //     text: qsTr(wellPlateNumber.properties.value)//+ ", "+ plateIndex)
-        // }
-
+        
         //Well Plate
         Rectangle   // 
         {
@@ -171,7 +147,6 @@ Item
                         heightValue: 10
 
                         shapeValue: "elliptic"
-                        toCenter: 'false'
                     }
                     ListElement { 
                         text: "48"
@@ -181,7 +156,6 @@ Item
                         heightValue: 10
 
                         shapeValue: "elliptic"
-                        toCenter: 'false'
                     }
                     ListElement { 
                         text: "24"
@@ -191,7 +165,6 @@ Item
                         heightValue: 10
 
                         shapeValue: "elliptic"
-                        toCenter: 'false'
                     }
                     ListElement { 
                         text: "12"
@@ -201,7 +174,6 @@ Item
                         heightValue: 15
 
                         shapeValue: "elliptic"
-                        toCenter: 'false'
                     }
                     ListElement { 
                         text: "6"
@@ -211,7 +183,6 @@ Item
                         heightValue: 15
 
                         shapeValue: "elliptic"
-                        toCenter: 'false'
                     }
                 }                
 
@@ -223,60 +194,30 @@ Item
                     width: UM.Theme.getSize("rokit_well_plate_button").width
                     exclusiveGroup: wellPlateExclusive
                     checkable: true
-                    
-                    // 나중에 쓸 코드
-                    // contentItem: Label
-                    // {
-                    //     id: buttonText
-                    //     text: wellPlateButton.text
-                    //     color: UM.Theme.getColor("text")
-                    //     font: UM.Theme.getFont("medium")
-                    //     renderType: Text.NativeRendering
-                    //     verticalAlignment: Text.AlignVCenter
-                    //     //elide: Text.ElideRight
-                    // }
-
-                    // background: Rectangle
-                    // {
-                    //     id: backgroundRect
-                    //     color: wellPlateButton.hovered ? UM.Theme.getColor("action_button_hovered") : "transparent"
-                    //     radius: UM.Theme.getSize("action_button_radius").width
-                    //     border.width: UM.Theme.getSize("default_lining").width
-                    //     border.color: wellPlateButton.checked ? UM.Theme.getColor("primary") : "transparent"
-                    // }
-
+                
                     onClicked:
                     {
                         var newWidthValue = widthValue // width
                         var newDepthValue = depthValue // depth
                         var newHeightValue = heightValue // height
                         var newShapeValue = shapeValue // shpae
-                        var newToCenter = toCenter // shpae
                         var wellPlateNum = text
 
                         buildPlateType.setPropertyValue("value", "Well Plate")
                         wellPlateNumber.setPropertyValue("value", wellPlateNum)
 
-                        // if (machineWidth.properties.value != newWidthValue){
-                        // }
-                        // if (machineDepth.properties.value != newDepthValue){
-                        // }
-                        // if (machineHeight.properties.value != newHeightValue){
-                        // }
-
                         // 1) 모양, 센터, 플레이트 네임 설정
-                        if (machineShape.properties.value != newShapeValue || originAtCenter.properties.value != newToCenter)
+                        if (machineShape.properties.value != newShapeValue)
                         {
                             if (setValueFunction !== null)
                             {
                                 setValueFunction(newShapeValue)
-                                setValueFunction(newToCenter)
+                            
                             }
                             else
                             {
-                                machineShape.setPropertyValue("value", newShapeValue)//newValue)
-                                originAtCenter.setPropertyValue("value", newToCenter)
-                            }
+                                machineShape.setPropertyValue("value", newShapeValue)
+\                            }
                             forceUpdateOnChangeFunction()
                             afterOnEditingFinishedFunction()
                         }
@@ -296,17 +237,7 @@ Item
                         }
                         forceUpdateOnChangeFunction()
                         afterOnEditingFinishedFunction()
-                    }
-
-                    // Binding //응용
-                    // {
-                    //     target: supportExtruderCombobox
-                    //     property: "currentIndex"
-                    //     value: supportExtruderCombobox.getIndexByPosition()
-                    //     // Sometimes when the value is already changed, the model is still being built.
-                    //     // The when clause ensures that the current index is not updated when this happens.
-                    //     when: supportExtruderCombobox.model.count > 0
-                    // }   
+                    } 
                 }
             }
         }
@@ -352,16 +283,6 @@ Item
         watchedProperties: [ "value", "options", "description" ]
         storeIndex: propertyStoreIndex
         // storeIndex: 0
-    }
-
-    // "Origin at center"
-    UM.SettingPropertyProvider  
-    {
-        id: originAtCenter
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_center_is_zero"
-        watchedProperties: [ "value" ]
-        storeIndex: propertyStoreIndex
     }
 
     // "Build plate type"

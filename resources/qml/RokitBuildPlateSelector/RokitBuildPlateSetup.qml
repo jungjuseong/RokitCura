@@ -107,19 +107,16 @@ Item
                         name: "Culture dish"
                         value: "elliptic"
                         number: 0
-                        toCenter: 'true'
                     }
                     ListElement{
                         name: "Well plate"
                         value: "elliptic"
                         number: 1
-                        toCenter: 'true'
                     }
                     ListElement{
                         name: "Culture slide"
                         value: "rectangular"
                         number: 2
-                        toCenter: 'false'
                     }
                 }
                 delegate: UM.TabRowButton
@@ -131,8 +128,7 @@ Item
                     onClicked: // Buil Plate 타입 설정
                     {
                         choosing = number;
-                        // resetPlateModel = -1
-                        // currentIndex = -1
+
                     }       
                 }
             }            

@@ -116,10 +116,10 @@ UM.MainWindow {
             }
         }
 
-        //ApplicationMenu {
-        //    id: applicationMenu
-        //    window: base
-        //}
+        ApplicationMenu {
+            id: applicationMenu
+            window: base
+        }
 
         Item {
             id: headerBackground

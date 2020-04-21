@@ -165,7 +165,6 @@ Item
                     heightValue: 15
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
                 }
                 ListElement { 
                     text: "100060" 
@@ -175,7 +174,6 @@ Item
                     heightValue: 15
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
                 }
 
                 ListElement { 
@@ -186,7 +184,6 @@ Item
                     heightValue: 10
 
                     shapeValue: "elliptic"
-                    toCenter: 'true'
                 }
             }
 
