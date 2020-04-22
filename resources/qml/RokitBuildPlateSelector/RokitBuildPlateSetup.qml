@@ -67,7 +67,12 @@ Item
                 left: parent.left
             } 
             height: contentHeight
-            text: catalog.i18nc("@header", "Build Plate Settings")// + resetPlateModel)
+            text: {
+                if (buildPlateType.properties.value == null || buildPlateType.properties.value == undefined) {
+                    return catalog.i18nc("@header", "Build Plate Settings")
+                }
+                return buildPlateType.properties.value
+            }
             font: UM.Theme.getFont("medium")
             color: UM.Theme.getColor("small_button_text")
             renderType: Text.NativeRendering
@@ -75,23 +80,11 @@ Item
             verticalAlignment: Text.AlignVCenter
         }
 
-        Text{
-            id: machineShapeView
-            anchors{
-                right: parent.right
-                verticalCenter: buildPlateTitle.verticalCenter
-            }
-            font: UM.Theme.getFont("medium")
-            text: qsTr(buildPlateType.properties.value)//+ ", "+ plateIndex)
-        }
-
-        UM.TabRow
-        {
+        UM.TabRow {
             id: tabBar
             visible: true
 
-            anchors
-            {
+            anchors {
                 top: buildPlateTitle.bottom
                 topMargin: UM.Theme.getSize("default_margin").width
                 left: parent.left
@@ -104,43 +97,37 @@ Item
                 {
                     id : buildModel
                     ListElement{
-                        name: "Culture dish"
+                        name: "Culture Dish"
                         value: "elliptic"
                         number: 0
-                        toCenter: 'true'
                     }
                     ListElement{
-                        name: "Well plate"
+                        name: "Well Plate"
                         value: "elliptic"
                         number: 1
-                        toCenter: 'true'
                     }
                     ListElement{
-                        name: "Culture slide"
+                        name: "Culture Slide"
                         value: "rectangular"
                         number: 2
-                        toCenter: 'false'
                     }
                 }
                 delegate: UM.TabRowButton
                 {
-                    Text{
-                        text: catalog.i18nc("@label", name) // -culture slide
+                    Text {
+                        text: catalog.i18nc("@label", name)
                         anchors.centerIn: parent
                     }
                     onClicked: // Buil Plate 타입 설정
                     {
                         choosing = number;
-                        // resetPlateModel = -1
-                        // currentIndex = -1
                     }       
                 }
             }            
         }
 
         // 틀 
-        Rectangle
-        {
+        Rectangle {
             id: borderLine
             anchors 
             {
@@ -156,75 +143,50 @@ Item
             border.color: UM.Theme.getColor("lining")
             border.width: UM.Theme.getSize("default_lining").width
             width: parent.width
-            height: UM.Theme.getSize("rokit_build_plate_content").height // 수정 필요
+            height: UM.Theme.getSize("rokit_build_plate_content").height 
         } 
     }
 
     // 메인 컨텐츠
     Row {
 
-        spacing: UM.Theme.getSize("thick_margin").height // edit
+        spacing: UM.Theme.getSize("thick_margin").height 
         
         anchors
         {
             left: parent.left
             right: parent.right
             top: parent.top
-            bottom : parent.bottom //edit --------
+            bottom : parent.bottom 
             margins: parent.padding
         }
          
-        CultureDishSelector // culture Dish
+        CultureDishSelector 
         {
             id: cultureDishSelector
             visible: choosing === 0 
             anchors.top : parent.top
             width: parent.width
-            // TODO Create a reusable component with these properties to not define them separately for each component
             labelColumnWidth: parent.firstColumnWidth
         }
         
-        WellPlateSelector // well Plate
+        WellPlateSelector 
         {
             id: wellPlateSelector
             visible: choosing === 1 
             anchors.top : parent.top
             width: parent.width
-            // TODO Create a reusable component with these properties to not define them separately for each component
             labelColumnWidth: parent.firstColumnWidth
         }   
 
-        CultureSlideSelector // culture Slide
+        CultureSlideSelector
         {
             id: cultureSlideSelector
             visible: choosing === 2 
             anchors.top : parent.top
             width: parent.width
-            // TODO Create a reusable component with these properties to not define them separately for each component
             labelColumnWidth: parent.firstColumnWidth        
         }            
-    }
-    // SupportSelector
-    // InfillDensitySelector
-
-    UM.SettingPropertyProvider
-    {
-        id: machineShape
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_shape"
-        watchedProperties: [ "value", "options", "description" ]
-        storeIndex: propertyStoreIndex
-        // storeIndex: 0
-    }
-
-    // "Origin at center"
-    UM.SettingPropertyProvider  
-    {
-        id: originAtCenter
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_center_is_zero"
-        watchedProperties: [ "value" ]
-        storeIndex: propertyStoreIndex
     }
 
     // "Build plate type"
@@ -232,7 +194,7 @@ Item
     {
         id: buildPlateType
         containerStack: Cura.MachineManager.activeMachine
-        key: "build_plate_type"
+        key: "machine_buildplate_type"
         watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }

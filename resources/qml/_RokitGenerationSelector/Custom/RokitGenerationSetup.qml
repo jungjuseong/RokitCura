@@ -215,7 +215,7 @@ Item
     {
         id: buildPlateType
         containerStack: Cura.MachineManager.activeMachine
-        key: "build_plate_type"
+        key: "machine_buildplate_type"
         watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
     }

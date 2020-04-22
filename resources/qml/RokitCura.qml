@@ -116,10 +116,10 @@ UM.MainWindow {
             }
         }
 
-        //ApplicationMenu {
-        //    id: applicationMenu
-        //    window: base
-        //}
+        ApplicationMenu {
+           id: applicationMenu
+           window: base
+        }
 
         Item {
             id: headerBackground
@@ -181,11 +181,6 @@ UM.MainWindow {
                 right: parent.right
             }
 
-            Image {
-                z: 0
-                opacity: 0.4
-                source: "../images/rokit-background-dna.png"
-            }
 
             Keys.forwardTo: applicationMenu
 
@@ -212,6 +207,17 @@ UM.MainWindow {
                         openDialog.handleOpenFileUrls(nonPackages);
                     }
                 }
+            }
+
+            Image {
+                anchors.fill: parent;
+
+                source: "../images/rokit-background-dna-1920x1080.png"; 
+                fillMode: Image.PreserveAspectCrop;
+                horizontalAlignment: Image.AlignHCenter
+                verticalAlignment: Image.AlignVCenter
+                opacity: 0.2
+                //z: main.z - 2
             }
 
             ObjectSelector {
@@ -368,6 +374,7 @@ UM.MainWindow {
                     }
                 }
             }
+
         }
 
         PrintSetupTooltip {

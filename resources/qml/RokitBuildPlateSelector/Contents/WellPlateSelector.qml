@@ -9,112 +9,59 @@ import QtQuick.Controls 2.3 as Controls2
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
+import "./model"
 
-//
-//  Enable support
-//
-Item
-{
+//  Well Plate
+
+Item {
     id: wellPlateSelector
-    height: childrenRect.height //-
+    height: childrenRect.height
 
     property real labelColumnWidth: Math.round(width / 3)
 
-    // 1) property is from MachineSettingsPrinterTab.qml 
-    property string tooltipText: machineShape.properties.description
-
-    // callback functions
-    property var forceUpdateOnChangeFunction: dummy_func
-    property var afterOnEditingFinishedFunction: dummy_func
-
-    property var setWidthValueFunction: null
-    property var setDepthValueFunction: null
-    property var setHeightValueFunction: null
-
-    // a dummy function for default property values
-    function dummy_func() {}
-
-    // 2)
-    UM.I18nCatalog { id: catalog; name: "cura" }
-
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
+    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
+    property var forceUpdateFunction: manager.forceUpdate
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
 
-    property var forceUpdateFunction: manager.forceUpdate
+    property var forceUpdateOnChangeFunction: dummy_func
+    property var afterOnEditingFinishedFunction: dummy_func
+
+    function dummy_func() {}
 
     Item
     {
-        id: enableSupportContainer
-        // 높이 핵심
-        //height: enableSupportRowTitle.height *14     // edit
-        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
+        id: wellPlateContainer
 
-        anchors //Item place location
+        UM.I18nCatalog { id: catalog; name: "cura" }
+
+        height: UM.Theme.getSize("rokit_build_plate_content_widget").height
+        anchors
         {
-            //left: enableSupportRowTitle.right
             left: parent.left
             right: parent.right
-            //verticalCenter: enableSupportRowTitle.verticalCenter
         }  
 
-        // Build plate Shape 확인용
-        // Text{
-        //     id: machineShapeView
-        //     anchors{
-        //         right: parent.right
-        //         bottom: parent.bottom
-        //         bottomMargin: 45
-        //     }
-        //     font: UM.Theme.getFont("large")
-        //     text: qsTr(machineShape.properties.value)//+ ", "+ plateIndex)
-        // }
-
-        //Build plate Shape 확인용
-        // Text{
-        //     id: machineShapeView
-        //     anchors{
-        //         right: parent.right
-        //         bottom: parent.bottom
-        //         bottomMargin: 45
-        //     }
-        //     font: UM.Theme.getFont("large")
-        //     text: qsTr(wellPlateNumber.properties.value)//+ ", "+ plateIndex)
-        // }
-
         //Well Plate
-        Rectangle   // 
-        {
+        Rectangle {
             id: preparingModel2
 
             width: childrenRect.width
             height : childrenRect.height
 
-            anchors
-            {
-                // left : parent.left
-                // top: parent.top
-                // topMargin: UM.Theme.getsize("default_margin").width                
-                // leftMargin: UM.Theme.getSize("thick_margin").width
-                centerIn: parent
-            }
+            anchors { centerIn: parent }
 
-            Column
-            {
-                spacing: UM.Theme.getSize("thin_margin").height // edit
-                Repeater
-                {
-                    id : re1
+            Column {
+                spacing: UM.Theme.getSize("thin_margin").height
+                Repeater {
                     model: 2
-                    Row
-                    {
-                        spacing: UM.Theme.getSize("thin_margin").height // edit
+                    Row {
+                        spacing: UM.Theme.getSize("thin_margin").height 
                         
-                        Repeater{
-                            id : re2
+                        Repeater {
                             model: 3
 
-                            Rectangle{
+                            Rectangle {
                                 width : UM.Theme.getSize("rokit_well_plate_diameter").width
                                 height : width
 
@@ -131,26 +78,22 @@ Item
             }
         }
 
-        Text //Cura.IconWithText   // TEXT
-        {
-            id: enableSupportRowTitle   // text location
-            anchors
-            {            
-                bottom: wellPlateButtonRow.top
+        Text  {
+            anchors {            
+                bottom: wellPlateButtons.top
                 left: parent.left
                 bottomMargin: UM.Theme.getSize("default_margin").width
             }
-            visible: true   // edit
-            text: catalog.i18nc("@label", "Number of wells") // -culture dish
+            text: catalog.i18nc("@label", "Number of Wells")
             font: UM.Theme.getFont("medium")
             width: labelColumnWidth
         }
 
-        Row{
-            id: wellPlateButtonRow
+        Row {
+            id: wellPlateButtons
             anchors
             {
-                left: parent.left   // edit
+                left: parent.left
                 leftMargin: UM.Theme.getSize("default_margin").width
                 bottom: parent.bottom
                 horizontalCenter: plate1.horizontalCenter
@@ -158,229 +101,86 @@ Item
             spacing: 0.5
 
             ExclusiveGroup{ id: wellPlateExclusive}
+   
 
             Repeater{
-                model: ListModel 
-                {
-                    id: model
-                    ListElement { 
-                        text: "96"
-                        plateIndex: 0
-                        widthValue: 20
-                        depthValue: 20
-                        heightValue: 10
+                model: WellPlateModel {
+                    id: wellPlateModel
+                }            
 
-                        shapeValue: "elliptic"
-                        toCenter: 'false'
-                    }
-                    ListElement { 
-                        text: "48"
-                        plateIndex: 1
-                        widthValue: 23
-                        depthValue: 23
-                        heightValue: 10
-
-                        shapeValue: "elliptic"
-                        toCenter: 'false'
-                    }
-                    ListElement { 
-                        text: "24"
-                        plateIndex: 2
-                        widthValue: 35
-                        depthValue: 35
-                        heightValue: 10
-
-                        shapeValue: "elliptic"
-                        toCenter: 'false'
-                    }
-                    ListElement { 
-                        text: "12"
-                        plateIndex: 3
-                        widthValue: 60
-                        depthValue: 60
-                        heightValue: 15
-
-                        shapeValue: "elliptic"
-                        toCenter: 'false'
-                    }
-                    ListElement { 
-                        text: "6"
-                        plateIndex: 4
-                        widthValue: 90
-                        depthValue: 90
-                        heightValue: 15
-
-                        shapeValue: "elliptic"
-                        toCenter: 'false'
-                    }
-                }                
-
-                delegate: Button{
-                    
-                    id: wellPlateButton
+                delegate: Button {                    
                     text: model.text
                     height: UM.Theme.getSize("rokit_well_plate_button").height
                     width: UM.Theme.getSize("rokit_well_plate_button").width
                     exclusiveGroup: wellPlateExclusive
                     checkable: true
                     
-                    // 나중에 쓸 코드
-                    // contentItem: Label
-                    // {
-                    //     id: buttonText
-                    //     text: wellPlateButton.text
-                    //     color: UM.Theme.getColor("text")
-                    //     font: UM.Theme.getFont("medium")
-                    //     renderType: Text.NativeRendering
-                    //     verticalAlignment: Text.AlignVCenter
-                    //     //elide: Text.ElideRight
-                    // }
+                    onClicked: {
+                        var productNo = text
+                        var attributes = wellPlateModel.attributes[index]
 
-                    // background: Rectangle
-                    // {
-                    //     id: backgroundRect
-                    //     color: wellPlateButton.hovered ? UM.Theme.getColor("action_button_hovered") : "transparent"
-                    //     radius: UM.Theme.getSize("action_button_radius").width
-                    //     border.width: UM.Theme.getSize("default_lining").width
-                    //     border.color: wellPlateButton.checked ? UM.Theme.getColor("primary") : "transparent"
-                    // }
+                        buildPlateType.setPropertyValue("value", "Well Plate:" + productNo)
 
-                    onClicked:
-                    {
-                        var newWidthValue = widthValue // width
-                        var newDepthValue = depthValue // depth
-                        var newHeightValue = heightValue // height
-                        var newShapeValue = shapeValue // shpae
-                        var newToCenter = toCenter // shpae
-                        var wellPlateNum = text
-
-                        buildPlateType.setPropertyValue("value", "Well Plate")
-                        wellPlateNumber.setPropertyValue("value", wellPlateNum)
-
-                        // if (machineWidth.properties.value != newWidthValue){
-                        // }
-                        // if (machineDepth.properties.value != newDepthValue){
-                        // }
-                        // if (machineHeight.properties.value != newHeightValue){
-                        // }
-
-                        // 1) 모양, 센터, 플레이트 네임 설정
-                        if (machineShape.properties.value != newShapeValue || originAtCenter.properties.value != newToCenter)
+                        if (machineShape.properties.value !== attributes.shape)
                         {
-                            if (setValueFunction !== null)
-                            {
-                                setValueFunction(newShapeValue)
-                                setValueFunction(newToCenter)
-                            }
-                            else
-                            {
-                                machineShape.setPropertyValue("value", newShapeValue)//newValue)
-                                originAtCenter.setPropertyValue("value", newToCenter)
-                            }
-                            forceUpdateOnChangeFunction()
-                            afterOnEditingFinishedFunction()
+                            machineShape.setPropertyValue("value", attributes.shape)
                         }
+                        
+                        machineWidth.setPropertyValue("value", attributes.width)
+                        machineDepth.setPropertyValue("value", attributes.depth)
+                        machineHeight.setPropertyValue("value", attributes.height)
 
-                        // 2) 좌표 설정
-                        if (setValueFunction !== null)
-                        {
-                            setWidthValueFunction(newWidthValue)
-                            setDepthValueFunction(newDepthValue)
-                            setHeightValueFunction(newHeightValue)
-                        }
-                        else
-                        {
-                            machineWidth.setPropertyValue("value", newWidthValue)
-                            machineDepth.setPropertyValue("value", newDepthValue)
-                            machineHeight.setPropertyValue("value", newHeightValue)
-                        }
                         forceUpdateOnChangeFunction()
                         afterOnEditingFinishedFunction()
-                    }
-
-                    // Binding //응용
-                    // {
-                    //     target: supportExtruderCombobox
-                    //     property: "currentIndex"
-                    //     value: supportExtruderCombobox.getIndexByPosition()
-                    //     // Sometimes when the value is already changed, the model is still being built.
-                    //     // The when clause ensures that the current index is not updated when this happens.
-                    //     when: supportExtruderCombobox.model.count > 0
-                    // }   
+                    }  
                 }
             }
         }
     }
 
+    // "Build plate type"
+    UM.SettingPropertyProvider {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "machine_buildplate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
+    }
 
     // "X (Width)"
-    UM.SettingPropertyProvider  
-    {
+    UM.SettingPropertyProvider {
         id: machineWidth
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_width"
-        watchedProperties: [ "value", "description" ]
-        storeIndex: propertyStoreIndex
-    }
-
-    // "Y (Depth)"
-    UM.SettingPropertyProvider  
-    {
-        id: machineDepth
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_depth"
-        watchedProperties: [ "value", "description" ]
-        storeIndex: propertyStoreIndex
-    }
-
-    // "Z (Height)"
-    UM.SettingPropertyProvider  
-    {
-        id: machineHeight
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_height"
-        watchedProperties: [ "value", "description" ]
-        storeIndex: propertyStoreIndex
-    }
-
-    // MachineShape
-    UM.SettingPropertyProvider
-    {
-        id: machineShape
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_shape"
-        watchedProperties: [ "value", "options", "description" ]
-        storeIndex: propertyStoreIndex
-        // storeIndex: 0
-    }
-
-    // "Origin at center"
-    UM.SettingPropertyProvider  
-    {
-        id: originAtCenter
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_center_is_zero"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
-    // "Build plate type"
-    UM.SettingPropertyProvider  
-    {
-        id: buildPlateType
+    // "Y (Depth)"
+    UM.SettingPropertyProvider {
+        id: machineDepth
         containerStack: Cura.MachineManager.activeMachine
-        key: "build_plate_type"
-        watchedProperties: [ "value", "options" ]
+        key: "machine_depth"
+        watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
-    // "Well plate Number"
-    UM.SettingPropertyProvider  
-    {
-        id: wellPlateNumber
+    // "Z (Height)"
+    UM.SettingPropertyProvider {
+        id: machineHeight
         containerStack: Cura.MachineManager.activeMachine
-        key: "well_plate_number"
+        key: "machine_height"
+        watchedProperties: [ "value" ]
+        storeIndex: propertyStoreIndex
+    }
+
+    // MachineShape
+    UM.SettingPropertyProvider {
+        id: machineShape
+        containerStack: Cura.MachineManager.activeMachine
+        key: "machine_shape"
         watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
+        // storeIndex: 0
     }
 }

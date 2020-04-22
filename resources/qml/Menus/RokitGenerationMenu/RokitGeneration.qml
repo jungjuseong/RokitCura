@@ -24,10 +24,34 @@ Item
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
+    
+    function getActiveExtruderId() {
+        return (extrudersModel.items[tabBar.currentIndex].id) ? extrudersModel.items[tabBar.currentIndex].id : ""
+    }
+
+    function getActiveExtruderName() {
+        return extrudersModel.items[tabBar.currentIndex].name
+    }
+
+    function getExtruderType() {
+
+        if (Cura.MachineManager.activeStack.variant != null) {
+            var lists = Cura.MachineManager.activeStack.variant.name.split(" ")
+            if (lists.length > 0)
+                return lists[0]
+        }
+
+        return ""
+    }
 
     Label {
         id: header
-        text: catalog.i18nc("@header", "Generation")
+        text: {
+                if (buildPlateType.properties.value == null || buildPlateType.properties.value == undefined) {
+                    return catalog.i18nc("@header", "Generation")
+                }
+                return "Build Plate - " + buildPlateType.properties.value
+        }
         font: UM.Theme.getFont("medium")
         color: UM.Theme.getColor("small_button_text")
         height: contentHeight
@@ -63,28 +87,11 @@ Item
                         height: parent.height
                     }
                 }
-                onClicked:
-                {
+                onClicked: {
                     Cura.ExtruderManager.setActiveExtruderIndex(tabBar.currentIndex)
                 }
             }
         }
-    }
-
-    function getActiveExtruderId() {
-        return extrudersModel.items[tabBar.currentIndex].id
-    }
-
-    function getActiveExtruderName() {
-        return extrudersModel.items[tabBar.currentIndex].name
-    }
-
-    function getExtruderType() {
-        var lists = Cura.MachineManager.activeStack.variant.name.split(" ")
-        if (lists.length > 0)
-            return lists[0]
-
-        return ""
     }
 
     Rectangle {
@@ -127,24 +134,52 @@ Item
 
             readonly property real paddedWidth: parent.width - padding
             property real textWidth: Math.round(paddedWidth * 0.2)
-            property real controlWidth: 
-            {
-                (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 3.2
-            }
+            property real controlWidth: (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 3.2
+
+            readonly property real bar_width:  UM.Theme.getSize("rokit_big_item").width
+            readonly property real bar_height: UM.Theme.getSize("rokit_big_item").height
+            readonly property var bar_border_color: UM.Theme.getColor("setting_control_border")
+            readonly property real bar_radius: UM.Theme.getSize("rokit_combobox_radius").height 
+            readonly property var bar_color: UM.Theme.getColor("secondary_shadow")
 
             Row { // Material Configuration Bar
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                Rectangle {
+                    width:  UM.Theme.getSize("rokit_big_item").width
+                    height: UM.Theme.getSize("rokit_big_item").height
+                    radius: UM.Theme.getSize("rokit_combobox_radius").height
+                    color: UM.Theme.getColor("secondary_shadow")
+                    border.color: UM.Theme.getColor("setting_control_border")
 
-                RokitMenuBar { name: "Material Configuration - " + Cura.MachineManager.activeStack.variant.name + " " + Cura.MachineManager.activeStack.material.name}
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+
+                    Text {
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text:  Cura.MachineManager.activeStack.variant.name + " - " + Cura.MachineManager.activeStack.material.name
+                    }
+                }
             }
 
             Row { // Nozzle Guage
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
 
-                RokitLabel { name: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage" }
-
+                Label {
+                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    verticalAlignment: Text.AlignVCenter
+                    font: base.labelFont
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: base.textWidth
+                    renderType: Text.NativeRendering
+                }
                 ToolButton
                 {
                     text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
@@ -154,11 +189,18 @@ Item
             }
 
             Row { // Material
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
 
-                RokitLabel { name: catalog.i18nc("@label", "Material") }
-
+                Label {
+                    text: catalog.i18nc("@label", "Material")
+                    verticalAlignment: Text.AlignVCenter
+                    font: base.labelFont
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: base.textWidth
+                    renderType: Text.NativeRendering
+                }
                 ToolButton
                 {
                     text: Cura.MachineManager.activeStack !== null ? Cura.MachineManager.activeStack.material.name : ""
@@ -175,9 +217,8 @@ Item
                 rowSpacing: 1 * screenScaleFactor
                 anchors
                 {
-                    //top: dispensor_vac_power.bottom
+                    //top: materialBar.bottom
                     left: selectors.left
-                    right: selectors.right
                     margins: UM.Theme.getSize("default_margin").width
                 }
 
@@ -211,10 +252,29 @@ Item
             }
 
             Row { // Layer Quality Bar
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
 
-                RokitMenuBar { name: "Layer Quality" }
+                Rectangle {
+                    width:  UM.Theme.getSize("rokit_big_item").width
+                    height: UM.Theme.getSize("rokit_big_item").height
+                    radius: UM.Theme.getSize("rokit_combobox_radius").height
+                    color: UM.Theme.getColor("secondary_shadow")
+                    border.color: UM.Theme.getColor("setting_control_border")
+                    
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+
+                    Text {
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: "Layer Quality"
+                    }
+                }
             }
 
             GridLayout {
@@ -225,9 +285,7 @@ Item
                 rowSpacing: 1 * screenScaleFactor
                 anchors
                 {
-                    //top: dispensor_vac_power.bottom
                     left: selectors.left
-                    right: selectors.right
                     margins: UM.Theme.getSize("default_margin").width
                 }
 
@@ -273,10 +331,29 @@ Item
             }
 
             Row { // UV Bar
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
 
-                RokitMenuBar { name: "UV Setting" }
+                Rectangle {
+                    width:  selectors.bar_width
+                    height: selectors.bar_height
+                    border.color: selectors.bar_border_color
+                    radius: selectors.bar_radius 
+                    color: selectors.bar_color
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+
+                    Text {
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: "UV"
+                    }
+                }
+                
             }
 
             GridLayout {
@@ -287,9 +364,7 @@ Item
                 rowSpacing: 1 * screenScaleFactor
                 anchors
                 {
-                    //top: dispensor_vac_power.bottom
                     left: selectors.left
-                    right: selectors.right
                     margins: UM.Theme.getSize("default_margin").width
                 }
 
@@ -352,95 +427,120 @@ Item
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: getExtruderType() === "Syringe"
 
-                RokitMenuBar { name: "Dispensor" + " - " + getExtruderType() } 
-            }
-
-            Row {
-                visible: getExtruderType() === "Syringe"
-
-                GridLayout {
-                    id: dispensor
-
-                    Layout.fillWidth: true
-                    columnSpacing: 24 * screenScaleFactor
-                    rowSpacing: 1 * screenScaleFactor
-                    anchors
-                    {
-                        //top: dispensor_vac_power.bottom
-                        left: selectors.left
-                        right: selectors.right
-                        margins: UM.Theme.getSize("default_margin").width * 2
+                Rectangle {
+                    width:  selectors.bar_width
+                    height: selectors.bar_height
+                    border.color: selectors.bar_border_color
+                    radius: selectors.bar_radius 
+                    color: selectors.bar_color
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
                     }
 
-                    columns: 2
-
-                    Cura.NumericTextFieldWithUnit {
-                        containerStackId: getActiveExtruderId()
-                        settingKey: "dispensor_shot"
-                        labelText: catalog.i18nc("@label", "SHOT")
-                        unitText: catalog.i18nc("@label", "sec")
-
-                        labelFont: base.labelFont
-                        labelWidth: selectors.textWidth
-                        controlWidth: selectors.controlWidth
-                        controlHeight: base.controlHeight
-                        textField.readOnly: true
-                    }                
-
-                    Cura.NumericTextFieldWithUnit {
-                        containerStackId: getActiveExtruderId()
-                        settingKey: "dispensor_vac"
-                        labelText: catalog.i18nc("@label", "VAC")
-                        unitText: catalog.i18nc("@label", "sec")
-
-                        labelFont: base.labelFont
-                        labelWidth: selectors.textWidth
-                        controlWidth: selectors.controlWidth
-                        controlHeight: base.controlHeight
-                        textField.readOnly: true
+                    Text {
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: "Dispensor"
                     }
-
-                    Cura.NumericTextFieldWithUnit {
-                        containerStackId: getActiveExtruderId()
-                        settingKey: "dispensor_int"
-                        labelText: catalog.i18nc("@label", "INT")
-                        unitText: catalog.i18nc("@label", "kpa")
-
-                        labelFont: base.labelFont
-                        labelWidth: selectors.textWidth
-                        controlWidth: selectors.controlWidth
-                        controlHeight: base.controlHeight
-                        textField.readOnly: true
-                    }                
-
-                    Cura.NumericTextFieldWithUnit {
-                        containerStackId: getActiveExtruderId()
-                        settingKey: "dispensor_shot_power"
-                        labelText: catalog.i18nc("@label", "SHOT P.")
-                        unitText: catalog.i18nc("@label", "kpa")
-
-                        labelFont: base.labelFont
-                        labelWidth: selectors.textWidth
-                        controlWidth: selectors.controlWidth
-                        controlHeight: base.controlHeight
-                        textField.readOnly: true
-                    }
-
-                    Cura.NumericTextFieldWithUnit {
-                        containerStackId: getActiveExtruderId()
-                        settingKey: "dispensor_vac_power"
-                        labelText: catalog.i18nc("@label", "VAC P.")
-
-                        unitText: catalog.i18nc("@label", "kpa")
-                        labelFont: base.labelFont
-                        labelWidth: selectors.textWidth
-                        controlWidth: selectors.controlWidth
-                        controlHeight: base.controlHeight
-                        textField.readOnly: true
-                    }
-                    
                 }
             }
+
+            GridLayout {
+                id: dispensor
+
+                visible: getExtruderType() === "Syringe"
+
+                Layout.fillWidth: true
+                columnSpacing: 24 * screenScaleFactor
+                rowSpacing: 1 * screenScaleFactor
+                anchors
+                {
+                    left: selectors.left
+                    margins: UM.Theme.getSize("default_margin").width
+                }
+                
+                columns: 2
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: getActiveExtruderId()
+                    settingKey: "dispensor_shot"
+                    labelText: catalog.i18nc("@label", "SHOT")
+                    unitText: catalog.i18nc("@label", "sec")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }                
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: getActiveExtruderId()
+                    settingKey: "dispensor_vac"
+                    labelText: catalog.i18nc("@label", "VAC")
+                    unitText: catalog.i18nc("@label", "sec")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: getActiveExtruderId()
+                    settingKey: "dispensor_int"
+                    labelText: catalog.i18nc("@label", "INT")
+                    unitText: catalog.i18nc("@label", "kpa")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }                
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: getActiveExtruderId()
+                    settingKey: "dispensor_shot_power"
+                    labelText: catalog.i18nc("@label", "SHOT P.")
+                    unitText: catalog.i18nc("@label", "kpa")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: getActiveExtruderId()
+                    settingKey: "dispensor_vac_power"
+                    labelText: catalog.i18nc("@label", "VAC P.")
+
+                    unitText: catalog.i18nc("@label", "kpa")
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                
+            }
+            
         }
+    }
+
+    // "Build plate type"
+    UM.SettingPropertyProvider  
+    {
+        id: buildPlateType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "machine_buildplate_type"
+        watchedProperties: [ "value", "options" ]
+        storeIndex: propertyStoreIndex
     }
 }
