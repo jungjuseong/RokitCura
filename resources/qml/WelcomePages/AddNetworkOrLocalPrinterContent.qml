@@ -38,6 +38,8 @@ Item
 
         title: catalog.i18nc("@label", "Add a networked printer")
         contentShown: true  // by default expand the network printer list
+        
+        visible: false
 
         onClicked:
         {
@@ -73,12 +75,12 @@ Item
     {
         id: addLocalPrinterDropDown
 
-        anchors.top: addNetworkPrinterDropDown.bottom
+        anchors.top: titleLabel.bottom // addNetworkPrinterDropDown.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: UM.Theme.getSize("default_margin").height
 
-        title: catalog.i18nc("@label", "Add a non-networked printer")
+        title: catalog.i18nc("@label", "Add a local printer")
 
         onClicked:
         {
@@ -132,8 +134,9 @@ Item
                 return localPrinterItem != null && isPrinterNameValid
             }
         }
+        text: catalog.i18nc("@button", "Finish")
 
-        text: base.currentItem.next_page_button_text
+        // text: base.currentItem.next_page_button_text
         onClicked:
         {
             // Create a network printer or a local printer according to the selection
@@ -153,7 +156,7 @@ Item
                 const printerName = addLocalPrinterDropDown.contentItem.printerName
                 if(Cura.MachineManager.addMachine(localPrinterItem.id, printerName))
                 {
-                    base.showNextPage()
+                    base.endWizard() // showNextPage()
                 }
             }
         }

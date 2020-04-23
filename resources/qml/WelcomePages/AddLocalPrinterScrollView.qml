@@ -116,7 +116,7 @@ Item
                     width: ListView.view.width
                     height: UM.Theme.getSize("action_button").height
                     text: section
-
+                    
                     property bool isActive: base.currentSection == section
 
                     background: Rectangle
