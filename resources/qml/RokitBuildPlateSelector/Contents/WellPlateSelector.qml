@@ -41,11 +41,6 @@ Item {
             left: parent.left
             right: parent.right
         }  
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> d91739bfc7542d5a315dd0b12dd5a79260a434b7
         //Well Plate
         Rectangle {
             id: preparingModel2
@@ -108,61 +103,9 @@ Item {
    
 
             Repeater{
-<<<<<<< HEAD
                 model: WellPlateModel {
                     id: wellPlateModel
                 }            
-=======
-                model: ListModel 
-                {
-                    id: model
-                    ListElement { 
-                        text: "96"
-                        plateIndex: 0
-                        widthValue: 20
-                        depthValue: 20
-                        heightValue: 10
-
-                        shapeValue: "elliptic"
-                    }
-                    ListElement { 
-                        text: "48"
-                        plateIndex: 1
-                        widthValue: 23
-                        depthValue: 23
-                        heightValue: 10
-
-                        shapeValue: "elliptic"
-                    }
-                    ListElement { 
-                        text: "24"
-                        plateIndex: 2
-                        widthValue: 35
-                        depthValue: 35
-                        heightValue: 10
-
-                        shapeValue: "elliptic"
-                    }
-                    ListElement { 
-                        text: "12"
-                        plateIndex: 3
-                        widthValue: 60
-                        depthValue: 60
-                        heightValue: 15
-
-                        shapeValue: "elliptic"
-                    }
-                    ListElement { 
-                        text: "6"
-                        plateIndex: 4
-                        widthValue: 90
-                        depthValue: 90
-                        heightValue: 15
-
-                        shapeValue: "elliptic"
-                    }
-                }                
->>>>>>> d91739bfc7542d5a315dd0b12dd5a79260a434b7
 
                 delegate: Button {                    
                     text: model.text
@@ -170,40 +113,10 @@ Item {
                     width: UM.Theme.getSize("rokit_well_plate_button").width
                     exclusiveGroup: wellPlateExclusive
                     checkable: true
-<<<<<<< HEAD
                     
                     onClicked: {
                         var productNo = text
                         var attributes = wellPlateModel.attributes[index]
-=======
-                
-                    onClicked:
-                    {
-                        var newWidthValue = widthValue // width
-                        var newDepthValue = depthValue // depth
-                        var newHeightValue = heightValue // height
-                        var newShapeValue = shapeValue // shpae
-                        var wellPlateNum = text
-
-                        buildPlateType.setPropertyValue("value", "Well Plate")
-                        wellPlateNumber.setPropertyValue("value", wellPlateNum)
-
-                        // 1) 모양, 센터, 플레이트 네임 설정
-                        if (machineShape.properties.value != newShapeValue)
-                        {
-                            if (setValueFunction !== null)
-                            {
-                                setValueFunction(newShapeValue)
-                            
-                            }
-                            else
-                            {
-                                machineShape.setPropertyValue("value", newShapeValue)
-\                            }
-                            forceUpdateOnChangeFunction()
-                            afterOnEditingFinishedFunction()
-                        }
->>>>>>> d91739bfc7542d5a315dd0b12dd5a79260a434b7
 
                         buildPlateType.setPropertyValue("value", "Well Plate:" + productNo)
 
@@ -218,11 +131,7 @@ Item {
 
                         forceUpdateOnChangeFunction()
                         afterOnEditingFinishedFunction()
-<<<<<<< HEAD
                     }  
-=======
-                    } 
->>>>>>> d91739bfc7542d5a315dd0b12dd5a79260a434b7
                 }
             }
         }
@@ -269,30 +178,6 @@ Item {
         id: machineShape
         containerStack: Cura.MachineManager.activeMachine
         key: "machine_shape"
-<<<<<<< HEAD
-=======
-        watchedProperties: [ "value", "options", "description" ]
-        storeIndex: propertyStoreIndex
-        // storeIndex: 0
-    }
-
-    // "Build plate type"
-    UM.SettingPropertyProvider  
-    {
-        id: buildPlateType
-        containerStack: Cura.MachineManager.activeMachine
-        key: "build_plate_type"
-        watchedProperties: [ "value", "options" ]
-        storeIndex: propertyStoreIndex
-    }
-
-    // "Well plate Number"
-    UM.SettingPropertyProvider  
-    {
-        id: wellPlateNumber
-        containerStack: Cura.MachineManager.activeMachine
-        key: "well_plate_number"
->>>>>>> d91739bfc7542d5a315dd0b12dd5a79260a434b7
         watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
         // storeIndex: 0
