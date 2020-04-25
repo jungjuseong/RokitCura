@@ -12,42 +12,20 @@ import QtQuick.Layouts 1.3
 import "./Contents"
 import "../Widgets"
 
-Item
-{
-    // 창 임시 면적 값
+Item {
     height: UM.Theme.getSize("rokit_build_plate_setting_widget").height + 2 * padding
     width: UM.Theme.getSize("rokit_build_plate_setting_widget").width - 2 * UM.Theme.getSize("wide_margin").width
     
-    property Action configureSettings
     property real padding: UM.Theme.getSize("thick_margin").width
     property real sidePadding: UM.Theme.getSize("thin_margin").width
 
-    // TODO
-    property real firstColumnWidth: Math.round(width / 3)
-
-    // 1
     property string tooltipText: machineShape.properties.description
-
-    // callback functions
-    property var forceUpdateOnChangeFunction: dummy_func
-    property var afterOnEditingFinishedFunction: dummy_func
-    property var setValueFunction: null
-
-    // a dummy function for default property values
-    function dummy_func() {}
-
-    // 2
-    UM.I18nCatalog { id: catalog; name: "cura" }
-
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
-    property string machineStackId: Cura.MachineManager.activeMachine.id
-    property var forceUpdateFunction: manager.forceUpdate
-
-    property int choosing: 0    // 선택하는 탭
-    property int resetPlateModel: 0    
+    property string tabName: "Culture Dish"
 
     Item {
         id: tabSpace
+
+        UM.I18nCatalog { id: catalog; name: "cura" }
 
         anchors{
             top: parent.top
@@ -58,8 +36,7 @@ Item
         }
         height: childrenRect.height  
         
-        Label   // Title Label
-        {
+        Label {
             id: buildPlateTitle
             anchors{
                 top: parent.top
@@ -67,12 +44,7 @@ Item
                 left: parent.left
             } 
             height: contentHeight
-            text: {
-                if (buildPlateType.properties.value == null || buildPlateType.properties.value == undefined) {
-                    return catalog.i18nc("@header", "Build Plate Settings")
-                }
-                return buildPlateType.properties.value
-            }
+            text: "Build Plate Settings"
             font: UM.Theme.getFont("medium")
             color: UM.Theme.getColor("small_button_text")
             renderType: Text.NativeRendering
@@ -82,7 +54,6 @@ Item
 
         UM.TabRow {
             id: tabBar
-            visible: true
 
             anchors {
                 top: buildPlateTitle.bottom
@@ -90,47 +61,26 @@ Item
                 left: parent.left
                 right: parent.right
             }
-            Repeater
-            {
-                id: repeater
-                model: ListModel
-                {
-                    id : buildModel
-                    ListElement{
-                        name: "Culture Dish"
-                        value: "elliptic"
-                        number: 0
-                    }
-                    ListElement{
-                        name: "Well Plate"
-                        value: "elliptic"
-                        number: 1
-                    }
-                    ListElement{
-                        name: "Culture Slide"
-                        value: "rectangular"
-                        number: 2
-                    }
-                }
-                delegate: UM.TabRowButton
-                {
+            Repeater {
+                model: ListModel {
+                    ListElement { name: "Culture Dish" }
+                    ListElement{ name: "Well Plate" }
+                    ListElement{ name: "Culture Slide" }
+                }                
+                delegate: UM.TabRowButton {
                     Text {
                         text: catalog.i18nc("@label", name)
                         anchors.centerIn: parent
                     }
-                    onClicked: // Buil Plate 타입 설정
-                    {
-                        choosing = number;
+                    onClicked: { 
+                        tabName = name
                     }       
                 }
             }            
-        }
-
-        // 틀 
+        } 
         Rectangle {
             id: borderLine
-            anchors 
-            {
+            anchors {
                 top: tabBar.bottom
                 topMargin: -UM.Theme.getSize("default_lining").width
                 left: parent.left
@@ -147,55 +97,31 @@ Item
         } 
     }
 
-    // 메인 컨텐츠
-    Row {
-
-        spacing: UM.Theme.getSize("thick_margin").height 
         
-        anchors
-        {
+    Item {
+        anchors  {
             left: parent.left
             right: parent.right
             top: parent.top
             bottom : parent.bottom 
             margins: parent.padding
         }
-         
-        CultureDishSelector 
-        {
-            id: cultureDishSelector
-            visible: choosing === 0 
+        CultureDishSelector {
+            visible: tabName === "Culture Dish" 
             anchors.top : parent.top
             width: parent.width
-            labelColumnWidth: parent.firstColumnWidth
         }
-        
-        WellPlateSelector 
-        {
-            id: wellPlateSelector
-            visible: choosing === 1 
+        WellPlateSelector {
+            visible: tabName === "Well Plate" 
             anchors.top : parent.top
             width: parent.width
-            labelColumnWidth: parent.firstColumnWidth
-        }   
-
-        CultureSlideSelector
-        {
-            id: cultureSlideSelector
-            visible: choosing === 2 
+        }
+        CultureSlideSelector {
+            visible: tabName === "Culture Slide"
             anchors.top : parent.top
             width: parent.width
-            labelColumnWidth: parent.firstColumnWidth        
-        }            
-    }
+        }
+    }            
+    
 
-    // "Build plate type"
-    UM.SettingPropertyProvider  
-    {
-        id: buildPlateType
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_buildplate_type"
-        watchedProperties: [ "value", "options" ]
-        storeIndex: propertyStoreIndex
-    }
 }

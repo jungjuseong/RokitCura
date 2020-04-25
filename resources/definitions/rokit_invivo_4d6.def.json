@@ -86,70 +86,11 @@
     "overrides": {
         "machine_buildplate_type":
         {
-            "default_value": "Culture Dish:CD-100090",
-            "type": "enum",
-            "options":
-            {
-                "culture_dish": "Culture Dish",
-                "well_plate": "Well Plate",
-                "culture_slide": "Culture Slide"
-            },
-            "children": {
-                "culture_dish_category_number":
-                {
-                    "label": "Culture Dish Cat. No.",
-                    "description": "Culture Dish Category number",
-                    "type": "enum",
-                    "options":
-                    {
-                        "11035": "11035",
-                        "11060": "11060",
-                        "11090": "11090",
-                        "11150": "11150",
-                        "11151": "11151",
-                        "20035": "20035",
-                        "20060": "20060",
-                        "20100": "20100",
-                        "20101": "20101",
-                        "20150": "20150",
-                        "20151": "20151"
-                    },
-                    "default_value": "11035"
-                },
-                "well_plate_number":
-                {
-                    "label": "Number of Well plate",
-                    "description": "Well plate number",
-                    "type": "enum",
-                    "options":
-                    {
-                        "6": "6",
-                        "12": "12",
-                        "24": "24",
-                        "48": "48",
-                        "96": "96"
-                    },
-                    "default_value": "96"
-                },
-                "culture_slide_category_number":
-                {
-                    "label": "Culture Slide Cat. No",
-                    "description": "Culture Slide Category Number",
-                    "type": "enum",
-                    "options":
-                    {
-                        "3800052CL": "3800052CL",
-                        "3800056CL": "3800056CL",
-                        "3800058CL": "3800058CL"
-                    },
-                    "default_value": "3800052CL"
-                }
-            }
+            "default_value": "Culture Dish:CD-100060"
         },
         "layer_height": { 
             "settable_per_extruder": true 
         },
-
         "machine_name": { 
             "default_value": "Dr. INVIVO 4D6" 
         },
@@ -170,9 +111,11 @@
             "default_value": 80,
             "type": "int",
             "minimum_value": "10",
-            "maximum_value": "100"
+            "maximum_value": "120"
         },
-        "machine_shape": { "default_value": "elliptic"},
+        "machine_shape": { 
+            "default_value": "elliptic"
+        },
         "machine_center_is_zero": { "default_value": false },
 
         "default_material_bed_temperature": { "settable_per_extruder": true },

@@ -7,8 +7,7 @@ import QtQuick.Controls 1.4
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-Menu
-{
+Menu {
     id: menu
     title: "Nozzle"
 
@@ -19,14 +18,12 @@ Menu
         id: nozzleModel
     }
 
-    Instantiator
-    {
+    Instantiator {
         model: { 
             return nozzleModel 
         }
         
-        MenuItem
-        {
+        MenuItem  {
             text: model.hotend_name
             checkable: true
             checked: {
@@ -39,15 +36,10 @@ Menu
                 return (extruder === undefined) ? false : (extruder.variant.name == model.hotend_name)
             }
             exclusiveGroup: group
-            enabled:
-            {
+            enabled: {
                 var activeMachine = Cura.MachineManager.activeMachine
                 
-                if (activeMachine === null)
-                {
-                    return false
-                }
-                if (extruderIndex > 0 && (model.hotend_name === "FFF Extruder" || model.hotend_name === "Hot Melt"))
+                if (activeMachine === null || (extruderIndex > 0 && (model.hotend_name === "FFF Extruder" || model.hotend_name === "Hot Melt")))
                 {
                     return false
                 }

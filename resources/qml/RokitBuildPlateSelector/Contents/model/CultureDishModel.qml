@@ -10,7 +10,7 @@ import UM 1.2 as UM
 import Cura 1.0 as Cura
 
 ListModel {
-
+    property string category: "Culture Dish"
     property var attributes: [
         { width: 90, depth: 90, height: 15, shape: "elliptic" },
         { width: 60, depth: 60, height: 15, shape: "elliptic" },

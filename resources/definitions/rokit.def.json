@@ -102,7 +102,7 @@
             "type": "category",
             "icon": "category_support",
             "description": "Dispensor Settings",
-            "enabled": "extruder_nr > 0",
+            "enabled": "extruder_nr >= 0",
             "children":
             {
                 "dispensor_enable":
@@ -111,7 +111,7 @@
                     "description": "Enable UV. Without these setting, such layers would collapse during printing.",
                     "type": "bool",
                     "default_value": false,
-                    "enabled": "extruder_nr > 0",
+                    "enabled": "extruder_nr >= 0",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -337,6 +337,70 @@
                     "settable_per_mesh": false,
                     "settable_per_extruder": false,
                     "settable_per_meshgroup": false
+                },
+                "machine_build_dish":
+                {
+                    "label": "Build Dish Type",
+                    "description": "print on the dish.",
+                    "default_value": "Culture Dish:CD-100090",
+                    "type": "enum",
+                    "options":
+                    {
+                        "culture_dish": "Culture Dish",
+                        "well_plate": "Well Plate",
+                        "culture_slide": "Culture Slide"
+                    },
+                    "children": {
+                        "culture_dish_category_number":
+                        {
+                            "label": "Culture Dish Cat. No.",
+                            "description": "Culture Dish Category number",
+                            "type": "enum",
+                            "options":
+                            {
+                                "11035": "11035",
+                                "11060": "11060",
+                                "11090": "11090",
+                                "11150": "11150",
+                                "11151": "11151",
+                                "20035": "20035",
+                                "20060": "20060",
+                                "20100": "20100",
+                                "20101": "20101",
+                                "20150": "20150",
+                                "20151": "20151"
+                            },
+                            "default_value": "11035"
+                        },
+                        "well_plate_number":
+                        {
+                            "label": "Number of Well plate",
+                            "description": "Well plate number",
+                            "type": "enum",
+                            "options":
+                            {
+                                "6": "6",
+                                "12": "12",
+                                "24": "24",
+                                "48": "48",
+                                "96": "96"
+                            },
+                            "default_value": "96"
+                        },
+                        "culture_slide_category_number":
+                        {
+                            "label": "Culture Slide Cat. No",
+                            "description": "Culture Slide Category Number",
+                            "type": "enum",
+                            "options":
+                            {
+                                "3800052CL": "3800052CL",
+                                "3800056CL": "3800056CL",
+                                "3800058CL": "3800058CL"
+                            },
+                            "default_value": "3800052CL"
+                        }
+                    }
                 },
                 "machine_buildplate_type":
                 {

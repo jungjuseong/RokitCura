@@ -10,7 +10,7 @@ import UM 1.2 as UM
 import Cura 1.0 as Cura
 
 ListModel {
-
+    property string category: "Well Plate"
     property var attributes: [
         { width: 20, depth: 20, height: 10, shape: "elliptic" },
         { width: 23, depth: 23, height: 10, shape: "elliptic" },

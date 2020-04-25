@@ -10,6 +10,7 @@ import UM 1.2 as UM
 import Cura 1.0 as Cura
 
 ListModel {
+    property string category: "Culture Slide"
 
     property var attributes: [
         { width: 25, depth: 50, height: 10, shape: "rectangular" },
