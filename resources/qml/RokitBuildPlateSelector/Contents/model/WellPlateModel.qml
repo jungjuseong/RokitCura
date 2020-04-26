@@ -11,12 +11,13 @@ import Cura 1.0 as Cura
 
 ListModel {
     property string category: "Well Plate"
+    property string shape: "elliptic"
     property var attributes: [
-        { width: 20, depth: 20, height: 10, shape: "elliptic" },
-        { width: 23, depth: 23, height: 10, shape: "elliptic" },
-        { width: 35, depth: 35, height: 10, shape: "elliptic" },
-        { width: 60, depth: 60, height: 10, shape: "elliptic" },
-        { width: 90, depth: 90, height: 10, shape: "elliptic" }
+        Qt.vector3d(20,20,10),
+        Qt.vector3d(23,23,10),
+        Qt.vector3d(35,35,10),
+        Qt.vector3d(60,60,10),
+        Qt.vector3d(90,90,10)
     ]
 
     ListElement { 

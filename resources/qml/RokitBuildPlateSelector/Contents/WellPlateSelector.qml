@@ -11,7 +11,8 @@ import "../../Widgets"
 import "./model"
 
 BuildPlateSelector {
-      
+    dishModel: WellPlateModel {}
+    
     Rectangle {
         width: childrenRect.width
         height : childrenRect.height
@@ -26,8 +27,8 @@ BuildPlateSelector {
                         model: 3
                         Rectangle {
                             width : UM.Theme.getSize("rokit_well_plate_diameter").width
-                            height : width
-                            radius: width*0.5
+                            height : UM.Theme.getSize("rokit_well_plate_diameter").width
+                            radius: width / 2
                             color: UM.Theme.getColor("rokit_build_plate")
                             border.width : 1
                             border.color: UM.Theme.getColor("rokit_build_plate_border")
@@ -37,46 +38,5 @@ BuildPlateSelector {
             }
         }
     }
-
-    // Item {
-    //     id: wellPlateButtons
-    //     anchors
-    //     {
-    //         left: parent.left
-    //         leftMargin: UM.Theme.getSize("default_margin").width
-    //         bottom: parent.bottom
-    //         horizontalCenter: plate1.horizontalCenter
-    //     }
-    //     spacing: 0.5
-
-    //     ExclusiveGroup { id: wellPlateExclusive }
-
-    //     Repeater {
-    //         model: WellPlateModel {
-    //             id: dishModel
-    //         }            
-
-    //         delegate: Button {                    
-    //             text: model.text
-    //             height: UM.Theme.getSize("rokit_well_plate_button").height
-    //             width: UM.Theme.getSize("rokit_well_plate_button").width
-    //             exclusiveGroup: wellPlateExclusive
-    //             checkable: true
-                
-    //             onClicked: {
-    //                 var attributes = dishModel.attributes[index]
-
-    //                 machineWidth.setPropertyValue("value", attributes.width)
-    //                 machineDepth.setPropertyValue("value", attributes.depth)
-    //                 machineHeight.setPropertyValue("value", attributes.height)
-    //                 machineShape.setPropertyValue("value", attributes.shape)
-
-    //                 buildPlateType.setPropertyValue("value", "Well Plate:" + model.get(index).text)
-
-    //                 afterOnEditingFinishedFunction()
-    //             }  
-    //         }
-    //     }
-    // }
-    dishModel: WellPlateModel {}
 }
+

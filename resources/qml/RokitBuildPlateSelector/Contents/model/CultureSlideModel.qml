@@ -11,11 +11,11 @@ import Cura 1.0 as Cura
 
 ListModel {
     property string category: "Culture Slide"
-
+    property string shape: "rectangular"
     property var attributes: [
-        { width: 25, depth: 50, height: 10, shape: "rectangular" },
-        { width: 20, depth: 40, height: 10, shape: "rectangular" },
-        { width: 15, depth: 30, height: 10, shape: "rectangular" }
+        Qt.vector3d(25,50,10),
+        Qt.vector3d(20,40,10),
+        Qt.vector3d(15,30,10)
     ]
 
     ListElement { 

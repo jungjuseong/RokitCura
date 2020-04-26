@@ -18,7 +18,7 @@ Item
     width: parent.width
     height: childrenRect.height
     
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
+    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1
 
     property int controlHeight: UM.Theme.getSize("setting_control").height * 1.2
     property var labelFont: UM.Theme.getFont("default")
@@ -50,7 +50,9 @@ Item
                 if (buildPlateType.properties.value == null || buildPlateType.properties.value == undefined) {
                     return catalog.i18nc("@header", "Generation")
                 }
-                return "Build Plate - " + buildPlateType.properties.value
+                const buildPlate = buildPlateType.properties.value.split(":")
+
+                return "Build Plate: " + buildPlate[0] + " - " + buildPlate[1]
         }
         font: UM.Theme.getFont("medium")
         color: UM.Theme.getColor("small_button_text")

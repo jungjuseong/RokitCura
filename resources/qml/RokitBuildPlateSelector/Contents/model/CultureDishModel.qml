@@ -11,10 +11,12 @@ import Cura 1.0 as Cura
 
 ListModel {
     property string category: "Culture Dish"
+    property string shape: "elliptic"
+
     property var attributes: [
-        { width: 90, depth: 90, height: 15, shape: "elliptic" },
-        { width: 60, depth: 60, height: 15, shape: "elliptic" },
-        { width: 35, depth: 35, height: 15, shape: "elliptic" }
+        Qt.vector3d(90,90,10),
+        Qt.vector3d(60,60,10),
+        Qt.vector3d(35,35,10)
     ]
 
     ListElement { 

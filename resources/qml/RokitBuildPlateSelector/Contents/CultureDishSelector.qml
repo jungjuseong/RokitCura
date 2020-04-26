@@ -14,6 +14,8 @@ import "../../Widgets"
 import "./model"
 
 BuildPlateSelector {
+    dishModel: CultureDishModel {}
+    
     Rectangle {
         width: UM.Theme.getSize("rokit_culture_dish_diameter").width
         height : width
@@ -24,7 +26,5 @@ BuildPlateSelector {
         color: UM.Theme.getColor("rokit_build_plate")
         border.width : 1
         border.color: UM.Theme.getColor("rokit_build_plate_border")
-    }
-    dishModel: CultureDishModel {}
-    
+    }   
 }

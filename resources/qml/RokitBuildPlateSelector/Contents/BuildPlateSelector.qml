@@ -13,16 +13,24 @@ import QtQuick.Layouts 1.3
 import "../../Widgets"
 import "./model"
 
-
-// Base of Dish models
 Item {
     id: buildPlate
     
     height: UM.Theme.getSize("rokit_build_plate_content_widget").height
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
-
     property var dishModel: {}
+
+    function setBuildPlateProperties(productId, attributes) {  
+
+        machineWidth.setPropertyValue("value", attributes.x)
+        machineDepth.setPropertyValue("value", attributes.y)
+        machineHeight.setPropertyValue("value", attributes.z)
+        machineShape.setPropertyValue("value", dishModel.shape)
+
+        buildPlateType.setPropertyValue("value", dishModel.category + ":" + productId)             
+        buildPlateTitle.text = dishModel.category + "  -  " + productId 
+    }
 
     UM.I18nCatalog { id: catalog; name: "cura" }
 
@@ -34,7 +42,7 @@ Item {
     Text {
         id: title
         anchors {
-            bottom: combobox.top
+            bottom: comboboxSelector.top
             left: parent.left
             leftMargin: UM.Theme.getSize("default_margin").width
             bottomMargin: UM.Theme.getSize("default_margin").width
@@ -45,7 +53,8 @@ Item {
     }
 
     Cura.ComboBox {
-        id: combobox
+        id: comboboxSelector
+        visible: dishModel.category !== "Well Plate"
 
         height: UM.Theme.getSize("rokit_combobox_default").height
         width: UM.Theme.getSize("rokit_combobox_default").width
@@ -59,29 +68,54 @@ Item {
         model: dishModel
 
         currentIndex: {
-            var productId = buildPlateType.properties.value.split(":")[1]
-
-            for (var i = 0; i < model.count; i++) {
-                if (model.get(i).text === productId) {
-                    return i
+                const productId = buildPlateType.properties.value.split(":")[1]
+                if (productId !== undefined) {
+                    for (var i = 0; i < model.count; i++) {
+                        if (model.get(i).text === productId) {
+                            return i
+                        }
+                    }
                 }
-            }
-            //return 0
+                return 0   
         }
-        onActivated: {       
-            var attributes = dishModel.attributes[index]
-
-            machineWidth.setPropertyValue("value", attributes.width)
-            machineDepth.setPropertyValue("value", attributes.depth)
-            machineHeight.setPropertyValue("value", attributes.height)
-            machineShape.setPropertyValue("value", attributes.shape)
-
-            buildPlateType.setPropertyValue("value", dishModel.category + model.get(index).text)             
-
-            buildPlateTitle.text = dishModel.category + "  -  " + model.get(index).text  
+        onActivated: { 
+            setBuildPlateProperties(model.get(index).text, dishModel.attributes[index]) 
         }
     }
     
+    Item {
+        id: buttonSelector
+        visible: dishModel.category === "Well Plate"
+
+        height: UM.Theme.getSize("rokit_well_plate_button").height
+        width: UM.Theme.getSize("rokit_well_plate_button").width
+        anchors  {
+            left: parent.left 
+            bottom: parent.bottom                
+            leftMargin: UM.Theme.getSize("default_margin").width
+        }
+
+        Row {
+            spacing: 0.5
+            ExclusiveGroup { id: buttonExclusive }
+            Repeater {
+                model: dishModel
+
+                delegate: Button {                    
+                    text: model.text
+                    height: UM.Theme.getSize("rokit_well_plate_button").height
+                    width: UM.Theme.getSize("rokit_well_plate_button").width
+                    exclusiveGroup: buttonExclusive
+                    checkable: true
+                    
+                    onClicked: { 
+                        setBuildPlateProperties(model.text, dishModel.attributes[index]) 
+                    }
+                }
+            }
+        }
+    }
+
     // "Build plate type"
     UM.SettingPropertyProvider {
         id: buildPlateType
