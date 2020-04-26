@@ -11,28 +11,27 @@ import Cura 1.0 as Cura
 
 ListModel {
     property string category: "Well Plate"
-    property string shape: "elliptic"
-    property var attributes: [
-        Qt.vector3d(20,20,10),
-        Qt.vector3d(23,23,10),
-        Qt.vector3d(35,35,10),
-        Qt.vector3d(60,60,10),
-        Qt.vector3d(90,90,10)
+    property string shape: "rectangle"
+    property var standardWell: "" // { diameter: 6.46, depth: 11.0, centerTocenter: 9.0 }
+    property var products: [
+        { id: "32296", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell},
+        { id: "32396", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell},
+        { id: "32496", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell},
+        { id: "32596", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell},
+        { id: "32696", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell},
+        { id: "32796", plate: Qt.vector3d(85.4,127.6,14.4), well: standardWell}
     ]
 
-    ListElement { 
-        text: "96"
+    Component.onCompleted: {
+        for (var i = 0; i < products.length; i++) {
+            const value = "#" + products[i].id
+            append(createListElement(value));
+        }
     }
-    ListElement { 
-        text: "48"
-    }
-    ListElement { 
-        text: "24"
-    }
-    ListElement { 
-        text: "12"
-    }
-    ListElement { 
-        text: "6"
+
+    function createListElement(value) {
+        return {
+            text: value
+        };
     }
 }

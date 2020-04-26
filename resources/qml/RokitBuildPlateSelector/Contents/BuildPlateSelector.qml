@@ -21,15 +21,17 @@ Item {
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
     property var dishModel: {}
 
-    function setBuildPlateProperties(productId, attributes) {  
+    function setBuildPlateProperties(product) {
+        var attr = product.plate
+        if (attr != undefined) {
+            machineWidth.setPropertyValue("value", attr.x)
+            machineDepth.setPropertyValue("value", attr.y)
+            machineHeight.setPropertyValue("value", attr.z)
+            machineShape.setPropertyValue("value", dishModel.shape)
 
-        machineWidth.setPropertyValue("value", attributes.x)
-        machineDepth.setPropertyValue("value", attributes.y)
-        machineHeight.setPropertyValue("value", attributes.z)
-        machineShape.setPropertyValue("value", dishModel.shape)
-
-        buildPlateType.setPropertyValue("value", dishModel.category + ":" + productId)             
-        buildPlateTitle.text = dishModel.category + "  -  " + productId 
+            buildPlateType.setPropertyValue("value", dishModel.category + ":" + product.id)             
+            buildPlateTitle.text = dishModel.category + "  -  " + product.id 
+        }
     }
 
     UM.I18nCatalog { id: catalog; name: "cura" }
@@ -54,7 +56,7 @@ Item {
 
     Cura.ComboBox {
         id: comboboxSelector
-        visible: dishModel.category !== "Well Plate"
+        //visible: dishModel.category !== "Well Plate"
 
         height: UM.Theme.getSize("rokit_combobox_default").height
         width: UM.Theme.getSize("rokit_combobox_default").width
@@ -79,13 +81,13 @@ Item {
                 return 0   
         }
         onActivated: { 
-            setBuildPlateProperties(model.get(index).text, dishModel.attributes[index]) 
+            setBuildPlateProperties(dishModel.products[index]) 
         }
     }
     
     Item {
         id: buttonSelector
-        visible: dishModel.category === "Well Plate"
+        visible: false // dishModel.category === "Well Plate"
 
         height: UM.Theme.getSize("rokit_well_plate_button").height
         width: UM.Theme.getSize("rokit_well_plate_button").width
@@ -109,7 +111,7 @@ Item {
                     checkable: true
                     
                     onClicked: { 
-                        setBuildPlateProperties(model.text, dishModel.attributes[index]) 
+                        setBuildPlateProperties(dishModel.products[index]) 
                     }
                 }
             }

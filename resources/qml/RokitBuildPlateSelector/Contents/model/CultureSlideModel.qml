@@ -12,19 +12,22 @@ import Cura 1.0 as Cura
 ListModel {
     property string category: "Culture Slide"
     property string shape: "rectangular"
-    property var attributes: [
-        Qt.vector3d(25,50,10),
-        Qt.vector3d(20,40,10),
-        Qt.vector3d(15,30,10)
+    property var products: [
+        { id: "11035", plate: Qt.vector3d(20,40,12) },
+        { id: "11060", plate: Qt.vector3d(30,60,12) },
+        { id: "11090", plate: Qt.vector3d(40,80,12) },
     ]
 
-    ListElement { 
-        text: "3800052CL"
+    Component.onCompleted: {
+        for (var i = 0; i < products.length; i++) {
+            const value = "#" + products[i].id
+            append(createListElement(value));
+        }
     }
-    ListElement { 
-        text: "3800056CL"
-    }
-    ListElement { 
-        text: "3800058CL"
+
+    function createListElement(value) {
+        return {
+            text: value
+        };
     }
 }

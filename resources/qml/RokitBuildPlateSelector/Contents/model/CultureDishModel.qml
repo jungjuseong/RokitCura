@@ -12,20 +12,31 @@ import Cura 1.0 as Cura
 ListModel {
     property string category: "Culture Dish"
     property string shape: "elliptic"
-
-    property var attributes: [
-        Qt.vector3d(90,90,10),
-        Qt.vector3d(60,60,10),
-        Qt.vector3d(35,35,10)
+    property var products: [
+        { id: "11035", plate: Qt.vector3d(35,35,10) },
+        { id: "11060", plate: Qt.vector3d(60,60,10) },
+        { id: "11090", plate: Qt.vector3d(90,90,15) },
+        { id: "11150", plate: Qt.vector3d(150,150,20) },
+        { id: "11151", plate: Qt.vector3d(150,150,25) },
+        { id: "20035", plate: Qt.vector3d(35,35,10) },
+        { id: "20060", plate: Qt.vector3d(60,60,15) },
+        { id: "20100", plate: Qt.vector3d(90,80,20) },
+        { id: "20101", plate: Qt.vector3d(90,90,20) },
+        { id: "20150", plate: Qt.vector3d(150,150,25) },
+        { id: "20151", plate: Qt.vector3d(150,150,20) }
     ]
 
-    ListElement { 
-        text: "CD-100090"
+    Component.onCompleted: {
+        for (var i = 0; i < products.length; i++) {
+            const value = "#" + products[i].id
+            append(createListElement(value));
+        }
     }
-    ListElement { 
-        text: "CD-100060"
+
+    function createListElement(value) {
+        return {
+            text: value
+        };
     }
-    ListElement { 
-        text: "CD-100035"
-    }
+
 }
