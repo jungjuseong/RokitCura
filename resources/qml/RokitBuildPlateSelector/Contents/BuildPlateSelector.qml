@@ -24,12 +24,11 @@ Item {
     function setBuildPlateProperties(product) {
         var attr = product.plate
         if (attr != undefined) {
-            machineWidth.setPropertyValue("value", attr.x)
-            machineDepth.setPropertyValue("value", attr.y)
-            machineHeight.setPropertyValue("value", attr.z)
-            machineShape.setPropertyValue("value", dishModel.shape)
-
-            buildPlateType.setPropertyValue("value", dishModel.category + ":" + product.id)             
+            buildDishWidth.setPropertyValue("value", attr.x)
+            buildDishDepth.setPropertyValue("value", attr.y)
+            buildDishHeight.setPropertyValue("value", attr.z)
+            buildDishShape.setPropertyValue("value", dishModel.shape)
+            buildDishType.setPropertyValue("value", dishModel.category + ":" + product.id)             
             buildPlateTitle.text = dishModel.category + "  -  " + product.id 
         }
     }
@@ -120,47 +119,46 @@ Item {
 
     // "Build plate type"
     UM.SettingPropertyProvider {
-        id: buildPlateType
+        id: buildDishType
         containerStack: Cura.MachineManager.activeMachine
-        key: "machine_buildplate_type"
-        watchedProperties: [ "value", "options" ]
+        key: "machine_build_dish_type"
+        watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
     // "X (Width)"
     UM.SettingPropertyProvider {
-        id: machineWidth
+        id: buildDishWidth
         containerStack: Cura.MachineManager.activeMachine
-        key: "machine_width"
+        key: "machine_build_dish_width"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
     // "Y (Depth)"
     UM.SettingPropertyProvider {
-        id: machineDepth
+        id: buildDishDepth
         containerStack: Cura.MachineManager.activeMachine
-        key: "machine_depth"
+        key: "machine_build_dish_depth"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
     // "Z (Height)"
     UM.SettingPropertyProvider {
-        id: machineHeight
+        id: buildDishHeight
         containerStack: Cura.MachineManager.activeMachine
-        key: "machine_height"
+        key: "machine_build_dish_height"
         watchedProperties: [ "value" ]
         storeIndex: propertyStoreIndex
     }
 
     // MachineShape
     UM.SettingPropertyProvider {
-        id: machineShape
+        id: buildDishShape
         containerStack: Cura.MachineManager.activeMachine
-        key: "machine_shape"
+        key: "machine_build_dish_shape"
         watchedProperties: [ "value", "options" ]
         storeIndex: propertyStoreIndex
-        // storeIndex: 0
     }
 }

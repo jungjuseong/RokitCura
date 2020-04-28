@@ -338,69 +338,15 @@
                     "settable_per_extruder": false,
                     "settable_per_meshgroup": false
                 },
-                "machine_build_dish":
+                "machine_height":
                 {
-                    "label": "Build Dish Type",
-                    "description": "print on the dish.",
-                    "default_value": "Culture Dish:CD-100090",
-                    "type": "enum",
-                    "options":
-                    {
-                        "culture_dish": "Culture Dish",
-                        "well_plate": "Well Plate",
-                        "culture_slide": "Culture Slide"
-                    },
-                    "children": {
-                        "culture_dish_category_number":
-                        {
-                            "label": "Culture Dish Cat. No.",
-                            "description": "Culture Dish Category number",
-                            "type": "enum",
-                            "options":
-                            {
-                                "11035": "11035",
-                                "11060": "11060",
-                                "11090": "11090",
-                                "11150": "11150",
-                                "11151": "11151",
-                                "20035": "20035",
-                                "20060": "20060",
-                                "20100": "20100",
-                                "20101": "20101",
-                                "20150": "20150",
-                                "20151": "20151"
-                            },
-                            "default_value": "11035"
-                        },
-                        "well_plate_number":
-                        {
-                            "label": "Number of Well plate",
-                            "description": "Well plate number",
-                            "type": "enum",
-                            "options":
-                            {
-                                "6": "6",
-                                "12": "12",
-                                "24": "24",
-                                "48": "48",
-                                "96": "96"
-                            },
-                            "default_value": "96"
-                        },
-                        "culture_slide_category_number":
-                        {
-                            "label": "Culture Slide Cat. No",
-                            "description": "Culture Slide Category Number",
-                            "type": "enum",
-                            "options":
-                            {
-                                "3800052CL": "3800052CL",
-                                "3800056CL": "3800056CL",
-                                "3800058CL": "3800058CL"
-                            },
-                            "default_value": "3800052CL"
-                        }
-                    }
+                    "label": "Machine Height",
+                    "description": "The height (Z-direction) of the printable area.",
+                    "default_value": 100,
+                    "type": "float",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
                 },
                 "machine_buildplate_type":
                 {
@@ -417,11 +363,56 @@
                     "settable_per_extruder": false,
                     "settable_per_meshgroup": false
                 },
-                "machine_height":
+                "machine_build_dish_type":
                 {
-                    "label": "Machine Height",
-                    "description": "The height (Z-direction) of the printable area.",
-                    "default_value": 100,
+                    "label": "A dish type on the Build Plate",
+                    "description": "A dish type on the Build Plate",
+                    "default_value": "Culture Dish",
+                    "type": "str",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "machine_build_dish_shape":
+                {
+                    "label": "Build Dish Shape",
+                    "description": "The shape of the build dish without taking unprintable areas into account.",
+                    "default_value": "rectangular",
+                    "type": "enum",
+                    "options":
+                    {
+                        "rectangular": "Rectangular",
+                        "elliptic": "Elliptic"
+                    },
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "machine_build_dish_width":
+                {
+                    "label": "Machine Build Dish width",
+                    "description": "The height (x-direction) of the dish.",
+                    "default_value": 40,
+                    "type": "float",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "machine_build_dish_depth":
+                {
+                    "label": "Machine Build DIsh Depth",
+                    "description": "The depth (y-direction) of the dish.",
+                    "default_value": 40,
+                    "type": "float",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
+                "machine_build_dish_height":
+                {
+                    "label": "Machine Build DIsh Height",
+                    "description": "The height (Z-direction) of the dish.",
+                    "default_value": 20,
                     "type": "float",
                     "settable_per_mesh": false,
                     "settable_per_extruder": false,

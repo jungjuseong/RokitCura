@@ -516,7 +516,7 @@ class BuildVolume(SceneNode):
         else:
             origin = Vector(min_w, min_h, max_d)
 
-        self._origin_mesh = self._buildOriginMesh(origin)
+        self._origin_mesh = None # self._buildOriginMesh(origin)
 
         disallowed_area_height = 0.1
         self._disallowed_area_size = 0.
@@ -1025,6 +1025,7 @@ class BuildVolume(SceneNode):
         return all_values
 
     def _calculateBedAdhesionSize(self, used_extruders):
+        return None
         if self._global_container_stack is None:
             return None
 

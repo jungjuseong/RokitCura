@@ -20,7 +20,7 @@ ListModel {
 
     Component.onCompleted: {
         for (var i = 0; i < products.length; i++) {
-            const value = "#" + products[i].id
+            const value = products[i].id
             append(createListElement(value));
         }
     }

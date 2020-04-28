@@ -106,7 +106,7 @@ from cura.UI.WelcomePagesModel import WelcomePagesModel
 from cura.UI.WhatsNewPagesModel import WhatsNewPagesModel
 from cura.UltimakerCloud import UltimakerCloudAuthentication
 from cura.Utils.NetworkingUtil import NetworkingUtil
-from . import BuildVolume
+from . import RokitBuildVolume
 from . import CameraAnimation
 from . import CuraActions
 from . import PlatformPhysics
@@ -773,7 +773,7 @@ class CuraApplication(QtApplication):
         # Setup scene and build volume
         self._setLoadingHint(self._i18n_catalog.i18nc("@info:progress", "Initializing build volume..."))
         root = self.getController().getScene().getRoot()
-        self._volume = BuildVolume.BuildVolume(self, root)
+        self._volume = RokitBuildVolume.BuildVolume(self, root)
         Arrange.build_volume = self._volume
 
         # initialize info objects

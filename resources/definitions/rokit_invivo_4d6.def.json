@@ -84,39 +84,41 @@
 
     },
     "overrides": {
-        "machine_buildplate_type":
-        {
-            "default_value": "Culture Dish:CD-100060"
-        },
+
         "layer_height": { 
             "settable_per_extruder": true 
         },
         "machine_name": { 
             "default_value": "Dr. INVIVO 4D6" 
         },
-
+        "print_sequence": {
+            "default_value": "one_at_a_time"
+        },
         "machine_width": { 
             "default_value": 80,
-            "type": "int",
-            "minimum_value": "10",
-            "maximum_value": "200"
+            "minimum_value": 60,
+            "maximum_value": 100
         },
         "machine_depth": { 
             "default_value": 80,
-            "type": "int",
-            "minimum_value": "10",
-            "maximum_value": "200"
+            "minimum_value": 60,
+            "maximum_value": 100
         },
         "machine_height": { 
-            "default_value": 80,
-            "type": "int",
-            "minimum_value": "10",
-            "maximum_value": "120"
+            "default_value": 40,
+            "minimum_value": 10,
+            "maximum_value": 80
         },
         "machine_shape": { 
             "default_value": "elliptic"
         },
-        "machine_center_is_zero": { "default_value": false },
+        "machine_center_is_zero": { "default_value": true },
+
+        "machine_build_dish_type": { "default_value": "Culture Dish" },
+        "machine_build_dish_width": { "default_value": 80 },
+        "machine_build_dish_depth": { "default_value": 80 },
+        "machine_build_dish_height": { "default_value": 40 },
+        "machine_build_dish_shape": { "default_value": "elliptic" },
 
         "default_material_bed_temperature": { "settable_per_extruder": true },
         "material_bed_temperature": { "settable_per_extruder": true },
