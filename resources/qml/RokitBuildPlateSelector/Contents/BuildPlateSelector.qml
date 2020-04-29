@@ -13,33 +13,32 @@ import QtQuick.Layouts 1.3
 import "../../Widgets"
 import "./model"
 
-Cura.MachineAction
-{
-    UM.I18nCatalog { id: catalog; name: "cura" }
+Cura.MachineAction {
     anchors.fill: parent
     property var extrudersModel: Cura.ExtrudersModel {}
+
+    UM.I18nCatalog { id: catalog; name: "cura" }
+
+    property var dishModel: {}
+    
+    function setBuildPlateProperties(product) {
+        var attr = product.plate
+        if (attr != undefined) {
+            buildDishWidth.setPropertyValue("value", attr.x)
+            buildDishDepth.setPropertyValue("value", attr.y)
+            buildDishHeight.setPropertyValue("value", attr.z)
+            buildDishShape.setPropertyValue("value", dishModel.shape)
+            buildDishType.setPropertyValue("value", dishModel.category + ":" + product.id)             
+            buildPlateTitle.text = dishModel.category + "  -  " + product.id 
+        }
+    }
+
+    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
+
     Item {
         id: buildPlate
         
         height: UM.Theme.getSize("rokit_build_plate_content_widget").height
-
-        property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
-        property var dishModel: {}
-
-        function setBuildPlateProperties(product) {
-            var attr = product.plate
-            if (attr != undefined) {
-                buildDishWidth.setPropertyValue("value", attr.x)
-                buildDishDepth.setPropertyValue("value", attr.y)
-                buildDishHeight.setPropertyValue("value", attr.z)
-                buildDishShape.setPropertyValue("value", dishModel.shape)
-                buildDishType.setPropertyValue("value", dishModel.category + ":" + product.id)             
-                buildPlateTitle.text = dishModel.category + "  -  " + product.id 
-            }
-        }
-
-        UM.I18nCatalog { id: catalog; name: "cura" }
-
         anchors {
             left: parent.left
             right: parent.right
