@@ -51,7 +51,7 @@ if with_sentry_sdk:
     if hasattr(sys, "frozen"):
         sentry_env = "production"  # A frozen build has the posibility to be a "real" distribution.
 
-    if ApplicationMetadata.CuraVersion == "master":
+    if ApplicationMetadata.CuraVersion == "4.6":
         sentry_env = "development"  # Master is always a development version.
     elif "beta" in ApplicationMetadata.CuraVersion or "BETA" in ApplicationMetadata.CuraVersion:
         sentry_env = "beta"

@@ -14,7 +14,7 @@
         "variants_name": "Nozzle Type",
         "has_materials": true,
         "preferred_material": "generic_pla",
-        "preferred_variant_name": "Syringe 0.25",
+        "preferred_variant_name": "0.25 Syringe",
         "preferred_variant_buildplate_name": "Culture Dish",
         "supports_network_connection": false,
         "machine_extruder_trains":
@@ -95,18 +95,18 @@
             "default_value": "one_at_a_time"
         },
         "machine_width": { 
-            "default_value": 80,
-            "minimum_value": 60,
-            "maximum_value": 100
+            "default_value": 180,
+            "minimum_value": 80,
+            "maximum_value": 200
         },
         "machine_depth": { 
-            "default_value": 80,
-            "minimum_value": 60,
-            "maximum_value": 100
+            "default_value": 180,
+            "minimum_value": 80,
+            "maximum_value": 180
         },
         "machine_height": { 
-            "default_value": 40,
-            "minimum_value": 10,
+            "default_value": 60,
+            "minimum_value": 40,
             "maximum_value": 80
         },
         "machine_shape": { 

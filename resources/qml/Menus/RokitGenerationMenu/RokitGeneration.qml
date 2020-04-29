@@ -34,11 +34,10 @@ Item
     }
 
     function getExtruderType() {
-
         if (Cura.MachineManager.activeStack.variant != null) {
             var lists = Cura.MachineManager.activeStack.variant.name.split(" ")
             if (lists.length > 0)
-                return lists[0]
+                return lists[1]
         }
 
         return ""
