@@ -19,8 +19,7 @@ Item {
     property real padding: UM.Theme.getSize("thick_margin").width
     property real sidePadding: UM.Theme.getSize("thin_margin").width
 
-    property string tooltipText: machineShape.properties.description
-    property string tabName: "Culture Dish"
+    property string tabName: ""
 
     Item {
         id: tabSpace
@@ -122,6 +121,4 @@ Item {
             width: parent.width
         }
     }            
-    
-
 }

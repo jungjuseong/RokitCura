@@ -192,7 +192,7 @@ msgstr ""
 #: /home/trin/Gedeeld/Projects/Cura/cura/CrashHandler.py:113
 msgctxt "@label crash message"
 msgid ""
-"<p><b>Oops, Ultimaker Cura has encountered something that doesn't seem right."
+"<p><b>Oops, Organ Regeneration has encountered something that doesn't seem right."
 "</p></b>\n"
 "                    <p>We encountered an unrecoverable error during start "
 "up. It was possibly caused by some incorrect configuration files. We suggest "
@@ -2287,7 +2287,7 @@ msgstr ""
 #: /home/trin/Gedeeld/Projects/Cura/plugins/SliceInfoPlugin/MoreInfoWindow.qml:74
 msgctxt "@text:window"
 msgid ""
-"Ultimaker Cura collects anonymous data in order to improve the print quality "
+"Organ Regeneration collects anonymous data in order to improve the print quality "
 "and user experience. Below is an example of all the data that is shared:"
 msgstr ""
 
@@ -5156,13 +5156,13 @@ msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/DataCollectionsContent.qml:24
 msgctxt "@label"
-msgid "Help us to improve Ultimaker Cura"
+msgid "Help us to improve Organ Regeneration"
 msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/DataCollectionsContent.qml:57
 msgctxt "@text"
 msgid ""
-"Ultimaker Cura collects anonymous data to improve print quality and user "
+"Organ Regeneration collects anonymous data to improve print quality and user "
 "experience, including:"
 msgstr ""
 
@@ -5189,7 +5189,7 @@ msgstr ""
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/DataCollectionsContent.qml:102
 msgctxt "@text"
 msgid ""
-"Data collected by Ultimaker Cura will not contain any personal information."
+"Data collected by Organ Regeneration will not contain any personal information."
 msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/DataCollectionsContent.qml:103
@@ -5214,14 +5214,14 @@ msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/WelcomeContent.qml:29
 msgctxt "@label"
-msgid "Welcome to Ultimaker Cura"
+msgid "Welcome to Organ Regeneration"
 msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/WelcomeContent.qml:47
 msgctxt "@text"
 msgid ""
 "Please follow these steps to set up\n"
-"Ultimaker Cura. This will only take a few moments."
+"Organ Regeneration. This will only take a few moments."
 msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/WelcomeContent.qml:58
@@ -5231,7 +5231,7 @@ msgstr ""
 
 #: /home/trin/Gedeeld/Projects/Cura/resources/qml/WelcomePages/WhatsNewContent.qml:24
 msgctxt "@label"
-msgid "What's new in Ultimaker Cura"
+msgid "What's new in Organ Regenerationa"
 msgstr ""
 
 #: ModelChecker/plugin.json

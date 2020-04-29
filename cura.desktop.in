@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Ultimaker Cura
-Name[de]=Ultimaker Cura
-Name[nl]=Ultimaker Cura
-GenericName=3D Printing Software
+Name=Organ Regeneration
+Name[de]=Organ Regeneration
+Name[nl]=Organ Regeneration
+GenericName=3D Bio Printing Software
 GenericName[de]=3D-Druck-Software
 GenericName[nl]=3D-printsoftware
 Comment=Cura converts 3D models into paths for a 3D printer. It prepares your print for maximum accuracy, minimum printing time and good reliability with many extra features that make your print come out great.
