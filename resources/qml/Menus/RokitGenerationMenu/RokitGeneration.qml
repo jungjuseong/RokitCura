@@ -9,8 +9,7 @@ import QtQuick.Layouts 1.3
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Item
-{
+Item {
     id: base
 
     UM.I18nCatalog { id: catalog;  name: "cura" }
@@ -43,23 +42,31 @@ Item
         return ""
     }
 
+    // "Build dish type"
+    UM.SettingPropertyProvider {
+        id: buildDishType
+        containerStack: Cura.MachineManager.activeMachine
+        key: "machine_build_dish_type"
+        watchedProperties: [ "value"]
+        storeIndex: propertyStoreIndex
+    }
+
     Label {
         id: header
         text: {
-                if (buildPlateType.properties.value == null || buildPlateType.properties.value == undefined) {
+                if (buildDishType.properties.value == null || buildDishType.properties.value == undefined) {
                     return catalog.i18nc("@header", "Generation")
                 }
-                const buildPlate = buildPlateType.properties.value.split(":")
+                const buildDish = buildDishType.properties.value.split(":")
 
-                return "Build Plate: " + buildPlate[0] + " - " + buildPlate[1]
+                return "Build Plate: " + buildDish[0] + " - " + buildDish[1]
         }
         font: UM.Theme.getFont("medium")
         color: UM.Theme.getColor("small_button_text")
         height: contentHeight
         renderType: Text.NativeRendering
 
-        anchors
-        {
+        anchors {
             top: parent.top
             left: parent.left
             right: parent.right
@@ -72,8 +79,7 @@ Item
         anchors.topMargin: UM.Theme.getSize("default_margin").height
         visible: extrudersModel.count > 1
 
-        Repeater
-        {
+        Repeater {
             id: repeater
             model: extrudersModel
             delegate: UM.TabRowButton
@@ -535,13 +541,4 @@ Item
         }
     }
 
-    // "Build plate type"
-    UM.SettingPropertyProvider  
-    {
-        id: buildPlateType
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_buildplate_type"
-        watchedProperties: [ "value", "options" ]
-        storeIndex: propertyStoreIndex
-    }
 }

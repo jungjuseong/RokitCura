@@ -120,8 +120,63 @@
         "machine_build_dish_height": { "default_value": 40 },
         "machine_build_dish_shape": { "default_value": "elliptic" },
 
-        "default_material_bed_temperature": { "settable_per_extruder": true },
-        "material_bed_temperature": { "settable_per_extruder": true },
+        "machine_heated_build_volume": { "default_value": true },
+        "default_material_print_temperature":
+        {
+            "default_value": 203,
+            "minimum_value_warning": "25",
+            "maximum_value_warning": "200",
+            "maximum_value": "215",
+            "minimum_value": "0",
+            "settable_per_extruder": true
+        },
+        "build_volume_temperature":
+        {
+            "default_value": 18,
+            "resolve": "min(extruderValues('build_volume_temperature'))",
+            "minimum_value": "0",
+            "minimum_value_warning": "18",
+            "maximum_value_warning": "45",
+            "enabled": "machine_heated_build_volume",
+            "settable_per_extruder": true
+        },
+        "material_print_temperature":
+        {
+            "default_value": 200,
+            "minimum_value": "0",
+            "minimum_value_warning": "18",
+            "maximum_value_warning": "201",
+            "maximum_value": "210",
+            "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
+            "settable_per_extruder": true
+        },
+        "material_print_temperature_layer_0":
+        {
+            "default_value": 200,
+            "value": "material_print_temperature",
+            "minimum_value": "0",
+            "minimum_value_warning": "0",
+            "maximum_value_warning": "200",
+            "maximum_value": "210"
+        },
+        "material_initial_print_temperature":
+        {
+            "default_value": "material_print_temperature",
+            "value": "max(-0, material_print_temperature - 10)",
+            "minimum_value": "0",
+            "minimum_value_warning": "material_standby_temperature",
+            "maximum_value_warning": "material_print_temperature",
+            "maximum_value": "210"
+        },
+        "material_final_print_temperature":
+        {
+            "default_value": "material_print_temperature",
+            "value": "max(-0, material_print_temperature - 10)",
+            "minimum_value": "0",
+            "minimum_value_warning": "material_standby_temperature",
+            "maximum_value_warning": "material_print_temperature",
+            "maximum_value": "210"
+        },
 
         "infill_pattern": {"value": "'triangles'" },
         "infill_before_walls": {"value": false },

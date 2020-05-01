@@ -334,7 +334,7 @@ class BuildVolume(SceneNode):
                 node.setOutsideBuildArea(True)
                 return
 
-            node.setOutsideBuildArea(False)
+            node.setOutsideBuildArea(False)          
 
     def _buildGridMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
         mb = MeshBuilder()
@@ -389,30 +389,33 @@ class BuildVolume(SceneNode):
 
             return mb.build().getTransformed(scale_matrix)
 
+    def _buildCubicMesh(self, mb: MeshBuilder, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, volume_outline_color=None) -> None:
+        if type(mb) is MeshBuilder:
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, max_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, min_d), Vector(max_w, max_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, max_h, min_d), color = volume_outline_color)
+
+            mb.addLine(Vector(min_w, min_h, max_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, max_d), Vector(min_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, max_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, max_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, min_d), Vector(min_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, max_h, min_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+
     def _buildMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
 
         build_dish_min_w, build_dish_max_w = -self._build_dish_width / 2, self._build_dish_width / 2
         build_dish_min_h, build_dish_max_h = 0.0, self._build_dish_height
         build_dish_min_d, build_dish_max_d = -self._build_dish_depth / 2, self._build_dish_depth / 2
 
+        mb = MeshBuilder()
         if self._shape != "elliptic":
             # Outline 'cube' of the build volume
-            mb = MeshBuilder()
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, max_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, min_d), Vector(max_w, max_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, max_h, min_d), color = self._volume_outline_color)
-
-            mb.addLine(Vector(min_w, min_h, max_d), Vector(max_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, min_h, max_d), Vector(min_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, max_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, max_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
-
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, min_d), Vector(min_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, max_h, min_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
-
+            self._buildCubicMesh(mb, min_w, max_w, min_h, max_h, min_d, max_d, volume_outline_color = self._volume_outline_color)
             return mb.build()
 
         else:
@@ -422,28 +425,14 @@ class BuildVolume(SceneNode):
                 # Scale circular meshes by aspect ratio if width != height
                 aspect = self._depth / self._width
                 scale_matrix.compose(scale = Vector(1, 1, aspect))
-            mb = MeshBuilder()
             mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color)
-            mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color)
+            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color)
 
             if self._build_dish_shape == "elliptic":
-                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color)
-                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_max_h, 0),  color = self._dish_volume_outline_color)
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color) # lower
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_max_h, 0),  color = self._dish_volume_outline_color) # upper
             else:
-                mb.addLine(Vector(build_dish_min_w, build_dish_min_h, build_dish_min_d), Vector(build_dish_max_w, build_dish_min_h, build_dish_min_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_min_w, build_dish_min_h, build_dish_min_d), Vector(build_dish_min_w, build_dish_max_h, build_dish_min_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_min_w, build_dish_max_h, build_dish_min_d), Vector(build_dish_max_w, build_dish_max_h, build_dish_min_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_max_w, build_dish_min_h, build_dish_min_d), Vector(build_dish_max_w, build_dish_max_h, build_dish_min_d), color = self._dish_volume_outline_color)
-
-                mb.addLine(Vector(build_dish_min_w, build_dish_min_h, build_dish_max_d), Vector(build_dish_max_w, build_dish_min_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_min_w, build_dish_min_h, build_dish_max_d), Vector(build_dish_min_w, build_dish_max_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_min_w, build_dish_max_h, build_dish_max_d), Vector(build_dish_max_w, build_dish_max_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_max_w, build_dish_min_h, build_dish_max_d), Vector(build_dish_max_w, build_dish_max_h, build_dish_max_d), color = self._dish_volume_outline_color)
-
-                mb.addLine(Vector(build_dish_min_w, build_dish_min_h, build_dish_min_d), Vector(build_dish_min_w, build_dish_min_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_max_w, build_dish_min_h, build_dish_min_d), Vector(build_dish_max_w, build_dish_min_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_min_w, build_dish_max_h, build_dish_min_d), Vector(build_dish_min_w, build_dish_max_h, build_dish_max_d), color = self._dish_volume_outline_color)
-                mb.addLine(Vector(build_dish_max_w, build_dish_max_h, build_dish_min_d), Vector(build_dish_max_w, build_dish_max_h, build_dish_max_d), color = self._dish_volume_outline_color)
+                self._buildCubicMesh(mb, build_dish_min_w, build_dish_max_w, build_dish_min_h, build_dish_max_h, build_dish_min_d, build_dish_max_d, volume_outline_color = self._dish_volume_outline_color)
 
             return mb.build().getTransformed(scale_matrix)
 
@@ -563,7 +552,7 @@ class BuildVolume(SceneNode):
 
         z_fight_distance = 0.2  # Distance between buildplate and disallowed area meshes to prevent z-fighting
 
-        self._grid_mesh = self._buildGridMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance)
+        self._grid_mesh = self._buildGridMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance) 
         self.setMeshData(self._buildMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance))
 
         # Indication of the machine origin
@@ -769,8 +758,7 @@ class BuildVolume(SceneNode):
         self._depth = self._global_container_stack.getProperty("machine_depth", "value")
         self._shape = self._global_container_stack.getProperty("machine_shape", "value")
 
-    ##  Calls _updateDisallowedAreas and makes sure the changes appear in the
-    #   scene.
+    ##  Calls _updateDisallowedAreas and makes sure the changes appear in the scene.
     #
     #   This is required for a signal to trigger the update in one go. The
     #   ``_updateDisallowedAreas`` method itself shouldn't call ``rebuild``,
@@ -839,11 +827,8 @@ class BuildVolume(SceneNode):
         for extruder_id in result_areas_no_brim:
             self._disallowed_areas_no_brim.extend(result_areas_no_brim[extruder_id])
 
-    ##  Computes the disallowed areas for objects that are printed with print
-    #   features.
-    #
-    #   This means that the brim, travel avoidance and such will be applied to
-    #   these features.
+    ##  Computes the disallowed areas for objects that are printed with print features.
+    #   This means that the brim, travel avoidance and such will be applied to these features.
     #
     #   \return A dictionary with for each used extruder ID the disallowed areas
     #   where that extruder may not print.

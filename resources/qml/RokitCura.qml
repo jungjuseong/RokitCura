@@ -20,8 +20,7 @@ UM.MainWindow {
     id: base
 
     // Cura application window title
-    title: 
-    {
+    title: {
         const title = (PrintInformation !== null && PrintInformation.jobName != "") ? PrintInformation.jobName + " - " : ""
         return title + CuraApplication.applicationDisplayName;
     }
@@ -48,8 +47,7 @@ UM.MainWindow {
         opacity: 0.7
         z: stageMenu.z + 1
 
-        MouseArea
-        {
+        MouseArea {
             // Prevent all mouse events from passing through.
             enabled: parent.visible
             anchors.fill: parent
@@ -101,8 +99,7 @@ UM.MainWindow {
         anchors.fill: parent
 
         signal hasMesh(string name) //this signal sends the filebase name so it can be used for the JobSpecs.qml
-        function getMeshName(path)
-        {
+        function getMeshName(path) {
             //takes the path the complete path of the meshname and returns only the filebase
             var fileName = path.slice(path.lastIndexOf("/") + 1)
             var fileBase = fileName.slice(0, fileName.indexOf("."))
@@ -123,8 +120,7 @@ UM.MainWindow {
 
         Item {
             id: headerBackground
-            anchors
-            {
+            anchors {
                 top: applicationMenu.bottom
                 left: parent.left
                 right: parent.right
@@ -180,10 +176,7 @@ UM.MainWindow {
                 left: parent.left
                 right: parent.right
             }
-
-
             Keys.forwardTo: applicationMenu
-
             DropArea {
                 // The drop area is here to handle files being dropped onto Cura.
                 anchors.fill: parent
@@ -208,23 +201,10 @@ UM.MainWindow {
                     }
                 }
             }
-
-            Image {
-                anchors.fill: parent;
-
-                source: "../images/rokit-background-dna-1920x1080.png"; 
-                fillMode: Image.PreserveAspectCrop;
-                horizontalAlignment: Image.AlignHCenter
-                verticalAlignment: Image.AlignVCenter
-                opacity: 0.2
-                //z: main.z - 2
-            }
-
             ObjectSelector {
                 id: objectSelector
                 visible: CuraApplication.platformActivity
-                anchors
-                {
+                anchors {
                     bottom: jobSpecs.top
                     left: toolbar.right
                     leftMargin: UM.Theme.getSize("default_margin").width
@@ -232,12 +212,10 @@ UM.MainWindow {
                     bottomMargin: UM.Theme.getSize("narrow_margin").height
                 }
             }
-
             JobSpecs {
                 id: jobSpecs
                 visible: CuraApplication.platformActivity
-                anchors
-                {
+                anchors {
                     left: toolbar.right
                     bottom: viewOrientationControls.top
                     leftMargin: UM.Theme.getSize("default_margin").width
@@ -246,18 +224,15 @@ UM.MainWindow {
                     topMargin: UM.Theme.getSize("thin_margin").width
                 }
             }
-
             ViewOrientationControls {
                 id: viewOrientationControls
 
-                anchors
-                {
+                anchors {
                     left: toolbar.right
                     bottom: parent.bottom
                     margins: UM.Theme.getSize("default_margin").width
                 }
             }
-
             Toolbar {
                 // The toolbar is the left bar that is populated by all the tools (which are dynamicly populated by
                 // plugins)
@@ -266,14 +241,12 @@ UM.MainWindow {
                 property int mouseX: base.mouseX
                 property int mouseY: base.mouseY
 
-                anchors
-                {
+                anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
                 }
                 visible: CuraApplication.platformActivity && !PrintInformation.preSliced
             }
-
             // A hint for the loaded content view. Overlay items / controls can safely be placed in this area
             Item {
                 id: mainSafeArea
@@ -282,7 +255,6 @@ UM.MainWindow {
                 anchors.top: main.top
                 anchors.bottom: main.bottom
             }
-
             Loader {
                 // A stage can control this area. If nothing is set, it will therefore show the 3D view.
                 id: main
@@ -348,27 +320,22 @@ UM.MainWindow {
                 }
             }
             UM.MessageStack {
-                anchors
-                {
+                anchors {
                     horizontalCenter: parent.horizontalCenter
                     top: parent.verticalCenter
                     bottom: parent.bottom
                     bottomMargin:  UM.Theme.getSize("default_margin").height
                 }
 
-                primaryButton: Component
-                {
-                    Cura.PrimaryButton
-                    {
+                primaryButton: Component {
+                    Cura.PrimaryButton {
                         text: model.name
                         height: UM.Theme.getSize("message_action_button").height
                     }
                 }
 
-                secondaryButton: Component
-                {
-                    Cura.SecondaryButton
-                    {
+                secondaryButton: Component {
+                    Cura.SecondaryButton {
                         text: model.name
                         height: UM.Theme.getSize("message_action_button").height
                     }
@@ -386,8 +353,7 @@ UM.MainWindow {
     UM.PreferencesDialog {
         id: preferences
 
-        Component.onCompleted:
-        {
+        Component.onCompleted: {
             //; Remove & re-add the general page as we want to use our own instead of uranium standard.
             removePage(0);
             insertPage(0, catalog.i18nc("@title:tab","General"), Qt.resolvedUrl("Preferences/GeneralPage.qml"));
@@ -405,8 +371,7 @@ UM.MainWindow {
             setPage(0);
         }
 
-        onVisibleChanged:
-        {
+        onVisibleChanged: {
             // When the dialog closes, switch to the General page.
             // This prevents us from having a heavy page like Setting Visiblity active in the background.
             setPage(0);
@@ -498,8 +463,7 @@ UM.MainWindow {
 
     onPreClosing: {
         close.accepted = CuraApplication.getIsAllChecksPassed();
-        if (!close.accepted)
-        {
+        if (!close.accepted) {
             CuraApplication.checkAndExitApplication();
         }
     }
