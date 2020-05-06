@@ -8,8 +8,7 @@ import QtQuick.Controls 1.1 as OldControls
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Item
-{
+Cura.MachineAction {
     id: base
 
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
@@ -139,8 +138,7 @@ Item
             }
         }
 
-        Column
-        {
+        Column {
             id: selectors
 
             padding: UM.Theme.getSize("default_margin").width
@@ -148,8 +146,7 @@ Item
 
             readonly property real paddedWidth: parent.width - padding * 2
             property real textWidth: Math.round(paddedWidth * 0.3)
-            property real controlWidth:
-            {
+            property real controlWidth: {
                 if(instructionLink == "")
                 {
                     return paddedWidth - textWidth
@@ -161,13 +158,11 @@ Item
             }
             property string instructionLink: Cura.MachineManager.activeStack != null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "instruction_link", ""): ""
 
-            Row // Material
-            {
+            Row { // Material
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
-                Label
-                {
+                Label {
                     text: catalog.i18nc("@label", "Material")
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
@@ -177,8 +172,7 @@ Item
                     renderType: Text.NativeRendering
                 }
 
-                OldControls.ToolButton
-                {
+                OldControls.ToolButton {
                     id: materialSelection
 
                     property bool valueError: Cura.MachineManager.activeStack !== null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "compatible", "") !== "True" : true
@@ -192,18 +186,15 @@ Item
 
                     style: UM.Theme.styles.print_setup_header_button
                     activeFocusOnPress: true
-                    menu: Cura.MaterialMenu
-                    {
+                    menu: Cura.MaterialMenu {
                         extruderIndex: Cura.ExtruderManager.activeExtruderIndex
                         updateModels: materialSelection.visible
                     }
                 }
-                Item
-                {
+                Item {
                     width: instructionButton.width + 2 * UM.Theme.getSize("default_margin").width
                     height: instructionButton.visible ? materialSelection.height: 0
-                    Button
-                    {
+                    Button {
                         id: instructionButton
                         hoverEnabled: true
                         contentItem: Item {}
@@ -221,13 +212,11 @@ Item
                 }
             }
 
-            Row // Nozzle
-            {
+            Row { // Nozzle
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasVariants
 
-                Label
-                {
+                Label {
                     text: (extrudersModel.items[tabBar.currentIndex].name === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
@@ -237,8 +226,7 @@ Item
                     renderType: Text.NativeRendering
                 }
 
-                OldControls.ToolButton
-                {
+                OldControls.ToolButton {
                     id: variantSelection
                     text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
                     tooltip: text
@@ -250,8 +238,7 @@ Item
                 }
             }
 
-            Row
-            {
+            Row {
                 id: warnings
                 height: visible ? childrenRect.height : 0
                 visible: buildplateCompatibilityError || buildplateCompatibilityWarning
@@ -260,20 +247,16 @@ Item
                 property bool buildplateCompatibilityWarning: Cura.MachineManager.variantBuildplateUsable
 
                 // This is a space holder aligning the warning messages.
-                Label
-                {
+                Label {
                     text: ""
                     width: selectors.textWidth
                     renderType: Text.NativeRendering
                 }
-
-                Item
-                {
+                Item {
                     width: selectors.controlWidth
                     height: childrenRect.height
 
-                    UM.RecolorImage
-                    {
+                    UM.RecolorImage {
                         id: warningImage
                         anchors.left: parent.left
                         source: UM.Theme.getIcon("warning")
@@ -284,9 +267,7 @@ Item
                         color: UM.Theme.getColor("material_compatibility_warning")
                         visible: !Cura.MachineManager.isCurrentSetupSupported || warnings.buildplateCompatibilityError || warnings.buildplateCompatibilityWarning
                     }
-
-                    Label
-                    {
+                    Label {
                         id: materialCompatibilityLabel
                         anchors.left: warningImage.right
                         anchors.leftMargin: UM.Theme.getSize("default_margin").width
@@ -302,13 +283,11 @@ Item
                 }
             }
 
-            Row  // material_print_temperature
-            {
+            Row  { // material_print_temperature
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasVariants
 
-                Cura.NumericTextFieldWithUnit
-                {
+                Cura.NumericTextFieldWithUnit {
                     containerStackId: extrudersModel.items[tabBar.currentIndex].id
                     settingKey: "material_print_temperature"
                     settingStoreIndex: propertyStoreIndex
@@ -322,13 +301,11 @@ Item
                 }
             }
 
-            Row  // material_bed_temperature
-            {
+            Row  { // material_bed_temperature
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasVariants
 
-                Cura.NumericTextFieldWithUnit
-                {
+                Cura.NumericTextFieldWithUnit {
                     containerStackId: extrudersModel.items[tabBar.currentIndex].id
                     settingKey: "material_bed_temperature"
                     settingStoreIndex: propertyStoreIndex

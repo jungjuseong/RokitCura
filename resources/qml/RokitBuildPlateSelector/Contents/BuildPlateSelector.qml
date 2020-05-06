@@ -15,10 +15,10 @@ import "./model"
 
 Cura.MachineAction {
     anchors.fill: parent
-    property var extrudersModel: Cura.ExtrudersModel {}
-
     UM.I18nCatalog { id: catalog; name: "cura" }
 
+    property var extrudersModel: Cura.ExtrudersModel {}
+    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
     property var dishModel: {}
     
     function setBuildPlateProperties(product) {
@@ -33,7 +33,6 @@ Cura.MachineAction {
         }
     }
 
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
 
     Item {
         id: buildPlate
@@ -47,7 +46,7 @@ Cura.MachineAction {
         Text {
             id: title
             anchors {
-                bottom: comboboxSelector.top
+                bottom: comboBoxSelector.top
                 left: parent.left
                 leftMargin: UM.Theme.getSize("default_margin").width
                 bottomMargin: UM.Theme.getSize("default_margin").width
@@ -58,7 +57,7 @@ Cura.MachineAction {
         }
 
         Cura.ComboBox {
-            id: comboboxSelector
+            id: comboBoxSelector
             visible: dishModel.category !== "Well Plate"
 
             height: UM.Theme.getSize("rokit_combobox_default").height
@@ -73,12 +72,12 @@ Cura.MachineAction {
             model: dishModel
 
             currentIndex: {
-                    const productId = buildPlateType.properties.value.split(":")[1]
-                    if (productId !== undefined) {
-                        for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).text === productId) {
-                                return i
-                            }
+                    const dishType = buildDishType.properties.value
+                    const product = dishType.split(":")[1]
+                    const productId = (product.count > 1) ? product[1] : ""
+                    for (var index = 0; index < model.count; index++) {
+                        if (model.get(index).text === productId) {
+                            return index
                         }
                     }
                     return 0   

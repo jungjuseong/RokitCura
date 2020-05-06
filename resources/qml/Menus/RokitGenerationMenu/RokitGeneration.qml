@@ -9,7 +9,7 @@ import QtQuick.Layouts 1.3
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Item {
+Cura.MachineAction {
     id: base
 
     UM.I18nCatalog { id: catalog;  name: "cura" }
@@ -23,22 +23,24 @@ Item {
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
-    
+    property var extrudersModel:  CuraApplication.getExtrudersModel()
+
     function getActiveExtruderId() {
-        return (extrudersModel.items[tabBar.currentIndex].id) ? extrudersModel.items[tabBar.currentIndex].id : ""
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        return (activeExtruder != null) ? activeExtruder.id : "None"
     }
 
     function getActiveExtruderName() {
-        return extrudersModel.items[tabBar.currentIndex].name
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        return (activeExtruder != null)  ? activeExtruder.name : "None"
     }
 
     function getExtruderType() {
-        if (Cura.MachineManager.activeStack.variant != null) {
-            var lists = Cura.MachineManager.activeStack.variant.name.split(" ")
-            if (lists.length > 0)
-                return lists[1]
-        }
-
+        const variantName = Cura.MachineManager.activeStack.variant.name
+        const lists = variantName.split(" ")
+        if (lists.length > 0)
+            return lists[1]
+        
         return ""
     }
 
@@ -82,12 +84,9 @@ Item {
         Repeater {
             id: repeater
             model: extrudersModel
-            delegate: UM.TabRowButton
-            {
-                contentItem: Item
-                {
-                    Cura.RokitExtruderIcon
-                    {
+            delegate: UM.TabRowButton {
+                contentItem: Item {
+                    Cura.RokitExtruderIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         materialColor: model.color
                         width: parent.height
@@ -118,8 +117,7 @@ Item {
             anchors.top: parent.top
             color: UM.Theme.getColor("lining")
             visible: tabBar.visible
-            Rectangle
-            {
+            Rectangle {
                 anchors
                 {
                     left: parent.left
@@ -187,8 +185,7 @@ Item {
                     width: base.textWidth
                     renderType: Text.NativeRendering
                 }
-                ToolButton
-                {
+                ToolButton {
                     text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
                     width: selectors.controlWidth
                     height: parent.height
@@ -208,8 +205,7 @@ Item {
                     width: base.textWidth
                     renderType: Text.NativeRendering
                 }
-                ToolButton
-                {
+                ToolButton {
                     text: Cura.MachineManager.activeStack !== null ? Cura.MachineManager.activeStack.material.name : ""
                     width: selectors.controlWidth
                     height: parent.height
@@ -222,8 +218,7 @@ Item {
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor
                 rowSpacing: 1 * screenScaleFactor
-                anchors
-                {
+                anchors {
                     //top: materialBar.bottom
                     left: selectors.left
                     margins: UM.Theme.getSize("default_margin").width
@@ -290,8 +285,7 @@ Item {
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor
                 rowSpacing: 1 * screenScaleFactor
-                anchors
-                {
+                anchors {
                     left: selectors.left
                     margins: UM.Theme.getSize("default_margin").width
                 }

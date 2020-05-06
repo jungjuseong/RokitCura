@@ -13,20 +13,14 @@ import Cura 1.0 as Cura
  * Menu that allows you to select the configuration of the current printer, such
  * as the nozzle sizes and materials in each extruder.
  */
-Cura.ExpandablePopup
-{
+Cura.ExpandablePopup {
     id: base
 
-    property var extrudersModel: Cura.ExtrudersModel{} // CuraApplication.getExtrudersModel()
-
-    UM.I18nCatalog
-    {
+    UM.I18nCatalog {
         id: catalog
         name: "cura"
     }
-
-    enum GenerationMethod
-    {
+    enum GenerationMethod {
         Auto,
         Custom
     }
@@ -34,8 +28,7 @@ Cura.ExpandablePopup
     contentPadding: UM.Theme.getSize("default_lining").width
     enabled: Cura.MachineManager.activeMachine.hasMaterials || Cura.MachineManager.activeMachine.hasVariants || Cura.MachineManager.activeMachine.hasVariantBuildplates; //Only let it drop down if there is any configuration that you could change.
 
-    headerItem: Cura.IconWithText
-    {
+    headerItem: Cura.IconWithText {
         text: "Generation"
         source: UM.Theme.getIcon("check")
         font: UM.Theme.getFont("medium")
@@ -43,8 +36,7 @@ Cura.ExpandablePopup
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
     }
 
-    contentItem: Column
-    {
+    contentItem: Column {
         id: popupItem
         width: UM.Theme.getSize("configuration_selector").width
         height: implicitHeight  // ExpandableComponent will try to use this to determine the size of the background of the pop-up.
@@ -55,41 +47,31 @@ Cura.ExpandablePopup
         property int configuration_method: RokitGenerationMenu.GenerationMethod.Custom  // Type of configuration being used. Only evaluated upon making popup visible.
         property int manual_selected_method: -1  // It stores the configuration method selected by the user. By default the selected method is
 
-        onVisibleChanged:
-        {
+        onVisibleChanged: {
             configuration_method = RokitGenerationMenu.GenerationMethod.Custom
         }
 
-        Item
-        {
+        Item {
             width: parent.width - 2 * parent.padding
             height: rokitGeneration.height + actionPanelWidget.height + UM.Theme.getSize("default_margin").height * 2
 
-            RokitGeneration
-            {
+            RokitGeneration {
                 id: rokitGeneration
                 visible: true
             }
 
-            Cura.ActionPanelWidget
-            {
+            Cura.ActionPanelWidget {
                 id: actionPanelWidget
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.rightMargin: UM.Theme.getSize("thick_margin").width
                 anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
             }
-        }
-
-
-        
+        }        
     }
 
-    Connections
-    {
+    Connections {
         target: Cura.MachineManager
         onGlobalContainerChanged: popupItem.manual_selected_method = -1  // When switching printers, reset the value of the manual selected method
     }
-
-
 }
