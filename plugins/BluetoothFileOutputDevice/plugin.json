@@ -1,0 +1,8 @@
+{
+    "name": "Bluetooth File Output Device",
+    "description": "Enables sending to bluetooth device.",
+    "author": "Rokit Healthcar B.V",
+    "version": "1.0.1",
+    "api": "7.2.0",
+    "i18n-catalog": "uranium"
+}

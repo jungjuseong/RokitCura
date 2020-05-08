@@ -464,6 +464,8 @@ class CuraApplication(QtApplication):
             "PreviewStage", #This shows the list of the plugin views that are installed in Cura.
             #"MonitorStage", #Major part of Cura's functionality.
             "LocalFileOutputDevice", #Major part of Cura's functionality.
+            "BluetoothFileOutputDevice", #Minor part of Cura's functionality.
+
             "LocalContainerProvider", #Cura is useless without any profiles or setting definitions.
 
             # Views:
