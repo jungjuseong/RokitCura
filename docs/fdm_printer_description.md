@@ -1,0 +1,472 @@
+### Machine
+-------
+- Machine Type(machine_name): 프린터 모델의 이름
+- Show Machine Variants(machine_show_variants): 이 프린터의 다른 변종을 보여줄지의 여부
+- Start G-code(machine_start_gcode): 맨 처음 실행할 G-code 명령
+- End G-code(machine_end_gcode): 맨 마지막에 실행할 G-code 명령
+- 재료 GUID(material_guid): 재료의 GUID. 자동으로 설정됨.
+- 구경(material_diameter): 사용한 필라멘트의 지름을 조정. 사용한 필라멘트의 지름에 이 값을 맞춘다.
+- 제작판의 적정 온도를 대기(material_bed_temp_wait): 재작판 온도가 적정할 때까지 기다리는 명령을 삽입할지
+- 노즐의 적정 온도를 대기(material_print_temp_wait): 노즐 온도가 시작 지점에 도달할 때까지 기다릴지
+- 재료 온도를 포함(material_print_temp_prepend): 노즐 온도 명렬을 gcode 시작에 넣을지 여부. start_gcode에 노즐 온도 명령이 있다면 Cura가 이 설정을 자동으로 불가로 만듬.
+- 제작판 온도를 포함(material_bed_temp_prepend): gcode 초반에 제작판 온도를 넣을지 여부. start_gcodee에 이미 제작판 온도 명령이 있으면 Cura 프론트엔드가 자동으로 이 설정을 불가로 만듬
+- 프린트 영역 너비(machine_width): The width (X-direction) of the printable area.
+- 프린트 영역 깊이(machine_depth): The depth (Y-direction) of the printable area.
+- 프린트 영역 높이(machine_height): The height (Z-direction) of the printable area.
+- 제작판 모양(machine_shape): 제작판의 모양(프린트 불가 영역을 고려하지 않음)
+- 제작판 재질(machine_buildplate_type): 제작판의 재질
+- 가열된 제작판이 있는지(machine_heated_bed): Whether the machine has a heated build plate present.
+- 빌드 볼륨 온도 안정화 기능이 있는지(machine_heated_build_volume): 프린터가 빌드 볼륨 온도를 안정화할 수 있는지
+- 중심이 원점(machine_center_is_zero): 프린터의 X/Y 원점 위치가 프린터 영역의 중심
+- 압출기 갯수(machine_extruder_count): 압출기 트레인의 갯수. 압출기 트레인은 feeder, bowden tube, and nozzle의 조합
+- 사용할 압출기의 수(extruders_enabled_count): 사용할 압출기 트레인의 갯수
+- 노즐의 외구경(machine_nozzle_tip_outer_diameter): 노즐 팁의 바깥 구경
+- 노즐 길이(machine_nozzle_head_distance): 노즐의 팁과 프린트 헤드의 최저점과의 높낮이
+- 노즐 각도(machine_nozzle_expansion_angle): 수평면과 노즐 팁 바로 위의 콘모양 파트와의 각도
+- 가열 구역 길이(machine_heat_zone_length): The distance from the tip of the nozzle in which heat from the nozzle is transferred to the filament.
+- 필라멘트 파크 거리(machine_filament_park_distance): The distance from the tip of the nozzle where to park the filament when an extruder is no longer used.
+- 노즐 온도 제어 가능(machine_nozzle_temp_enabled): Cura로 노즐 온도를 제어. 아니면 이 설정을 끈다.
+- 가열 속도(machine_nozzle_heat_up_speed): The speed (°C/s) by which the nozzle heats up averaged over the window of normal printing temperatures and the standby temperature.
+- 쿨다운 속도(machine_nozzle_cool_down_speed): The speed (°C/s) by which the nozzle cools down averaged over the window of normal printing temperatures and the standby temperature.
+- Minimal Time Standby Temperature(machine_min_cool_heat_time_window): 노즐이 식기 전에 압출기가 비활성되어야 하는 최소 시간. 이 시간보다 오랫동안 압출기를 사용하지 않을 경우에만 대기 온도까지 냉각 될 수 있음
+- 선호 G-code(machine_gcode_flavor): The type of g-code to be generated. 
+- 펌웨어 Retraction(machine_firmware_retract): Whether to use firmware retract commands (G10/G11) instead of using the E property in G1 commands to retract the material.
+- 압출기의 가열기 공유(machine_extruders_share_heater): 압출기들이 가열기를 공유하는지
+- 프린트 헤드 비허가 구역(machine_disallowed_areas): 프린트 헤드가 들어갈 수 없는 영역
+- 노즐 비허가 구역(nozzle_disallowed_areas): 노즐이 들어갈 수 없는 영역
+- Machine Head & Fan Polygon(machine_head_with_fans_polygon): A 2D silhouette of the print head (fan caps included).
+- Gantry Height(gantry_height): The height difference between the tip of the nozzle and the gantry system (X and Y axes).
+- 노즐 ID(machine_nozzle_id): 압출기 트레인의 노즐 ID(such as "AA 0.4" and "BB 0.8")
+- 노즐 구경(machine_nozzle_size): 노즐의 내측 지름. 표준이 아닌 노즐 크기를 사용할 때 이 설정을 바꿈
+- 압출기 위치(machine_use_extruder_offset_to_offset_coords): 압출기 위치를 좌표계에 적용
+- 압출기 대기 Z 위치(extruder_prime_pos_z): 프린팅 시작시 노즐이 대기할 Z 축 위치
+- 압출기 대기 절대 위치(extruder_prime_pos_abs): 압출기 대기 위치를 헤드의 최근 위치에 상대적 위치가 아니라 절대 위치로 만듬
+- Maximum Speed X(machine_max_feedrate_x): The maximum speed for the motor of the X-direction.
+- Maximum Speed Y(machine_max_feedrate_y): The maximum speed for the motor of the Y-direction.
+- Maximum Speed Z(machine_max_feedrate_z): The maximum speed for the motor of the Z-direction.
+- Maximum Feedrate(machine_max_feedrate_e): The maximum speed of the filament.
+- Maximum Acceleration X(machine_max_acceleration_x): Maximum acceleration for the motor of the X-direction
+- Maximum Acceleration Y(machine_max_acceleration_y): Maximum acceleration for the motor of the Y-direction.
+- Maximum Acceleration Z(machine_max_acceleration_z): Maximum acceleration for the motor of the Z-direction.
+- Maximum Filament Acceleration(machine_max_acceleration_e): Maximum acceleration for the motor of the filament.
+- Default Acceleration(machine_acceleration): The default acceleration of print head movement.
+- Default X-Y Jerk(machine_max_jerk_xy): Default jerk for movement in the horizontal plane.
+- Default Z Jerk(machine_max_jerk_z): Default jerk for the motor of the Z-direction.
+- Default Filament Jerk(machine_max_jerk_e): Default jerk for the motor of the filament.
+- Steps per Millimeter (X)(machine_steps_per_mm_x): How many steps of the stepper motor will result in one millimeter of movement in the X direction.
+- Steps per Millimeter (Y)(machine_steps_per_mm_y): How many steps of the stepper motor will result in one millimeter of movement in the Y direction.
+- Steps per Millimeter (Z)(machine_steps_per_mm_z): How many steps of the stepper motor will result in one millimeter of movement in the Z direction.
+- Steps per Millimeter (E)(machine_steps_per_mm_e): How many steps of the stepper motors will result in one millimeter of extrusion.
+- X Endstop in Positive Direction(machine_endstop_positive_direction_x): Whether the endstop of the X axis is in the positive direction (high X coordinate) or negative (low X coordinate).
+- Y Endstop in Positive Direction(machine_endstop_positive_direction_y): Whether the endstop of the Y axis is in the positive direction (high Y coordinate) or negative (low Y coordinate).
+- Z Endstop in Positive Direction(machine_endstop_positive_direction_z): Whether the endstop of the Z axis is in the positive direction (high Z coordinate) or negative (low Z coordinate).
+- Minimum Feedrate(machine_minimum_feedrate): The minimal movement speed of the print head.
+- Feeder Wheel Diameter(machine_feeder_wheel_diameter): The diameter of the wheel that drives the material in the feeder.
+  
+### Quality
+-------
+- Layer Height(layer_height): The height of each layer in mm. Higher values produce faster prints in lower resolution, lower values produce slower prints in higher resolution.
+- Initial Layer Height(layer_height_0): The height of the initial layer in mm. A thicker initial layer makes adhesion to the build plate easier.
+- Line Width(line_width): Width of a single line. Generally, the width of each line should correspond to the width of the nozzle. However, slightly reducing this value could produce better prints.
+- Initial Layer Line Width(initial_layer_line_width_factor): Multiplier of the line width on the first layer. Increasing this could improve bed adhesion.
+  
+### Shell
+-------
+- Wall Extruder(wall_extruder_nr): The extruder train used for printing the walls. This is used in multi-extrusion.
+- Wall Thickness(wall_thickness): The thickness of the walls in the horizontal direction. This value divided by the wall line width defines the number of walls.
+- Outer Wall Wipe Distance(wall_0_wipe_dist): Distance of a travel move inserted after the outer wall, to hide the Z seam better.
+- Top Surface Skin Extruder(roofing_extruder_nr): The extruder train used for printing the top most skin. This is used in multi-extrusion.
+- Top Surface Skin Layers(roofing_layer_count): The number of top most skin layers. Usually only one top most layer is sufficient to generate higher quality top surfaces.
+- Top/Bottom Extruder(top_bottom_extruder_nr): The extruder train used for printing the top and bottom skin. This is used in multi-extrusion.
+- Top/Bottom Thickness(top_bottom_thickness): The thickness of the top/bottom layers in the print. This value divided by the layer height defines the number of top/bottom layers.
+- Top/Bottom Pattern(top_bottom_pattern): The pattern of the top/bottom layers.
+- Bottom Pattern Initial Layer(top_bottom_pattern_0): The pattern on the bottom of the print on the first layer.
+- Connect Top/Bottom Polygons(connect_skin_polygons): Connect top/bottom skin paths where they run next to each other. For the concentric pattern enabling this setting greatly reduces the travel time, but because the connections can happen midway over infill this feature can reduce the top surface quality.
+- Top/Bottom Line Directions(skin_angles): A list of integer line directions to use when the top/bottom layers use the lines or zig zag pattern. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the traditional default angles (45 and 135 degrees).
+- Outer Wall Inset(wall_0_inset): Inset applied to the path of the outer wall. If the outer wall is smaller than the nozzle, and printed after the inner walls, use this offset to get the hole in the nozzle to overlap with the inner walls instead of the outside of the model.
+- Optimize Wall Printing Order(optimize_wall_printing_order): Optimize the order in which walls are printed so as to reduce the number of retractions and the distance travelled. Most parts will benefit from this being enabled but some may actually take longer so please compare the print time estimates with and without optimization. First layer is not optimized when choosing brim as build plate adhesion type.
+- Outer Before Inner Walls(outer_inset_first): Prints walls in order of outside to inside when enabled. This can help improve dimensional accuracy in X and Y when using a high viscosity plastic like ABS; however it can decrease outer surface print quality, especially on overhangs.
+- Alternate Extra Wall(alternate_extra_perimeter): Prints an extra wall at every other layer. This way infill gets caught between these extra walls, resulting in stronger prints.
+- Compensate Wall Overlaps(travel_compensate_overlapping_walls_enabled): Compensate the flow for parts of a wall being printed where there is already a wall in place.
+- Minimum Wall Flow(wall_min_flow): Minimum allowed percentage flow for a wall line. The wall overlap compensation reduces a wall's flow when it lies close to an existing wall. Walls whose flow is less than this value will be replaced with a travel move. When using this setting, you must enable the wall overlap compensation and print the outer wall before inner walls.
+- Prefer Retract(wall_min_flow_retract): If enabled, retraction is used rather than combing for travel moves that replace walls whose flow is below the minimum flow threshold.
+- Fill Gaps Between Walls(fill_perimeter_gaps): Fills the gaps between walls where no walls fit.
+- Filter Out Tiny Gaps(filter_out_tiny_gaps): Filter out tiny gaps to reduce blobs on outside of model.
+- Print Thin Walls(fill_outline_gaps): Print pieces of the model which are horizontally thinner than the nozzle size.
+- Horizontal Expansion(xy_offset): Amount of offset applied to all polygons in each layer. Positive values can compensate for too big holes; negative values can compensate for too small holes.
+- Initial Layer Horizontal Expansion(xy_offset_layer_0): Amount of offset applied to all polygons in the first layer. A negative value can compensate for squishing of the first layer known as "elephant's foot".
+- Hole Horizontal Expansion(hole_xy_offset): Amount of offset applied to all holes in each layer. Positive values increase the size of the holes, negative values reduce the size of the holes.
+- Z Seam Alignment(z_seam_type): Starting point of each path in a layer. When paths in consecutive layers start at the same point a vertical seam may show on the print. When aligning these near a user specified location, the seam is easiest to remove. When placed randomly the inaccuracies at the paths' start will be less noticeable. When taking the shortest path the print will be quicker.
+- Z Seam Position(z_seam_position): The position near where to start printing each part in a layer.
+- Seam Corner Preference(z_seam_corner): Control whether corners on the model outline influence the position of the seam. None means that corners have no influence on the seam position. Hide Seam makes the seam more likely to occur on an inside corner. Expose Seam makes the seam more likely to occur on an outside corner. Hide or Expose Seam makes the seam more likely to occur at an inside or outside corner. Smart Hiding allows both inside and outside corners, but chooses inside corners more frequently, if appropriate.
+- Z Seam Relative(z_seam_relative): When enabled, the z seam coordinates are relative to each part's centre. When disabled, the coordinates define an absolute position on the build plate.
+- No Skin in Z Gaps(skin_no_small_gaps_heuristic): When the model has small vertical gaps of only a few layers, there should normally be skin around those layers in the narrow space. Enable this setting to not generate skin if the vertical gap is very small. This improves printing time and slicing time, but technically leaves infill exposed to the air.
+- Extra Skin Wall Count(skin_outline_count): Replaces the outermost part of the top/bottom pattern with a number of concentric lines. Using one or two lines improves roofs that start on infill material.
+- Enable Ironing(ironing_enabled): Go over the top surface one additional time, but this time extruding very little material. This is meant to melt the plastic on top further, creating a smoother surface. The pressure in the nozzle chamber is kept high so that the creases in the surface are filled with material.
+- Iron Only Highest Layer(ironing_only_highest_layer): Only perform ironing on the very last layer of the mesh. This saves time if the lower layers don't need a smooth surface finish.
+- Ironing Pattern(ironing_pattern): The pattern to use for ironing top surfaces.
+- Ironing Line Spacing(ironing_line_spacing): The distance between the lines of ironing.
+- Ironing Flow(ironing_flow): The amount of material, relative to a normal skin line, to extrude during ironing. Keeping the nozzle filled helps filling some of the crevices of the top surface, but too much results in overextrusion and blips on the side of the surface.
+- Ironing Inset(ironing_inset): A distance to keep from the edges of the model. Ironing all the way to the edge of the mesh may result in a jagged edge on your print.
+- Ironing Speed(speed_ironing): The speed at which to pass over the top surface.
+- Ironing Acceleration(acceleration_ironing): The acceleration with which ironing is performed.
+- Ironing Jerk(jerk_ironing): The maximum instantaneous velocity change while performing ironing.
+- Skin Overlap Percentage(skin_overlap): Adjust the amount of overlap between the walls and (the endpoints of) the skin-centerlines, as a percentage of the line widths of the skin lines and the innermost wall. A slight overlap allows the walls to connect firmly to the skin. Note that, given an equal skin and wall line-width, any percentage over 50% may already cause any skin to go past the wall, because at that point the position of the nozzle of the skin-extruder may already reach past the middle of the wall.
+
+### Infill
+-------
+- Infill Extruder(infill_extruder_nr): The extruder train used for printing infill. This is used in multi-extrusion.
+- Infill Density(infill_sparse_density): Adjusts the density of infill of the print.
+- Infill Pattern(infill_pattern): The pattern of the infill material of the print. The line and zig zag infill swap direction on alternate layers, reducing material cost. The grid, triangle, tri-hexagon, cubic, octet, quarter cubic, cross and concentric patterns are fully printed every layer. Gyroid, cubic, quarter cubic and octet infill change with every layer to provide a more equal distribution of strength over each direction.
+- Connect Infill Lines(zig_zaggify_infill): Connect the ends where the infill pattern meets the inner wall using a line which follows the shape of the inner wall. Enabling this setting can make the infill adhere to the walls better and reduce the effects of infill on the quality of vertical surfaces. Disabling this setting reduces the amount of material used.
+- Connect Infill Polygons(connect_infill_polygons): Connect infill paths where they run next to each other. For infill patterns which consist of several closed polygons, enabling this setting greatly reduces the travel time.
+- Infill Line Directions(infill_angles): A list of integer line directions to use. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the traditional default angles (45 and 135 degrees for the lines and zig zag patterns and 45 degrees for all other patterns).
+- Infill X Offset(infill_offset_x): The infill pattern is moved this distance along the X axis.
+- Infill Y Offset(infill_offset_y): The infill pattern is moved this distance along the Y axis.
+- Randomize Infill Start(infill_randomize_start_location): Randomize which infill line is printed first. This prevents one segment becoming the strongest, but it does so at the cost of an additional travel move.
+- Infill Line Multiplier(infill_multiplier): Convert each infill line to this many lines. The extra lines do not cross over each other, but avoid each other. This makes the infill stiffer, but increases print time and material usage.
+- Extra Infill Wall Count(infill_wall_line_count): Add extra walls around the infill area. Such walls can make top/bottom skin lines sag down less which means you need less top/bottom skin layers for the same quality at the cost of some extra material. This feature can combine with the Connect Infill Polygons to connect all the infill into a single extrusion path without the need for travels or retractions if configured right.
+- Cubic Subdivision Shell(sub_div_rad_add): An addition to the radius from the center of each cube to check for the boundary of the model, as to decide whether this cube should be subdivided. Larger values lead to a thicker shell of small cubes near the boundary of the model.
+- Infill Overlap Percentage(infill_overlap): The amount of overlap between the infill and the walls as a percentage of the infill line width. A slight overlap allows the walls to connect firmly to the infill.
+- Infill Wipe Distance(infill_wipe_dist): Distance of a travel move inserted after every infill line, to make the infill stick to the walls better. This option is similar to infill overlap, but without extrusion and only on one end of the infill line.
+- Infill Layer Thickness(infill_sparse_thickness): The thickness per layer of infill material. This value should always be a multiple of the layer height and is otherwise rounded.
+- Gradual Infill Steps(gradual_infill_steps): Number of times to reduce the infill density by half when getting further below top surfaces. Areas which are closer to top surfaces get a higher density, up to the Infill Density.
+- Gradual Infill Step Height(gradual_infill_step_height): The height of infill of a given density before switching to half the density.
+- Infill Before Walls(infill_before_walls): Print the infill before printing the walls. Printing the walls first may lead to more accurate walls, but overhangs print worse. Printing the infill first leads to sturdier walls, but the infill pattern might sometimes show through the surface.
+- Minimum Infill Area(min_infill_area): Don't generate areas of infill smaller than this (use skin instead).
+- Infill Support(infill_support_enabled): Print infill structures only where tops of the model should be supported. Enabling this reduces print time and material usage, but leads to ununiform object strength.
+- Infill Overhang Angle(infill_support_angle): The minimum angle of internal overhangs for which infill is added. At a value of 0° objects are totally filled with infill, 90° will not provide any infill.
+- Skin Removal Width(skin_preshrink): The largest width of skin areas which are to be removed. Every skin area smaller than this value will disappear. This can help in limiting the amount of time and material spent on printing top/bottom skin at slanted surfaces in the model.
+- Skin Expand Distance(expand_skins_expand_distance): The distance the skins are expanded into the infill. Higher values makes the skin attach better to the infill pattern and makes the walls on neighboring layers adhere better to the skin. Lower values save amount of material used.
+- Maximum Skin Angle for Expansion(max_skin_angle_for_expansion): Top and/or bottom surfaces of your object with an angle larger than this setting, won't have their top/bottom skin expanded. This avoids expanding the narrow skin areas that are created when the model surface has a near vertical slope. An angle of 0° is horizontal, while an angle of 90° is vertical.
+- Skin Edge Support Thickness(skin_edge_support_thickness): The thickness of the extra infill that supports skin edges.
+
+### Material
+-------
+- 디폴트 프린트 온도(default_material_print_temperature): 프린팅에 사용하는 기본 온도. 이것이 재료의 기본 온도가 되야 함. 다른 모든 프린트 온도는 이 값과의 차이를 사용해야 함.
+- 빌드 볼륨 온도(build_volume_temperature): 프린트 되는 환경의 온도. 값이 0이면 온도가 조절되지 않는다.
+- 프린트 온도(material_print_temperature): 프린트 할 때의 온도.
+- 첫 레이어의 프린팅 온도(material_print_temperature_layer_0): 첫 층에 사용되는 프린팅 온도. 첫 층을 특별하게 처리하지 않는다면 0으로 둔다.
+- 처음의 프린팅 온도(material_initial_print_temperature): 프린팅 온도로 가열하는 동안 프린팅이 사작횔 수 있는 최소 온도.
+- 마지막 프린팅 온도(material_final_print_temperature): The temperature to which to already start cooling down just before the end of printing.
+- Extrusion Cool Down Speed Modifier(material_extrusion_cool_down_speed): The extra speed by which the nozzle cools while extruding. The same value is used to signify the heat up speed lost when heating up while extruding.
+- Default Build Plate Temperature(default_material_bed_temperature): The default temperature used for the heated build plate. This should be the "base" temperature of a build plate. All other print temperatures should use offsets based on this value
+- Build Plate Temperature(material_bed_temperature): The temperature used for the heated build plate. If this is 0, the bed temperature will not be adjusted.
+- Build Plate Temperature Initial Layer(material_bed_temperature_layer_0): 첫 층에서 가열된 제작판에 사용되는 온도.
+- Adhesion Tendency(material_adhesion_tendency): 표면 접착도.
+- Surface Energy(material_surface_energy): 표면 에너지
+- Shrinkage Ratio(material_shrinkage_percentage): 수축율
+- Crystalline Material(material_crystallinity): 잘 떨어지는 재질(크리스탈)인지 길게 늘어지는 재질인지(논 크리스탈) ?
+- Anti-ooze Retracted Position(material_anti_ooze_retracted_position): How far the material needs to be retracted before it stops oozing.
+- Anti-ooze Retraction Speed(material_anti_ooze_retraction_speed): How fast the material needs to be retracted during a filament switch to prevent oozing.
+- Break Preparation Retracted Position(material_break_preparation_retracted_position): How far the filament can be stretched before it breaks, while heated.
+- Break Preparation Retraction Speed(material_break_preparation_speed): How fast the filament needs to be retracted just before breaking it off in a retraction.
+- Break Preparation Temperature(material_break_preparation_temperature): The temperature used to purge material, should be roughly equal to the highest possible printing temperature.
+- Break Retracted Position(material_break_retracted_position): How far to retract the filament in order to break it cleanly.
+- Break Retraction Speed(material_break_speed): The speed at which to retract the filament in order to break it cleanly.
+- Break Temperature(material_break_temperature): The temperature at which the filament is broken for a clean break.
+- Flush Purge Speed(material_flush_purge_speed): Material Station internal value
+- Flush Purge Length(material_flush_purge_length): Material Station internal value
+- End Of Filament Purge Speed(material_end_of_filament_purge_speed): Material Station internal value
+- End Of Filament Purge Length(material_end_of_filament_purge_length): Material Station internal value
+- Maximum Park Duration(material_maximum_park_duration): Material Station internal value
+- No Load Move Factor(material_no_load_move_factor): Material Station internal value
+- Flow(material_flow): Flow compensation: the amount of material extruded is multiplied by this value.
+- Initial Layer Flow(material_flow_layer_0): Flow compensation for the first layer: the amount of material extruded on the initial layer is multiplied by this value.
+- Standby Temperature(material_standby_temperature): The temperature of the nozzle when another nozzle is currently used for printing.
+
+### Speed
+-------
+- 프린트 스피드(speed_print): 프린팅 할때의 속도
+- 트레블 스피드(speed_travel): 이동만할 때의 속도.
+- Initial Layer Speed(speed_layer_0): The speed for the initial layer. A lower value is advised to improve adhesion to the build plate.
+- Skirt/Brim Speed(skirt_brim_speed): The speed at which the skirt and brim are printed. Normally this is done at the initial layer speed, but sometimes you might want to print the skirt or brim at a different speed.
+- Z Hop Speed(speed_z_hop): The speed at which the vertical Z movement is made for Z Hops. This is typically lower than the print speed since the build plate or machine's gantry is harder to move.
+- Number of Slower Layers(speed_slowdown_layers): The first few layers are printed slower than the rest of the model, to get better adhesion to the build plate and improve the overall success rate of prints. The speed is gradually increased over these layers.
+- 필라멘트 플로우를 이퀄라이즈(speed_equalize_flow_enabled): Print thinner than normal lines faster so that the amount of material extruded per second remains the same. Thin pieces in your model might require lines printed with smaller line width than provided in the settings. This setting controls the speed changes for such lines.
+- 플로우 이퀄라이즈를 위한 최대 스피드(speed_equalize_flow_max): Maximum print speed when adjusting the print speed in order to equalize flow.
+- 가속 제어 가능(acceleration_enabled): Enables adjusting the print head acceleration. Increasing the accelerations can reduce printing time at the cost of print quality.
+- Print Acceleration(acceleration_print): The acceleration with which printing happens.
+- Travel Acceleration(acceleration_travel): The acceleration with which travel moves are made.
+- Initial Layer Acceleration(acceleration_layer_0): The acceleration for the initial layer.
+- Skirt/Brim Acceleration(acceleration_skirt_brim): The acceleration with which the skirt and brim are printed. Normally this is done with the initial layer acceleration, but sometimes you might want to print the skirt or brim at a different acceleration.
+- Enable Jerk Control(jerk_enabled): Enables adjusting the jerk of print head when the velocity in the X or Y axis changes. Increasing the jerk can reduce printing time at the cost of print quality.
+- Print Jerk(jerk_print): The maximum instantaneous velocity change of the print head.
+- Travel Jerk(jerk_travel): The maximum instantaneous velocity change with which travel moves are made.
+- Initial Layer Jerk(jerk_layer_0): The print maximum instantaneous velocity change for the initial layer.
+- Skirt/Brim Jerk(jerk_skirt_brim): The maximum instantaneous velocity change with which the skirt and brim are printed.
+
+### Travel
+-------
+- 리트랙션 가능(retraction_enable): 노즐이 프린팅하지 않는 영역으로 이동할때 필라멘트를 흡입함
+- 레이어 변경시 리트랙트(retract_at_layer_change): 노즐이 다음 층으로 이동할때 필라멘트를 흡입함
+- 리트랙션 거리(retraction_amount): 흡입 이동 동안 흡입되는 재료의 길이
+- 리트랙션 속도(retraction_speed): 흡입 이동 동안 필라멘트가 흡입되고 프라임되는 속도.
+- Retraction Extra Prime Amount(retraction_extra_prime_amount): Some material can ooze away during a travel move, which can be compensated for here.
+- Retraction Minimum Travel(retraction_min_travel): The minimum distance of travel needed for a retraction to happen at all. This helps to get fewer retractions in a small area.
+- Maximum Retraction Count(retraction_count_max): This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
+- Minimum Extrusion Distance Window(retraction_extrusion_window): The window in which the maximum retraction count is enforced. This value should be approximately the same as the retraction distance, so that effectively the number of times a retraction passes the same patch of material is limited.
+- Limit Support Retractions(limit_support_retractions): Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
+- Combing 모드(retraction_combing): Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
+- 흡입없이 최대 Comb 거리(retraction_combing_max_distance): When non-zero, combing travel moves that are longer than this distance will use retraction.
+- 외벽 전에 리트랙트(travel_retract_before_outer_wall): 외곽 벽을 시작하기 위해 이동할 때 항상 압입됨.
+- 트레블링 시 인쇄된 부분 회피(travel_avoid_other_parts): 노즐이 트래블링 시에 이미 인쇄된 파트를 회피함. 이 옵션은 combing이 활성일때만 사용 가능한다
+- 트레블링 시 지지대를 회피(travel_avoid_supports): 노즐이 트래블링 시 이미 프린트된 지지대를 회피함. 이 옵션은 combing이 활성일때만 사용 가능
+- Travel Avoid Distance(travel_avoid_distance): 트래블 이동 동안 회피 시 노즐과 이미 인쇄된 파트 간의 거리
+- Layer Start X(layer_start_x): The X coordinate of the position near where to find the part to start printing each layer.
+- Layer Start Y(layer_start_y): The Y coordinate of the position near where to find the part to start printing each layer.
+- Z Hop When Retracted(retraction_hop_enabled): Whenever a retraction is done, the build plate is lowered to create clearance between the nozzle and the print. It prevents the nozzle from hitting the print during travel moves, reducing the chance to knock the print from the build plate.
+- Z Hop Only Over Printed Parts(retraction_hop_only_when_collides): Only perform a Z Hop when moving over printed parts which cannot be avoided by horizontal motion by Avoid Printed Parts when Traveling.
+- Z Hop Height(retraction_hop): The height difference when performing a Z Hop.
+- Z Hop After Extruder Switch(retraction_hop_after_extruder_switch): After the machine switched from one extruder to the other, the build plate is lowered to create clearance between the nozzle and the print. This prevents the nozzle from leaving oozed material on the outside of a print.
+- Z Hop After Extruder Switch Height(retraction_hop_after_extruder_switch_height): The height difference when performing a Z Hop after extruder switch.
+
+### Cooling
+-------
+
+- 프린트 냉각 가능(cool_fan_enabled): 프린트시 프린트 쿨링 팬을 가능으로 함. The fans improve print quality on layers with short layer times and bridging / overhangs.
+- 팬 스피드(cool_fan_speed): 프린트 쿨링 팬의 회전 속도.
+- 일반/최대 팬 스피드 임계치(cool_min_layer_time_fan_speed_max): The layer time which sets the threshold between regular fan speed and maximum fan speed. Layers that print slower than this time use regular fan speed. For faster layers the fan speed gradually increases towards the maximum fan speed.
+- 초기 팬 스피드(cool_fan_speed_0): The speed at which the fans spin at the start of the print. In subsequent layers the fan speed is gradually increased up to the layer corresponding to Regular Fan Speed at Height.
+- Height에서 일반 팬 스피드(cool_fan_full_at_height): The height at which the fans spin on regular fan speed. At the layers below the fan speed gradually increases from Initial Fan Speed to Regular Fan Speed.
+-최저 레이어 시간(cool_min_layer_time): 한 레이어에서 소요할 최소 시간. This forces the printer to slow down, to at least spend the time set here in one layer. This allows the printed material to cool down properly before printing the next layer. Layers may still take shorter than the minimal layer time if Lift Head is disabled and if the Minimum Speed would otherwise be violated.
+- 최저 스피드(cool_min_speed): The minimum print speed, despite slowing down due to the minimum layer time. When the printer would slow down too much, the pressure in the nozzle would be too low and result in bad print quality.
+- Lift Head(cool_lift_head): When the minimum speed is hit because of minimum layer time, lift the head away from the print and wait the extra time until the minimum layer time is reached.
+
+### Support
+-------
+
+- 지지대 사용(support_enable): Generate structures to support parts of the model which have overhangs. Without these structures, such parts would collapse during printing.
+- 지지대에 사용할 압출기(support_extruder_nr): The extruder train to use for printing the support. This is used in multi-extrusion.
+- Support Placement(support_type): Adjusts the placement of the support structures. The placement can be set to touching build plate or everywhere. When set to everywhere the support structures will also be printed on the model.
+- Support Overhang Angle(support_angle): The minimum angle of overhangs for which support is added. At a value of 0° all overhangs are supported, 90° will not provide any support.
+- Support Pattern(support_pattern): The pattern of the support structures of the print. The different options available result in sturdy or easy to remove support.
+- Support Wall Line Count(support_wall_count): The number of walls with which to surround support infill. Adding a wall can make support print more reliably and can support overhangs better, but increases print time and material used.
+- Connect Support Lines(zig_zaggify_support): Connect the ends of the support lines together. Enabling this setting can make your support more sturdy and reduce underextrusion, but it will cost more material.
+- Connect Support ZigZags(support_connect_zigzags): Connect the ZigZags. This will increase the strength of the zig zag support structure.
+- Support Density(support_infill_rate): Adjusts the density of the support structure. A higher value results in better overhangs, but the supports are harder to remove.
+- Support Infill Line Directions(support_infill_angles): A list of integer line directions to use. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the default angle 0 degrees.
+- 지지대 Brim 사용(support_brim_enable): Generate a brim within the support infill regions of the first layer. This brim is printed underneath the support, not around it. Enabling this setting increases the adhesion of support to the build plate.
+- 지지대 Brim 너비(support_brim_width): The width of the brim to print underneath the support. A larger brim enhances adhesion to the build plate, at the cost of some extra material.
+- Support Z Distance(support_z_distance): Distance from the top/bottom of the support structure to the print. This gap provides clearance to remove the supports after the model is printed. This value is rounded up to a multiple of the layer height.
+- Support X/Y Distance(support_xy_distance): Distance of the support structure from the print in the X/Y directions.
+- Support Distance Priority(support_xy_overrides_z): Whether the Support X/Y Distance overrides the Support Z Distance or vice versa. When X/Y overrides Z the X/Y distance can push away the support from the model, influencing the actual Z distance to the overhang. We can disable this by not applying the X/Y distance around overhangs.
+- Minimum Support X/Y Distance(support_xy_distance_overhang): Distance of the support structure from the overhang in the X/Y directions.
+- Support Stair Step Height(support_bottom_stair_step_height): The height of the steps of the stair-like bottom of support resting on the model. A low value makes the support harder to remove, but too high values can lead to unstable support structures. Set to zero to turn off the stair-like behaviour.
+- Support Stair Step Maximum Width(support_bottom_stair_step_width): The maximum width of the steps of the stair-like bottom of support resting on the model. A low value makes the support harder to remove, but too high values can lead to unstable support structures.
+- Support Join Distance(support_join_distance): The maximum distance between support structures in the X/Y directions. When separate structures are closer together than this value, the structures merge into one.
+- 지지대 수평 확장(support_offset): Amount of offset applied to all support polygons in each layer. Positive values can smooth out the support areas and result in more sturdy support.
+- Support Infill Layer Thickness(support_infill_sparse_thickness): The thickness per layer of support infill material. This value should always be a multiple of the layer height and is otherwise rounded.
+- Gradual Support Infill Steps(gradual_support_infill_steps): Number of times to reduce the support infill density by half when getting further below top surfaces. Areas which are closer to top surfaces get a higher density, up to the Support Infill Density.
+- Gradual Support Infill Step Height(gradual_support_infill_step_height): The height of support infill of a given density before switching to half the density.
+- Minimum Support Area(minimum_support_area): Minimum area size for support polygons. Polygons which have an area smaller than this value will not be generated.
+- Enable Support Interface(support_interface_enable): Generate a dense interface between the model and the support. This will create a skin at the top of the support on which the model is printed and at the bottom of the support, where it rests on the model.
+- Support Interface Thickness(support_interface_height): The thickness of the interface of the support where it touches with the model on the bottom or the top.
+- Support Interface Resolution(support_interface_skip_height): When checking where there's model above and below the support, take steps of the given height. Lower values will slice slower, while higher values may cause normal support to be printed in some places where there should have been support interface.
+- Support Interface Density(support_interface_density): Adjusts the density of the roofs and floors of the support structure. A higher value results in better overhangs, but the supports are harder to remove.
+- Support Interface Pattern(support_interface_pattern): The pattern with which the interface of the support with the model is printed.
+- Minimum Support Interface Area(minimum_interface_area): Minimum area size for support interface polygons. Polygons which have an area smaller than this value will be printed as normal support.
+- Support Interface Horizontal Expansion(support_interface_offset): Amount of offset applied to the support interface polygons.
+- Support Interface Line Directions(support_interface_angles): A list of integer line directions to use. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the default angles (alternates between 45 and 135 degrees if interfaces are quite thick or 90 degrees).
+- Fan Speed Override(support_fan_enable): When enabled, the print cooling fan speed is altered for the skin regions immediately above the support.
+- Supported Skin Fan Speed(support_supported_skin_fan_speed): Percentage fan speed to use when printing the skin regions immediately above the support. Using a high fan speed can make the support easier to remove.
+- Use Towers(support_use_towers): Use specialized towers to support tiny overhang areas. These towers have a larger diameter than the region they support. Near the overhang the towers' diameter decreases, forming a roof.
+- Tower Diameter(support_tower_diameter): The diameter of a special tower.
+- Maximum Tower-Supported Diameter(support_tower_maximum_supported_diameter): Maximum diameter in the X/Y directions of a small area which is to be supported by a specialized support tower.
+- Tower Roof Angle(support_tower_roof_angle): The angle of a rooftop of a tower. A higher value results in pointed tower roofs, a lower value results in flattened tower roofs.
+- Drop Down Support Mesh(support_mesh_drop_down): Make support everywhere below the support mesh, so that there's no overhang in the support mesh.
+
+### Build Plate Adhesion
+
+-------
+- Enable Prime Blob(prime_blob_enable): Whether to prime the filament with a blob before printing. Turning this setting on will ensure that the extruder will have material ready at the nozzle before printing. Printing Brim or Skirt can act like priming too, in which case turning this setting off saves some time.
+- Extruder Prime X Position(extruder_prime_pos_x): The X coordinate of the position where the nozzle primes at the start of printing.
+- Extruder Prime Y Position(extruder_prime_pos_y): The Y coordinate of the position where the nozzle primes at the start of printing.
+- Build Plate Adhesion Type(adhesion_type): Different options that help to improve both priming your extrusion and adhesion to the build plate. Brim adds a single layer flat area around the base of your model to prevent warping. Raft adds a thick grid with a roof below the model. Skirt is a line printed around the model, but not connected to the model.
+- Build Plate Adhesion Extruder(adhesion_extruder_nr): The extruder train to use for printing the skirt/brim/raft. This is used in multi-extrusion.
+- Skirt Line Count(skirt_line_count): Multiple skirt lines help to prime your extrusion better for small models. Setting this to 0 will disable the skirt.
+- Skirt Distance(skirt_gap): The horizontal distance between the skirt and the first layer of the print. This is the minimum distance. Multiple skirt lines will extend outwards from this distance.
+- Skirt/Brim Minimum Length(skirt_brim_minimal_length): The minimum length of the skirt or brim. If this length is not reached by all skirt or brim lines together, more skirt or brim lines will be added until the minimum length is reached. Note: If the line count is set to 0 this is ignored.
+- Brim Width(brim_width): The distance from the model to the outermost brim line. A larger brim enhances adhesion to the build plate, but also reduces the effective print area.
+- Brim Distance(brim_gap): The horizontal distance between the first brim line and the outline of the first layer of the print. A small gap can make the brim easier to remove while still providing the thermal benefits.
+- Brim Replaces Support(brim_replaces_support): Enforce brim to be printed around the model even if that space would otherwise be occupied by support. This replaces some regions of the first layer of support by brim regions.
+- Brim Only on Outside(brim_outside_only): Only print the brim on the outside of the model. This reduces the amount of brim you need to remove afterwards, while it doesn't reduce the bed adhesion that much.
+- Raft Extra Margin(raft_margin): If the raft is enabled, this is the extra raft area around the model which is also given a raft. Increasing this margin will create a stronger raft while using more material and leaving less area for your print.
+- Raft Smoothing(raft_smoothing): This setting controls how much inner corners in the raft outline are rounded. Inward corners are rounded to a semi circle with a radius equal to the value given here. This setting also removes holes in the raft outline which are smaller than such a circle.
+- Raft Air Gap(raft_airgap): The gap between the final raft layer and the first layer of the model. Only the first layer is raised by this amount to lower the bonding between the raft layer and the model. Makes it easier to peel off the raft.
+- Initial Layer Z Overlap(layer_0_z_overlap): Make the first and second layer of the model overlap in the Z direction to compensate for the filament lost in the airgap. All models above the first model layer will be shifted down by this amount.
+- Raft Top Layers(raft_surface_layers): The number of top layers on top of the 2nd raft layer. These are fully filled layers that the model sits on. 2 layers result in a smoother top surface than 1.
+- Raft Top Layer Thickness(raft_surface_thickness): Layer thickness of the top raft layers.
+- Raft Top Line Width(raft_surface_line_width): Width of the lines in the top surface of the raft. These can be thin lines so that the top of the raft becomes smooth.
+- Raft Top Spacing(raft_surface_line_spacing): The distance between the raft lines for the top raft layers. The spacing should be equal to the line width, so that the surface is solid.
+- Raft Middle Thickness(raft_interface_thickness): Layer thickness of the middle raft layer.
+- Raft Middle Line Width(raft_interface_line_width): Width of the lines in the middle raft layer. Making the second layer extrude more causes the lines to stick to the build plate.
+- Raft Middle Spacing(raft_interface_line_spacing): The distance between the raft lines for the middle raft layer. The spacing of the middle should be quite wide, while being dense enough to support the top raft layers.
+- Raft Base Thickness(raft_base_thickness): Layer thickness of the base raft layer. This should be a thick layer which sticks firmly to the printer build plate.
+- Raft Base Line Width(raft_base_line_width): Width of the lines in the base raft layer. These should be thick lines to assist in build plate adhesion.
+- Raft Base Line Spacing(raft_base_line_spacing): The distance between the raft lines for the base raft layer. Wide spacing makes for easy removal of the raft from the build plate.
+- Raft Print Speed(raft_speed): The speed at which the raft is printed.
+- Raft Print Acceleration(raft_acceleration): The acceleration with which the raft is printed.
+- Raft Print Jerk(raft_jerk): The jerk with which the raft is printed.
+- Raft Fan Speed(raft_fan_speed): The fan speed for the raft.
+
+### Dual Extrusion
+-------
+- Prime 타워 사용(prime_tower_enable): 노즐을 바꾼 후 재료를 준비하는 프린트물 옆에 타워를 인쇄
+- Prime 타워 크기(prime_tower_size): 프라임 타워의 너비
+- Prime 타워 최소 볼륨(prime_tower_min_volume): The minimum volume for each layer of the prime tower in order to purge enough material.
+- Prime 타워 X Position(prime_tower_position_x): The x coordinate of the position of the prime tower.
+- Prime 타워 Y Position(prime_tower_position_y): The y coordinate of the position of the prime tower.
+- Wipe Inactive Nozzle on Prime Tower(prime_tower_wipe_enabled): After printing the prime tower with one nozzle, wipe the oozed material from the other nozzle off on the prime tower.
+- Prime 타워 Brim(prime_tower_brim_enable): Prime-towers might need the extra adhesion afforded by a brim even if the model doesn't. Presently can't be used with the 'Raft' adhesion-type.
+- Enable Ooze Shield(ooze_shield_enabled): Enable exterior ooze shield. This will create a shell around the model which is likely to wipe a second nozzle if it's at the same height as the first nozzle.
+- Ooze Shield Angle(ooze_shield_angle): The maximum angle a part in the ooze shield will have. With 0 degrees being vertical, and 90 degrees being horizontal. A smaller angle leads to less failed ooze shields, but more material.
+- Ooze Shield Distance(ooze_shield_dist): Distance of the ooze shield from the print, in the X/Y directions.
+- 노즐 전환 리트랙션 거리(switch_extruder_retraction_amount): 압출기 전환 시 리트랙션 양. 전혀 리트랙션이 없으면 0으로 설정. 일반적으로 가열 구역의 길이와 같아야 함
+- 노즐 전환 리트랙션 속도(switch_extruder_retraction_speeds): 필라멘트가 빨려드는 속도. 리트랙션 속도가 빠를수록 작업이 나아지지만 너무 빠르면 닳아질 수 있음.
+- Nozzle Switch Extra Prime Amount(switch_extruder_extra_prime_amount): Extra material to prime after nozzle switching.
+
+### Mesh Fixes
+-------
+- Union Overlapping Volumes(meshfix_union_all): Ignore the internal geometry arising from overlapping volumes within a mesh and print the volumes as one. This may cause unintended internal cavities to disappear.
+- Remove All Holes(meshfix_union_all_remove_holes): Remove the holes in each layer and keep only the outside shape. This will ignore any invisible internal geometry. However, it also ignores layer holes which can be viewed from above or below.
+- Extensive Stitching(meshfix_extensive_stitching): Extensive stitching tries to stitch up open holes in the mesh by closing the hole with touching polygons. This option can introduce a lot of processing time.
+- Keep Disconnected Faces(meshfix_keep_open_polygons): Normally Cura tries to stitch up small holes in the mesh and remove parts of a layer with big holes. Enabling this option keeps those parts which cannot be stitched. This option should be used as a last resort option when everything else fails to produce proper g-code.
+- Merged Meshes Overlap(multiple_mesh_overlap): Make meshes which are touching each other overlap a bit. This makes them bond together better.
+- Remove Mesh Intersection(carve_multiple_volumes): Remove areas where multiple meshes are overlapping with each other. This may be used if merged dual material objects overlap with each other.
+- Alternate Mesh Removal(alternate_carve_order): Switch to which mesh intersecting volumes will belong with every layer, so that the overlapping meshes become interwoven. Turning this setting off will cause one of the meshes to obtain all of the volume in the overlap, while it is removed from the other meshes.
+- Remove Empty First Layers(remove_empty_first_layers): Remove empty layers beneath the first printed layer if they are present. Disabling this setting can cause empty first layers if the Slicing Tolerance setting is set to Exclusive or Middle.
+- Maximum Resolution(meshfix_maximum_resolution): The minimum size of a line segment after slicing. If you increase this, the mesh will have a lower resolution. This may allow the printer to keep up with the speed it has to process g-code and will increase slice speed by removing details of the mesh that it can't process anyway.
+- Maximum Travel Resolution(meshfix_maximum_travel_resolution): The minimum size of a travel line segment after slicing. If you increase this, the travel moves will have less smooth corners. This may allow the printer to keep up with the speed it has to process g-code, but it may cause model avoidance to become less accurate.
+- Maximum Deviation(meshfix_maximum_deviation): The maximum deviation allowed when reducing the resolution for the Maximum Resolution setting. If you increase this, the print will be less accurate, but the g-code will be smaller. Maximum Deviation is a limit for Maximum Resolution, so if the two conflict the Maximum Deviation will always be held true.
+  
+### Special Modes
+-------
+- 프린트 순서(print_sequence): 한 레이어에 모든 모델을 프린트하거나 한번에 한 모델씩 프린트 함. 한번에 한 모델씩 프린트는 a) 압출기를 하나만 사용하고 b) 모든 모델이 전체 프린트 헤드가 그들 사이도 움직일 수 있도록 분리되어 있고 모든 모델들은 노즐과 X/Y 축 사이의 거리보다 낮아야 한다
+- Infill Mesh(infill_mesh): Use this mesh to modify the infill of other meshes with which it overlaps. Replaces infill regions of other meshes with regions for this mesh. It's suggested to only print one Wall and no Top/Bottom Skin for this mesh.
+- Infill Mesh Order(infill_mesh_order): Determines which infill mesh is inside the infill of another infill mesh. An infill mesh with a higher order will modify the infill of infill meshes with lower order and normal meshes.
+- Cutting Mesh(cutting_mesh): Limit the volume of this mesh to within other meshes. You can use this to make certain areas of one mesh print with different settings and with a whole different extruder.
+- Mold(mold_enabled): Print models as a mold, which can be cast in order to get a model which resembles the models on the build plate.
+- Minimal Mold Width(mold_width): The minimal distance between the ouside of the mold and the outside of the model.
+- Mold Roof Height(mold_roof_height): The height above horizontal parts in your model which to print mold.
+- Mold Angle(mold_angle): The angle of overhang of the outer walls created for the mold. 0° will make the outer shell of the mold vertical, while 90° will make the outside of the model follow the contour of the model.
+- Support Mesh(support_mesh): Use this mesh to specify support areas. This can be used to generate support structure.
+- Anti Overhang Mesh(anti_overhang_mesh): Use this mesh to specify where no part of the model should be detected as overhang. This can be used to remove unwanted support structure.
+- Surface Mode(magic_mesh_surface_mode): Treat the model as a surface only, a volume, or volumes with loose surfaces. The normal print mode only prints enclosed volumes. "Surface" prints a single wall tracing the mesh surface with no infill and no top/bottom skin. "Both" prints enclosed volumes like normal and any remaining polygons as surfaces.
+- Spiralize Outer Contour(magic_spiralize): Spiralize smooths out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid model into a single walled print with a solid bottom. This feature should only be enabled when each layer only contains a single part.
+- Smooth Spiralized Contours(smooth_spiralized_contours): Smooth the spiralized contours to reduce the visibility of the Z seam (the Z seam should be barely visible on the print but will still be visible in the layer view). Note that smoothing will tend to blur fine surface details.
+- Relative Extrusion(relative_extrusion): Use relative extrusion rather than absolute extrusion. Using relative E-steps makes for easier post-processing of the g-code. However, it's not supported by all printers and it may produce very slight deviations in the amount of deposited material compared to absolute E-steps. Irrespective of this setting, the extrusion mode will always be set to absolute before any g-code script is output.
+### Experimental
+-------
+- Tree Support(support_tree_enable): Generate a tree-like support with branches that support your print. This may reduce material usage and print time, but greatly increases slicing time.
+- Tree Support Branch Angle(support_tree_angle): The angle of the branches. Use a lower angle to make them more vertical and more stable. Use a higher angle to be able to have more reach.
+- Tree Support Branch Distance(support_tree_branch_distance): How far apart the branches need to be when they touch the model. Making this distance small will cause the tree support to touch the model at more points, causing better overhang but making support harder to remove.
+- Tree Support Branch Diameter(support_tree_branch_diameter): The diameter of the thinnest branches of tree support. Thicker branches are more sturdy. Branches towards the base will be thicker than this.
+- Tree Support Branch Diameter Angle(support_tree_branch_diameter_angle): The angle of the branches' diameter as they gradually become thicker towards the bottom. An angle of 0 will cause the branches to have uniform thickness over their length. A bit of an angle can increase stability of the tree support.
+- Tree Support Collision Resolution(support_tree_collision_resolution): Resolution to compute collisions with to avoid hitting the model. Setting this lower will produce more accurate trees that fail less often, but increases slicing time dramatically.
+- Slicing Tolerance(slicing_tolerance): How to slice layers with diagonal surfaces. The areas of a layer can be generated based on where the middle of the layer intersects the surface (Middle). Alternatively each layer can have the areas which fall inside of the volume throughout the height of the layer (Exclusive) or a layer has the areas which fall inside anywhere within the layer (Inclusive). Exclusive retains the most details, Inclusive makes for the best fit and Middle takes the least time to process.
+- Top Surface Skin Line Width(roofing_line_width): Width of a single line of the areas at the top of the print.
+- Top Surface Skin Pattern(roofing_pattern): The pattern of the top most layers.
+- Top Surface Skin Line Directions(roofing_angles): A list of integer line directions to use when the top surface skin layers use the lines or zig zag pattern. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the traditional default angles (45 and 135 degrees).
+- Infill Travel Optimization(infill_enable_travel_optimization): When enabled, the order in which the infill lines are printed is optimized to reduce the distance travelled. The reduction in travel time achieved very much depends on the model being sliced, infill pattern, density, etc. Note that, for some models that have many small areas of infill, the time to slice the model may be greatly increased.
+- Auto Temperature(material_flow_dependent_temperature): Change the temperature for each layer automatically with the average flow speed of that layer.
+- Flow Temperature Graph(material_flow_temp_graph): Data linking material flow (in mm3 per second) to temperature (degrees Celsius).
+- Minimum Polygon Circumference(minimum_polygon_circumference): Polygons in sliced layers that have a circumference smaller than this amount will be filtered out. Lower values lead to higher resolution mesh at the cost of slicing time. It is meant mostly for high resolution SLA printers and very tiny 3D models with a lot of details.
+- Break Up Support In Chunks(support_skip_some_zags): Skip some support line connections to make the support structure easier to break away. This setting is applicable to the Zig Zag support infill pattern.
+- Support Chunk Size(support_skip_zag_per_mm): Leave out a connection between support lines once every N millimeter to make the support structure easier to break away.
+- Enable Draft Shield(draft_shield_enabled): This will create a wall around the model, which traps (hot) air and shields against exterior airflow. Especially useful for materials which warp easily.
+- Draft Shield X/Y Distance(draft_shield_dist): Distance of the draft shield from the print, in the X/Y directions.
+- Draft Shield Limitation(draft_shield_height_limitation): Set the height of the draft shield. Choose to print the draft shield at the full height of the model or at a limited height.
+- Draft Shield Height(draft_shield_height): Height limitation of the draft shield. Above this height no draft shield will be printed.
+- Make Overhang Printable(conical_overhang_enabled): Change the geometry of the printed model such that minimal support is required. Steep overhangs will become shallow overhangs. Overhanging areas will drop down to become more vertical.
+- Maximum Model Angle(conical_overhang_angle): The maximum angle of overhangs after the they have been made printable. At a value of 0° all overhangs are replaced by a piece of model connected to the build plate, 90° will not change the model in any way.
+- Enable Coasting(coasting_enable): Coasting replaces the last part of an extrusion path with a travel path. The oozed material is used to print the last piece of the extrusion path in order to reduce stringing.
+- Coasting Volume(coasting_volume): The volume otherwise oozed. This value should generally be close to the nozzle diameter cubed.
+- Minimum Volume Before Coasting(coasting_min_volume): The smallest volume an extrusion path should have before allowing coasting. For smaller extrusion paths, less pressure has been built up in the bowden tube and so the coasted volume is scaled linearly. This value should always be larger than the Coasting Volume.
+- Coasting Speed(coasting_speed): The speed by which to move during coasting, relative to the speed of the extrusion path. A value slightly under 100% is advised, since during the coasting move the pressure in the bowden tube drops.
+- Cross 3D Pocket Size(cross_infill_pocket_size): The size of pockets at four-way crossings in the cross 3D pattern at heights where the pattern is touching itself.
+- Cross Infill Density Image(cross_infill_density_image): The file location of an image of which the brightness values determine the minimal density at the corresponding location in the infill of the print.
+- Cross Fill Density Image for Support(cross_support_density_image): The file location of an image of which the brightness values determine the minimal density at the corresponding location in the support.
+- Spaghetti Infill(spaghetti_infill_enabled): Print the infill every so often, so that the filament will curl up chaotically inside the object. This reduces print time, but the behaviour is rather unpredictable.
+- Spaghetti Infill Stepping(spaghetti_infill_stepped): Whether to print spaghetti infill in steps or extrude all the infill filament at the end of the print.
+- Spaghetti Maximum Infill Angle(spaghetti_max_infill_angle): The maximum angle w.r.t. the Z axis of the inside of the print for areas which are to be filled with spaghetti infill afterwards. Lowering this value causes more angled parts in your model to be filled on each layer.
+- Spaghetti Infill Maximum Height(spaghetti_max_height): The maximum height of inside space which can be combined and filled from the top.
+- Spaghetti Inset(spaghetti_inset): The offset from the walls from where the spaghetti infill will be printed.
+- Spaghetti Flow(spaghetti_flow): Adjusts the density of the spaghetti infill. Note that the Infill Density only controls the line spacing of the filling pattern, not the amount of extrusion for spaghetti infill.
+- Spaghetti Infill Extra Volume(spaghetti_infill_extra_volume): A correction term to adjust the total volume being extruded each time when filling spaghetti.
+- Enable Conical Support(support_conical_enabled): Make support areas smaller at the bottom than at the overhang.
+- Conical Support Angle(support_conical_angle): The angle of the tilt of conical support. With 0 degrees being vertical, and 90 degrees being horizontal. Smaller angles cause the support to be more sturdy, but consist of more material. Negative angles cause the base of the support to be wider than the top.
+- Conical Support Minimum Width(support_conical_min_width): Minimum width to which the base of the conical support area is reduced. Small widths can lead to unstable support structures.
+- Fuzzy Skin(magic_fuzzy_skin_enabled): Randomly jitter while printing the outer wall, so that the surface has a rough and fuzzy look.
+- Fuzzy Skin Outside Only(magic_fuzzy_skin_outside_only): Jitter only the parts' outlines and not the parts' holes.
+- Fuzzy Skin Thickness(magic_fuzzy_skin_thickness): The width within which to jitter. It's advised to keep this below the outer wall width, since the inner walls are unaltered.
+- Fuzzy Skin Density(magic_fuzzy_skin_point_density): The average density of points introduced on each polygon in a layer. Note that the original points of the polygon are discarded, so a low density results in a reduction of the resolution.
+- Flow Rate Compensation Max Extrusion Offset(flow_rate_max_extrusion_offset): The maximum distance in mm to move the filament to compensate for changes in flow rate.
+- Flow Rate Compensation Factor(flow_rate_extrusion_offset_factor): How far to move the filament in order to compensate for changes in flow rate, as a percentage of how far the filament would move in one second of extrusion.
+- Wire Printing(wireframe_enabled): Print only the outside surface with a sparse webbed structure, printing 'in thin air'. This is realized by horizontally printing the contours of the model at given Z intervals which are connected via upward and diagonally downward lines.
+- WP Connection Height(wireframe_height): The height of the upward and diagonally downward lines between two horizontal parts. This determines the overall density of the net structure. Only applies to Wire Printing.
+- WP Roof Inset Distance(wireframe_roof_inset): The distance covered when making a connection from a roof outline inward. Only applies to Wire Printing.
+- WP Speed(wireframe_printspeed): Speed at which the nozzle moves when extruding material. Only applies to Wire Printing.
+- WP Flow(wireframe_flow): Flow compensation: the amount of material extruded is multiplied by this value. Only applies to Wire Printing.
+- WP Top Delay(wireframe_top_delay): Delay time after an upward move, so that the upward line can harden. Only applies to Wire Printing.
+- WP Bottom Delay(wireframe_bottom_delay): Delay time after a downward move. Only applies to Wire Printing.
+- WP Flat Delay(wireframe_flat_delay): Delay time between two horizontal segments. Introducing such a delay can cause better adhesion to previous layers at the connection points, while too long delays cause sagging. Only applies to Wire Printing.
+- WP Ease Upward(wireframe_up_half_speed): Distance of an upward move which is extruded with half speed. This can cause better adhesion to previous layers, while not heating the material in those layers too much. Only applies to Wire Printing.
+- WP Knot Size(wireframe_top_jump): Creates a small knot at the top of an upward line, so that the consecutive horizontal layer has a better chance to connect to it. Only applies to Wire Printing.
+- WP Fall Down(wireframe_fall_down): Distance with which the material falls down after an upward extrusion. This distance is compensated for. Only applies to Wire Printing.
+- WP Drag Along(wireframe_drag_along): Distance with which the material of an upward extrusion is dragged along with the diagonally downward extrusion. This distance is compensated for. Only applies to Wire Printing.
+- WP Strategy(wireframe_strategy): Strategy for making sure two consecutive layers connect at each connection point. Retraction lets the upward lines harden in the right position, but may cause filament grinding. A knot can be made at the end of an upward line to heighten the chance of connecting to it and to let the line cool; however, it may require slow printing speeds. Another strategy is to compensate for the sagging of the top of an upward line; however, the lines won't always fall down as predicted.
+- WP Straighten Downward Lines(wireframe_straight_before_down): Percentage of a diagonally downward line which is covered by a horizontal line piece. This can prevent sagging of the top most point of upward lines. Only applies to Wire Printing.
+- WP Roof Fall Down(wireframe_roof_fall_down): The distance which horizontal roof lines printed 'in thin air' fall down when being printed. This distance is compensated for. Only applies to Wire Printing.
+- WP Roof Drag Along(wireframe_roof_drag_along): The distance of the end piece of an inward line which gets dragged along when going back to the outer outline of the roof. This distance is compensated for. Only applies to Wire Printing.
+- WP Roof Outer Delay(wireframe_roof_outer_delay): Time spent at the outer perimeters of hole which is to become a roof. Longer times can ensure a better connection. Only applies to Wire Printing.
+- WP Nozzle Clearance(wireframe_nozzle_clearance): Distance between the nozzle and horizontally downward lines. Larger clearance results in diagonally downward lines with a less steep angle, which in turn results in less upward connections with the next layer. Only applies to Wire Printing.
+- Use Adaptive Layers(adaptive_layer_height_enabled): Adaptive layers computes the layer heights depending on the shape of the model.
+- Adaptive Layers Maximum Variation(adaptive_layer_height_variation): The maximum allowed height different from the base layer height.
+- Adaptive Layers Variation Step Size(adaptive_layer_height_variation_step): The difference in height of the next layer height compared to the previous one.
+- Adaptive Layers Topography Size(adaptive_layer_height_threshold): Target horizontal distance between two adjacent layers. Reducing this setting causes thinner layers to be used to bring the edges of the layers closer together.
+- Overhanging Wall Angle(wall_overhang_angle): Walls that overhang more than this angle will be printed using overhanging wall settings. When the value is 90, no walls will be treated as overhanging. Overhang that gets supported by support will not be treated as overhang either.
+- Overhanging Wall Speed(wall_overhang_speed_factor): Overhanging walls will be printed at this percentage of their normal print speed.
+- Enable Bridge Settings(bridge_settings_enabled): Detect bridges and modify print speed, flow and fan settings while bridges are printed.
+- Minimum Bridge Wall Length(bridge_wall_min_length): Unsupported walls shorter than this will be printed using the normal wall settings. Longer unsupported walls will be printed using the bridge wall settings.
+- Bridge Skin Support Threshold(bridge_skin_support_threshold): If a skin region is supported for less than this percentage of its area, print it using the bridge settings. Otherwise it is printed using the normal skin settings.
+- Bridge Sparse Infill Max Density(bridge_sparse_infill_max_density): Maximum density of infill considered to be sparse. Skin over sparse infill is considered to be unsupported and so may be treated as a bridge skin.
+- Bridge Wall Coasting(bridge_wall_coast): This controls the distance the extruder should coast immediately before a bridge wall begins. Coasting before the bridge starts can reduce the pressure in the nozzle and may produce a flatter bridge.
+- Bridge Wall Speed(bridge_wall_speed): The speed at which the bridge walls are printed.
+- Bridge Wall Flow(bridge_wall_material_flow): When printing bridge walls, the amount of material extruded is multiplied by this value.
+- Bridge Skin Speed(bridge_skin_speed): The speed at which bridge skin regions are printed.
+- Bridge Skin Flow(bridge_skin_material_flow): When printing bridge skin regions, the amount of material extruded is multiplied by this value.
+- Bridge Skin Density(bridge_skin_density): The density of the bridge skin layer. Values less than 100 will increase the gaps between the skin lines.
+- Bridge Fan Speed(bridge_fan_speed): Percentage fan speed to use when printing bridge walls and skin.
+- Bridge Has Multiple Layers(bridge_enable_more_layers): If enabled, the second and third layers above the air are printed using the following settings. Otherwise, those layers are printed using the normal settings.
+- Bridge Second Skin Speed(bridge_skin_speed_2): Print speed to use when printing the second bridge skin layer.
+- Bridge Second Skin Flow(bridge_skin_material_flow_2): When printing the second bridge skin layer, the amount of material extruded is multiplied by this value.
+- Bridge Second Skin Density(bridge_skin_density_2): The density of the second bridge skin layer. Values less than 100 will increase the gaps between the skin lines.
+- Bridge Second Skin Fan Speed(bridge_fan_speed_2): Percentage fan speed to use when printing the second bridge skin layer.
+- Bridge Third Skin Speed(bridge_skin_speed_3): Print speed to use when printing the third bridge skin layer.
+- Bridge Third Skin Flow(bridge_skin_material_flow_3): When printing the third bridge skin layer, the amount of material extruded is multiplied by this value.
+- Bridge Third Skin Density(bridge_skin_density_3): The density of the third bridge skin layer. Values less than 100 will increase the gaps between the skin lines.
+- Bridge Third Skin Fan Speed(bridge_fan_speed_3): Percentage fan speed to use when printing the third bridge skin layer.
+- Wipe Nozzle Between Layers(clean_between_layers): Whether to include nozzle wipe G-Code between layers (maximum 1 per layer). Enabling this setting could influence behavior of retract at layer change. Please use Wipe Retraction settings to control retraction at layers where the wipe script will be working.
+- Material Volume Between Wipes(max_extrusion_before_wipe): Maximum material that can be extruded before another nozzle wipe is initiated. If this value is less than the volume of material required in a layer, the setting has no effect in this layer, i.e. it is limited to one wipe per layer.
+- Wipe Retraction Enable(wipe_retraction_enable): Retract the filament when the nozzle is moving over a non-printed area.
+- Wipe Retraction Distance(wipe_retraction_amount): Amount to retract the filament so it does not ooze during the wipe sequence.
+- Wipe Retraction Extra Prime Amount(wipe_retraction_extra_prime_amount): Some material can ooze away during a wipe travel moves, which can be compensated for here.
+- Wipe Retraction Speed(wipe_retraction_speed): The speed at which the filament is retracted and primed during a wipe retraction move.
+- Wipe Pause(wipe_pause): Pause after the unretract.
+- Wipe Z Hop(wipe_hop_enable): When wiping, the build plate is lowered to create clearance between the nozzle and the print. It prevents the nozzle from hitting the print during travel moves, reducing the chance to knock the print from the build plate.
+- Wipe Z Hop Height(wipe_hop_amount): The height difference when performing a Z Hop.
+- Wipe Hop Speed(wipe_hop_speed): Speed to move the z-axis during the hop.
+- Wipe Brush X Position(wipe_brush_pos_x): X location where wipe script will start.
+- Wipe Repeat Count(wipe_repeat_count): Number of times to move the nozzle across the brush.
+- Wipe Move Distance(wipe_move_distance): The distance to move the head back and forth across the brush.
+- Small Hole Max Size(small_hole_max_size): Holes and part outlines with a diameter smaller than this will be printed using Small Feature Speed.
+- Small Feature Speed(small_feature_speed_factor): Small features will be printed at this percentage of their normal print speed. Slower printing can help with adhesion and accuracy.
+- Small Feature Initial Layer Speed(small_feature_speed_factor_0): Small features on the first layer will be printed at this percentage of their normal print speed. Slower printing can help with adhesion and accuracy.
+### Command Line Settings
+-------
+- Center Object(center_object): Whether to center the object on the middle of the build platform (0,0), instead of using the coordinate system in which the object was saved.
+- Mesh Position X(mesh_position_x): Offset applied to the object in the x direction.
+- Mesh Position Y(mesh_position_y): Offset applied to the object in the y direction.
+- Mesh Position Z(mesh_position_z): Offset applied to the object in the z direction. With this you can perform what was used to be called 'Object Sink'.
+- Mesh Rotation Matrix(mesh_rotation_matrix): Transformation matrix to be applied to the model when loading it from file.
