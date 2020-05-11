@@ -31,7 +31,7 @@ from cura.Scene.CuraSceneNode import CuraSceneNode
 from cura.Settings.ExtruderManager import ExtruderManager
 
 from PyQt5.QtCore import QTimer
-
+from PyQt5.QtGui import QPixmap, QColor, QFont, QPen, QPainter
 
 if TYPE_CHECKING:
     from cura.CuraApplication import CuraApplication

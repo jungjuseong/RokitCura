@@ -177,6 +177,13 @@ UM.MainWindow {
                 right: parent.right
             }
             Keys.forwardTo: applicationMenu
+
+            Image {
+                source: '../images/rokit-background-dna-1920x1080.png'
+                opacity: 0.25
+                z: main.z - 10
+            }
+
             DropArea {
                 // The drop area is here to handle files being dropped onto Cura.
                 anchors.fill: parent
@@ -201,6 +208,7 @@ UM.MainWindow {
                     }
                 }
             }
+
             ObjectSelector {
                 id: objectSelector
                 visible: CuraApplication.platformActivity
@@ -258,7 +266,6 @@ UM.MainWindow {
             Loader {
                 // A stage can control this area. If nothing is set, it will therefore show the 3D view.
                 id: main
-
                 anchors {
                     // Align to the top of the stageMenu since the stageMenu may not exist
                     top: stageMenu.source ? stageMenu.verticalCenter : parent.top
@@ -266,7 +273,6 @@ UM.MainWindow {
                     right: parent.right
                     bottom: parent.bottom
                 }
-
                 source: UM.Controller.activeStage != null ? UM.Controller.activeStage.mainComponent : ""
 
                 onLoaded: {
@@ -281,9 +287,7 @@ UM.MainWindow {
                 // Note that this menu does not need to be set at all! It's perfectly acceptable to have a stage
                 // without this menu!
                 id: stageMenu
-
-                anchors
-                {
+                anchors {
                     left: parent.left
                     right: parent.right
                     top: parent.top
@@ -293,8 +297,7 @@ UM.MainWindow {
                 source: UM.Controller.activeStage != null ? UM.Controller.activeStage.stageMenuComponent : ""
 
                 //  HACK: This is to ensure that the parent never gets set to null, as this wreaks havoc on the focus.
-                function onParentDestroyed()
-                {
+                function onParentDestroyed() {
                     printSetupSelector.parent = stageMenu
                     printSetupSelector.visible = false
                 }
@@ -302,15 +305,12 @@ UM.MainWindow {
 
                 // The printSetupSelector is defined here so that the setting list doesn't need to get re-instantiated
                 // Every time the stage is changed.
-                property var printSetupSelector: Cura.RokitPrintSetupSelector
-                {
+                property var printSetupSelector: Cura.RokitPrintSetupSelector {
                    width: UM.Theme.getSize("print_setup_widget").width
                    height: UM.Theme.getSize("stage_menu").height
                    headerCornerSide: RoundedRectangle.Direction.Right
-                   onParentChanged:
-                   {
-                       if(stageMenu.oldParent !=null)
-                       {
+                   onParentChanged: {
+                       if(stageMenu.oldParent != null) {
                            stageMenu.oldParent.Component.destruction.disconnect(stageMenu.onParentDestroyed)
                        }
                        stageMenu.oldParent = parent
@@ -520,14 +520,12 @@ UM.MainWindow {
         modality: Qt.WindowModal
         selectMultiple: true
         nameFilters: UM.MeshFileHandler.supportedReadFileTypes;
-        folder:
-        {
+        folder:{
             //Because several implementations of the file dialog only update the folder when it is explicitly set.
             folder = CuraApplication.getDefaultPath("dialog_load_path");
             return CuraApplication.getDefaultPath("dialog_load_path");
         }
-        onAccepted:
-        {
+        onAccepted: {
             // Because several implementations of the file dialog only update the folder
             // when it is explicitly set.
             var f = folder;
@@ -542,8 +540,7 @@ UM.MainWindow {
         // There are lots of user interactions in this part of the logic, such as showing a warning dialog here and there,
         // etc. This means it will come back and forth from time to time between QML and Python. So, separating the logic
         // and view here may require more effort but make things more difficult to understand.
-        function handleOpenFileUrls(fileUrlList)
-        {
+        function handleOpenFileUrls(fileUrlList){
             // look for valid project files
             var projectFileUrlList = [];
             var hasGcode = false;
@@ -581,18 +578,15 @@ UM.MainWindow {
             }
         }
 
-        function handleOpenFiles(selectedMultipleFiles, hasProjectFile, fileUrlList, projectFileUrlList)
-        {
+        function handleOpenFiles(selectedMultipleFiles, hasProjectFile, fileUrlList, projectFileUrlList) {
             // we only allow opening one project file
-            if (selectedMultipleFiles && hasProjectFile)
-            {
+            if (selectedMultipleFiles && hasProjectFile) {
                 openFilesIncludingProjectsDialog.fileUrls = fileUrlList.slice();
                 openFilesIncludingProjectsDialog.show();
                 return;
             }
 
-            if (hasProjectFile)
-            {
+            if (hasProjectFile)  {
                 var projectFile = projectFileUrlList[0];
 
                 // check preference
@@ -612,8 +606,7 @@ UM.MainWindow {
                     askOpenAsProjectOrModelsDialog.show();
                 }
             }
-            else
-            {
+            else {
                 openFilesIncludingProjectsDialog.loadModelFiles(fileUrlList.slice());
             }
         }
@@ -659,8 +652,7 @@ UM.MainWindow {
 
     Connections  {
         target: CuraApplication
-        onOpenProjectFile:
-        {
+        onOpenProjectFile: {
             askOpenAsProjectOrModelsDialog.fileUrl = project_file;
             askOpenAsProjectOrModelsDialog.show();
         }
@@ -668,11 +660,9 @@ UM.MainWindow {
 
     Connections  {
         target: Cura.Actions.showProfileFolder
-        onTriggered:
-        {
+        onTriggered: {
             var path = UM.Resources.getPath(UM.Resources.Preferences, "");
-            if(Qt.platform.os == "windows")
-            {
+            if(Qt.platform.os == "windows") {
                 path = path.replace(/\\/g,"/");
             }
             Qt.openUrlExternally(path);
@@ -765,10 +755,8 @@ UM.MainWindow {
         interval: 100
         repeat: false
         running: true
-        onTriggered:
-        {
-            if (!base.visible)
-            {
+        onTriggered: {
+            if (!base.visible) {
                 base.visible = true
             }
         }
