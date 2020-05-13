@@ -31,7 +31,6 @@ from cura.Scene.CuraSceneNode import CuraSceneNode
 from cura.Settings.ExtruderManager import ExtruderManager
 
 from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QPixmap, QColor, QFont, QPen, QPainter
 
 if TYPE_CHECKING:
     from cura.CuraApplication import CuraApplication
@@ -210,6 +209,7 @@ class BuildVolume(SceneNode):
         self._disallowed_areas = areas
 
     def render(self, renderer):
+
         if not self.getMeshData() or not self.isVisible():
             return True
 
@@ -425,8 +425,8 @@ class BuildVolume(SceneNode):
                 # Scale circular meshes by aspect ratio if width != height
                 aspect = self._depth / self._width
                 scale_matrix.compose(scale = Vector(1, 1, aspect))
-            mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color)
-            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color)
+            mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color) # lower
+            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color) # upper
 
             if self._build_dish_shape == "elliptic":
                 mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color) # lower

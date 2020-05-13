@@ -5,8 +5,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.1
 import UM 1.2 as UM
 
-Item
-{
+Item {
     id: extruderIconItem
 
     implicitWidth: UM.Theme.getSize("extruder_icon").width
@@ -15,8 +14,7 @@ Item
     property color materialColor
     property alias textColor: extruderNumberText.color
 
-    UM.RecolorImage
-    {
+    UM.RecolorImage {
         id: mainIcon
         anchors.fill: parent
 
@@ -24,8 +22,7 @@ Item
         color: materialColor
     }
 
-    Rectangle
-    {
+    Rectangle {
         id: extruderNumberCircle
 
         width: height
@@ -33,16 +30,14 @@ Item
         radius: (index === 0) ? Math.round(width / 2) : Math.round(width / 3) 
         color: UM.Theme.getColor("toolbar_background")
 
-        anchors
-        {
+        anchors {
             horizontalCenter: parent.horizontalCenter
             top: parent.top
             // The circle needs to be slightly off center (so it sits in the middle of the square bit of the icon)
             topMargin: (parent.height - height) / 2 - 0.1 * parent.height
         }
 
-        Label
-        {
+        Label {
             id: extruderNumberText
             anchors.centerIn: parent
             text: (index === 0) ? "L" : ("R" + index)

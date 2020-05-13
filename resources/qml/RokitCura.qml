@@ -147,15 +147,6 @@ UM.MainWindow {
                 }
             }
 
-            // This is a placehoder for adding a pattern in the header
-            Image {
-                id: backgroundPattern
-                anchors.fill: parent
-                fillMode: Image.Tile
-                source: UM.Theme.getImage("header_pattern")
-                horizontalAlignment: Image.AlignLeft
-                verticalAlignment: Image.AlignTop
-            }
         }
 
         RokitMainWindowHeader {
@@ -177,12 +168,6 @@ UM.MainWindow {
                 right: parent.right
             }
             Keys.forwardTo: applicationMenu
-
-            Image {
-                source: '../images/rokit-background-dna-1920x1080.png'
-                opacity: 0.25
-                z: main.z - 10
-            }
 
             DropArea {
                 // The drop area is here to handle files being dropped onto Cura.
@@ -206,6 +191,16 @@ UM.MainWindow {
                         }
                         openDialog.handleOpenFileUrls(nonPackages);
                     }
+                }
+            }
+
+            Rectangle {                
+                Image {
+                    source: '../images/rokit-background-dna-1920x1080.png'
+                    fillMode: Image.Stretch
+                    opacity: 0.3
+                    cache: false
+                    z: viewOrientationControls.z - 10
                 }
             }
 
@@ -262,6 +257,7 @@ UM.MainWindow {
                 anchors.right: main.right
                 anchors.top: main.top
                 anchors.bottom: main.bottom
+
             }
             Loader {
                 // A stage can control this area. If nothing is set, it will therefore show the 3D view.

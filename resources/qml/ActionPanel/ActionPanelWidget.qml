@@ -61,7 +61,7 @@ Item
         Component
         {
             id: sliceProcessWidget
-            SliceProcessWidget { }
+            RokitSliceProcessWidget { }
         }
 
         Component
