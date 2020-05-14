@@ -12,31 +12,14 @@ import "./model"
 
 BuildPlateSelector {
     dishModel: WellPlateModel {}
-    
-    Rectangle {
-        width: childrenRect.width
-        height : childrenRect.height
-        anchors { centerIn: parent }
-        Column {
-            spacing: UM.Theme.getSize("thin_margin").height
-            Repeater {
-                model: 2
-                Row {
-                    spacing: UM.Theme.getSize("thin_margin").height                        
-                    Repeater {
-                        model: 3
-                        Rectangle {
-                            width : UM.Theme.getSize("rokit_well_plate_diameter").width
-                            height : UM.Theme.getSize("rokit_well_plate_diameter").width
-                            radius: width / 2
-                            color: UM.Theme.getColor("rokit_build_plate")
-                            border.width : 1
-                            border.color: UM.Theme.getColor("rokit_build_plate_border")
-                        }
-                    }                  
-                }
-            }
-        }
-    }
-}
 
+    // 6 wells
+    WellCircles {
+        id: wellCircles
+        diameter: UM.Theme.getSize("rokit_well_plate_diameter").width
+        rowHoles: 2
+        columnHoles: 3
+    }
+    // 12 wells
+
+}

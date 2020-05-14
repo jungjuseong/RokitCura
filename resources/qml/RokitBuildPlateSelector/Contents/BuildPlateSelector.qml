@@ -13,14 +13,15 @@ import QtQuick.Layouts 1.3
 import "../../Widgets"
 import "./model"
 
-Cura.MachineAction {
+Item {
     anchors.fill: parent
     UM.I18nCatalog { id: catalog; name: "cura" }
 
     property var extrudersModel: Cura.ExtrudersModel {}
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
     property var dishModel: {}
-    
+    property var selectedWells: "6"
+
     function setBuildPlateProperties(product) {
         var attr = product.plate
         if (attr != undefined) {
@@ -29,10 +30,9 @@ Cura.MachineAction {
             buildDishHeight.setPropertyValue("value", attr.z)
             buildDishShape.setPropertyValue("value", dishModel.shape)
             buildDishType.setPropertyValue("value", dishModel.category + ":" + product.id)             
-            buildPlateTitle.text = dishModel.category + "  -  " + product.id 
+            buildPlateTitle.text = dishModel.category + "  -  " + product.id + " wells"
         }
     }
-
 
     Item {
         id: buildPlate
@@ -82,7 +82,7 @@ Cura.MachineAction {
                     }
                     return 0   
             }
-            onActivated: { 
+            onActivated: {
                 setBuildPlateProperties(dishModel.products[index]) 
             }
         }
@@ -112,8 +112,9 @@ Cura.MachineAction {
                         exclusiveGroup: buttonExclusive
                         checkable: true
                         
-                        onClicked: { 
-                            setBuildPlateProperties(dishModel.products[index]) 
+                        onClicked: {
+                            wellCircles.selectedWells = dishModel.products[index]
+                            setBuildPlateProperties(wellCircles.selectedWells)
                         }
                     }
                 }

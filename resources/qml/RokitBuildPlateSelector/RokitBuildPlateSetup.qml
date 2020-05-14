@@ -25,8 +25,7 @@ Item {
         id: tabSpace
 
         UM.I18nCatalog { id: catalog; name: "cura" }
-
-        anchors{
+        anchors {
             top: parent.top
             left: parent.left
             leftMargin: parent.sidePadding

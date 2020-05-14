@@ -11,14 +11,14 @@ import Cura 1.0 as Cura
 
 ListModel {
     property string category: "Well Plate"
-    property string shape: "rectangle"
-    property var well96: { "diameter": 6.5, "depth": 11.0, "centerTocenter": 9.0 }
+    property string shape: "elliptic"
+    property var external_dimension: Qt.vector3d(85.4, 127.6, 14.4)
     property var products: [
-        { id: "96", plate: Qt.vector3d(85.4, 127.6, 14.4), wells: well96 },
-        { id: "48", plate: Qt.vector3d(85.4, 127.6, 14.4), wells: { "diameter": 9.75, "depth": 11.0, "centerTocenter": 9.0 }},
-        { id: "24", plate: Qt.vector3d(85.4, 127.6, 14.4), wells: { "diameter": 15.5, "depth": 11.0, "centerTocenter": 9.0 }},
-        { id: "12", plate: Qt.vector3d(85.4, 127.6, 14.4), wells: { "diameter": 21.9, "depth": 11.0, "centerTocenter": 9.0 }},
-        { id: "6", plate: Qt.vector3d(85.4, 127.6, 14.4), wells: { "diameter": 35.0, "depth": 11.0, "centerTocenter": 9.0 }}
+        { id: "96", plate: Qt.vector3d(6.5, 6.5, 10.8) },
+        { id: "48", plate: Qt.vector3d(9.75, 9.75, 17.50)},
+        { id: "24", plate: Qt.vector3d(15.5, 15.5, 17.50)},
+        { id: "12", plate: Qt.vector3d(21.9, 21.9, 17.50)},
+        { id: "6", plate: Qt.vector3d(35.0, 35.0, 17.50)}
     ]
 
     Component.onCompleted: {
