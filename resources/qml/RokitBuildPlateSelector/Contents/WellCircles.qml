@@ -6,16 +6,12 @@ import QtQuick.Controls 2.3 as Controls2
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-
 Rectangle {
     id: wellCircles
 
-    property var selectedWells: "6"
-    property var rowHoles: 2
-    property var columnHoles: 3
-    property var diameter: {
-        UM.Theme.getSize("rokit_well_plate_diameter").width
-    }
+    property var base_diameter: UM.Theme.getSize("rokit_well_plate_diameter").width
+    property var holes: [2, 3, 1]  // row, cols, size denominator
+
     property var spacing: UM.Theme.getSize("thin_margin").height 
     property var color: UM.Theme.getColor("rokit_build_plate")
     property var borderColor: UM.Theme.getColor("rokit_build_plate_border")
@@ -25,17 +21,17 @@ Rectangle {
     anchors { centerIn: parent }
 
     Column {
-        spacing: UM.Theme.getSize("thin_margin").height
+        spacing: wellCircles.spacing * holes[2]
         Repeater {
-            model: wellCircles.rowHoles
+            model: holes[0]
             Row {
-                spacing: wellCircles.spacing                        
+                spacing: wellCircles.spacing * holes[2]                      
                 Repeater {
-                    model: wellCircles.columnHoles
+                    model: holes[1]
                     Rectangle {
-                        width: wellCircles.diameter
-                        height: wellCircles.diameter
-                        radius: wellCircles.diameter / 2
+                        width: base_diameter * holes[2]
+                        height: base_diameter * holes[2]
+                        radius: base_diameter * holes[2] / 2
                         color: wellCircles.color
                         border.width : 1
                         border.color: wellCircles.borderColor

@@ -113,8 +113,23 @@ Item {
                         checkable: true
                         
                         onClicked: {
-                            wellCircles.selectedWells = dishModel.products[index]
-                            setBuildPlateProperties(wellCircles.selectedWells)
+                            switch (dishModel.products[index].id) {
+                                case "96":
+                                    wellCircles.holes = [8, 12, 1/4]
+                                    break
+                                case "48":
+                                    wellCircles.holes = [6, 8, 1/3]
+                                    break
+                                case "24":
+                                    wellCircles.holes = [4, 6, 1/2]
+                                    break
+                                case "12":
+                                    wellCircles.holes = [3, 4, 2/3]
+                                    break
+                                default:
+                                    wellCircles.holes = [2, 3, 1]
+                            }
+                            setBuildPlateProperties(dishModel.products[index])
                         }
                     }
                 }

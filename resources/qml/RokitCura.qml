@@ -194,15 +194,15 @@ UM.MainWindow {
                 }
             }
 
-            Rectangle {                
-                Image {
-                    source: '../images/rokit-background-dna-1920x1080.png'
-                    fillMode: Image.Stretch
-                    opacity: 0.3
-                    cache: false
-                    z: viewOrientationControls.z - 10
-                }
-            }
+            // Rectangle {                
+            //     Image {
+            //         source: '../images/rokit-background-dna-1920x1080.png'
+            //         fillMode: Image.Stretch
+            //         opacity: 0.3
+            //         cache: false
+            //         z: viewOrientationControls.z - 10
+            //     }
+            // }
 
             ObjectSelector {
                 id: objectSelector
