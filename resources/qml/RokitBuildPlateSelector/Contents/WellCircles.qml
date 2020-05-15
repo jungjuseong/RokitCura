@@ -10,12 +10,13 @@ import Cura 1.0 as Cura
 Rectangle {
     id: wellCircles
 
-    property var selectedWells: "6"
-    property var rowHoles: 2
-    property var columnHoles: 3
-    property var diameter: {
-        UM.Theme.getSize("rokit_well_plate_diameter").width
-    }
+
+    property var holes: { 
+        rows: 8 
+        cols: 12 
+        diameter: diameter0 / 4 
+    } 
+
     property var spacing: UM.Theme.getSize("thin_margin").height 
     property var color: UM.Theme.getColor("rokit_build_plate")
     property var borderColor: UM.Theme.getColor("rokit_build_plate_border")
@@ -27,18 +28,18 @@ Rectangle {
     Column {
         spacing: UM.Theme.getSize("thin_margin").height
         Repeater {
-            model: wellCircles.rowHoles
+            model: holes.rows
             Row {
-                spacing: wellCircles.spacing                        
+                spacing: spacing                   
                 Repeater {
-                    model: wellCircles.columnHoles
+                    model: holes.cols
                     Rectangle {
-                        width: wellCircles.diameter
-                        height: wellCircles.diameter
-                        radius: wellCircles.diameter / 2
-                        color: wellCircles.color
+                        width: holes.diameter
+                        height: holes.diameter
+                        radius: holes.diameter / 2
+                        color: color
                         border.width : 1
-                        border.color: wellCircles.borderColor
+                        border.color: borderColor
                     }
                 }                 
             }

@@ -15,11 +15,6 @@ BuildPlateSelector {
 
     // 6 wells
     WellCircles {
-        id: wellCircles
-        diameter: UM.Theme.getSize("rokit_well_plate_diameter").width
-        rowHoles: 2
-        columnHoles: 3
     }
-    // 12 wells
 
 }
