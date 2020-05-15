@@ -7,14 +7,10 @@ import UM 1.2 as UM
 import Cura 1.0 as Cura
 import QtQuick.Layouts 1.3
 
-import "../../Widgets"
 import "./model"
 
 BuildPlateSelector {
     dishModel: WellPlateModel {}
 
-    // 6 wells
-    WellCircles {
-    }
-
+    WellCircles { id: wellCircles }
 }

@@ -113,29 +113,24 @@ Item {
                         checkable: true
                         
                         onClicked: {
-                            selectedWells = dishModel.products[index]
-
-                            switch (selectedWells) {
+                            const well = dishModel.products[index]
+                            switch (well.id) {
                                 case "96":
-                                    wellCircles.holes = { rows: 8, cols: 12, diameter: diameter0 / 4 }
+                                    wellCircles.holes = [8, 12, 1/4]
                                     break
                                 case "48":
-                                    wellCircles.holes = { rows: 6, cols: 8, diameter: diameter0 / 3 }
+                                    wellCircles.holes = [6, 8, 1/3]
                                     break
                                 case "24":
-                                    wellCircles.holes = { rows: 4, cols: 6, diameter: diameter0 / 2 }
+                                    wellCircles.holes = [4, 6, 1/2]
                                     break
                                 case "12":
-                                    wellCircles.holes = { rows: 3, cols: 4, diameter: diameter0 * 2 / 3 }
+                                    wellCircles.holes = [3, 4, 2/3]
                                     break
-                                case "6":
-                                    wellCircles.holes = { rows: 2, cols: 3, diameter: diameter0 }
-                                    break
-                                default:
-                                    wellCircles.holes = { rows: 8, cols: 12, diameter: diameter0 / 4 }
+                                default: // 6
+                                    wellCircles.holes = [2, 3, 1]
                             }
-                        
-                            setBuildPlateProperties(selectedWells)
+                            setBuildPlateProperties(well)
                         }
                     }
                 }
