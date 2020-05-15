@@ -19,19 +19,19 @@ Cura.MachineAction {
     
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1
 
-    property int controlHeight: UM.Theme.getSize("setting_control").height * 1.2
+    property int controlHeight: UM.Theme.getSize("setting_control").height * 1.15
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
     property var extrudersModel:  CuraApplication.getExtrudersModel()
 
     function getActiveExtruderId() {
-        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
         return (activeExtruder != null) ? activeExtruder.id : "None"
     }
 
     function getActiveExtruderName() {
-        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
         return (activeExtruder != null)  ? activeExtruder.name : "None"
     }
 
@@ -74,6 +74,7 @@ Cura.MachineAction {
             right: parent.right
         }
     }
+
 
     UM.TabRow {
         id: tabBar
@@ -118,8 +119,7 @@ Cura.MachineAction {
             color: UM.Theme.getColor("lining")
             visible: tabBar.visible
             Rectangle {
-                anchors
-                {
+                anchors {
                     left: parent.left
                     leftMargin: parent.parent.border.width
                     right: parent.right
@@ -141,21 +141,47 @@ Cura.MachineAction {
             property real textWidth: Math.round(paddedWidth * 0.2)
             property real controlWidth: (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 3.2
 
-            readonly property real bar_width:  UM.Theme.getSize("rokit_big_item").width
-            readonly property real bar_height: UM.Theme.getSize("rokit_big_item").height
+            readonly property real bar_width: UM.Theme.getSize("rokit_big_item").width
+            readonly property real bar_height: UM.Theme.getSize("rokit_big_item").height * 0.8
+            readonly property real bar_radius: UM.Theme.getSize("rokit_combobox_radius").height
+
             readonly property var bar_border_color: UM.Theme.getColor("setting_control_border")
-            readonly property real bar_radius: UM.Theme.getSize("rokit_combobox_radius").height 
             readonly property var bar_color: UM.Theme.getColor("secondary_shadow")
+
+            Cura.ObjectsModel {id: objectsModel }
+
+            Row { // Object list Bar
+                visible: objectsModel.count > 0
+                Rectangle {
+                    width: selectors.bar_width
+                    height: selectors.bar_height
+                    radius: selectors.bar_radius
+                    color: selectors.bar_color
+                    border.color: selectors.bar_border_color
+
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+
+                    Text {
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: objectsModel.getItem(0).name + ((objectsModel.count > 1) ? " ..." : "")
+                    }
+                }
+            }
 
             Row { // Material Configuration Bar
                 visible: Cura.MachineManager.activeMachine.hasMaterials
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 Rectangle {
-                    width:  UM.Theme.getSize("rokit_big_item").width
-                    height: UM.Theme.getSize("rokit_big_item").height
-                    radius: UM.Theme.getSize("rokit_combobox_radius").height
-                    color: UM.Theme.getColor("secondary_shadow")
-                    border.color: UM.Theme.getColor("setting_control_border")
+                    width: selectors.bar_width
+                    height: selectors.bar_height
+                    radius: selectors.bar_radius
+                    color: selectors.bar_color
+                    border.color: selectors.bar_border_color
 
                     anchors { 
                         margins: UM.Theme.getSize("default_margin").width
@@ -174,8 +200,6 @@ Cura.MachineAction {
 
             Row { // Nozzle Guage
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-
                 Label {
                     text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
@@ -194,8 +218,6 @@ Cura.MachineAction {
 
             Row { // Material
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-
                 Label {
                     text: catalog.i18nc("@label", "Material")
                     verticalAlignment: Text.AlignVCenter
@@ -255,14 +277,12 @@ Cura.MachineAction {
 
             Row { // Layer Quality Bar
                 visible: Cura.MachineManager.activeMachine.hasMaterials
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-
                 Rectangle {
-                    width:  UM.Theme.getSize("rokit_big_item").width
-                    height: UM.Theme.getSize("rokit_big_item").height
-                    radius: UM.Theme.getSize("rokit_combobox_radius").height
-                    color: UM.Theme.getColor("secondary_shadow")
-                    border.color: UM.Theme.getColor("setting_control_border")
+                    width: selectors.bar_width
+                    height: selectors.bar_height
+                    radius: selectors.bar_radius
+                    color: selectors.bar_color
+                    border.color: selectors.bar_border_color
                     
                     anchors { 
                         margins: UM.Theme.getSize("default_margin").width
@@ -333,10 +353,8 @@ Cura.MachineAction {
 
             Row { // UV Bar
                 visible: Cura.MachineManager.activeMachine.hasMaterials
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-
                 Rectangle {
-                    width:  selectors.bar_width
+                    width: selectors.bar_width
                     height: selectors.bar_height
                     border.color: selectors.bar_border_color
                     radius: selectors.bar_radius 
@@ -363,8 +381,7 @@ Cura.MachineAction {
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor
                 rowSpacing: 1 * screenScaleFactor
-                anchors
-                {
+                anchors {
                     left: selectors.left
                     margins: UM.Theme.getSize("default_margin").width
                 }
@@ -425,9 +442,7 @@ Cura.MachineAction {
             }
 
             Row { // Dispensor Bar
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: getExtruderType() === "Syringe"
-
                 Rectangle {
                     width:  selectors.bar_width
                     height: selectors.bar_height
@@ -457,8 +472,7 @@ Cura.MachineAction {
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor
                 rowSpacing: 1 * screenScaleFactor
-                anchors
-                {
+                anchors {
                     left: selectors.left
                     margins: UM.Theme.getSize("default_margin").width
                 }

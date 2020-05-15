@@ -18,7 +18,7 @@ Item {
         id: mainIcon
         anchors.fill: parent
 
-        source: UM.Theme.getIcon("extruder_button")
+        source: UM.Theme.getIcon((index === 0) ? "extruder_button" : "hk_syringe_button")
         color: materialColor
     }
 
