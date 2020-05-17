@@ -3,7 +3,7 @@ import pytest
 
 from UM.Math.Polygon import Polygon
 from UM.Math.Vector import Vector
-from cura.RokitBuildVolume import BuildVolume, PRIME_CLEARANCE
+from cura.BuildVolume import BuildVolume, PRIME_CLEARANCE
 import numpy
 
 

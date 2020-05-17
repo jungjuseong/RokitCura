@@ -660,6 +660,8 @@ class CuraEngineBackend(QObject, Backend):
         self.setState(BackendState.Done)
         self.processingProgress.emit(1.0)
 
+        dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
+
         try:
             gcode_list = self._scene.gcode_dict[self._start_slice_job_build_plate] #type: ignore #Because we generate this attribute dynamically.
         except KeyError:  # Can occur if the g-code has been cleared while a slice message is still arriving from the other end.

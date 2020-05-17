@@ -9,11 +9,12 @@
         "file_formats": "text/x-gcode",
         "has_machine_quality": true,
         "preferred_quality_type": "normal",
-        "has_variants": true,
-        "variants_name": "Nozzle Type",
         "has_materials": true,
         "preferred_material": "generic_pla",
+        "has_variants": true,
+        "variants_name": "Nozzle Type",
         "preferred_variant_name": "0.25 Syringe",
+        "has_variant_buildplates": true,
         "preferred_variant_buildplate_name": "Culture Dish",
         "supports_network_connection": false,
         "machine_extruder_trains":
@@ -94,30 +95,26 @@
             "default_value": "one_at_a_time"
         },
         "machine_width": { 
-            "default_value": 180,
-            "minimum_value": 80,
-            "maximum_value": 200
+            "default_value": 35,
+            "minimum_value": 6.5,
+            "maximum_value": 150
         },
         "machine_depth": { 
-            "default_value": 180,
-            "minimum_value": 80,
-            "maximum_value": 180
+            "default_value": 35,
+            "minimum_value": 6.5,
+            "maximum_value": 150
         },
         "machine_height": { 
-            "default_value": 60,
-            "minimum_value": 40,
-            "maximum_value": 80
+            "default_value": 10,
+            "minimum_value": 10,
+            "maximum_value": 25
         },
         "machine_shape": { 
             "default_value": "elliptic"
         },
         "machine_center_is_zero": { "default_value": true },
 
-        "machine_build_dish_type": { "default_value": "Culture Dish" },
-        "machine_build_dish_width": { "default_value": 80 },
-        "machine_build_dish_depth": { "default_value": 80 },
-        "machine_build_dish_height": { "default_value": 40 },
-        "machine_build_dish_shape": { "default_value": "elliptic" },
+        "machine_build_dish_type": { "default_value": "Culture Dish:11035" },
 
         "machine_heated_build_volume": { "default_value": true },
         "default_material_print_temperature":

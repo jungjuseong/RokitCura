@@ -8,7 +8,7 @@ from UM.Math.Polygon import Polygon
 from UM.Math.Vector import Vector
 from UM.Scene.SceneNode import SceneNode
 from cura.Arranging.ShapeArray import ShapeArray
-from cura.RokitBuildVolume import BuildVolume
+from cura.BuildVolume import BuildVolume
 from cura.Scene import ZOffsetDecorator
 
 from collections import namedtuple
