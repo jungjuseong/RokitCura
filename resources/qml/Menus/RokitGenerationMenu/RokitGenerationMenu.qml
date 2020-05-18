@@ -16,10 +16,7 @@ import Cura 1.0 as Cura
 Cura.ExpandablePopup {
     id: base
 
-    UM.I18nCatalog {
-        id: catalog
-        name: "cura"
-    }
+    UM.I18nCatalog { id: catalog;  name: "cura" }
     enum GenerationMethod {
         Auto,
         Custom
@@ -38,6 +35,7 @@ Cura.ExpandablePopup {
 
     contentItem: Column {
         id: popupItem
+
         width: UM.Theme.getSize("configuration_selector").width
         height: implicitHeight  // ExpandableComponent will try to use this to determine the size of the background of the pop-up.
         padding: UM.Theme.getSize("default_margin").height
@@ -53,19 +51,18 @@ Cura.ExpandablePopup {
 
         Item {
             width: parent.width - 2 * parent.padding
-            height: rokitGeneration.height + actionPanelWidget.height + UM.Theme.getSize("default_margin").height * 2
+            height: rokitGeneration.height + actionPanelWidget.height + UM.Theme.getSize("default_margin").height
 
             RokitGeneration {
                 id: rokitGeneration
-                visible: true
             }
-
+            
             Cura.ActionPanelWidget {
                 id: actionPanelWidget
-                anchors.right: parent.right
+                visible: true
+                anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                anchors.rightMargin: UM.Theme.getSize("thick_margin").width
-                anchors.bottomMargin: UM.Theme.getSize("thick_margin").height
+                //anchors.bottomMargin: UM.Theme.getSize("default_margin").height
             }
         }        
     }

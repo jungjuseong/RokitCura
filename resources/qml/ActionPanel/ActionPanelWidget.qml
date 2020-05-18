@@ -8,12 +8,10 @@ import QtQuick.Layouts 1.3
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-
 // This element hold all the elements needed for the user to trigger the slicing process, and later
 // to get information about the printing times, material consumption and the output process (such as
 // saving to a file, printing over network, ...
-Item
-{
+Item {
     id: base
     width: actionPanelWidget.width + additionalComponents.width
     height: childrenRect.height
@@ -21,8 +19,7 @@ Item
 
     property bool hasPreviewButton: true
 
-    Rectangle
-    {
+    Rectangle {
         id: actionPanelWidget
 
         width: UM.Theme.getSize("action_panel_widget").width
@@ -36,11 +33,9 @@ Item
 
         property bool outputAvailable: UM.Backend.state == UM.Backend.Done || UM.Backend.state == UM.Backend.Disabled
 
-        Loader
-        {
+        Loader {
             id: loader
-            anchors
-            {
+            anchors {
                 top: parent.top
                 topMargin: UM.Theme.getSize("thick_margin").height
                 left: parent.left
@@ -49,30 +44,24 @@ Item
                 rightMargin: UM.Theme.getSize("thick_margin").width
             }
             sourceComponent: actionPanelWidget.outputAvailable ? outputProcessWidget : sliceProcessWidget
-            onLoaded:
-            {
+            onLoaded: {
                 if(actionPanelWidget.outputAvailable)
                 {
                     loader.item.hasPreviewButton = base.hasPreviewButton;
                 }
             }
         }
-
-        Component
-        {
+        Component {
             id: sliceProcessWidget
             RokitSliceProcessWidget { }
         }
-
-        Component
-        {
+        Component {
             id: outputProcessWidget
             OutputProcessWidget { }
         }
     }
 
-    Item
-    {
+    Item {
         id: additionalComponents
         width: childrenRect.width
         anchors.right: actionPanelWidget.left
@@ -80,8 +69,7 @@ Item
         anchors.bottom: actionPanelWidget.bottom
         anchors.bottomMargin: UM.Theme.getSize("thick_margin").height * 2
         visible: actionPanelWidget.visible
-        Row
-        {
+        Row {
             id: additionalComponentsRow
             anchors.verticalCenter: parent.verticalCenter
             spacing: UM.Theme.getSize("default_margin").width
@@ -90,16 +78,13 @@ Item
 
     Component.onCompleted: base.addAdditionalComponents()
 
-    Connections
-    {
+    Connections {
         target: CuraApplication
         onAdditionalComponentsChanged: base.addAdditionalComponents()
     }
 
-    function addAdditionalComponents()
-    {
-        for (var component in CuraApplication.additionalComponents["saveButton"])
-        {
+    function addAdditionalComponents() {
+        for (var component in CuraApplication.additionalComponents["saveButton"]) {
             CuraApplication.additionalComponents["saveButton"][component].parent = additionalComponentsRow
         }
     }

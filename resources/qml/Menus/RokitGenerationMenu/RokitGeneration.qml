@@ -19,7 +19,7 @@ Cura.MachineAction {
     
     property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1
 
-    property int controlHeight: UM.Theme.getSize("setting_control").height * 1.15
+    property int controlHeight: UM.Theme.getSize("setting_control").height * 1.2
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id

@@ -20,10 +20,7 @@ Column {
 
     spacing: UM.Theme.getSize("thin_margin").height
 
-    UM.I18nCatalog {
-        id: catalog
-        name: "cura"
-    }
+    UM.I18nCatalog { id: catalog;  name: "cura" }
 
     property real progress: UM.Backend.progress
     property int backendState: UM.Backend.state
@@ -74,59 +71,20 @@ Column {
         visible: (widget.backendState == UM.Backend.Processing || (prepareButtons.autoSlice && widget.backendState == UM.Backend.NotStarted))
     }
 
-    Item {
-        id: prepareButtons
-        // Get the current value from the preferences
-        property bool autoSlice: UM.Preferences.getValue("general/auto_slice")
-        // Disable the slice process when
-
-        width: parent.width
-        height: UM.Theme.getSize("action_button").height
-        visible: !autoSlice
-        Cura.PrimaryButton {
-            id: sliceButton
-
-            fixedWidthMode: true
-            height: parent.height
-
-            anchors.right: parent.right
-            anchors.left: parent.left
-
-            text: widget.waitingForSliceToStart ? catalog.i18nc("@button", "Processing"): catalog.i18nc("@button", "Slice")
-            tooltip: catalog.i18nc("@label", "Start the slicing process")
-            enabled: widget.backendState != UM.Backend.Error && !widget.waitingForSliceToStart
-            visible: widget.backendState == UM.Backend.NotStarted || widget.backendState == UM.Backend.Error
-            onClicked: sliceOrStopSlicing()
-        }
-
-
-        Cura.SecondaryButton {
-            id: cancelButton
-            fixedWidthMode: true
-            height: parent.height
-            anchors.left: parent.left
-
-            anchors.right: parent.right
-            text: catalog.i18nc("@button", "Cancel")
-            enabled: sliceButton.enabled
-            visible: !sliceButton.visible
-            onClicked: sliceOrStopSlicing()
-        }
-    }
     CheckBox {            
         id: leftFirstCheckbox
 
-        //anchors.top: sliceButton.top
-        anchors.topMargin: UM.Theme.getSize("default_margin").height;
-        //anchors.right: sliceButton.left
+        anchors.bottom: sliceButton.top
+        anchors.bottomMargin: UM.Theme.getSize("default_margin").height;
+        anchors.right: sliceButton.left
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
 
         text: catalog.i18nc("@option:check","Left First");
         style: UM.Theme.styles.partially_checkbox
         tooltip: catalog.i18nc("@label", "slice in the left model first")
 
-        enabled: widget.backendState != UM.Backend.Error && !widget.waitingForSliceToStart
-        visible: widget.backendState == UM.Backend.NotStarted || widget.backendState == UM.Backend.Error
+        enabled: sliceButton.enabled
+        visible: sliceButton.visible
 
         property var checkbox_state: 0; // if the state number is 2 then the checkbox has "partially" state
 
@@ -167,6 +125,48 @@ Column {
             checkbox_state = 0;
         }
     }
+
+    Item {
+        id: prepareButtons
+        // Get the current value from the preferences
+        property bool autoSlice: UM.Preferences.getValue("general/auto_slice")
+        // Disable the slice process when
+
+        width: parent.width
+        height: UM.Theme.getSize("action_button").height
+        //visible: !autoSlice
+
+        Cura.PrimaryButton {
+            id: sliceButton
+
+            fixedWidthMode: true
+            height: parent.height
+
+            anchors.right: parent.right
+            anchors.left: parent.left
+
+            text: widget.waitingForSliceToStart ? catalog.i18nc("@button", "Processing"): catalog.i18nc("@button", "Slice")
+            tooltip: catalog.i18nc("@label", "Start the slicing process")
+            enabled: CuraApplication.platformActivity && widget.backendState != UM.Backend.Error && !widget.waitingForSliceToStart
+            visible: true // widget.backendState == UM.Backend.NotStarted || widget.backendState == UM.Backend.Error
+            onClicked: sliceOrStopSlicing()
+        }
+
+        Cura.SecondaryButton {
+            id: cancelButton
+            fixedWidthMode: true
+            height: parent.height
+            anchors.left: parent.left
+
+            anchors.right: parent.right
+            text: catalog.i18nc("@button", "Cancel")
+            enabled: sliceButton.enabled
+            visible: !sliceButton.visible
+            onClicked: sliceOrStopSlicing()
+        }
+    }
+    
+
     // React when the user changes the preference of having the auto slice enabled
     Connections {
         target: UM.Preferences
@@ -188,10 +188,8 @@ Column {
     // Shortcut for "slice/stop"
     Controls1.Action{
         shortcut: "Ctrl+P"
-        onTriggered:
-        {
-            if (sliceButton.enabled)
-            {
+        onTriggered: {
+            if (sliceButton.enabled) {
                 sliceOrStopSlicing()
             }
         }
@@ -200,8 +198,7 @@ Column {
     // We have to use indirect bindings, as the values can be changed from the outside, which could cause breaks
     // (for instance, a value would be set, but it would be impossible to change it).
     // Doing it indirectly does not break these.
-    Binding
-    {
+    Binding {
         target: widget
         property: "leftFirst"
         value: UM.ActiveTool.properties.getValue("LeftFirst")
