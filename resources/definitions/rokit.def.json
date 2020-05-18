@@ -28,7 +28,7 @@
         {
             "label": "UV",
             "type": "category",
-            "icon": "category_support",
+            "icon": "category_uv",
             "description": "UV enable",
             "children":
             {
@@ -98,10 +98,10 @@
         },
         "dispensor":
         {
-            "label": "Dispensor",
+            "label": "Dispenser",
             "type": "category",
-            "icon": "category_support",
-            "description": "Dispensor Settings",
+            "icon": "category_dispenser",
+            "description": "Dispenser Settings",
             "enabled": "extruder_nr >= 0",
             "children":
             {

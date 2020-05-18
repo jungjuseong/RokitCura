@@ -151,7 +151,7 @@ class CuraApplication(QtApplication):
                          api_version = ApplicationMetadata.CuraSDKVersion,
                          build_type = ApplicationMetadata.CuraBuildType,
                          is_debug_mode = ApplicationMetadata.CuraDebugMode,
-                         tray_icon_name = "rokit-cura-icon-32.png",
+                         tray_icon_name = "rokit-heart-icon-32.png",
                          **kwargs)
 
         self.default_theme = "rokit-light"
@@ -451,7 +451,7 @@ class CuraApplication(QtApplication):
         super().startSplashWindowPhase()
 
         if not self.getIsHeadLess():
-            self.setWindowIcon(QIcon(Resources.getPath(Resources.Images, "rokit-cura-icon.png")))
+            self.setWindowIcon(QIcon(Resources.getPath(Resources.Images, "rokit-heart-icon-256.png")))
 
         self.setRequiredPlugins([
             # Misc.:
