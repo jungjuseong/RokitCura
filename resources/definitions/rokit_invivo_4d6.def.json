@@ -7,6 +7,7 @@
         "manufacturer": "Rokit HealthCare",
         "visible": true,
         "file_formats": "text/x-gcode",
+
         "has_machine_quality": true,
         "preferred_quality_type": "normal",
         "has_materials": true,

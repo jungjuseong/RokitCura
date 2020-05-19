@@ -158,6 +158,16 @@ UM.MainWindow {
             }
         }
 
+        Image {
+            source: '../images/rokit-background-dna-1920x1080.png'
+            width: base.width
+            height: base.height
+            fillMode: Image.Stretch
+            opacity: 0.25
+            cache: false
+            z: objectSelector.z - 10
+        } 
+
         Item {
             id: contentItem
 
@@ -193,16 +203,6 @@ UM.MainWindow {
                     }
                 }
             }
-
-            // Rectangle {                
-            //     Image {
-            //         source: '../images/rokit-background-dna-1920x1080.png'
-            //         fillMode: Image.Stretch
-            //         opacity: 0.3
-            //         cache: false
-            //         z: viewOrientationControls.z - 10
-            //     }
-            // }
 
             ObjectSelector {
                 id: objectSelector

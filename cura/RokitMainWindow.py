@@ -15,6 +15,6 @@ class RokitMainWindow(MainWindow):
 
         target = QRectF(10.0, 20.0, 80.0, 60.0)
         source = QRectF(0.0, 0.0, 70.0, 40.0)
-        self._pixmap = QPixmap(Resources.getPath(Resources.Images, "rokit-cura.png"))
+        self._pixmap = QPixmap(Resources.getPath(Resources.Images, "rokit-splash.png"))
         self._painter = QPainter(this)
         self._painter.drawPixmap(target, pixmap, source)

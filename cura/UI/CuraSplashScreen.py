@@ -21,7 +21,7 @@ class CuraSplashScreen(QSplashScreen):
             splash_image = QPixmap(Resources.getPath(Resources.Images, "cura_enterprise.png"))
             self._version_y_offset = 26
         else:
-            splash_image = QPixmap(Resources.getPath(Resources.Images, "rokit-cura.png"))
+            splash_image = QPixmap(Resources.getPath(Resources.Images, "rokit-splash.png"))
 
         self.setPixmap(splash_image)
 

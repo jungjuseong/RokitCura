@@ -10,15 +10,13 @@ import UM 1.4 as UM
 import Cura 1.0 as Cura
 import QtGraphicalEffects 1.0
 
-Item
-{
+Item {
     id: base
 
     implicitHeight: UM.Theme.getSize("main_window_header").height
     implicitWidth: UM.Theme.getSize("main_window_header").width
 
-    Image
-    {
+    Image {
         id: logo
         anchors.left: parent.left
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
@@ -32,29 +30,25 @@ Item
         sourceSize.height: height
     }
 
-    Row
-    {
+    Row {
         id: stagesListContainer
         spacing: Math.round(UM.Theme.getSize("default_margin").width / 2)
 
-        anchors
-        {
+        anchors {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter
             leftMargin: UM.Theme.getSize("default_margin").width
         }
 
         // The main window header is dynamically filled with all available stages
-        Repeater
-        {
+        Repeater {
             id: stagesHeader
 
             model: UM.StageModel { 
                 id: stageModel 
             }
 
-            delegate: Button
-            {
+            delegate: Button {
                 id: stageSelectorButton
                 text: model.name.toUpperCase()
                 checkable: true
@@ -72,8 +66,7 @@ Item
                 property string stageId: model.id
 
                 // This is a trick to assure the activeStage is correctly changed. It doesn't work propertly if done in the onClicked (see CURA-6028)
-                MouseArea
-                {
+                MouseArea {
                     anchors.fill: parent
                     onClicked: UM.Controller.setActiveStage(model.id)
                 }
