@@ -23,8 +23,7 @@ Cura.MachineAction {
     width: parent.width
     height: childrenRect.height
 
-    Label
-    {
+    Label {
         id: header
         text: catalog.i18nc("@header", "Material Configuration")
         font: UM.Theme.getFont("medium")
@@ -32,39 +31,32 @@ Cura.MachineAction {
         height: contentHeight
         renderType: Text.NativeRendering
 
-        anchors
-        {
+        anchors {
             top: parent.top
             left: parent.left
             right: parent.right
         }
     }
 
-    UM.TabRow
-    {
+    UM.TabRow {
         id: tabBar
         anchors.top: header.bottom
         anchors.topMargin: UM.Theme.getSize("default_margin").height
         visible: extrudersModel.count > 1
 
-        Repeater
-        {
+        Repeater {
             id: repeater
             model: extrudersModel
-            delegate: UM.TabRowButton
-            {
-                contentItem: Item
-                {
-                    Cura.RokitExtruderIcon
-                    {
+            delegate: UM.TabRowButton {
+                contentItem: Item {
+                    Cura.RokitExtruderIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         materialColor: model.color
                         width: parent.height
                         height: parent.height
                     }
                 }
-                onClicked:
-                {
+                onClicked: {
                     Cura.ExtruderManager.setActiveExtruderIndex(tabBar.currentIndex)
                 }
             }
@@ -73,20 +65,16 @@ Cura.MachineAction {
         //When active extruder changes for some other reason, switch tabs.
         //Don't directly link currentIndex to Cura.ExtruderManager.activeExtruderIndex!
         //This causes a segfault in Qt 5.11. Something with VisualItemModel removing index -1. We have to use setCurrentIndex instead.
-        Connections
-        {
+        Connections {
             target: Cura.ExtruderManager
-            onActiveExtruderChanged:
-            {
+            onActiveExtruderChanged: {
                 tabBar.setCurrentIndex(Cura.ExtruderManager.activeExtruderIndex);
             }
         }
 
         // Can't use 'item: ...activeExtruderIndex' directly apparently, see also the comment on the previous block.
-        onVisibleChanged:
-        {
-            if (tabBar.visible)
-            {
+        onVisibleChanged: {
+            if (tabBar.visible) {
                 tabBar.setCurrentIndex(Cura.ExtruderManager.activeExtruderIndex);
             }
         }
@@ -94,18 +82,15 @@ Cura.MachineAction {
         //When the model of the extruders is rebuilt, the list of extruders is briefly emptied and rebuilt.
         //This causes the currentIndex of the tab to be in an invalid position which resets it to 0.
         //Therefore we need to change it back to what it was: The active extruder index.
-        Connections
-        {
+        Connections {
             target: repeater.model
-            onModelChanged:
-            {
+            onModelChanged: {
                 tabBar.setCurrentIndex(Cura.ExtruderManager.activeExtruderIndex)
             }
         }
     }
 
-    Rectangle
-    {
+    Rectangle {
         width: parent.width
         height: childrenRect.height
         anchors.top: tabBar.bottom
@@ -116,17 +101,14 @@ Cura.MachineAction {
         color: UM.Theme.getColor("main_background")
 
         //Remove rounding and lining at the top.
-        Rectangle
-        {
+        Rectangle {
             width: parent.width
             height: parent.radius
             anchors.top: parent.top
             color: UM.Theme.getColor("lining")
             visible: tabBar.visible
-            Rectangle
-            {
-                anchors
-                {
+            Rectangle {
+                anchors {
                     left: parent.left
                     leftMargin: parent.parent.border.width
                     right: parent.right
@@ -147,12 +129,10 @@ Cura.MachineAction {
             readonly property real paddedWidth: parent.width - padding * 2
             property real textWidth: Math.round(paddedWidth * 0.3)
             property real controlWidth: {
-                if(instructionLink == "")
-                {
+                if(instructionLink == "") {
                     return paddedWidth - textWidth
                 }
-                else
-                {
+                else {
                     return paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width
                 }
             }

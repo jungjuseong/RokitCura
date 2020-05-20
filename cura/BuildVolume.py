@@ -628,7 +628,7 @@ class BuildVolume(SceneNode):
                 diagonal = self.getDiagonalSize()
                 if diagonal > 1:
                     # You can zoom out up to 5 times the diagonal. This gives some space around the volume.
-                    camera.setZoomRange(min = 0.1, max = diagonal * 5)  # type: ignore
+                    camera.setZoomRange(min = 0.1, max = diagonal * 20)  # type: ignore
 
     def _onEngineCreated(self) -> None:
         self._engine_ready = True

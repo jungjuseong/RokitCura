@@ -660,6 +660,11 @@ class CuraEngineBackend(QObject, Backend):
         self.setState(BackendState.Done)
         self.processingProgress.emit(1.0)
 
+        # extruder_stack = self._global_container_stack.extruders.get(str(self._extruder_position))
+        # if not extruder_stack:
+        #     return
+        # nozzle_name = extruder_stack.variant.getName()
+
         dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
 
         try:
