@@ -348,22 +348,6 @@
                     "settable_per_extruder": false,
                     "settable_per_meshgroup": false
                 },
-                "machine_buildplate_type":
-                {
-                    "label": "A dish type on the Build Plate",
-                    "description": "A dish type of the build plate installed on the printer.",
-                    "default_value": "culture_dish",
-                    "type": "enum",
-                    "options":
-                    {
-                        "culture_dish": "Culture Dish",
-                        "well_plate": "Well Plate",
-                        "culture_slide": "Culture Slide"
-                    },
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": false,
-                    "settable_per_meshgroup": false
-                },
                 "machine_build_dish_type":
                 {
                     "label": "A dish type on the Build Plate",

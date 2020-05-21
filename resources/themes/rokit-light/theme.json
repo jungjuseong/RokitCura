@@ -448,7 +448,7 @@
 
     "sizes": {
         "rokit_build_plate_setting_widget" : [36.0, 28.0],
-        "rokit_build_plate_content_widget" : [28.0, 28.0],
+        "rokit_build_plate_content_widget" : [28.0, 2.0],
         "rokit_build_plate_content" : [28.0, 25.5],
 
         "rokit_combobox_default" : [20, 2.5],

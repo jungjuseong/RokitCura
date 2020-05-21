@@ -13,16 +13,13 @@ Menu {
 
     property int extruderIndex: 0
 
-    Cura.NozzleModel
-    {
+    Cura.NozzleModel {
         id: nozzleModel
     }
 
     Instantiator {
-        model: { 
-            return nozzleModel 
-        }
-        
+        model:  nozzleModel 
+    
         MenuItem  {
             text: model.hotend_name
             checkable: true

@@ -679,7 +679,7 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             gcode_list[index] = replaced
-
+        
         self._slicing = False
         if self._slice_start_time:
             Logger.log("d", "Slicing took %s seconds", time() - self._slice_start_time )

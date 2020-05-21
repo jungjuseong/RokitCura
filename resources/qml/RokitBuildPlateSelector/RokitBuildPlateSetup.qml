@@ -62,8 +62,8 @@ Item {
             Repeater {
                 model: ListModel {
                     ListElement { name: "Culture Dish" }
-                    ListElement{ name: "Well Plate" }
-                    ListElement{ name: "Culture Slide" }
+                    ListElement { name: "Well Plate" }
+                    ListElement { name: "Culture Slide" }
                 }                
                 delegate: UM.TabRowButton {
                     Text {

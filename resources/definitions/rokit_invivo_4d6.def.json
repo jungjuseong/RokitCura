@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "Dr.Invivo 4D6",
+    "name": "Dr. INVIVO 4D6",
     "inherits": "rokit",
     "metadata": {
         "author": "IRON",
@@ -78,17 +78,17 @@
             "default_value": "one_at_a_time"
         },
         "machine_width": { 
-            "default_value": 35,
-            "minimum_value": 6.5,
-            "maximum_value": 150
+            "default_value": 85.4,
+            "minimum_value": 85,
+            "maximum_value": 86
         },
         "machine_depth": { 
-            "default_value": 35,
-            "minimum_value": 6.5,
-            "maximum_value": 150
+            "default_value": 127.6,
+            "minimum_value": 127,
+            "maximum_value": 128
         },
         "machine_height": { 
-            "default_value": 10,
+            "default_value": 14, 
             "minimum_value": 10,
             "maximum_value": 25
         },
@@ -105,7 +105,7 @@
             "default_value": 203,
             "minimum_value_warning": "25",
             "maximum_value_warning": "200",
-            "maximum_value": "215",
+            "maximum_value": "210",
             "minimum_value": "0",
             "settable_per_extruder": true
         },
@@ -113,12 +113,14 @@
         {
             "default_value": 200,
             "minimum_value": "0",
-            "minimum_value_warning": "18",
+            "minimum_value_warning": "0",
             "maximum_value_warning": "201",
             "maximum_value": "210",
             "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
             "settable_per_extruder": true
         },
+        "material_initial_print_temperature": { "value": "material_print_temperature" },
+        "material_final_print_temperature": { "value": "material_print_temperature" },
         "material_print_temperature_layer_0":
         {
             "default_value": 200,
@@ -133,31 +135,31 @@
             "default_value": 18,
             "resolve": "min(extruderValues('build_volume_temperature'))",
             "minimum_value": "0",
-            "minimum_value_warning": "18",
-            "maximum_value_warning": "45",
+            "minimum_value_warning": "0",
+            "maximum_value_warning": "10",
             "enabled": "machine_heated_build_volume",
             "settable_per_extruder": true
         },
         "default_material_bed_temperature":
         {
             "resolve": "max(extruderValues('default_material_bed_temperature'))",
-            "default_value": 60,
+            "default_value": 15,
             "minimum_value": "0",
             "minimum_value_warning": "build_volume_temperature",
-            "maximum_value_warning": "65",
-            "maximum_value": "70",
+            "maximum_value_warning": "40",
+            "maximum_value": "60",
             "enabled": true,
             "settable_per_extruder": true
         },
         "material_bed_temperature":
         {
-            "default_value": 60,
+            "default_value": 15,
             "value": "default_material_bed_temperature",
             "resolve": "max(extruderValues('material_bed_temperature'))",
             "minimum_value": "0",
             "minimum_value_warning": "build_volume_temperature",
-            "maximum_value_warning": "60",
-            "maximum_value": "70",
+            "maximum_value_warning": "40",
+            "maximum_value": "60",
             "settable_per_extruder": true
         },
 

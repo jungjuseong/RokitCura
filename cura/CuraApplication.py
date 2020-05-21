@@ -67,6 +67,8 @@ from cura.Machines.Models.MaterialBrandsModel import MaterialBrandsModel
 from cura.Machines.Models.MaterialManagementModel import MaterialManagementModel
 from cura.Machines.Models.MultiBuildPlateModel import MultiBuildPlateModel
 from cura.Machines.Models.NozzleModel import NozzleModel
+from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
+
 from cura.Machines.Models.QualityManagementModel import QualityManagementModel
 from cura.Machines.Models.QualityProfilesDropDownMenuModel import QualityProfilesDropDownMenuModel
 from cura.Machines.Models.QualitySettingsModel import QualitySettingsModel
@@ -1095,6 +1097,7 @@ class CuraApplication(QtApplication):
         qmlRegisterSingletonType(CustomQualityProfilesDropDownMenuModel, "Cura", 1, 0,
                                  "CustomQualityProfilesDropDownMenuModel", self.getCustomQualityProfilesDropDownMenuModel)
         qmlRegisterType(NozzleModel, "Cura", 1, 0, "NozzleModel")
+        qmlRegisterType(RokitBuildDishModel, "Cura", 1, 0, "RokitBuildDishModel")
         qmlRegisterType(IntentModel, "Cura", 1, 6, "IntentModel")
         qmlRegisterType(IntentCategoryModel, "Cura", 1, 6, "IntentCategoryModel")
 

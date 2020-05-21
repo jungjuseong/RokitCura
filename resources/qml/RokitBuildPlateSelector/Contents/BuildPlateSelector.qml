@@ -5,7 +5,8 @@ import QtQuick 2.10
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.3 as Controls2
-
+import QtQuick.Controls 2.0
+import QtQuick.Controls 1.1 as OldControls
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 import QtQuick.Layouts 1.3
@@ -14,24 +15,17 @@ import "../../Widgets"
 import "./model"
 
 Item {
+    id: base
+
     anchors.fill: parent
     UM.I18nCatalog { id: catalog; name: "cura" }
 
     property var extrudersModel: Cura.ExtrudersModel {}
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1 
-    property var dishModel: {}
+    
+    property var dishModel: []
+    property var category: "####"
 
-    function setBuildPlateProperties(product) {
-
-        if (product.plate != undefined) {
-            machineWidth.setPropertyValue("value", product.plate.x)
-            machineDepth.setPropertyValue("value", product.plate.y)
-            machineHeight.setPropertyValue("value", product.plate.z)
-            machineShape.setPropertyValue("value", dishModel.shape)
-            buildDishType.setPropertyValue("value", dishModel.category + ":" + product.id)
-            buildPlateTitle.text = dishModel.category + "  -  " + product.id
-        }
-    }
+    //{"product_id": "96", "shape": "elliptic", "volume": QVector3D(6.5, 6.5, 10.8)}
 
     Item {
         id: buildPlate
@@ -41,11 +35,11 @@ Item {
             left: parent.left
             right: parent.right
         } 
-
+        
         Text {
             id: title
             anchors {
-                bottom: comboBoxSelector.top
+                bottom: selectDish.top
                 left: parent.left
                 leftMargin: UM.Theme.getSize("default_margin").width
                 bottomMargin: UM.Theme.getSize("default_margin").width
@@ -55,128 +49,22 @@ Item {
             width: base.width / 3
         }
 
-        Cura.ComboBox {
-            id: comboBoxSelector
-            visible: dishModel.category !== "Well Plate"
-
-            height: UM.Theme.getSize("rokit_combobox_default").height
-            width: UM.Theme.getSize("rokit_combobox_default").width
-            anchors  {
-                left: parent.left 
-                bottom: parent.bottom                
-                leftMargin: UM.Theme.getSize("default_margin").width
-            }
-            textRole: "text"  // this solves that the combobox isn't populated in the first time Cura is started
-
-            model: dishModel
-
-            currentIndex: {
-                    const product = buildDishType.properties.value.split(":")[1]
-                    if (product[1]) {
-                        for (var index = 0; index < model.count; index++) {
-                            if (model.get(index).text === product[1]) {
-                                return index
-                            }
-                        }
-                    }
-                    return comboBoxSelector.currentIndex   
-            }
-            onActivated: {
-                setBuildPlateProperties(dishModel.products[index]) 
-            }
+        OldControls.ToolButton {
+            id: selectDish
+            text: buildDishType.properties.value
+            tooltip: text
+            height: parent.height
+            width: parent.width
+            style: UM.Theme.styles.print_setup_header_button
+            activeFocusOnPress: true
+            menu: Cura.RokitBuildDishMenu {  }
         }
         
-        Item {
-            id: buttonSelector
-            visible: dishModel.category === "Well Plate"
-
-            height: UM.Theme.getSize("rokit_well_plate_button").height
-            width: UM.Theme.getSize("rokit_well_plate_button").width
-            anchors  {
-                left: parent.left 
-                bottom: parent.bottom                
-                leftMargin: UM.Theme.getSize("default_margin").width
-            }
-
-            Row {
-                spacing: 0.5
-                ExclusiveGroup { id: buttonExclusive }
-                Repeater {
-                    model: dishModel
-
-                    delegate: Button {                    
-                        text: model.text
-                        height: buttonSelector.height
-                        width: buttonSelector.width
-                        exclusiveGroup: buttonExclusive
-                        checkable: true
-                        
-                        onClicked: {
-                            const well = dishModel.products[index]
-                            switch (well.id) {
-                                case "96":
-                                    wellCircles.holes = [8, 12, 1/4]
-                                    break
-                                case "48":
-                                    wellCircles.holes = [6, 8, 1/3]
-                                    break
-                                case "24":
-                                    wellCircles.holes = [4, 6, 1/2]
-                                    break
-                                case "12":
-                                    wellCircles.holes = [3, 4, 2/3]
-                                    break
-                                default: // 6
-                                    wellCircles.holes = [2, 3, 1]
-                            }
-                            setBuildPlateProperties(well)
-                        }
-                    }
-                }
-            }
-        }
-
         // "Build dish type"
         UM.SettingPropertyProvider {
             id: buildDishType
             containerStack: Cura.MachineManager.activeMachine
             key: "machine_build_dish_type"
-            watchedProperties: [ "value" ]
-            storeIndex: 0
-        }
-
-        // "X (Width)"
-        UM.SettingPropertyProvider {
-            id: machineWidth
-            containerStack: Cura.MachineManager.activeMachine
-            key: "machine_width"
-            watchedProperties: [ "value" ]
-            storeIndex: 0
-        }
-
-        // "Y (Depth)"
-        UM.SettingPropertyProvider {
-            id: machineDepth
-            containerStack: Cura.MachineManager.activeMachine
-            key: "machine_depth"
-            watchedProperties: [ "value" ]
-            storeIndex: 0
-        }
-
-        // "Z (Height)"
-        UM.SettingPropertyProvider {
-            id: machineHeight
-            containerStack: Cura.MachineManager.activeMachine
-            key: "machine_height"
-            watchedProperties: [ "value" ]
-            storeIndex: 0
-        }
-
-        // MachineShape
-        UM.SettingPropertyProvider {
-            id: machineShape
-            containerStack: Cura.MachineManager.activeMachine
-            key: "machine_shape"
             watchedProperties: [ "value" ]
             storeIndex: 0
         }

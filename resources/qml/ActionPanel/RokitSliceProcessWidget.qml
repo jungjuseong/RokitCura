@@ -74,9 +74,7 @@ Column {
     CheckBox {            
         id: leftFirstCheckbox
 
-        anchors.bottom: sliceButton.top
         anchors.bottomMargin: UM.Theme.getSize("default_margin").height;
-        anchors.right: sliceButton.left
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
 
         text: catalog.i18nc("@option:check","Left First");
@@ -112,7 +110,7 @@ Column {
         }
         onClicked: {
             // If state is partially, then set Checked
-            if (checkbox_state == 2){
+            if (checkbox_state == 2) {
                 leftFirstCheckbox.checked = true
                 UM.ActiveTool.setProperty("LeftFirst", true);
             }
@@ -135,6 +133,7 @@ Column {
         width: parent.width
         height: UM.Theme.getSize("action_button").height
         //visible: !autoSlice
+
 
         Cura.PrimaryButton {
             id: sliceButton
