@@ -19,22 +19,23 @@ Menu {
     
         MenuItem  {
 
-            text: model.category + " - " + model.product_id 
+            text: model.product_id 
             checkable: false
             checked: {
                 var activeMachine = Cura.MachineManager.activeMachine
                 if (activeMachine == null) {
                     return false
                 }
-                return (index === -1) ? false : buildDishType.properties.value ===  model.category + ":" + model.product_id
+                return (index === -1) ? false : buildDishType.properties.value ===  model.product_id
             }
             exclusiveGroup: group
             enabled: true
             onTriggered: {
-                buildDishType.setPropertyValue("value", model.category + ":" + model.product_id)
+                buildDishType.setPropertyValue("value", model.product_id)
             }
         }
-        onObjectAdded: { 
+        onObjectAdded: {
+            const category = object.text.split(":")[0]
             if (object.text.indexOf(menu.category) !== -1) {
                 menu.insertItem(index, object);
             }

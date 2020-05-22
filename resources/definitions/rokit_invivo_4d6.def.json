@@ -93,7 +93,7 @@
             "maximum_value": 25
         },
         "machine_shape": { 
-            "default_value": "elliptic"
+            "default_value": "rectangular"
         },
         "machine_center_is_zero": { "default_value": true },
 

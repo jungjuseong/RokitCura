@@ -32,11 +32,12 @@ from cura.Settings.ExtruderManager import ExtruderManager
 
 from PyQt5.QtCore import QTimer
 
-
 if TYPE_CHECKING:
     from cura.CuraApplication import CuraApplication
     from cura.Settings.ExtruderStack import ExtruderStack
     from UM.Settings.ContainerStack import ContainerStack
+    
+from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
 
 catalog = i18nCatalog("cura")
 
@@ -54,6 +55,8 @@ class BuildVolume(SceneNode):
         self._machine_manager = self._application.getMachineManager()
 
         self._volume_outline_color = None  # type: Optional[Color]
+        self._dish_volume_outline_color = None  # type: Optional[Color]
+
         self._x_axis_color = None  # type: Optional[Color]
         self._y_axis_color = None  # type: Optional[Color]
         self._z_axis_color = None  # type: Optional[Color]
@@ -65,11 +68,18 @@ class BuildVolume(SceneNode):
         self._depth = 0  # type: float
         self._shape = ""  # type: str
 
+        self._build_dish_model = RokitBuildDishModel()
+
+        self._build_dish_shape = "" 
+        self._build_dish_width = 0
+        self._build_dish_depth = 0
+        self._build_dish_height = 0
+        
         self._shader = None
 
         self._origin_mesh = None  # type: Optional[MeshData]
-        self._origin_line_length = 20
-        self._origin_line_width = 1.5
+        self._origin_line_length = 8 # 20
+        self._origin_line_width = .8 # 1.5
         self._enabled = False
 
         self._grid_mesh = None   # type: Optional[MeshData]
@@ -203,6 +213,7 @@ class BuildVolume(SceneNode):
         self._disallowed_areas = areas
 
     def render(self, renderer):
+
         if not self.getMeshData() or not self.isVisible():
             return True
 
@@ -327,32 +338,42 @@ class BuildVolume(SceneNode):
                 node.setOutsideBuildArea(True)
                 return
 
-            node.setOutsideBuildArea(False)
+            node.setOutsideBuildArea(False)          
 
     def _buildGridMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
         mb = MeshBuilder()
-        if self._shape != "elliptic":
-            # Build plate grid mesh
-            mb.addQuad(
-                Vector(min_w, min_h - z_fight_distance, min_d),
-                Vector(max_w, min_h - z_fight_distance, min_d),
-                Vector(max_w, min_h - z_fight_distance, max_d),
-                Vector(min_w, min_h - z_fight_distance, max_d)
-            )
 
-            for n in range(0, 6):
-                v = mb.getVertex(n)
-                mb.setVertexUVCoordinates(n, v[0], v[2])
-            return mb.build()
-        else:
+        build_dish_min_w, build_dish_max_w = -self._build_dish_width / 2, self._build_dish_width / 2
+        build_dish_min_h, build_dish_max_h = 0.0, self._build_dish_height
+        build_dish_min_d, build_dish_max_d = -self._build_dish_depth / 2, self._build_dish_depth / 2
+
+        if self._shape == "rectangular":
+            # Build plate grid mesh
+            # mb.addQuad(
+            #     Vector(min_w, min_h - z_fight_distance, min_d),
+            #     Vector(max_w, min_h - z_fight_distance, min_d),
+            #     Vector(max_w, min_h - z_fight_distance, max_d),
+            #     Vector(min_w, min_h - z_fight_distance, max_d)
+            # )
             aspect = 1.0
             scale_matrix = Matrix()
+            
             if self._width != 0:
                 # Scale circular meshes by aspect ratio if width != height
                 aspect = self._depth / self._width
                 scale_matrix.compose(scale=Vector(1, 1, aspect))
-            mb.addVertex(0, min_h - z_fight_distance, 0)
-            mb.addArc(max_w, Vector.Unit_Y, center=Vector(0, min_h - z_fight_distance, 0))
+            
+            if self._build_dish_shape == "rectangular":
+                mb.addQuad(
+                    Vector(build_dish_min_w, build_dish_min_h, build_dish_min_d),
+                    Vector(build_dish_max_w, build_dish_min_h, build_dish_min_d),
+                    Vector(build_dish_max_w, build_dish_min_h, build_dish_max_d),
+                    Vector(build_dish_min_w, build_dish_min_h, build_dish_max_d)
+                )
+            else:
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center=Vector(0, build_dish_min_h, 0))
+                mb.addVertex(0, build_dish_min_h, 0)
+
             sections = mb.getVertexCount() - 1  # Center point is not an arc section
             indices = []
             for n in range(0, sections - 1):
@@ -363,29 +384,92 @@ class BuildVolume(SceneNode):
             for n in range(0, mb.getVertexCount()):
                 v = mb.getVertex(n)
                 mb.setVertexUVCoordinates(n, v[0], v[2] * aspect)
+
             return mb.build().getTransformed(scale_matrix)
 
+        else:
+            aspect = 1.0
+            scale_matrix = Matrix()
+            
+            if self._width != 0:
+                # Scale circular meshes by aspect ratio if width != height
+                aspect = self._depth / self._width
+                scale_matrix.compose(scale=Vector(1, 1, aspect))
+            
+            if self._build_dish_shape != "elliptic":
+                mb.addQuad(
+                    Vector(build_dish_min_w, build_dish_min_h, build_dish_min_d),
+                    Vector(build_dish_max_w, build_dish_min_h, build_dish_min_d),
+                    Vector(build_dish_max_w, build_dish_min_h, build_dish_max_d),
+                    Vector(build_dish_min_w, build_dish_min_h, build_dish_max_d)
+                )
+            else:
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center=Vector(0, build_dish_min_h, 0))
+                mb.addVertex(0, build_dish_min_h, 0)
+            # mb.addArc(max_w, Vector.Unit_Y, center=Vector(0, min_h - z_fight_distance, 0))
+            sections = mb.getVertexCount() - 1  # Center point is not an arc section
+            indices = []
+            for n in range(0, sections - 1):
+                indices.append([0, n + 2, n + 1])
+            mb.addIndices(numpy.asarray(indices, dtype=numpy.int32))
+            mb.calculateNormals()
+
+            for n in range(0, mb.getVertexCount()):
+                v = mb.getVertex(n)
+                mb.setVertexUVCoordinates(n, v[0], v[2] * aspect)
+
+            return mb.build().getTransformed(scale_matrix)
+
+    def _buildCubicMesh(self, mb: MeshBuilder, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, volume_outline_color=None) -> None:
+        if type(mb) is MeshBuilder:
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, max_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, min_d), Vector(max_w, max_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, max_h, min_d), color = volume_outline_color)
+
+            mb.addLine(Vector(min_w, min_h, max_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, max_d), Vector(min_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, max_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, max_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, max_h, min_d), Vector(min_w, max_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, max_h, min_d), Vector(max_w, max_h, max_d), color = volume_outline_color)
+
+    def _buildRectangleMesh(self, mb: MeshBuilder, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, volume_outline_color=None) -> None:
+        if type(mb) is MeshBuilder:
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, max_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, min_h, max_d), color = volume_outline_color)
+            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, min_h, max_d), color = volume_outline_color)
+
+
     def _buildMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
-        if self._shape != "elliptic":
+
+        build_dish_min_w, build_dish_max_w = -self._build_dish_width / 2, self._build_dish_width / 2
+        build_dish_min_h, build_dish_max_h = 0.0, self._build_dish_height
+        build_dish_min_d, build_dish_max_d = -self._build_dish_depth / 2, self._build_dish_depth / 2
+
+        mb = MeshBuilder()
+        if self._shape == "rectangular":
             # Outline 'cube' of the build volume
-            mb = MeshBuilder()
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, max_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, min_d), Vector(max_w, max_h, min_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, max_h, min_d), color = self._volume_outline_color)
+            # Bottom and top 'ellipse' of the build volume
+            scale_matrix = Matrix()
+            if self._width != 0:
+                # Scale circular meshes by aspect ratio if width != height
+                aspect = self._depth / self._width
+                scale_matrix.compose(scale = Vector(1, 1, aspect))
+            # mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color) # lower
+            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color) # upper
+            self._buildRectangleMesh(mb, min_w, max_w, min_h, max_h, min_d, max_d, volume_outline_color = self._volume_outline_color)
 
-            mb.addLine(Vector(min_w, min_h, max_d), Vector(max_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, min_h, max_d), Vector(min_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, max_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, max_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
+            if self._build_dish_shape == "elliptic":
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color) # lower
+            else:
+                self._buildRectangleMesh(mb, build_dish_min_w, build_dish_max_w, build_dish_min_h, build_dish_max_h, build_dish_min_d, build_dish_max_d, volume_outline_color = self._dish_volume_outline_color)
 
-            mb.addLine(Vector(min_w, min_h, min_d), Vector(min_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, min_h, min_d), Vector(max_w, min_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(min_w, max_h, min_d), Vector(min_w, max_h, max_d), color = self._volume_outline_color)
-            mb.addLine(Vector(max_w, max_h, min_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
-
-            return mb.build()
-
+            return mb.build().getTransformed(scale_matrix)
         else:
             # Bottom and top 'ellipse' of the build volume
             scale_matrix = Matrix()
@@ -393,9 +477,15 @@ class BuildVolume(SceneNode):
                 # Scale circular meshes by aspect ratio if width != height
                 aspect = self._depth / self._width
                 scale_matrix.compose(scale = Vector(1, 1, aspect))
-            mb = MeshBuilder()
-            mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color)
-            mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color)
+            mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color) # lower
+            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color) # upper
+
+            if self._build_dish_shape == "elliptic":
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color) # lower
+                mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_max_h, 0),  color = self._dish_volume_outline_color) # upper
+            else:
+                self._buildCubicMesh(mb, build_dish_min_w, build_dish_max_w, build_dish_min_h, build_dish_max_h, build_dish_min_d, build_dish_max_d, volume_outline_color = self._dish_volume_outline_color)
+
             return mb.build().getTransformed(scale_matrix)
 
     def _buildOriginMesh(self, origin: Vector) -> MeshData:
@@ -428,6 +518,8 @@ class BuildVolume(SceneNode):
         if theme is None:
             return
         self._volume_outline_color = Color(*theme.getColor("volume_outline").getRgb())
+        self._dish_volume_outline_color = Color(*theme.getColor("dish_volume_outline").getRgb())
+
         self._x_axis_color = Color(*theme.getColor("x_axis").getRgb())
         self._y_axis_color = Color(*theme.getColor("y_axis").getRgb())
         self._z_axis_color = Color(*theme.getColor("z_axis").getRgb())
@@ -505,9 +597,20 @@ class BuildVolume(SceneNode):
         min_d = -self._depth / 2
         max_d = self._depth / 2
 
+        build_dish_type = self._global_container_stack.getProperty("machine_build_dish_type", "value")
+
+        for index in range(self._build_dish_model.count):
+            item = self._build_dish_model.getItem(index)
+            if item['product_id'] == build_dish_type:
+                self._build_dish_shape = item['shape']
+                self._build_dish_width = item['volume'].x()
+                self._build_dish_depth = item['volume'].y()
+                self._build_dish_height = item['volume'].z()
+                break
+
         z_fight_distance = 0.2  # Distance between buildplate and disallowed area meshes to prevent z-fighting
 
-        self._grid_mesh = self._buildGridMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance)
+        self._grid_mesh = self._buildGridMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance) 
         self.setMeshData(self._buildMesh(min_w, max_w, min_h, max_h, min_d, max_d, z_fight_distance))
 
         # Indication of the machine origin
@@ -516,7 +619,7 @@ class BuildVolume(SceneNode):
         else:
             origin = Vector(min_w, min_h, max_d)
 
-        self._origin_mesh = None # self._buildOriginMesh(origin)
+        self._origin_mesh = self._buildOriginMesh(origin)
 
         disallowed_area_height = 0.1
         self._disallowed_area_size = 0.
@@ -604,6 +707,7 @@ class BuildVolume(SceneNode):
 
             self._width = self._global_container_stack.getProperty("machine_width", "value")
             machine_height = self._global_container_stack.getProperty("machine_height", "value")
+
             if self._global_container_stack.getProperty("print_sequence", "value") == "one_at_a_time" and len(self._scene_objects) > 1:
                 self._height = min(self._global_container_stack.getProperty("gantry_height", "value"), machine_height)
                 if self._height < machine_height:
@@ -628,7 +732,8 @@ class BuildVolume(SceneNode):
                 diagonal = self.getDiagonalSize()
                 if diagonal > 1:
                     # You can zoom out up to 5 times the diagonal. This gives some space around the volume.
-                    camera.setZoomRange(min = 0.1, max = diagonal * 20)  # type: ignore
+                    camera.setZoomRange(min = 0.1, max = diagonal * 5)  # type: ignore
+
 
     def _onEngineCreated(self) -> None:
         self._engine_ready = True
@@ -712,8 +817,7 @@ class BuildVolume(SceneNode):
         self._depth = self._global_container_stack.getProperty("machine_depth", "value")
         self._shape = self._global_container_stack.getProperty("machine_shape", "value")
 
-    ##  Calls _updateDisallowedAreas and makes sure the changes appear in the
-    #   scene.
+    ##  Calls _updateDisallowedAreas and makes sure the changes appear in the scene.
     #
     #   This is required for a signal to trigger the update in one go. The
     #   ``_updateDisallowedAreas`` method itself shouldn't call ``rebuild``,
@@ -782,11 +886,8 @@ class BuildVolume(SceneNode):
         for extruder_id in result_areas_no_brim:
             self._disallowed_areas_no_brim.extend(result_areas_no_brim[extruder_id])
 
-    ##  Computes the disallowed areas for objects that are printed with print
-    #   features.
-    #
-    #   This means that the brim, travel avoidance and such will be applied to
-    #   these features.
+    ##  Computes the disallowed areas for objects that are printed with print features.
+    #   This means that the brim, travel avoidance and such will be applied to these features.
     #
     #   \return A dictionary with for each used extruder ID the disallowed areas
     #   where that extruder may not print.
@@ -803,6 +904,7 @@ class BuildVolume(SceneNode):
             prime_tower_size = self._global_container_stack.getProperty("prime_tower_size", "value")
             machine_width = self._global_container_stack.getProperty("machine_width", "value")
             machine_depth = self._global_container_stack.getProperty("machine_depth", "value")
+
             prime_tower_x = self._global_container_stack.getProperty("prime_tower_position_x", "value")
             prime_tower_y = - self._global_container_stack.getProperty("prime_tower_position_y", "value")
             if not self._global_container_stack.getProperty("machine_center_is_zero", "value"):
@@ -845,6 +947,7 @@ class BuildVolume(SceneNode):
             return result
         machine_width = self._global_container_stack.getProperty("machine_width", "value")
         machine_depth = self._global_container_stack.getProperty("machine_depth", "value")
+
         for extruder in used_extruders:
             prime_blob_enabled = extruder.getProperty("prime_blob_enable", "value")
             prime_x = extruder.getProperty("extruder_prime_pos_x", "value")

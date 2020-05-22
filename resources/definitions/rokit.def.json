@@ -348,6 +348,21 @@
                     "settable_per_extruder": false,
                     "settable_per_meshgroup": false
                 },
+                "machine_buildplate_type":
+                {
+                    "label": "Build Plate Material",
+                    "description": "The material of the build plate installed on the printer.",
+                    "default_value": "aluminum",
+                    "type": "enum",
+                    "options":
+                    {
+                        "glass": "Glass",
+                        "aluminum": "Aluminum"
+                    },
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false
+                },
                 "machine_build_dish_type":
                 {
                     "label": "A dish type on the Build Plate",
