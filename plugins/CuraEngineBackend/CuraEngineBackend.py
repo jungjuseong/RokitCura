@@ -679,6 +679,25 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             gcode_list[index] = replaced
+
+        
+        # 
+        gcode_body = gcode_list[2:-1] # gcode body part
+        std_index = gcode_body[0].find(".stl") + 6 # '6' helps to go std_index <--- must modify
+        std_rear_index = gcode_body[0].find('Z', std_index) 
+
+        std_str = "".join(gcode_body[0][std_index-1:std_rear_index-1])
+        # spacing = 20
+        new_position = std_str[std_str.find('X'):] # only remain the value x and y
+
+        gcode_spacing = ";dy_spacing\n"+std_str+"\nG91\nG1 Z2\nG1 X-20\nG1 Z-2\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
+
+        gcode_body.insert(0,gcode_spacing)
+        gcode_clone = []
+        for i in range(5): # five clone
+            gcode_clone.append(gcode_body)
+            gcode_list[-1:-1]= gcode_clone[i]  # put the clones in front of the end-code # 상무님 append사용으로 변경하겠습니다.
+
         
         self._slicing = False
         if self._slice_start_time:
