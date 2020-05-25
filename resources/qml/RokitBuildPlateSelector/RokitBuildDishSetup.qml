@@ -148,6 +148,7 @@ Item {
                     return cultureDishMenu
             }
         }
+        
         UM.SettingPropertyProvider {
             id: buildDishType
             containerStack: Cura.MachineManager.activeMachine

@@ -25,14 +25,15 @@ Cura.MachineAction {
     property string machineStackId: Cura.MachineManager.activeMachine.id
     property var extrudersModel:  CuraApplication.getExtrudersModel()
 
-    function getActiveExtruderId() {
+    property string activeExtruderId: {
         const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
-        return (activeExtruder != null) ? activeExtruder.id : "None"
+        console.log(activeExtruder.id)
+        return activeExtruder.id
     }
 
-    function getActiveExtruderName() {
+    property string activeExtruderName: {
         const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
-        return (activeExtruder != null)  ? activeExtruder.name : "None"
+        return activeExtruder.name
     }
 
     function getExtruderType() {
@@ -201,7 +202,7 @@ Cura.MachineAction {
             Row { // Nozzle Guage
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
                 Label {
-                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    text: (activeExtruderName === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
                     font: base.labelFont
                     color: UM.Theme.getColor("text")
@@ -249,7 +250,7 @@ Cura.MachineAction {
                 columns: 2
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "material_print_temperature"
                     labelText: catalog.i18nc("@label", "Print Temp.")
                     unitText: catalog.i18nc("@label", "°C")
@@ -261,7 +262,7 @@ Cura.MachineAction {
                     textField.readOnly: true
                 }
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "material_bed_temperature"
                     labelText: catalog.i18nc("@label", "Bed Temp.")
                     unitText: catalog.i18nc("@label", "°C")
@@ -313,7 +314,7 @@ Cura.MachineAction {
                 columns: 2
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "layer_height"
                     labelText: catalog.i18nc("@label", "Layer Height")
                     unitText: catalog.i18nc("@label", "mm")
@@ -326,7 +327,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "infill_pattern"
                     labelText: catalog.i18nc("@label", "Infill Pattern")
 
@@ -338,7 +339,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "infill_sparse_density"
                     labelText: catalog.i18nc("@label", "Infill Density")
                     unitText: catalog.i18nc("@label", "%")
@@ -389,7 +390,7 @@ Cura.MachineAction {
                 columns: 2
 
                 Cura.NumericTextFieldWithUnit  {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "uv_per_layers"
                     labelText: catalog.i18nc("@label", "Layers")
                     unitText: catalog.i18nc("@label", "layers")
@@ -402,7 +403,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit  {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "uv_type"
                     labelText: catalog.i18nc("@label", "Type")
                     unitText: catalog.i18nc("@label", "nm")
@@ -415,7 +416,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "uv_time"
                     labelText: catalog.i18nc("@label", "Time")
                     unitText: catalog.i18nc("@label", "sec")
@@ -428,7 +429,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "uv_dimming"
                     labelText: catalog.i18nc("@label", "Dimming")
                     unitText: catalog.i18nc("@label", "%")
@@ -480,7 +481,7 @@ Cura.MachineAction {
                 columns: 2
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "dispensor_shot"
                     labelText: catalog.i18nc("@label", "SHOT")
                     unitText: catalog.i18nc("@label", "sec")
@@ -493,7 +494,7 @@ Cura.MachineAction {
                 }                
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "dispensor_vac"
                     labelText: catalog.i18nc("@label", "VAC")
                     unitText: catalog.i18nc("@label", "sec")
@@ -506,7 +507,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "dispensor_int"
                     labelText: catalog.i18nc("@label", "INT")
                     unitText: catalog.i18nc("@label", "kpa")
@@ -519,7 +520,7 @@ Cura.MachineAction {
                 }                
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "dispensor_shot_power"
                     labelText: catalog.i18nc("@label", "SHOT P.")
                     unitText: catalog.i18nc("@label", "kpa")
@@ -532,7 +533,7 @@ Cura.MachineAction {
                 }
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: getActiveExtruderId()
+                    containerStackId: activeExtruderId
                     settingKey: "dispensor_vac_power"
                     labelText: catalog.i18nc("@label", "VAC P.")
 
