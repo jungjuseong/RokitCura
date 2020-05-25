@@ -9,15 +9,15 @@ import Cura 1.0 as Cura
 
 Menu {
     id: menu
-    title: "Dish"
 
-    property int index: 0
     property string category: ""
+    property string selected: buildDishType.properties.value
 
     Instantiator {
         model: Cura.RokitBuildDishModel { }
     
         MenuItem  {
+            id: menuItem
 
             text: model.product_id 
             checkable: false
@@ -25,13 +25,16 @@ Menu {
                 var activeMachine = Cura.MachineManager.activeMachine
                 if (activeMachine == null) {
                     return false
-                }
-                return (index === -1) ? false : buildDishType.properties.value ===  model.product_id
+                }                
+                return selected ===  model.product_id
             }
             exclusiveGroup: group
-            enabled: true
+            //enabled: true
             onTriggered: {
-                buildDishType.setPropertyValue("value", model.product_id)
+                selected = model.product_id
+                buildDishType.setPropertyValue("value", selected)
+
+                preview.showPreview(selected)
             }
         }
         onObjectAdded: {
@@ -42,8 +45,7 @@ Menu {
         }
         onObjectRemoved: menu.removeItem(object);
     }
-
-    // "Build dish type"
+    
     UM.SettingPropertyProvider {
         id: buildDishType
         containerStack: Cura.MachineManager.activeMachine

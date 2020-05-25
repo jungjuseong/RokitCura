@@ -46,7 +46,7 @@ Item
             height: parent.height
             spacing: 0
 
-            Cura.RokitBuildPlateSelector {
+            Cura.RokitBuildDishSelector {
                 id: plateSelector
                 headerCornerSide: Cura.RoundedRectangle.Direction.Left
                 Layout.minimumWidth: UM.Theme.getSize("machine_selector_widget").width

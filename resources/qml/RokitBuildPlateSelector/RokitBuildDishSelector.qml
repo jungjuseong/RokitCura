@@ -13,10 +13,7 @@ Cura.ExpandablePopup {
     contentPadding: UM.Theme.getSize("default_lining").width
     contentAlignment: Cura.ExpandablePopup.ContentAlignment.AlignLeft
 
-    UM.I18nCatalog {
-        id: catalog
-        name: "cura"
-    }
+    UM.I18nCatalog {id: catalog;  name: "cura" }
 
     headerItem: Cura.IconWithText {
         text: "Build Plate"
@@ -26,12 +23,8 @@ Cura.ExpandablePopup {
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
     }
 
-    contentItem: RokitBuildPlateSetup {
-        anchors
-        {
-            left: parent.left
-            top: parent.top
-        }
-        visible: true
+    contentItem: RokitBuildDishSetup {
+        anchors.left: parent.left
+        anchors.top: parent.top
     }
 }

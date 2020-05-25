@@ -1,11 +1,11 @@
 // Copyright (c) 2018 Ultimaker B.V.
 // Cura is released under the terms of the LGPLv3 or higher.
 
+import QtQuick 2.10
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 1.1 as OldControls
 
-import QtQuick 2.7
 import QtQuick.Layouts 1.1
 
 import UM 1.2 as UM
@@ -14,24 +14,35 @@ import Cura 1.0 as Cura
 Item {
     id: base
 
-    anchors.fill: parent
-    UM.I18nCatalog { id: catalog; name: "cura" }
-
-    Rectangle {
-        id: preview
-
-        width: UM.Theme.getSize("rokit_culture_slide").width
-        height : UM.Theme.getSize("rokit_culture_slide").height
-        anchors {
-            centerIn: parent
-        }
-        color: UM.Theme.getColor("rokit_build_plate")
-        border.width : 1
-        border.color: UM.Theme.getColor("rokit_build_plate_border")
+    Cura.RokitBuildDishMenu {
+        id: wellPlateMenu
+        category: "Well Plate"
     }
 
-     OldControls.ToolButton {
+    Cura.RokitBuildDishMenu {
+        id: cultureDishMenu
+        category: "Culture Dish"
+    }
 
+    Cura.RokitBuildDishMenu {
+        id: cultureSlideMenu
+        category: "Culture Slide"
+    }
+
+    property string category: ""
+
+    UM.I18nCatalog { id: catalog; name: "cura" }
+
+    anchors.fill: parent
+    anchors.top : parent.top
+    width: parent.width
+
+    DishPreview {
+        id: preview
+    }
+
+    OldControls.ToolButton {
+        id: toolButton
         anchors.top: preview.bottom
         anchors.topMargin: UM.Theme.getSize("thick_margin").height * 2
 
@@ -41,8 +52,13 @@ Item {
         width: parent.width
         style: UM.Theme.styles.print_setup_header_button
         activeFocusOnPress: true
-        menu: Cura.RokitBuildDishMenu { 
-            category: "Culture Slide"
+        menu: {
+            if (category === "Well Plate")
+                return wellPlateMenu
+            if (category === "Culture Slide")
+                return cultureSlideMenu
+            if (category === "Culture Dish")
+                return cultureDishMenu
         }
     }
 

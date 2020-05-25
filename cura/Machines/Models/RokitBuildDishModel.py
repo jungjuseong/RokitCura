@@ -30,7 +30,7 @@ class RokitBuildDishModel(ListModel):
         item_list.append({"product_id": "Well Plate:96", "shape": "elliptic", "volume": QVector3D(6.5, 6.5, 10.8)})
         item_list.append({"product_id": "Well Plate:48", "shape": "elliptic", "volume": QVector3D(9.75, 9.75, 17.50)})
         item_list.append({"product_id": "Well Plate:24", "shape": "elliptic", "volume": QVector3D(15.5, 15.5, 17.50)})
-        item_list.append({"product_id": "Well Plate12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 17.50)})
+        item_list.append({"product_id": "Well Plate:12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 17.50)})
         item_list.append({"product_id": "Well Plate:6", "shape": "elliptic", "volume": QVector3D(35.0, 35.0, 17.50)})
 
         item_list.append({"product_id": "Culture Dish:11035", "shape": "elliptic", "volume": QVector3D(35,35,10)})

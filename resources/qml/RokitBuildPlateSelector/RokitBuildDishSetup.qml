@@ -4,13 +4,11 @@
 import QtQuick 2.10
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 1.1 as OldControls
 
 import UM 1.3 as UM
 import Cura 1.6 as Cura
 import QtQuick.Layouts 1.3
-
-import "./Contents"
-import "../Widgets"
 
 Item {
     height: UM.Theme.getSize("rokit_build_plate_setting_widget").height + 2 * padding
@@ -72,10 +70,12 @@ Item {
                     }
                     onClicked: { 
                         tabName = name
+                        toolButton.category = name
                     }       
                 }
             }            
-        } 
+        }
+        
         Rectangle {
             id: borderLine
             anchors {
@@ -97,27 +97,63 @@ Item {
 
         
     Item {
-        anchors  {
-            left: parent.left
-            right: parent.right
-            top: parent.top
-            bottom : parent.bottom 
-            margins: parent.padding
+        id: buildDishSelector
+
+        Cura.RokitBuildDishMenu {
+            id: wellPlateMenu
+            category: "Well Plate"
         }
-        CultureDishSelector {
-            visible: tabName === "Culture Dish" 
-            anchors.top : parent.top
+
+        Cura.RokitBuildDishMenu {
+            id: cultureDishMenu
+            category: "Culture Dish"
+        }
+
+        Cura.RokitBuildDishMenu {
+            id: cultureSlideMenu
+            category: "Culture Slide"
+        }
+
+        anchors.fill: parent
+        anchors.top : parent.top
+        width: parent.width
+
+        DishPreview {
+            id: preview
+        }
+
+        OldControls.ToolButton {
+            id: toolButton
+
+            property string category: buildDishType.properties.value.split(":")[0]
+            anchors.top: preview.bottom
+            anchors.topMargin: UM.Theme.getSize("thick_margin").height * 2
+
+            text: buildDishType.properties.value
+            tooltip: text
+            height: UM.Theme.getSize("rokit_build_plate_content_widget").height
             width: parent.width
+            style: UM.Theme.styles.print_setup_header_button
+            activeFocusOnPress: true
+            
+            menu: {
+                console.log("menuCategory:" + category)
+                if (category === "Well Plate")
+                    return wellPlateMenu
+                if (category === "Culture Slide")
+                    return cultureSlideMenu
+                if (category === "Culture Dish")
+                    return cultureDishMenu
+            }
         }
-        WellPlateSelector {
-            visible: tabName === "Well Plate" 
-            anchors.top : parent.top
-            width: parent.width
+
+        UM.SettingPropertyProvider {
+            id: buildDishType
+            containerStack: Cura.MachineManager.activeMachine
+            key: "machine_build_dish_type"
+            watchedProperties: [ "value" ]
+            storeIndex: 0
         }
-        CultureSlideSelector {
-            visible: tabName === "Culture Slide"
-            anchors.top : parent.top
-            width: parent.width
-        }
-    }            
+    }
+              
 }
