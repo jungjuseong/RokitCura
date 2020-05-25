@@ -73,9 +73,9 @@ Item {
                         toolButton.category = name
                     }       
                 }
+
             }            
-        }
-        
+        }        
         Rectangle {
             id: borderLine
             anchors {
@@ -94,11 +94,10 @@ Item {
             height: UM.Theme.getSize("rokit_build_plate_content").height 
         } 
     }
-
         
     Item {
         id: buildDishSelector
-
+        
         Cura.RokitBuildDishMenu {
             id: wellPlateMenu
             category: "Well Plate"
@@ -120,6 +119,7 @@ Item {
 
         DishPreview {
             id: preview
+            product_id: buildDishType.properties.value
         }
 
         OldControls.ToolButton {
@@ -127,12 +127,14 @@ Item {
 
             property string category: buildDishType.properties.value.split(":")[0]
             anchors.top: preview.bottom
+            anchors.left: preview.left
             anchors.topMargin: UM.Theme.getSize("thick_margin").height * 2
+            anchors.leftMargin: UM.Theme.getSize("thick_margin").width
 
             text: buildDishType.properties.value
             tooltip: text
             height: UM.Theme.getSize("rokit_build_plate_content_widget").height
-            width: parent.width
+            width: parent.width / 2
             style: UM.Theme.styles.print_setup_header_button
             activeFocusOnPress: true
             
@@ -146,7 +148,6 @@ Item {
                     return cultureDishMenu
             }
         }
-
         UM.SettingPropertyProvider {
             id: buildDishType
             containerStack: Cura.MachineManager.activeMachine

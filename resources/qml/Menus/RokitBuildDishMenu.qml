@@ -34,7 +34,7 @@ Menu {
                 selected = model.product_id
                 buildDishType.setPropertyValue("value", selected)
 
-                preview.showPreview(selected)
+                preview.product_id = selected
             }
         }
         onObjectAdded: {
