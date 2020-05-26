@@ -348,20 +348,10 @@ class BuildVolume(SceneNode):
         build_dish_min_d, build_dish_max_d = -self._build_dish_depth / 2, self._build_dish_depth / 2
 
         if self._shape == "rectangular":
-            # Build plate grid mesh
-            # mb.addQuad(
-            #     Vector(min_w, min_h - z_fight_distance, min_d),
-            #     Vector(max_w, min_h - z_fight_distance, min_d),
-            #     Vector(max_w, min_h - z_fight_distance, max_d),
-            #     Vector(min_w, min_h - z_fight_distance, max_d)
-            # )
-            aspect = 1.0
             scale_matrix = Matrix()
-            
-            if self._width != 0:
-                # Scale circular meshes by aspect ratio if width != height
-                aspect = self._depth / self._width
-                scale_matrix.compose(scale=Vector(1, 1, aspect))
+            # Scale circular meshes by aspect ratio if width != height
+            aspect = self._build_dish_depth / self._build_dish_width # 1.0
+            scale_matrix.compose(scale=Vector(1, 1, aspect))
             
             if self._build_dish_shape == "rectangular":
                 mb.addQuad(
@@ -453,18 +443,12 @@ class BuildVolume(SceneNode):
 
         mb = MeshBuilder()
         if self._shape == "rectangular":
-            # Outline 'cube' of the build volume
-            # Bottom and top 'ellipse' of the build volume
-            scale_matrix = Matrix()
-            if self._width != 0:
-                # Scale circular meshes by aspect ratio if width != height
-                aspect = self._depth / self._width
-                scale_matrix.compose(scale = Vector(1, 1, aspect))
-            # mb.addArc(max_w, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), color = self._volume_outline_color) # lower
-            # mb.addArc(max_w, Vector.Unit_Y, center = (0, max_h, 0),  color = self._volume_outline_color) # upper
             self._buildRectangleMesh(mb, min_w, max_w, min_h, max_h, min_d, max_d, volume_outline_color = self._volume_outline_color)
 
             if self._build_dish_shape == "elliptic":
+                scale_matrix = Matrix()
+                aspect = self._build_dish_depth / self._build_dish_width # 1.0
+                scale_matrix.compose(scale = Vector(1, 1, aspect))
                 mb.addArc(build_dish_max_w, Vector.Unit_Y, center = (0, build_dish_min_h, 0), color = self._dish_volume_outline_color) # lower
             else:
                 self._buildRectangleMesh(mb, build_dish_min_w, build_dish_max_w, build_dish_min_h, build_dish_max_h, build_dish_min_d, build_dish_max_d, volume_outline_color = self._dish_volume_outline_color)
