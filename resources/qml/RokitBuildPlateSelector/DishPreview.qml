@@ -16,63 +16,55 @@ Rectangle {
 
     property string product_id: ""
 
-    property var diameter: UM.Theme.getSize("rokit_well_plate_diameter").width
-    property int rows: 2
-    property int cols: 3
-    property var size_factor: 1
-    property int radius: diameter / 2
+    readonly property var diameter: UM.Theme.getSize("rokit_well_plate_diameter").width
+    readonly property var spacing: UM.Theme.getSize("thin_margin").height 
+    readonly property var color: UM.Theme.getColor("rokit_build_plate")
+    readonly property var borderColor: UM.Theme.getColor("rokit_build_plate_border")
     
-    property var spacing: UM.Theme.getSize("thin_margin").height 
-    property var color: UM.Theme.getColor("rokit_build_plate")
-    property var borderColor: UM.Theme.getColor("rokit_build_plate_border")
-    
-    property var circlesInfo: {
+    property var shapeInfo: {
         const category = product_id.split(":")[0]
         const numberOfCircles = product_id.split(":")[1]
 
         console.log(product_id)
 
-        var circles = {}
-        circles.rows = 1
-        circles.cols = 1
-        circles.size_factor = 2
+        var shape = { rows:1, cols:1, size_factor:2.0 }
 
         if (category === "Well Plate") {
             switch (numberOfCircles) {
                 case "96":
-                    circles.rows = 8, circles.cols = 12, circles.size_factor = 1/4
+                    shape = { rows:8, cols:12, size_factor:1/4 }
                     break
                 case "48":
-                    circles.rows = 6, circles.cols = 8, circles.size_factor = 1/3
+                    shape = { rows:6, cols:8, size_factor:1/3 } 
                     break
                 case "24":
-                    circles.rows = 4, circles.cols = 6, circles.size_factor = 1/2
+                    shape = { rows:4, cols:6, size_factor:1/2 }
                     break
                 case "12":
-                    circles.rows = 3, circles.cols = 4, circles.size_factor = 2/3
+                    shape = { rows:3, cols:4, size_factor:2/3 }
                     break
                 default:
-                    circles.rows = 2 , circles.cols = 3, circles.size_factor = 1
+                    shape = { rows:2, cols:3, size_factor:1 }
             }
         }
-        circles.radius = (category === "Culture Slide") ? 0 : (base.diameter * circles.size_factor) / 2
+        shape.radius = (category !== "Culture Slide") ? (base.diameter * shape.size_factor) / 2 : 0
 
-        return circles
+        return shape
     }
 
     Column {
 
-        spacing: base.spacing * circlesInfo.size_factor
+        spacing: base.spacing * shapeInfo.size_factor
         Repeater {
-            model: circlesInfo.rows
+            model: shapeInfo.rows
             Row {
-                spacing: base.spacing * circlesInfo.size_factor                      
+                spacing: base.spacing * shapeInfo.size_factor                      
                 Repeater {
-                    model: circlesInfo.cols
+                    model: shapeInfo.cols
                     Rectangle {
-                        width: base.diameter * circlesInfo.size_factor
-                        height: base.diameter * circlesInfo.size_factor
-                        radius: circlesInfo.radius
+                        width: (shapeInfo.radius === 0) ? 0.66667 * base.diameter * shapeInfo.size_factor : base.diameter * shapeInfo.size_factor
+                        height: base.diameter * shapeInfo.size_factor
+                        radius: shapeInfo.radius
                         color: base.color
                         border.width : 1
                         border.color: base.borderColor
