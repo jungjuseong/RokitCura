@@ -680,23 +680,57 @@ class CuraEngineBackend(QObject, Backend):
 
             gcode_list[index] = replaced
 
-        
-        # 
-        gcode_body = gcode_list[2:-1] # gcode body part
-        std_index = gcode_body[0].find(".stl") + 6 # '6' helps to go std_index <--- must modify
-        std_rear_index = gcode_body[0].find('Z', std_index) 
+        #
+        if (dishType[:dishType.find(':')] == "Well Plate"):
+            well_plate_num = dishType[dishType.find(':')+1:]
+            
+            if(well_plate_num == '6'): # [라인 시퀀스 넘버, 이동 거리, Z 높이]
+                wellPlate =[3,'38.5','10']
+            if(well_plate_num == '12'):
+                wellPlate =[4,'28.87','10']
+            if(well_plate_num == '24'):
+                wellPlate =[6,'19.5','10']
+            if(well_plate_num == '48'):
+                wellPlate =[8,'14.43','10']
+            if(well_plate_num == '96'):
+                wellPlate =[12,'9.3','10']
 
-        std_str = "".join(gcode_body[0][std_index-1:std_rear_index-1])
-        # spacing = 20
-        new_position = std_str[std_str.find('X'):] # only remain the value x and y
+            clone_num = int(well_plate_num)-1
+            line_seq = wellPlate[0]
+            distance = wellPlate[1]
+            zHeight = wellPlate[2]
 
-        gcode_spacing = ";dy_spacing\n"+std_str+"\nG91\nG1 Z2\nG1 X-20\nG1 Z-2\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
+            gcode_clone = gcode_list[2:-2] # gcode body part
+            #std_index = gcode_clone[0].find(".stl") + 6 # '6' helps to go std_index
+            std_index = gcode_clone[0].find("G0")
+            std_rear_index = gcode_clone[0].find('Z', std_index)
 
-        gcode_body.insert(0,gcode_spacing)
-        gcode_clone = []
-        for i in range(5): # five clone
-            gcode_clone.append(gcode_body)
-            gcode_list[-1:-1]= gcode_clone[i]  # put the clones in front of the end-code # 상무님 append사용으로 변경하겠습니다.
+            std_str = "".join(gcode_clone[0][std_index:std_rear_index-1])
+            new_position = std_str[std_str.find('X'):]  # only remain the value x and y
+
+            line_ctrl = 1 # 시작은 좌측 이동
+
+            gcode_body = []
+            for i in range(clone_num): # Clone number
+
+                if (i+1)%line_seq ==0:
+                    dire = "Y"+ distance
+                    line_ctrl = abs(line_ctrl-1) # dire를 조절함.
+                else:
+                    if line_ctrl == 1: # 좌측 이동
+                        dire = "X-"+ distance
+                    if line_ctrl == 0: # 우측 이동
+                        dire = "X"+ distance
+
+
+                gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 Z"+zHeight+" F1500 E-10\nG1 "+dire+"\nG1 Z-"+zHeight+"\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
+                gcode_clone.insert(0,gcode_spacing)
+                gcode_body.append(gcode_clone)
+                gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
+                gcode_clone.remove(gcode_spacing)
+
+            
+            #
 
         
         self._slicing = False
