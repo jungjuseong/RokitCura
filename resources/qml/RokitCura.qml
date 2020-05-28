@@ -541,16 +541,13 @@ UM.MainWindow {
             var projectFileUrlList = [];
             var hasGcode = false;
             var nonGcodeFileList = [];
-            for (var i in fileUrlList)
-            {
+            for (var i in fileUrlList) {
                 var endsWithG = /\.g$/;
                 var endsWithGcode = /\.gcode$/;
-                if (endsWithG.test(fileUrlList[i]) || endsWithGcode.test(fileUrlList[i]))
-                {
+                if (endsWithG.test(fileUrlList[i]) || endsWithGcode.test(fileUrlList[i])) {
                     continue;
                 }
-                else if (CuraApplication.checkIsValidProjectFile(fileUrlList[i]))
-                {
+                else if (CuraApplication.checkIsValidProjectFile(fileUrlList[i])) {
                     projectFileUrlList.push(fileUrlList[i]);
                 }
                 nonGcodeFileList.push(fileUrlList[i]);
@@ -560,16 +557,14 @@ UM.MainWindow {
             // show a warning if selected multiple files together with Gcode
             var hasProjectFile = projectFileUrlList.length > 0;
             var selectedMultipleFiles = fileUrlList.length > 1;
-            if (selectedMultipleFiles && hasGcode)
-            {
+            if (selectedMultipleFiles && hasGcode) {
                 infoMultipleFilesWithGcodeDialog.selectedMultipleFiles = selectedMultipleFiles;
                 infoMultipleFilesWithGcodeDialog.hasProjectFile = hasProjectFile;
                 infoMultipleFilesWithGcodeDialog.fileUrls = nonGcodeFileList.slice();
                 infoMultipleFilesWithGcodeDialog.projectFileUrlList = projectFileUrlList.slice();
                 infoMultipleFilesWithGcodeDialog.open();
             }
-            else
-            {
+            else {
                 handleOpenFiles(selectedMultipleFiles, hasProjectFile, fileUrlList, projectFileUrlList);
             }
         }
@@ -587,16 +582,13 @@ UM.MainWindow {
 
                 // check preference
                 var choice = UM.Preferences.getValue("cura/choice_on_open_project");
-                if (choice == "open_as_project")
-                {
+                if (choice == "open_as_project") {
                     openFilesIncludingProjectsDialog.loadProjectFile(projectFile);
                 }
-                else if (choice == "open_as_model")
-                {
+                else if (choice == "open_as_model") {
                     openFilesIncludingProjectsDialog.loadModelFiles([projectFile].slice());
                 }
-                else    // always ask
-                {
+                else { // always ask
                     // ask whether to open as project or as models
                     askOpenAsProjectOrModelsDialog.fileUrl = projectFile;
                     askOpenAsProjectOrModelsDialog.show();
