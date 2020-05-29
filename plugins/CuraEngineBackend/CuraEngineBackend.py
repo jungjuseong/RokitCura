@@ -681,27 +681,31 @@ class CuraEngineBackend(QObject, Backend):
             gcode_list[index] = replaced
 
         #
+        if (dishType[:dishType.find(':')] == "Culture Dish"):
+            axisControl = "\nG1 X63.5 Y63.5\nG92 X0 Y0\n"
+            gcode_list[1] += axisControl 
+        # if (dishType[:dishType.find(':')] == "Culture Slide"):
+        #
         if (dishType[:dishType.find(':')] == "Well Plate"):
             well_plate_num = dishType[dishType.find(':')+1:]
             
-            if(well_plate_num == '6'): # [라인 시퀀스 넘버, 이동 거리, Z 높이]
-                wellPlate =[3,'38.5','10']
-            if(well_plate_num == '12'):
-                wellPlate =[4,'28.87','10']
-            if(well_plate_num == '24'):
-                wellPlate =[6,'19.5','10']
-            if(well_plate_num == '48'):
-                wellPlate =[8,'14.43','10']
-            if(well_plate_num == '96'):
-                wellPlate =[12,'9.3','10']
+            if(well_plate_num == '6'): wellPlate =[3,'38.5','10',[21,23]] # [라인 시퀀스 넘버, 이동 거리, Z 높이]                
+            if(well_plate_num == '12'): wellPlate =[4,'28.87','10',[14,18]] # < 수정 필요
+            if(well_plate_num == '24'): wellPlate =[6,'19.5','10',[11.5,13.5]]
+            if(well_plate_num == '48'): wellPlate =[8,'14.43','10',[10,12]] # < 수정 필요
+            if(well_plate_num == '96'): wellPlate =[12,'9.3','10',[9,11]]
 
             clone_num = int(well_plate_num)-1
             line_seq = wellPlate[0]
             distance = wellPlate[1]
             zHeight = wellPlate[2]
 
+            axisControl = "G1 X"+str(wellPlate[3][0] + 20)+" Y"+str(wellPlate[3][1] + 20)+"\nG92 X0 Y0\n"
+            gcode_list[1] += axisControl 
+
+            # Clonning process
             gcode_clone = gcode_list[2:-2] # gcode body part
-            #std_index = gcode_clone[0].find(".stl") + 6 # '6' helps to go std_index
+            #std_index = gcode_clone[0].find(".stl") + 6 
             std_index = gcode_clone[0].find("G0")
             std_rear_index = gcode_clone[0].find('Z', std_index)
 
@@ -713,24 +717,22 @@ class CuraEngineBackend(QObject, Backend):
             gcode_body = []
             for i in range(clone_num): # Clone number
 
-                if (i+1)%line_seq ==0:
-                    dire = "Y"+ distance
+                if (i+1) % line_seq ==0:
+                    dire = "X"+ distance
                     line_ctrl = abs(line_ctrl-1) # dire를 조절함.
                 else:
-                    if line_ctrl == 1: # 좌측 이동
-                        dire = "X-"+ distance
+                    if line_ctrl == 1: # 좌측 이동 
+                        dire = "Y"+ distance
                     if line_ctrl == 0: # 우측 이동
-                        dire = "X"+ distance
+                        dire = "Y-"+ distance
 
 
                 gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 Z"+zHeight+" F1500 E-10\nG1 "+dire+"\nG1 Z-"+zHeight+"\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
-                gcode_clone.remove(gcode_spacing)
-
-            
-            #
+                gcode_clone.remove(gcode_spacing)           
+        #
 
         
         self._slicing = False
