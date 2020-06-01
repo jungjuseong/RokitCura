@@ -738,7 +738,13 @@ class CuraEngineBackend(QObject, Backend):
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
-                gcode_clone.remove(gcode_spacing)           
+                gcode_clone.remove(gcode_spacing) 
+            
+            # add the dispenser commends
+            for j in range(len(gcode_list)):
+                if (gcode_list[j].startswith(";LAYER")):
+                    gcode_list[j] = "M301\n" + gcode_list[j]
+                    gcode_list[j] = gcode_list[j] +"M330\nG4 P2000\n"
         #
 
         
