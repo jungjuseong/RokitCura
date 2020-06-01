@@ -185,7 +185,7 @@
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {
-            "default_value": ";(**** start of start-gcode for Rokit Healthcare ****)\nG21; set units to mm,\nG90; set positioning to absolute\n;M104 S0 T0 (set extruder temperature)\nG92 Z0\nG1 Z20 F120\nG28 X Y F1000 (home XY axes maximum)\nG28 Z F120 (home Z axis minimum)\nM1010 S1\nG95 P2\n;G1 Z20 F1500\n;G1 X119 Y20 F800\n;M109 S0 T0 ;wait for extruder to reach temperature\n;M106 P4 S255 ;uv led1\n;M106 P3 S255 ;uv led2\nM1015 P0 F60.0 E-0.5\nG92 E0 (Set E to 0 again)\nT0 ;Switch to the first extruder\nG1 X10.4 Y200.0 Z0.28 F5000.0\nG1 X10.4 Y20 Z0.28 F1500.0 E30 ;Draw the line\n;(**** end of start-gcode ****)"
+            "default_value": ";(**** start of start-gcode for Rokit Healthcare ****)\nG21; set units to mm,\nG90; set positioning to absolute\n;M104 S0 T0 (set extruder temperature)\nG92 Z0\nG1 Z20 F120\nG28 X Y F1000 (home XY axes maximum)\nG28 Z F120 (home Z axis minimum)\nM1010 S1\nG95 P2\n;G1 Z20 F1500\n;G1 X119 Y20 F800\n;M109 S0 T0 ;wait for extruder to reach temperature\n;M106 P4 S255 ;uv led1\n;M106 P3 S255 ;uv led2\nM1015 P0 F60.0 E-0.5\nG92 E0 (Set E to 0 again)\nT0 ;Switch to the first extruder\nG1 X10.1 Y20 Z0.28 F5000.0\nG1 X10.1 Y200.0 Z0.28 F1500.0 E15\nG1 X10.4 Y200.0 Z0.28 F5000.0\nG1 X10.4 Y20 Z0.28 F1500.0 E30 ;Draw the line\nG0 Z10\n;(**** end of start-gcode ****)"
         },
         "machine_end_gcode": {
             "default_value": ";(**** start of end-gcode for Rokit Healthcare ****)\nM73 P100\n;end progress\nM104 T0 S0\n;extruder heater off\nM106 P4 S0 ;uv led1\nM106 P3 S0;uv led2\nM1010 S0 ; TM ;(**** end of end-gcode ****)"
