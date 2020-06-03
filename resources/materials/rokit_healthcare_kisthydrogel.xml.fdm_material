@@ -3,13 +3,14 @@
     <metadata>
         <name>
             <brand>Rokit Healthcare</brand>
-            <material>KIST Hydrogel</material>
+            <material>KistHydrogel</material>
+            <label>Kist Hydrogel</label>
             <color>Generic</color>
         </name>
         <GUID>2780b345-577b-4a24-ccaa-12e6aad3e693</GUID>
         <version>1</version>
         <color_code>#8cb219</color_code>
-        <description>Tough and durable. ABS is good for mechanical parts. It is impact resistant, dimensionally stable and handles temperatures up to 85ºC.</description>
+        <description>Tough and durable. KIST Hydrogel is good for mechanical parts. It is impact resistant, dimensionally stable and handles temperatures up to 85ºC.</description>
         <adhesion_info>Use glue, to avoid chipping of the glass.</adhesion_info>
     </metadata>
     <properties>

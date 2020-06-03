@@ -232,8 +232,7 @@ class BuildVolume(SceneNode):
             renderer.queueNode(self, mesh = self._disallowed_area_mesh, shader = self._shader, transparent = True, backface_cull = True, sort = -9)
 
         if self._error_mesh:
-            renderer.queueNode(self, mesh=self._error_mesh, shader=self._shader, transparent=True,
-                               backface_cull=True, sort=-8)
+            renderer.queueNode(self, mesh=self._error_mesh, shader=self._shader, transparent=True, backface_cull=True, sort=-8)
 
         return True
 

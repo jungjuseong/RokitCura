@@ -3,7 +3,8 @@
     <metadata>
         <name>
             <brand>Rokit Healthcare</brand>
-            <material>Pluronic F-127</material>
+            <material>PluronicF127</material>
+            <label>Pluronic F-127</label>
             <color>Generic</color>
         </name>
         <GUID>2780b345-577b-4a24-ccaa-12e6aad3e694</GUID>
