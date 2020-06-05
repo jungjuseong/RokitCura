@@ -3,7 +3,8 @@
     <metadata>
         <name>
             <brand>Rokit Healthcare</brand>
-            <material>GelMa(INVIVO Gel)</material>
+            <material>GelMa</material>
+            <label>GelMa(Invivo-Gel)</label>
             <color>Generic</color>
         </name>
         <GUID>2780b345-577b-4a24-ccaa-12e6aad3e692</GUID>
