@@ -666,29 +666,37 @@ class CuraEngineBackend(QObject, Backend):
         # nozzle_name = extruder_stack.variant.getName()
 
         dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
-        bedTemp = self._global_container_stack.getProperty("material_bed_temperature","value")
-        # printTemp = self._global_container_stack.getProperty("default_material_print_temperature","value")
-        nozzleType = self._global_container_stack.getProperty("variants_name","value")
-        
-        # UV value
-        # if (self._global_container_stack.getProperty("uv_enable","value") != False):
-        uvEnable = self._global_container_stack.getProperty("uv_enable","value")
-        # uv_per_layers
-        # uv_type
-        # uv_time
-        # uv_dimming
+        # print_Temp, bed_Temp
+        print_temp =[]
+        # uv_enable, layers, uvtype, time, dimming
+        uv_value = [[],[],[],[],[]]
+        # uv_value = [['1']]*5
+        # dsp_enable, shot, vac, int, shot.p, vac.p
+        dsp_value = [[],[],[],[],[],[]]
 
-        # Dispenser
-        # if (self._global_container_stack.getProperty("dispensor_enable","value") != False):
-        dps_enable =self._global_container_stack.getProperty("dispensor_enable","value")
-        # dispensor_shot
-        # dispensor_vac
-        # dispensor_int
-        # dispensor_shot_power
-        # dispensor_vac_power
-        
-        # ABC
+        extruder_kind = self._global_container_stack.extruderList
+        # print_temp[1] = extruder_kind[ext].getProperty("material_bed_temperature","value"))
+        for ext in range(6):
+            print_temp.append(extruder_kind[ext].getProperty("material_print_temperature","value"))
+            
+            # if (uvEnable[ext_index]==True):
+            uv_value[0].append(extruder_kind[ext].getProperty("uv_enable","value"))
+            uv_value[1].append(extruder_kind[ext].getProperty("uv_per_layers","value"))
+            uv_value[2].append(extruder_kind[ext].getProperty("uv_type","value"))
+            uv_value[3].append(extruder_kind[ext].getProperty("uv_time","value"))
+            uv_value[4].append(extruder_kind[ext].getProperty("uv_dimming","value"))
+            # if (dsp_enable[ext_index]==True):
+            dsp_value[0].append(extruder_kind[ext].getProperty("dispensor_enable","value"))
+            dsp_value[1].append(extruder_kind[ext].getProperty("dispensor_shot","value"))
+            dsp_value[2].append(extruder_kind[ext].getProperty("dispensor_vac","value"))
+            dsp_value[3].append(extruder_kind[ext].getProperty("dispensor_int","value"))
+            dsp_value[4].append(extruder_kind[ext].getProperty("dispensor_shot_power","value"))
+            dsp_value[5].append(extruder_kind[ext].getProperty("dispensor_vac_power","value"))
 
+        printTemp = " ".join(map(str,print_temp)) + str(extruder_kind[ext].getProperty("material_bed_temperature","value"))
+        interval = " ".join(map(str,dsp_value[3]))
+        shotPressure = " ".join(map(str,dsp_value[4]))
+        vacPressure = " ".join(map(str,dsp_value[5]))
 
         try:
             gcode_list = self._scene.gcode_dict[self._start_slice_job_build_plate] #type: ignore #Because we generate this attribute dynamically.
@@ -701,34 +709,27 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{filament_cost}", str(self._application.getPrintInformation().materialCosts))
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
-            #uvEnable
-            # if (uvEnable !=False):
+            #
             replaced = replaced.replace(";{uv_on}", "M78")
-            #temp
-            # replaced = replaced.replace("{bed_temp}", "M140 S"+str(bedTemp)+"\nM105\nM190 S"+str(bedTemp))
-            replaced = replaced.replace(";{print_temp}", "M308 "+str(6)+" 0 0 0 0 "+str(bedTemp)+" ;set print Temp.")
-
-            # dispenser
-            replaced = replaced.replace("{shot_p}","M306 "+ str(self._global_container_stack.getProperty("dispensor_shot_power","value"))+ " 1 1 1 1 1")
-            replaced = replaced.replace("{vac_p}","M307 "+ str(self._global_container_stack.getProperty("dispensor_vac_power","value"))+ " 1 1 1 1 1")
-            replaced = replaced.replace("{interval}","M308 "+ str(self._global_container_stack.getProperty("dispensor_int","value"))+ " 1 1 1 1 1")
-            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500 ")
-            replaced = replaced.replace("{select_extruder}", "D1")
+            replaced = replaced.replace(";{print_temp}", "M308 "+printTemp+" ;set print Temp.")
+            replaced = replaced.replace("{shot_p}","M306 "+ shotPressure)
+            replaced = replaced.replace("{vac_p}","M307 "+ vacPressure)
+            replaced = replaced.replace("{interval}","M308 "+ interval)
+            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500 ") # 미구현
+            replaced = replaced.replace("{select_extruder}", "D1") # 미구현
 
             gcode_list[index] = replaced
 
         # if (dishType[:dishType.find(':')] == "Culture Dish"):
         # if (dishType[:dishType.find(':')] == "Culture Slide"):
-        
-        # Well Plate
         if (dishType[:dishType.find(':')] == "Well Plate"):
             well_plate_num = dishType[dishType.find(':')+1:]
             
             # [라인 시퀀스 넘버(turning point), 이동 거리, Z 높이, Plate 시작 원점]  
-            if(well_plate_num == '6'): wellPlate =[3,'38.5','10',[21,23]] # < 플레이트의 정보 필요             
-            if(well_plate_num == '12'): wellPlate =[4,'28.87','10',[14,18]] # < 플레이트의 정보 필요
-            if(well_plate_num == '24'): wellPlate =[6,'19.5','10',[11.5,13.5]] # < 플레이트의 정보 필요
-            if(well_plate_num == '48'): wellPlate =[8,'14.43','10',[10,12]] # < 플레이트의 정보 필요
+            if(well_plate_num == '6'): wellPlate =[3,'38.5','10',[21,23]] # < 정보 필요             
+            if(well_plate_num == '12'): wellPlate =[4,'28.87','10',[14,18]] # < 정보 필요
+            if(well_plate_num == '24'): wellPlate =[6,'19.5','10',[11.5,13.5]] # < 정보 필요
+            if(well_plate_num == '48'): wellPlate =[8,'14.43','10',[10,12]] # < 정보 필요
             if(well_plate_num == '96'): wellPlate =[12,'9','10',[74,49.5]] # 42.5,49.5 / 31.5
 
             clone_num = int(well_plate_num)-1
@@ -737,7 +738,6 @@ class CuraEngineBackend(QObject, Backend):
             zHeight = wellPlate[2]
 
             # 원점 재설정 
-            # axisControl = "G1 X"+str(155-wellPlate[3][0])+" Y"+str(155-wellPlate[3][1])+"; start point*\nG92 X0 Y0\n"
             axisControl = "G0 X"+str(wellPlate[3][0])+" Y"+str(wellPlate[3][1])+"; start point*\nG92 X0 Y0\n\n"
             gcode_list[1] += axisControl 
 
@@ -745,34 +745,29 @@ class CuraEngineBackend(QObject, Backend):
             gcode_clone = gcode_list[2:-2]
             std_str = "G1 X0 Y0 E-10"
             new_position ="X0 Y0"
-
             line_ctrl = 1 # 시작은 앞으로 이동
-  
             gcode_body = []
             for i in range(clone_num): # Clone number
-
                 if (i+1) % line_seq ==0:
-                    dire = "X-"+ distance # 다음 줄
-                    line_ctrl = abs(line_ctrl-1) # dire를 조절함.
+                    dire = "X-"+ distance 
+                    line_ctrl = abs(line_ctrl-1) # direction control
                 else:
-                    if line_ctrl == 1: # 앞으로 이동
+                    if line_ctrl == 1: 
                         dire = "Y-"+ distance
-                    if line_ctrl == 0: # 뒤로 이동
+                    if line_ctrl == 0: 
                         dire = "Y"+ distance
-
-                # gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 Z"+zHeight+"\nG1 "+dire+"\nG1 Z-"+zHeight+"\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
                 gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" # control spacing about build plate after printing one model
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
-                gcode_clone.remove(gcode_spacing) 
+                gcode_clone.remove(gcode_spacing)
             
             # add the dispenser commends
             for j in range(len(gcode_list)):
                 if (gcode_list[j].startswith(";LAYER")):
                     gcode_list[j] = "M301 ;SHOT\n" + gcode_list[j]
                     gcode_list[j] = gcode_list[j] +"M330 ;STOP\nG4 P120\n\n"
-            gcode_list.insert(-2,"G92 X"+str(11) +" Y"+str(49.5)+"\nG0 X0 Y0 Z0 A0 F800")
+            gcode_list.insert(-2,"G92 X"+str(11) +" Y"+str(49.5)+"\nG0 X0 Y0 Z0 A0 F800") 
         #
 
         
