@@ -25,8 +25,7 @@ Menu {
             checkable: true
             checked: {
                 var activeMachine = Cura.MachineManager.activeMachine
-                if (activeMachine === null)
-                {
+                if (activeMachine === null) {
                     return false
                 }
                 var extruder = Cura.MachineManager.activeMachine.extruderList[extruderIndex]
@@ -36,8 +35,7 @@ Menu {
             enabled: {
                 var activeMachine = Cura.MachineManager.activeMachine
                 
-                if (activeMachine === null || (extruderIndex > 0 && (model.hotend_name === "FFF Extruder" || model.hotend_name === "Hot Melt")))
-                {
+                if (activeMachine === null || (extruderIndex > 0 && (model.hotend_name === "FFF Extruder" || model.hotend_name === "Hot Melt")))  {
                     return false
                 }
                 var extruder = activeMachine.extruderList[extruderIndex]

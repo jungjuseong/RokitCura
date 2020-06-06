@@ -9,7 +9,7 @@ import QtQuick.Layouts 1.3
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Cura.MachineAction {
+Item {
     id: base
 
     UM.I18nCatalog { id: catalog;  name: "cura" }
@@ -17,7 +17,7 @@ Cura.MachineAction {
     width: parent.width
     height: childrenRect.height
     
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1
+    property int propertyStoreIndex: 1
 
     property int controlHeight: UM.Theme.getSize("setting_control").height * 1.2
     property var labelFont: UM.Theme.getFont("default")
@@ -26,13 +26,12 @@ Cura.MachineAction {
     property var extrudersModel:  CuraApplication.getExtrudersModel()
 
     property string activeExtruderId: {
-        const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
-        console.log(activeExtruder.id)
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
         return activeExtruder.id
     }
 
     property string activeExtruderName: {
-        const activeExtruder = CuraApplication.getExtrudersModel().getItem(tabBar.currentIndex)
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
         return activeExtruder.name
     }
 
@@ -40,7 +39,7 @@ Cura.MachineAction {
         const variantName = Cura.MachineManager.activeStack.variant.name
         const lists = variantName.split(" ")
         if (lists.length > 0)
-            return lists[1]
+            return lists[0]
         
         return ""
     }

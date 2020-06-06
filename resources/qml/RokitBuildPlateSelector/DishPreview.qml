@@ -9,7 +9,7 @@ import Cura 1.0 as Cura
 Rectangle {
     id: base
 
-    visible: category === "Well Plate"
+    //visible: category === "Well Plate"
     width: childrenRect.width
     height: childrenRect.height
     anchors.centerIn: parent
@@ -24,8 +24,6 @@ Rectangle {
     property var shapeInfo: {
         const category = product_id.split(":")[0]
         const numberOfCircles = product_id.split(":")[1]
-
-        console.log(product_id)
 
         var shape = { rows:1, cols:1, size_factor:2.0 }
 
@@ -53,7 +51,6 @@ Rectangle {
     }
 
     Column {
-
         spacing: base.spacing * shapeInfo.size_factor
         Repeater {
             model: shapeInfo.rows

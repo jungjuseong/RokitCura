@@ -98,17 +98,17 @@ Item {
     Item {
         id: buildDishSelector
         
-        Cura.RokitBuildDishMenu {
+        RokitBuildDishMenu {
             id: wellPlateMenu
             category: "Well Plate"
         }
 
-        Cura.RokitBuildDishMenu {
+        RokitBuildDishMenu {
             id: cultureDishMenu
             category: "Culture Dish"
         }
 
-        Cura.RokitBuildDishMenu {
+        RokitBuildDishMenu {
             id: cultureSlideMenu
             category: "Culture Slide"
         }
@@ -119,19 +119,19 @@ Item {
 
         DishPreview {
             id: preview
-            product_id: buildDishType.properties.value
+            product_id: (buildDishType.properties.value !== undefined) ? buildDishType.properties.value : ""
         }
 
         OldControls.ToolButton {
             id: toolButton
 
-            property string category: buildDishType.properties.value.split(":")[0]
+            property string category: (buildDishType.properties.value !== undefined) ? buildDishType.properties.value.split(":")[0] : ""
             anchors.top: preview.bottom
             anchors.left: preview.left
             anchors.topMargin: UM.Theme.getSize("thick_margin").height * 2
             anchors.leftMargin: UM.Theme.getSize("thick_margin").width
 
-            text: buildDishType.properties.value
+            text: (buildDishType.properties.value !== undefined) ? buildDishType.properties.value : ""
             tooltip: text
             height: UM.Theme.getSize("rokit_build_plate_content_widget").height
             width: parent.width / 2
@@ -139,13 +139,14 @@ Item {
             activeFocusOnPress: true
             
             menu: {
-                console.log("menuCategory:" + category)
                 if (category === "Well Plate")
                     return wellPlateMenu
-                if (category === "Culture Slide")
+                else if (category === "Culture Slide")
                     return cultureSlideMenu
-                if (category === "Culture Dish")
+                else if (category === "Culture Dish")
                     return cultureDishMenu
+                
+                return wellPlateMenu
             }
         }
         

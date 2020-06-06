@@ -1,24 +1,31 @@
 // Copyright (c) 2019 Ultimaker B.V.
 // Cura is released under the terms of the LGPLv3 or higher.
-
-import QtQuick 2.6
+import QtQuick 2.10
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.3
+import QtQuick.Window 2.2
 import QtQuick.Controls 2.0
 import QtQuick.Controls 1.1 as OldControls
 
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Cura.MachineAction {
+Item {
     id: base
 
-    property int propertyStoreIndex: manager ? manager.storeContainerIndex : 1  // definition_changes
-    property var forceUpdateFunction: manager.forceUpdate 
-
-    UM.I18nCatalog
-    {
-        id: catalog
-        name: "cura"
+    property var extrudersModel:  Cura.ExtrudersModel{} 
+    
+    property string activeExtruderId: {
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        return (activeExtruder !== undefined) ? activeExtruder.id : ""
     }
+
+    property string activeExtruderName: {
+        const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
+        return (activeExtruder !== undefined) ? activeExtruder.name : ""
+    }
+
+    UM.I18nCatalog {id: catalog; name: "cura" }
 
     width: parent.width
     height: childrenRect.height
@@ -30,7 +37,6 @@ Cura.MachineAction {
         color: UM.Theme.getColor("small_button_text")
         height: contentHeight
         renderType: Text.NativeRendering
-
         anchors {
             top: parent.top
             left: parent.left
@@ -40,6 +46,7 @@ Cura.MachineAction {
 
     UM.TabRow {
         id: tabBar
+
         anchors.top: header.bottom
         anchors.topMargin: UM.Theme.getSize("default_margin").height
         visible: extrudersModel.count > 1
@@ -194,10 +201,10 @@ Cura.MachineAction {
 
             Row { // Nozzle
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasVariants
+                //visible: Cura.MachineManager.activeMachine.hasVariants
 
                 Label {
-                    text: (extrudersModel.items[tabBar.currentIndex].name === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    text: (activeExtruderName === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")
@@ -268,16 +275,15 @@ Cura.MachineAction {
                 visible: Cura.MachineManager.activeMachine.hasVariants
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: extrudersModel.items[tabBar.currentIndex].id
+                    containerStackId: activeExtruderId
                     settingKey: "material_print_temperature"
-                    settingStoreIndex: propertyStoreIndex
+                    settingStoreIndex: 0
                     labelText: catalog.i18nc("@label", "Print Temperature")
                     labelFont: UM.Theme.getFont("default")
                     labelWidth: selectors.textWidth - 8
                     controlWidth: selectors.controlWidth
                     controlHeight: parent.height
                     unitText: catalog.i18nc("@label", "°C")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
                 }
             }
 
@@ -286,18 +292,18 @@ Cura.MachineAction {
                 visible: Cura.MachineManager.activeMachine.hasVariants
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: extrudersModel.items[tabBar.currentIndex].id
+                    containerStackId: activeExtruderId
                     settingKey: "material_bed_temperature"
-                    settingStoreIndex: propertyStoreIndex
+                    settingStoreIndex: 1
                     labelText: catalog.i18nc("@label", "Bed Temperature")
                     labelFont: UM.Theme.getFont("default")
                     labelWidth: selectors.textWidth - 10
                     controlWidth: selectors.controlWidth
                     controlHeight: parent.height
                     unitText: catalog.i18nc("@label", "°C")
-                    forceUpdateOnChangeFunction: forceUpdateFunction
                 }
             }
+            
         }
     }
 }

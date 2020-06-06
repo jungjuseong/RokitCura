@@ -11,7 +11,7 @@ Menu {
     id: menu
 
     property string category: ""
-    property string selected: buildDishType.properties.value
+    property string selected: (buildDishType.properties.value !== undefined) ? buildDishType.properties.value : ""
 
     Instantiator {
         model: Cura.RokitBuildDishModel { }
@@ -28,7 +28,7 @@ Menu {
                 }                
                 return selected ===  model.product_id
             }
-            exclusiveGroup: group
+            //exclusiveGroup: group
             //enabled: true
             onTriggered: {
                 selected = model.product_id

@@ -13,20 +13,17 @@ import Cura 1.0 as Cura
  * Menu that allows you to select the configuration of the current printer, such
  * as the nozzle sizes and materials in each extruder.
  */
-Cura.ExpandablePopup
-{
+Cura.ExpandablePopup {
     id: base
 
-    property var extrudersModel:  Cura.ExtrudersModel{}  // CuraApplication.getExtrudersModel()
+    property var extrudersModel:  Cura.ExtrudersModel{} 
 
-    UM.I18nCatalog
-    {
+    UM.I18nCatalog {
         id: catalog
         name: "cura"
     }
 
-    enum ConfigurationMethod
-    {
+    enum ConfigurationMethod {
         Auto,
         Custom
     }
@@ -34,8 +31,7 @@ Cura.ExpandablePopup
     contentPadding: UM.Theme.getSize("default_lining").width
     enabled: Cura.MachineManager.activeMachine.hasMaterials || Cura.MachineManager.activeMachine.hasVariants || Cura.MachineManager.activeMachine.hasVariantBuildplates; //Only let it drop down if there is any configuration that you could change.
 
-    headerItem: Cura.IconWithText
-    {
+    headerItem: Cura.IconWithText {
         text: "Material"
         source: UM.Theme.getIcon("category_material")
         font: UM.Theme.getFont("medium")
@@ -43,8 +39,7 @@ Cura.ExpandablePopup
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0
     }
 
-    contentItem: Column
-    {
+    contentItem: Column {
         id: popupItem
         width: UM.Theme.getSize("configuration_selector").width
         height: implicitHeight  // Required because ExpandableComponent will try to use this to determine the size of the background of the pop-up.
@@ -55,8 +50,7 @@ Cura.ExpandablePopup
         property int configuration_method: RokitConfigurationMenu.ConfigurationMethod.Custom  // Type of configuration being used. Only evaluated upon making popup visible.
         property int manual_selected_method: -1  // It stores the configuration method selected by the user. By default the selected method is
 
-        onVisibleChanged:
-        {
+        onVisibleChanged: {
             // is_connected = Cura.MachineManager.activeMachine.hasRemoteConnection && Cura.MachineManager.printerConnected && Cura.MachineManager.printerOutputDevices[0].uniqueConfigurations.length > 0 //Re-evaluate.
 
             // If the printer is not connected or does not have configurations, we switch always to the custom mode. If is connected instead, the auto mode
@@ -64,11 +58,9 @@ Cura.ExpandablePopup
             configuration_method = is_connected ? (manual_selected_method == -1 ? RokitConfigurationMenu.ConfigurationMethod.Auto : manual_selected_method) : RokitConfigurationMenu.ConfigurationMethod.Custom
         }
 
-        Item
-        {
+        Item {
             width: parent.width - 2 * parent.padding
-            height:
-            {
+            height: {
                 var height = 0
                 if (autoConfiguration.visible)
                 {
@@ -81,21 +73,18 @@ Cura.ExpandablePopup
                 return height
             }
 
-            AutoConfiguration
-            {
+            AutoConfiguration {
                 id: autoConfiguration
                 visible: popupItem.configuration_method == RokitConfigurationMenu.ConfigurationMethod.Auto
             }
 
-            RokitCustomConfiguration
-            {
+            RokitCustomConfiguration {
                 id: customConfiguration
                 visible: popupItem.configuration_method == RokitConfigurationMenu.ConfigurationMethod.Custom
             }
         }
 
-        Rectangle
-        {
+        Rectangle  {
             id: separator
             visible: buttonBar.visible
             x: -parent.padding

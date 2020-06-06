@@ -35,9 +35,10 @@ if TYPE_CHECKING:
     from UM.Scene.Scene import Scene
     from UM.Settings.ContainerStack import ContainerStack
 
+from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
+
 from UM.i18n import i18nCatalog
 catalog = i18nCatalog("cura")
-
 
 class CuraEngineBackend(QObject, Backend):
     backendError = Signal()
@@ -79,6 +80,8 @@ class CuraEngineBackend(QObject, Backend):
                 if os.path.exists(execpath):
                     default_engine_location = execpath
                     break
+
+        self._build_dish_model = RokitBuildDishModel()
 
         self._application = CuraApplication.getInstance() #type: CuraApplication
         self._multi_build_plate_model = None #type: Optional[MultiBuildPlateModel]
@@ -722,23 +725,25 @@ class CuraEngineBackend(QObject, Backend):
         
         # Well Plate
         if (dishType[:dishType.find(':')] == "Well Plate"):
-            well_plate_num = dishType[dishType.find(':')+1:]
+            # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})                
+            trip = {}
             
-            # [라인 시퀀스 넘버(turning point), 이동 거리, Z 높이, Plate 시작 원점]  
-            if(well_plate_num == '6'): wellPlate =[3,'38.5','10',[21,23]] # < 플레이트의 정보 필요             
-            if(well_plate_num == '12'): wellPlate =[4,'28.87','10',[14,18]] # < 플레이트의 정보 필요
-            if(well_plate_num == '24'): wellPlate =[6,'19.5','10',[11.5,13.5]] # < 플레이트의 정보 필요
-            if(well_plate_num == '48'): wellPlate =[8,'14.43','10',[10,12]] # < 플레이트의 정보 필요
-            if(well_plate_num == '96'): wellPlate =[12,'9','10',[74,49.5]] # 42.5,49.5 / 31.5
+            for index in range(self._build_dish_model.count):
+                dish = self._build_dish_model.getItem(index)
+                if dish['product_id'] == dishType:
+                    trip = dish['trip']
+                    break
+
+            well_plate_num = dishType[dishType.find(':')+1:]
 
             clone_num = int(well_plate_num)-1
-            line_seq = wellPlate[0]
-            distance = wellPlate[1]
-            zHeight = wellPlate[2]
+            line_seq = trip["line_seq"] 
+            distance = str(trip["spacing"]) 
+            z_height = trip["z"] 
+            start_point = trip["start_point"]
 
             # 원점 재설정 
-            # axisControl = "G1 X"+str(155-wellPlate[3][0])+" Y"+str(155-wellPlate[3][1])+"; start point*\nG92 X0 Y0\n"
-            axisControl = "G0 X"+str(wellPlate[3][0])+" Y"+str(wellPlate[3][1])+"; start point*\nG92 X0 Y0\n\n"
+            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0 Y0\n\n"
             gcode_list[1] += axisControl 
 
             # Clonning process
@@ -752,19 +757,19 @@ class CuraEngineBackend(QObject, Backend):
             for i in range(clone_num): # Clone number
 
                 if (i+1) % line_seq ==0:
-                    dire = "X-"+ distance # 다음 줄
+                    dire = "X-" + distance # 다음 줄
                     line_ctrl = abs(line_ctrl-1) # dire를 조절함.
                 else:
                     if line_ctrl == 1: # 앞으로 이동
-                        dire = "Y-"+ distance
+                        dire = "Y-" + distance
                     if line_ctrl == 0: # 뒤로 이동
-                        dire = "Y"+ distance
+                        dire = "Y" + distance
 
                 # gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 Z"+zHeight+"\nG1 "+dire+"\nG1 Z-"+zHeight+"\nG90\nG92 "+new_position+"\n" # control spacing about build plate after printing one model
                 gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" # control spacing about build plate after printing one model
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
-                gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
+                gcode_list[-2:-2] = gcode_body[i]  # put the clones in front of the end-code
                 gcode_clone.remove(gcode_spacing) 
             
             # add the dispenser commends
