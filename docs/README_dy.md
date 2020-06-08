@@ -12,33 +12,54 @@ print 출력 순서 변경
 설정 값(온도, uv, dispenser 등) 적용
 실린지 선택 적용(미완)
 
+- 2020.06.08.
 
 
 # start code 
 ;(*** front of start-gcode for Rokit Healthcare ***)\n
-M74 ; IO
-{uv_on} ;M78 ; uv 
-M176 ; mini comp
-G21; set units to mm
-G90; set positioning to absolute
-{print_temp} ; include bed_temp
-{shot_p} ; shot 압력
-{vac_p} ; vac 압력
-{interval} ; int(흡입 주기) 간격
-G0 X0 Y0 Z0 A0. B0. C0.
-G0 B0 ; 선택한 실린지 하강
-{phys_slct_extruder} ; 물리적으로 익스트루더가 선택됨.
-G0 B9. ; 선택한 실린지 하강
-{select_extruder} ; 기계가 익스트루더를 인식함.(선택)
-G0 C20 ; 실린지 묶음 하강
-G92 E0 ;(Set E to 0 again) ; only fff
-G0 Z10
+M72 ; Motor enable 
+M74 ;  Enabel IO 
+M78 ; LED Light ON 
+M176 ; Comp ON 
+G21 ; Set unit to mm 
+; Axis Home
+M29 Y
+M29 X
+M29 Z
+M29 C
+M29 A
+G78 B50.
+M29 B
+// G90
+M311 ; Get shot time
+M321 ; Get vaccum time
+M313 ; Get interval time
+M314 ; Get shot pressure
+M315 ; Get vaccum pressure
+
+M316 ; Get real temp
+M317 ; Get set temp
+M318 ; Get PID value
+M319 ; Get toggle temp
+G92 E0 ; Set E to 0 only FFF
+
+; (1, 2, 3, 4, 5, EX, BED)
+M303 0 0 0 0 0 0 ; Set shot time
+M304 0 0 0 0 0 0 ; Set vaccum time
+M305 0 0 0 0 0 0 ; Set interval time
+M306 0 0 0 0 0 0 ; Set shot pressure
+M307 0 0 0 0 0 0 ; Set vaccum pressure
+M308 0 0 0 0 0 0 0 ; Set temp
+M309 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Set PID value
+
+M310 5 ; Set toggle level
+
+M316 ; Get real temp 
+; (M190 0 0 0 0 0 0 0 Wait for set temp)
+
+; (G54 G00 X0. Y0. Z0. Set positioning to absolute right printing zone)
+; (G55 G00 X0. Y0. Z0. Set positioning to absolute left printing zone)
 ;(*** back of start-gcode ***)
-
-
-
-self._global_container_stack.getProperty("dispensor_shot","value")
-self._global_container_stack.getProperty("dispensor_vac","value")
 
 
 # end code
