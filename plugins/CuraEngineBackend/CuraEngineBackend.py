@@ -671,9 +671,11 @@ class CuraEngineBackend(QObject, Backend):
         dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
         # print_Temp, bed_Temp
         print_temp =[]
+
         # uv_enable, layers, uvtype, time, dimming
         uv_value = [[],[],[],[],[]]
         # uv_value = [['1']]*5
+
         # dsp_enable, shot, vac, int, shot.p, vac.p
         dsp_value = [[],[],[],[],[],[]]
 
@@ -732,8 +734,25 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{vac_p}","M307 "+ vacPressure)
             replaced = replaced.replace("{print_temp}", "M308 "+printTemp+" ;set print and bed Temp.")
             replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500 ") # 미구현
-            replaced = replaced.replace("{select_extruder}", "D1") # 미구현
+            # replaced = replaced.replace(";{select_extruder}", "D1") # 미구현
             replaced = replaced.replace(";{fdm_extr}", "D1") # 미구현
+
+            # add the dispenser commends
+            if line.startswith(";LAYER:"):
+                uv_cnt = int(line[len(";LAYER:"):line.find("\n")])
+                if uv_cnt % uv_cycle[0] == 0:
+                    replaced = "M301 ;SHOT\n" + replaced
+                    replaced += "M330 ;STOP\nG4 P120\n"
+                    replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term[0]*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
+                # replaced = replaced
+            
+            # 임시 방편
+            if "T0" in line: replaced = replaced.replace("T0","D0")
+            if "T1" in line: replaced = replaced.replace("T1","D1")
+            if "T2" in line: replaced = replaced.replace("T2","D2")
+            if "T3" in line: replaced = replaced.replace("T3","D3")
+            if "T4" in line: replaced = replaced.replace("T4","D4")
+            if "T5" in line: replaced = replaced.replace("T5","D5")
 
             gcode_list[index] = replaced
 
@@ -762,7 +781,7 @@ class CuraEngineBackend(QObject, Backend):
             gcode_list[1] += axisControl 
 
             # Clonning process
-            gcode_clone = gcode_list[2:-2]
+            gcode_clone = gcode_list[2:-1]
             std_str = "G1 X0 Y0 E-10"
             new_position ="X0 Y0"
             line_ctrl = 1 # 시작은 앞으로 이동
@@ -780,18 +799,8 @@ class CuraEngineBackend(QObject, Backend):
                 gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" 
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
-                gcode_list[-2:-2]= gcode_body[i]  # put the clones in front of the end-code
+                gcode_list[-1:-1]= gcode_body[i]  # put the clones in front of the end-code
                 gcode_clone.remove(gcode_spacing)
-            
-            # add the dispenser commends
-            for j in range(len(gcode_list)):
-                if (gcode_list[j].startswith(";LAYER")):
-                    g_layer = gcode_list[j]
-                    uv_cnt = "".join(g_layer[len(";LAYER")+1:gcode_list[j].find("\n")]) # 임시
-                    gcode_list[j] = "M301 ;SHOT\n" + gcode_list[j]
-                    gcode_list[j] += "M330 ;STOP\nG4 P120\n"
-                    if int(uv_cnt) % uv_cycle[0] == 0:
-                        gcode_list[j] += uv_command[0]+"; UV ON\nG4 P"+str(uv_term[0]*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
 
             gcode_list.insert(-2,"G92 X"+str(11) +" Y"+str(49.5)+"\nG0 X0 Y0 Z0 A0 F800") 
         #

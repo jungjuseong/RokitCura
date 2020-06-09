@@ -185,10 +185,10 @@
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {
-            "default_value": "\n;(*** front of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.\nM29 B\nG90; set positioning to absolute\n{shot_time} ;shot\n{vac_time} ;vac\n{interval} ;int\n{shot_p} ;shot.p\n{vac_p} ;vac.p\n;{print_temp}\nG0 X0 Y0 Z0 A0. B0. C0.\nG0 B0\n{phys_slct_extruder}\nG0 B9.\n{select_extruder}\nG0 C20\nG0 Z10\n;(*** back of start-gcode ***)\n"
+            "default_value": "\n;(*** front of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.\nM29 B\n{shot_time} ;shot\n{vac_time} ;vac\n{interval} ;int\n{shot_p} ;shot.p\n{vac_p} ;vac.p\n;{print_temp}\nG0 B0\n{phys_slct_extruder}\nG0 B9.\n;{select_extruder}\nG0 C20\nG0 Z10\n;(*** back of start-gcode ***)\n"
         },
         "machine_end_gcode": {
-            "default_value": ";(*** front of end-gcode for Rokit Healthcare ****)\nM73 P100 ;end progress\nM104 T0 S0 ;extruder heater off\nM140 S0 ;Turn-off bed\nM75 ;IO dis \nM79 ; light OFF\nM177 ;comp off\nM73; motor drive off\n;(*** rear of end-gcode ***)"
+            "default_value": ";(*** front of end-gcode for Rokit Healthcare ****)\nM73 P100 ;end progress\nG0 X0 Y0 Z0 A0. B0. C0.\nM140 S0 ;Turn-off bed\nM75 ;IO dis \nM79 ; light OFF\nM177 ;comp off\nM73; motor drive off\n;(*** rear of end-gcode ***)"
         },
         "machine_extruder_count": { "default_value": 6 }
     }
