@@ -294,7 +294,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: activeExtruderId
                     settingKey: "material_bed_temperature"
-                    settingStoreIndex: 1
+                    settingStoreIndex: 0
                     labelText: catalog.i18nc("@label", "Bed Temperature")
                     labelFont: UM.Theme.getFont("default")
                     labelWidth: selectors.textWidth - 10

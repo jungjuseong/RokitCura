@@ -14,6 +14,27 @@ print 출력 순서 변경
 
 - 2020.06.08.
 
+- 2020.06.11.
+Organ Regeneration --> Organ Regenerator
+syringe 전체 적용과 syringe 각각 적용 구분
+T 명령어 --> D 명령어 
+
+
+
+
+### 미완성 기능
+Dimming 설정 -- 명령어 생성이 안됨
+Left first 기능
+그림자 제거
+print Temp. 범위 재설정 --> (-10 ~ 350)
+G- code 필요없는 명령어 제거
+* Build 플레이트 맡는 명령어 적용 및 재구조화
+
+
+
+
+
+
 
 # start code 
 ;(*** front of start-gcode for Rokit Healthcare ***)\n

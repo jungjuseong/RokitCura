@@ -9,7 +9,7 @@ import Cura 1.1 as Cura
 
 
 //
-// This component contains the content for the "What's new in Organ Regeneration" page of the welcome on-boarding process.
+// This component contains the content for the "What's new in Organ Regenerator" page of the welcome on-boarding process.
 //
 Item
 {
@@ -21,7 +21,7 @@ Item
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
-        text: catalog.i18nc("@label", "What's new in Organ Regeneration")
+        text: catalog.i18nc("@label", "What's new in Organ Regenerator")
         color: UM.Theme.getColor("primary_button")
         font: UM.Theme.getFont("huge")
         renderType: Text.NativeRendering

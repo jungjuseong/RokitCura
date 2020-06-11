@@ -673,41 +673,35 @@ class CuraEngineBackend(QObject, Backend):
         print_temp =[]
 
         # uv_enable, layers, uvtype, time, dimming
-        uv_value = [[],[],[],[],[]]
-        # uv_value = [['1']]*5
+        uv_value = []
+        uv_value.append(self._global_container_stack.getProperty("uv_enable","value")) #
+        uv_value.append(self._global_container_stack.getProperty("uv_per_layers","value")) 
+        uv_value.append(self._global_container_stack.getProperty("uv_type","value")) 
+        uv_value.append(self._global_container_stack.getProperty("uv_time","value"))
+        uv_value.append(self._global_container_stack.getProperty("uv_dimming","value")) # 미구현
 
         # dsp_enable, shot, vac, int, shot.p, vac.p
         dsp_value = [[],[],[],[],[],[]]
-
         extruder_kind = self._global_container_stack.extruderList
-        # print_temp[1] = extruder_kind[extr].getProperty("material_bed_temperature","value"))
         for extr in range(6):
             print_temp.append(extruder_kind[extr].getProperty("material_print_temperature","value"))
             
-            # if (uvEnable[ext_index]==True):
-            uv_value[0].append(extruder_kind[extr].getProperty("uv_enable","value")) #
-            uv_value[1].append(extruder_kind[extr].getProperty("uv_per_layers","value")) 
-            uv_value[2].append(extruder_kind[extr].getProperty("uv_type","value")) 
-            uv_value[3].append(extruder_kind[extr].getProperty("uv_time","value"))
-            uv_value[4].append(extruder_kind[extr].getProperty("uv_dimming","value")) # 미구현
-            # if (dsp_enable[ext_index]==True):
-            uv_value[0].append(extruder_kind[extr].getProperty("dispensor_enable","value")) # 
+            dsp_value[0].append(extruder_kind[extr].getProperty("dispensor_enable","value")) # 
             dsp_value[1].append(extruder_kind[extr].getProperty("dispensor_shot","value")) 
             dsp_value[2].append(extruder_kind[extr].getProperty("dispensor_vac","value"))
             dsp_value[3].append(extruder_kind[extr].getProperty("dispensor_int","value"))
             dsp_value[4].append(extruder_kind[extr].getProperty("dispensor_shot_power","value"))
             dsp_value[5].append(extruder_kind[extr].getProperty("dispensor_vac_power","value"))
-        print_temp.append(extruder_kind[extr].getProperty("material_bed_temperature","value")) # add the Bed temperature
+        print_temp.append(self._global_container_stack.getProperty("material_bed_temperature","value"))
 
         # Cloning system setting
-        printTemp = " ".join(map(str,print_temp)) 
-        
-        uv_cycle = uv_value[1] # layers
-        uv_term = uv_value[3] # time
-        uvDimming = uv_value[4] # dimming - 미구현
-        uvType = uv_value[2]
-        if uvType[0] == '365': uv_command = ['M172','M173'] # UV curing ON/OFF
-        if uvType[0] == '405': uv_command = ['M174','M175'] # UV disinfect ON/OFF
+        printTemp = " ".join(map(str,print_temp))
+
+        uv_cycle = uv_value[1] # UV layers
+        uv_term = uv_value[3] # UV time
+        uvDimming = uv_value[4] # UV dimming - 미구현
+        if uv_value[2] == '365': uv_command = ['M172','M173'] # UV type: curing ON/OFF
+        if uv_value[2] == '405': uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
 
         shotTime = " ".join(map(str,dsp_value[1]))
         vacTime = " ".join(map(str,dsp_value[2]))
@@ -727,32 +721,30 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             #
-            replaced = replaced.replace("{shot_time}","M303 "+ shotTime) 
-            replaced = replaced.replace("{vac_time}","M304 "+ vacTime) 
-            replaced = replaced.replace("{interval}","M305 "+ interval)
-            replaced = replaced.replace("{shot_p}","M306 "+ shotPressure)
-            replaced = replaced.replace("{vac_p}","M307 "+ vacPressure)
+            replaced = replaced.replace("{shot_time}","M303 "+ shotTime+" ;shot") 
+            replaced = replaced.replace("{vac_time}","M304 "+ vacTime+" ;vac") 
+            replaced = replaced.replace("{interval}","M305 "+ interval+" ;int")
+            replaced = replaced.replace("{shot_p}","M306 "+ shotPressure+" ;shot.p")
+            replaced = replaced.replace("{vac_p}","M307 "+ vacPressure+" ;vac.p")
             replaced = replaced.replace("{print_temp}", "M308 "+printTemp+" ;set print and bed Temp.")
-            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500 ") # 미구현
+            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1000") # 미구현
             # replaced = replaced.replace(";{select_extruder}", "D1") # 미구현
-            replaced = replaced.replace(";{fdm_extr}", "D1") # 미구현
+            replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
 
-            # add the dispenser commends
+            # add the dispenser commends - 수정 필요
             if line.startswith(";LAYER:"):
                 uv_cnt = int(line[len(";LAYER:"):line.find("\n")])
-                if uv_cnt % uv_cycle[0] == 0:
+                if uv_cnt % uv_cycle == 0:
                     replaced = "M301 ;SHOT\n" + replaced
                     replaced += "M330 ;STOP\nG4 P120\n"
-                    replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term[0]*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
-                # replaced = replaced
-            
-            # 임시 방편
-            if "T0" in line: replaced = replaced.replace("T0","D0")
-            if "T1" in line: replaced = replaced.replace("T1","D1")
-            if "T2" in line: replaced = replaced.replace("T2","D2")
-            if "T3" in line: replaced = replaced.replace("T3","D3")
-            if "T4" in line: replaced = replaced.replace("T4","D4")
-            if "T5" in line: replaced = replaced.replace("T5","D5")
+                    replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
+            # 
+            if "T0" in line: replaced = replaced.replace("T0","D1")
+            if "T1" in line: replaced = replaced.replace("T1","D2")
+            if "T2" in line: replaced = replaced.replace("T2","D3")
+            if "T3" in line: replaced = replaced.replace("T3","D4")
+            if "T4" in line: replaced = replaced.replace("T4","D5")
+            if "T5" in line: replaced = replaced.replace("T5","D6")
 
             gcode_list[index] = replaced
 
@@ -784,7 +776,7 @@ class CuraEngineBackend(QObject, Backend):
             gcode_clone = gcode_list[2:-1]
             std_str = "G1 X0 Y0 E-10"
             new_position ="X0 Y0"
-            line_ctrl = 1 # 시작은 앞으로 이동
+            line_ctrl = 1 # forward
             gcode_body = []
             for i in range(clone_num): # Clone number
                 if (i+1) % line_seq ==0:
@@ -796,15 +788,13 @@ class CuraEngineBackend(QObject, Backend):
                     if line_ctrl == 0: 
                         dire = "Y"+ distance
                 # control spacing about build plate after printing one model
-                gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" 
+                gcode_spacing = ";spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" 
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-1:-1]= gcode_body[i]  # put the clones in front of the end-code
                 gcode_clone.remove(gcode_spacing)
-
-            gcode_list.insert(-2,"G92 X"+str(11) +" Y"+str(49.5)+"\nG0 X0 Y0 Z0 A0 F800") 
+            gcode_list.insert(-1,"G92 X"+str(11) +" Y"+str(start_point.y())+"\nG0 X0 Y0 Z0 A0 F800\n") 
         #
-
         
         self._slicing = False
         if self._slice_start_time:
