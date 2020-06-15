@@ -727,14 +727,14 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{shot_p}","M306 "+ shotPressure+" ;shot.p")
             replaced = replaced.replace("{vac_p}","M307 "+ vacPressure+" ;vac.p")
             replaced = replaced.replace("{print_temp}", "M308 "+printTemp+" ;set print and bed Temp.")
-            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1000") # 미구현
+            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500") # 미구현
             # replaced = replaced.replace(";{select_extruder}", "D1") # 미구현
             replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
 
             # add the dispenser commends - 수정 필요
             if line.startswith(";LAYER:"):
                 uv_cnt = int(line[len(";LAYER:"):line.find("\n")])
-                if uv_cnt % uv_cycle == 0:
+                if uv_cnt % uv_cycle == 0: 
                     replaced = "M301 ;SHOT\n" + replaced
                     replaced += "M330 ;STOP\nG4 P120\n"
                     replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"

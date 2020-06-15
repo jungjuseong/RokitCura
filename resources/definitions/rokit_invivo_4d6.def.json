@@ -182,6 +182,7 @@
         "infill_before_walls": {"value": false },
         
         "adhesion_type": { "default_value": "none" },
+        "speed_travel_layer_0": { "value": "20" },
 
         "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
         "machine_start_gcode": {
