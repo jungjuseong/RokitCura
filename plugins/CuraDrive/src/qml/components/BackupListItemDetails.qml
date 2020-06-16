@@ -33,7 +33,7 @@ ColumnLayout
     // Material count
     BackupListItemDetailsRow
     {
-        iconSource: UM.Theme.getIcon("category_material")
+        iconSource: UM.Theme.getIcon("hk_syringe_button")
         label: catalog.i18nc("@backuplist:label", "Materials")
         value: backupDetailsData.metadata.material_count
     }

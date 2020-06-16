@@ -33,7 +33,7 @@ Cura.ExpandablePopup {
 
     headerItem: Cura.IconWithText {
         text: "Material"
-        source: UM.Theme.getIcon("category_material")
+        source: UM.Theme.getIcon("hk_syringe_button")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")
         iconSize: source != "" ? UM.Theme.getSize("machine_selector_icon").width: 0

@@ -127,7 +127,7 @@ Item {
 
             property string category: (buildDishType.properties.value !== undefined) ? buildDishType.properties.value.split(":")[0] : ""
             anchors.top: preview.bottom
-            anchors.left: preview.left
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: UM.Theme.getSize("thick_margin").height * 2
             anchors.leftMargin: UM.Theme.getSize("thick_margin").width
 

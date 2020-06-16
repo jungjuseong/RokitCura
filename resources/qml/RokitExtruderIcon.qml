@@ -17,7 +17,6 @@ Item {
     UM.RecolorImage {
         id: mainIcon
         anchors.fill: parent
-
         source: UM.Theme.getIcon((index === 0) ? "extruder_button" : "hk_syringe_button")
         color: materialColor
     }
@@ -28,7 +27,7 @@ Item {
         width: height
         height: Math.round(parent.height * 0.6)
         radius: (index === 0) ? Math.round(width / 2) : Math.round(width / 3) 
-        color: UM.Theme.getColor("toolbar_background")
+        color: (index === 0) ? materialColor :UM.Theme.getColor("toolbar_background")
 
         anchors {
             horizontalCenter: parent.horizontalCenter
