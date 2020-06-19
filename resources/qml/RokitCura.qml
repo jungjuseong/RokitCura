@@ -19,6 +19,10 @@ import "WelcomePages"
 UM.MainWindow {
     id: base
 
+    property var am: ApplicationMenu {
+           window: base
+    }
+
     // Cura application window title
     title: {
         const title = (PrintInformation !== null && PrintInformation.jobName != "") ? PrintInformation.jobName + " - " : ""
@@ -108,13 +112,18 @@ UM.MainWindow {
 
         //DeleteSelection on the keypress backspace event
         Keys.onPressed: {
-            if (event.key == Qt.Key_Backspace) {
+            if (event.key === Qt.Key_Backspace) {
                 Cura.Actions.deleteSelection.trigger()
+            }
+            // application menu
+            if (event.key === Qt.Key_F2) {
+                applicationMenu.visible = !applicationMenu.visible
             }
         }
 
         ApplicationMenu {
            id: applicationMenu
+           visible: false
            window: base
         }
 

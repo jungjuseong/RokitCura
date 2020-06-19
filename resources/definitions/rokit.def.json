@@ -41,13 +41,25 @@
                     "settable_per_mesh": false,
                     "settable_per_extruder": false
                 },
+                "uv_initial_layers":
+                {
+                    "label": "Layers",
+                    "description": "UV initial layers",
+                    "type": "int",
+                    "unit": "layers",
+                    "default_value": 2,
+                    "minimum_value": "1",
+                    "maximum_value_warning": "10",
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": false
+                },
                 "uv_per_layers":
                 {
                     "label": "Layers",
                     "description": "UV per layers",
                     "type": "int",
                     "unit": "layers",
-                    "default_value": 2,
+                    "default_value": 3,
                     "minimum_value": "1",
                     "maximum_value_warning": "10",
                     "enabled": "uv_enable",

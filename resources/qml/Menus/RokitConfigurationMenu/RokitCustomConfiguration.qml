@@ -150,7 +150,7 @@ Item {
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
                 Label {
-                    text: catalog.i18nc("@label", "Material")
+                    text: catalog.i18nc("@label", "Material & Nozzle")
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")
