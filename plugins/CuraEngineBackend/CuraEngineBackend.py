@@ -713,14 +713,14 @@ class CuraEngineBackend(QObject, Backend):
             gcode_list = self._scene.gcode_dict[self._start_slice_job_build_plate] #type: ignore #Because we generate this attribute dynamically.
         except KeyError:  # Can occur if the g-code has been cleared while a slice message is still arriving from the other end.
             gcode_list = []
-        for index, line in enumerate(gcode_list):
-            replaced = line.replace("{print_time}", str(self._application.getPrintInformation().currentPrintTime.getDisplayString(DurationFormat.Format.ISO8601)))
+        for index, lines in enumerate(gcode_list):
+            replaced = lines.replace("{print_time}", str(self._application.getPrintInformation().currentPrintTime.getDisplayString(DurationFormat.Format.ISO8601)))
             replaced = replaced.replace("{filament_amount}", str(self._application.getPrintInformation().materialLengths))
             replaced = replaced.replace("{filament_weight}", str(self._application.getPrintInformation().materialWeights))
             replaced = replaced.replace("{filament_cost}", str(self._application.getPrintInformation().materialCosts))
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
-            #
+            # set the dispenser commands
             replaced = replaced.replace("{shot_time}","M303 "+ shotTime+" ;shot") 
             replaced = replaced.replace("{vac_time}","M304 "+ vacTime+" ;vac") 
             replaced = replaced.replace("{interval}","M305 "+ interval+" ;int")
@@ -728,28 +728,29 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{vac_p}","M307 "+ vacPressure+" ;vac.p")
             replaced = replaced.replace("{print_temp}", "M308 "+printTemp+" ;set print and bed Temp.")
             replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500") # 미구현
-            # replaced = replaced.replace(";{select_extruder}", "D1") # 미구현
             replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
 
-            # add the dispenser commends - 수정 필요
-            if line.startswith(";LAYER:"):
-                uv_cnt = int(line[len(";LAYER:"):line.find("\n")])
-                if uv_cnt % uv_cycle == 0: 
+            # add the UV commends - 수정 필요
+            if replaced.startswith(";LAYER:"):
+                uv_cnt = int(replaced[len(";LAYER:"):replaced.find("\n")])
+                if uv_cnt % uv_cycle == 0:
                     replaced = "M301 ;SHOT\n" + replaced
                     replaced += "M330 ;STOP\nG4 P120\n"
                     replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
-            # 
-            if "T0" in line: replaced = replaced.replace("T0","D1")
-            if "T1" in line: replaced = replaced.replace("T1","D2")
-            if "T2" in line: replaced = replaced.replace("T2","D3")
-            if "T3" in line: replaced = replaced.replace("T3","D4")
-            if "T4" in line: replaced = replaced.replace("T4","D5")
-            if "T5" in line: replaced = replaced.replace("T5","D6")
 
+            # Remove the E Value
+            # Change to D command from T # 수정 필요!!!
+            line_bundle = replaced.split("\n")
+            for line_num, line in enumerate(line_bundle):
+                if line.startswith("G1"):
+                    line_bundle[line_num] = line[:line.find("E")]
+                if line.startswith("T"):
+                    line_bundle[line_num] = "D"+ str(int(line[-1])+1) # syringe number
+            replaced = "\n".join(line_bundle)
+            
             gcode_list[index] = replaced
 
-        # if (dishType[:dishType.find(':')] == "Culture Dish"):
-        # if (dishType[:dishType.find(':')] == "Culture Slide"):
+        # Well Plate's clonning part
         if (dishType[:dishType.find(':')] == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})                
             trip = {}
@@ -769,13 +770,13 @@ class CuraEngineBackend(QObject, Backend):
             start_point = trip["start_point"]
 
             # 원점 재설정 
-            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0 Y0\n\n"
+            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.000 Y0.000\n\n"
             gcode_list[1] += axisControl 
 
             # Clonning process
             gcode_clone = gcode_list[2:-1]
-            std_str = "G1 X0 Y0 E-10"
-            new_position ="X0 Y0"
+            std_str = "G1 X0. Y0."
+            new_position ="X0. Y0."
             line_ctrl = 1 # forward
             gcode_body = []
             for i in range(clone_num): # Clone number
@@ -788,7 +789,7 @@ class CuraEngineBackend(QObject, Backend):
                     if line_ctrl == 0: 
                         dire = "Y"+ distance
                 # control spacing about build plate after printing one model
-                gcode_spacing = ";spacing\nG92 E0\n"+std_str+"\nG91\nG1 B0 F800\nG1 "+dire+"\nG1 B15. F800\nG90\nG92 "+new_position+"\n\n" 
+                gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG0 B0.\nG91 G0 "+dire+"\nG90\nG0 B15.\nG92 "+new_position+"\n\n" 
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-1:-1]= gcode_body[i]  # put the clones in front of the end-code

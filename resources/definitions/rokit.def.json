@@ -4123,9 +4123,9 @@
                     "label": "Enable Print Cooling",
                     "description": "Enables the print cooling fans while printing. The fans improve print quality on layers with short layer times and bridging / overhangs.",
                     "type": "bool",
-                    "default_value": true,
+                    "default_value": false,
                     "settable_per_mesh": false,
-                    "settable_per_extruder": true
+                    "settable_per_extruder": false
                 },
                 "cool_fan_speed":
                 {
@@ -5239,7 +5239,7 @@
                         "raft": "Raft",
                         "none": "None"
                     },
-                    "default_value": "brim",
+                    "default_value": "none",
                     "resolve": "extruderValue(adhesion_extruder_nr, 'adhesion_type')",
                     "settable_per_mesh": false,
                     "settable_per_extruder": false

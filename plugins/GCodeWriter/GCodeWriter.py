@@ -79,10 +79,6 @@ class GCodeWriter(MeshWriter):
                 if gcode[:len(self._setting_keyword)] == self._setting_keyword:
                     has_settings = True
                 stream.write(gcode)
-            # Serialise the current container stack and put it at the end of the file.
-            if not has_settings:
-                settings = self._serialiseSettings(Application.getInstance().getGlobalContainerStack())
-                stream.write(settings)
             return True
 
         self.setInformation(catalog.i18nc("@warning:status", "Please prepare G-code before exporting."))

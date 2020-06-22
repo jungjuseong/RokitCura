@@ -31,7 +31,11 @@ G- code 필요없는 명령어 제거
 * Build 플레이트 맡는 명령어 적용 및 재구조화
 
 
-
+# GCodeWriter.py // End 코드 뒤에 SETTING 문자열
+# Serialise the current container stack and put it at the end of the file. // 
+    if not has_settings:
+        settings = self._serialiseSettings(Application.getInstance().getGlobalContainerStack()
+        stream.write(settings)
 
 
 
