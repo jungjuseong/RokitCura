@@ -683,7 +683,7 @@ class CuraEngineBackend(QObject, Backend):
         # dsp_enable, shot, vac, int, shot.p, vac.p
         dsp_value = [[],[],[],[],[],[]]
         extruder_kind = self._global_container_stack.extruderList
-        for extr in range(6):
+        for extr in range(1,6):
             print_temp.append(extruder_kind[extr].getProperty("material_print_temperature","value"))
             
             dsp_value[0].append(extruder_kind[extr].getProperty("dispensor_enable","value")) # 
@@ -692,6 +692,15 @@ class CuraEngineBackend(QObject, Backend):
             dsp_value[3].append(extruder_kind[extr].getProperty("dispensor_int","value"))
             dsp_value[4].append(extruder_kind[extr].getProperty("dispensor_shot_power","value"))
             dsp_value[5].append(extruder_kind[extr].getProperty("dispensor_vac_power","value"))
+        
+        left_extruder = self._global_container_stack.extruderList[0]
+        dsp_value[0].append(left_extruder.getProperty("dispensor_enable","value")) # 
+        dsp_value[1].append(left_extruder.getProperty("dispensor_shot","value")) 
+        dsp_value[2].append(left_extruder.getProperty("dispensor_vac","value"))
+        dsp_value[3].append(left_extruder.getProperty("dispensor_int","value"))
+        dsp_value[4].append(left_extruder.getProperty("dispensor_shot_power","value"))
+        dsp_value[5].append(left_extruder.getProperty("dispensor_vac_power","value"))
+        print_temp.append(left_extruder.getProperty("material_print_temperature","value"))
         print_temp.append(self._global_container_stack.getProperty("material_bed_temperature","value"))
 
         # Cloning system setting
@@ -702,7 +711,7 @@ class CuraEngineBackend(QObject, Backend):
         uvDimming = uv_value[4] # UV dimming - 미구현
         if uv_value[2] == '365': uv_command = ['M172','M173'] # UV type: curing ON/OFF
         if uv_value[2] == '405': uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
-
+        
         shotTime = " ".join(map(str,dsp_value[1]))
         vacTime = " ".join(map(str,dsp_value[2]))
         interval = " ".join(map(str,dsp_value[3]))
@@ -721,7 +730,7 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             # set the dispenser commands
-            replaced = replaced.replace("{shot_time}","M303 "+ shotTime+" ;shot") 
+            replaced = replaced.replace("{shot_time}","M303 "+ shotTime+" ;shot.t") 
             replaced = replaced.replace("{vac_time}","M304 "+ vacTime+" ;vac") 
             replaced = replaced.replace("{interval}","M305 "+ interval+" ;int")
             replaced = replaced.replace("{shot_p}","M306 "+ shotPressure+" ;shot.p")
@@ -734,20 +743,30 @@ class CuraEngineBackend(QObject, Backend):
             if replaced.startswith(";LAYER:"):
                 uv_cnt = int(replaced[len(";LAYER:"):replaced.find("\n")])
                 if uv_cnt % uv_cycle == 0:
-                    replaced = "M301 ;SHOT\n" + replaced
-                    replaced += "M330 ;STOP\nG4 P120\n"
                     replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
 
             # Remove the E Value
             # Change to D command from T # 수정 필요!!!
+            # SHOT & STOP sequence
+            shotFlag = True
             line_bundle = replaced.split("\n")
-            for line_num, line in enumerate(line_bundle):
+            for num, line in enumerate(line_bundle):
+                
                 if line.startswith("G1"):
-                    line_bundle[line_num] = line[:line.find("E")]
+                    line_bundle[num] = line[:line.find("E")-1]
+                    if shotFlag == True:
+                        if line.find("F") == -1: 
+                            line_bundle[num] = "M301 ;SHOT\n" + line_bundle[num]
+                            shotFlag = False
+                if line.startswith("G0") and shotFlag == False:
+                    line_bundle[num] = "M330 ;STOP\n" + line_bundle[num]
+                    shotFlag =True
                 if line.startswith("T"):
-                    line_bundle[line_num] = "D"+ str(int(line[-1])+1) # syringe number
+                    line_bundle[num] = "D"+ str(int(line[-1])+1) # syringe number
+
+                line_bundle[num] = line_bundle[num].replace("-.","-0.")
+
             replaced = "\n".join(line_bundle)
-            
             gcode_list[index] = replaced
 
         # Well Plate's clonning part
@@ -770,14 +789,17 @@ class CuraEngineBackend(QObject, Backend):
             start_point = trip["start_point"]
 
             # 원점 재설정 
-            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.000 Y0.000\n\n"
+            selected_extruder = "G0 A0. F1500\n"
+            axisControl = "G0 B9.0\nG0 C4.0\nG0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 C10.0\n\n"
+            gcode_list[1] += selected_extruder 
             gcode_list[1] += axisControl 
 
             # Clonning process
             gcode_clone = gcode_list[2:-1]
-            std_str = "G1 X0. Y0."
-            new_position ="X0. Y0."
-            line_ctrl = 1 # forward
+            std_str = "G1 X0.0 Y0.0"
+            new_position ="X0.0 Y0.0"
+            line_ctrl = 1 # forward            
+
             gcode_body = []
             for i in range(clone_num): # Clone number
                 if (i+1) % line_seq ==0:
@@ -789,7 +811,7 @@ class CuraEngineBackend(QObject, Backend):
                     if line_ctrl == 0: 
                         dire = "Y"+ distance
                 # control spacing about build plate after printing one model
-                gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG0 B0.\nG91 G0 "+dire+"\nG90\nG0 B15.\nG92 "+new_position+"\n\n" 
+                gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG0 C4.0\nG91 G0 "+dire+"\nG90 G0 C10.0\nG92 "+new_position+"\n\n" 
                 gcode_clone.insert(0,gcode_spacing)
                 gcode_body.append(gcode_clone)
                 gcode_list[-1:-1]= gcode_body[i]  # put the clones in front of the end-code

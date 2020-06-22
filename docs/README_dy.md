@@ -37,8 +37,17 @@ G- code 필요없는 명령어 제거
         settings = self._serialiseSettings(Application.getInstance().getGlobalContainerStack()
         stream.write(settings)
 
-
-
+- 06.22
+left syringe 이미지
+초반의 익스트루더 b ,c위치 조절
+spacing 코드 수정 c좌표로 **
+axis control 뒤에 실린지 선택 설정 **
+UV의 'layer주기'부분 수정
+travel 속도 1200, 600 변경
+M303, 디스펜서 명령어 실린지 순서 변경 ***
+소수값에 정수부분 0 추가하기
+로딩창 regenator로 이름 수정 
+M301, M303 코드 적용 ****
 
 # start code 
 ;(*** front of start-gcode for Rokit Healthcare ***)\n

@@ -17,7 +17,7 @@ Item {
     UM.RecolorImage {
         id: mainIcon
         anchors.fill: parent
-        source: UM.Theme.getIcon((index === 0) ? "extruder_button" : "hk_syringe_button")
+        source: UM.Theme.getIcon((index === 0) ? "extruder_button_left" : "hk_syringe_button")
         color: materialColor
     }
 
