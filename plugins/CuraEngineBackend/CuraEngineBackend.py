@@ -676,6 +676,7 @@ class CuraEngineBackend(QObject, Backend):
         uv_value = []
         uv_value.append(self._global_container_stack.getProperty("uv_enable","value")) #
         uv_value.append(self._global_container_stack.getProperty("uv_per_layers","value")) 
+        uv_value.append(self._global_container_stack.getProperty("uv_start_layer","value"))
         uv_value.append(self._global_container_stack.getProperty("uv_type","value")) 
         uv_value.append(self._global_container_stack.getProperty("uv_time","value"))
         uv_value.append(self._global_container_stack.getProperty("uv_dimming","value")) # 미구현
@@ -707,10 +708,11 @@ class CuraEngineBackend(QObject, Backend):
         printTemp = " ".join(map(str,print_temp))
 
         uv_cycle = uv_value[1] # UV layers
-        uv_term = uv_value[3] # UV time
-        uvDimming = uv_value[4] # UV dimming - 미구현
-        if uv_value[2] == '365': uv_command = ['M172','M173'] # UV type: curing ON/OFF
-        if uv_value[2] == '405': uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
+        uv_start_layer = uv_value[2] # UV start Layer
+        uv_term = uv_value[4] # UV time
+        uvDimming = uv_value[5] # UV dimming - 미구현
+        if uv_value[3] == '365': uv_command = ['M172','M173'] # UV type: curing ON/OFF
+        if uv_value[3] == '405': uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
         
         shotTime = " ".join(map(str,dsp_value[1]))
         vacTime = " ".join(map(str,dsp_value[2]))
@@ -730,18 +732,20 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             # set the dispenser commands
-            replaced = replaced.replace("{shot_time}","M303 "+ shotTime+" ;shot.t") 
-            replaced = replaced.replace("{vac_time}","M304 "+ vacTime+" ;vac") 
-            replaced = replaced.replace("{interval}","M305 "+ interval+" ;int")
-            replaced = replaced.replace("{shot_p}","M306 "+ shotPressure+" ;shot.p")
-            replaced = replaced.replace("{vac_p}","M307 "+ vacPressure+" ;vac.p")
-            replaced = replaced.replace("{print_temp}", "M308 "+printTemp+" ;set print and bed Temp.")
-            replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500") # 미구현
-            replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
+            replaced = replaced.replace("{shot_time}","M303 "+ shotTime) 
+            replaced = replaced.replace("{vac_time}","M304 "+ vacTime) 
+            replaced = replaced.replace("{interval}","M305 "+ interval)
+            replaced = replaced.replace("{shot_p}","M306 "+ shotPressure)
+            replaced = replaced.replace("{vac_p}","M307 "+ vacPressure)
+            replaced = replaced.replace("{print_temp}", "M308 "+printTemp)
+            # replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500") # 미구현
+            # replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
 
             # add the UV commends - 수정 필요
             if replaced.startswith(";LAYER:"):
                 uv_cnt = int(replaced[len(";LAYER:"):replaced.find("\n")])
+                if uv_cnt == uv_start_layer:
+                    replaced += uv_command[0]+";start UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+";start UV OFF\n\n"
                 if uv_cnt % uv_cycle == 0:
                     replaced += uv_command[0]+"; UV ON\nG4 P"+str(uv_term*1000)+"\n" + uv_command[1]+"; UV OFF\n\n"
 
