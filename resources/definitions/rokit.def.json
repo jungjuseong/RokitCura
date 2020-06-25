@@ -39,7 +39,7 @@
                     "type": "bool",
                     "default_value": false,
                     "settable_per_mesh": false,
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_initial_layers":
                 {
@@ -51,7 +51,7 @@
                     "minimum_value": "1",
                     "maximum_value_warning": "10",
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_per_layers":
                 {
@@ -63,7 +63,7 @@
                     "minimum_value": "1",
                     "maximum_value_warning": "10",
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_start_layer":
                 {
@@ -75,7 +75,7 @@
                     "minimum_value": "1",
                     "maximum_value_warning": "10",
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_type":
                 {
@@ -90,7 +90,7 @@
                     },
                     "default_value": "365",
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_time":
                 {
@@ -103,7 +103,7 @@
                     "maximum_value_warning": "55",
                     "default_value": 5,
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "uv_dimming":
                 {
@@ -116,7 +116,7 @@
                     "maximum_value_warning": "99",
                     "default_value": 80,
                     "enabled": "uv_enable",
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 }
             }
         },

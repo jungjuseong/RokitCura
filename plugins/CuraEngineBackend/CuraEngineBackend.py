@@ -662,11 +662,11 @@ class CuraEngineBackend(QObject, Backend):
     def _onSlicingFinishedMessage(self, message: Arcus.PythonMessage) -> None:
         self.setState(BackendState.Done)
         self.processingProgress.emit(1.0)
-
-        # extruder_stack = self._global_container_stack.extruders.get(str(self._extruder_position))
-        # if not extruder_stack:
-        #     return
-        # nozzle_name = extruder_stack.variant.getName()
+        #
+        # build volume에 따라
+        # syringe 또는 fff, hot melt 를 기준으로
+        # printing에 참여하는 노즐을 구분할 필요가 있음.
+        #
 
         # 프린트 온도 설정
         print_temperature_list =[]
@@ -681,12 +681,14 @@ class CuraEngineBackend(QObject, Backend):
         print_temperature = " ".join(map(str,print_temperature_list))
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
-        uv_value_list = []
-        uv_value_list.append(self._global_container_stack.getProperty("uv_enable","value")) #
-        uv_value_list.append(self._global_container_stack.getProperty("uv_per_layers","value")) 
-        uv_value_list.append(self._global_container_stack.getProperty("uv_type","value")) 
-        uv_value_list.append(self._global_container_stack.getProperty("uv_time","value"))
-        uv_value_list.append(self._global_container_stack.getProperty("uv_dimming","value")) # 미구현
+        uv_value_list = [[],[],[],[],[]]
+        for index in range(1,6):
+            extruder = self._global_container_stack.extruderList[index]
+            uv_value_list[0].append(extruder.getProperty("uv_enable","value")) #
+            uv_value_list[1].append(extruder.getProperty("uv_per_layers","value")) 
+            uv_value_list[2].append(extruder.getProperty("uv_type","value")) 
+            uv_value_list[3].append(extruder.getProperty("uv_time","value"))
+            uv_value_list[4].append(extruder.getProperty("uv_dimming","value")) # 미구현
         
         uv_per_layers = uv_value_list[1] # UV per layers
         uv_time = uv_value_list[3] # UV time
@@ -697,15 +699,15 @@ class CuraEngineBackend(QObject, Backend):
 
         for index in range(1,6):
             extruder = self._global_container_stack.extruderList[index]
-            dispenser_value_list[0].append(extruder.getProperty("dispensor_enable","value")) # 
-            dispenser_value_list[1].append(extruder.getProperty("dispensor_shot","value")) 
+            dispenser_value_list[0].append(extruder.getProperty("dispensor_enable","value"))
+            dispenser_value_list[1].append(extruder.getProperty("dispensor_shot","value"))
             dispenser_value_list[2].append(extruder.getProperty("dispensor_vac","value"))
             dispenser_value_list[3].append(extruder.getProperty("dispensor_int","value"))
             dispenser_value_list[4].append(extruder.getProperty("dispensor_shot_power","value"))
             dispenser_value_list[5].append(extruder.getProperty("dispensor_vac_power","value"))
         
-        dispenser_value_list[0].append(left_extruder.getProperty("dispensor_enable","value")) # 
-        dispenser_value_list[1].append(left_extruder.getProperty("dispensor_shot","value")) 
+        dispenser_value_list[0].append(left_extruder.getProperty("dispensor_enable","value"))
+        dispenser_value_list[1].append(left_extruder.getProperty("dispensor_shot","value"))
         dispenser_value_list[2].append(left_extruder.getProperty("dispensor_vac","value"))
         dispenser_value_list[3].append(left_extruder.getProperty("dispensor_int","value"))
         dispenser_value_list[4].append(left_extruder.getProperty("dispensor_shot_power","value"))
@@ -722,9 +724,10 @@ class CuraEngineBackend(QObject, Backend):
         except KeyError:  # Can occur if the g-code has been cleared while a slice message is still arriving from the other end.
             gcode_list = []
         
-        if uv_value_list[2] == '365': 
+        uv_type = uv_value_list[2]
+        if uv_type[0] == '365': # ----------------------------------------수정해야함.
             uv_command = ['M172','M173'] # UV type: curing ON/OFF
-        elif uv_value_list[2] == '405': 
+        elif uv_type[0] == '405': 
             uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
 
         for index, lines in enumerate(gcode_list):            
@@ -735,36 +738,43 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
 
             # set the dispenser commands
-            replaced = replaced.replace("{shot_time}","M303 " + shot_times + " ;shot.t") 
-            replaced = replaced.replace("{vac_time}","M304 " + vac_times + " ;vac") 
-            replaced = replaced.replace("{interval}","M305 " + intervals + " ;int")
-            replaced = replaced.replace("{shot_p}","M306 " + shot_pressures + " ;shot.p")
-            replaced = replaced.replace("{vac_p}","M307 " + vac_pressures + " ;vac.p")
-            replaced = replaced.replace("{print_temp}", "M308 "+ print_temperature + " ;set print and bed Temp.")
+            replaced = replaced.replace("{shot_time}","M303 " + shot_times) 
+            replaced = replaced.replace("{vac_time}","M304 " + vac_times) 
+            replaced = replaced.replace("{interval}","M305 " + intervals)
+            replaced = replaced.replace("{shot_p}","M306 " + shot_pressures)
+            replaced = replaced.replace("{vac_p}","M307 " + vac_pressures)
+            replaced = replaced.replace("{print_temp}", "M308 "+ print_temperature)
             replaced = replaced.replace("{phys_slct_extruder}", "G0 A0. F1500") # 미구현
             replaced = replaced.replace(";{fdm_extr}", "G92 E0") # 미구현
 
             # add the UV commends - 수정 필요
             if replaced.startswith(";LAYER:"):
                 layer_no = int(replaced[len(";LAYER:"):replaced.find("\n")])
-                if (layer_no % uv_per_layers) == 0:
-                    replaced += uv_command[0]+"; UV ON\nG4 P" + str(uv_time*1000) + "\n" + uv_command[1] + "; UV OFF\n\n"
- 
-            # Remove the E Value
-            # Change to D command from T # 수정 필요!!!
+                if (layer_no % uv_per_layers[0]) == 0:
+                    replaced += uv_command[0]+"; UV ON\nG4 P" + str(uv_time[0]*1000) + "\n" + uv_command[1] + "; UV OFF\n\n"
+            gcode_list[index] = replaced
+
+        for index, lines in enumerate(gcode_list):
+            # E 명령어를 J명령어로 변경
+            # Change to D command from T
             # SHOT & STOP sequence
             shotFlag = True
+            replaced = lines
             layer_commands = replaced.split("\n")
             for command_index, command in enumerate(layer_commands):                
                 if command.startswith("G1"):
-                    layer_commands[command_index] = command[:command.find("E") - 1]
-                    if shotFlag == True:
-                        if command.find("F") == -1: # split한 후 인자의 갯수로 판단
+                    # layer_commands[command_index] = command[:command.find("E") - 1]
+                    layer_commands[command_index] = layer_commands[command_index].replace("E","J")
+                    if shotFlag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
+                        comand_number= command.split()
+                        if len(comand_number) > 3: # split한 후 인자의 갯수로 판단
                             layer_commands[command_index] = "M301 ;SHOT\n" + layer_commands[command_index]
                             shotFlag = False
-                elif command.startswith("G0") and shotFlag == False:
-                    layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
-                    shotFlag =True
+                elif command.startswith("G0"): 
+                    layer_commands[command_index] = layer_commands[command_index].replace("Z","C")
+                    if shotFlag == False:
+                        layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
+                        shotFlag =True
                 elif command.startswith("T"):
                     layer_commands[command_index] = "D"+ str(int(command[-1]) + 1) # syringe number
 
@@ -791,30 +801,30 @@ class CuraEngineBackend(QObject, Backend):
             clone_num = int(well_plate_num)-1
             line_seq = trip["line_seq"] 
             distance = str(trip["spacing"]) 
-            z_height = trip["z"] 
+            z_height = trip["z"]
             start_point = trip["start_point"]
 
             # 원점 재설정 
             selected_extruder = "G0 A0. F1500\n"
             axisControl = "G0 B9.0\nG0 C4.0\nG0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 C10.0\n\n"
-            gcode_list[1] += selected_extruder 
-            gcode_list[1] += axisControl 
+            gcode_list[1] += selected_extruder
+            gcode_list[1] += axisControl
 
             # Clonning process
             gcode_clone = gcode_list[2:-1]
             std_str = "G1 X0.0 Y0.0"
             new_position ="X0.0 Y0.0"
-            line_ctrl = 1 # forward            
+            line_ctrl = 1 # forward
 
             gcode_body = []
             for i in range(clone_num): # Clone number
                 if (i+1) % line_seq ==0:
-                    dire = "X-"+ distance 
+                    dire = "X-"+ distance
                     line_ctrl = abs(line_ctrl-1) # direction control
                 else:
-                    if line_ctrl == 1: 
+                    if line_ctrl == 1:
                         dire = "Y-"+ distance
-                    if line_ctrl == 0: 
+                    if line_ctrl == 0:
                         dire = "Y"+ distance
                 # control spacing about build plate after printing one model
                 gcode_spacing = ";dy_spacing\nG92 E0\n"+std_str+"\nG0 C4.0\nG91 G0 "+dire+"\nG90 G0 C10.0\nG92 "+new_position+"\n\n" 

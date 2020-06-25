@@ -50,6 +50,11 @@ M303, 디스펜서 명령어 실린지 순서 변경 ***
 M301, M303 코드 적용 ****
 uv start layer 항목 추가
 
+# extruder_stack = self._global_container_stack.extruders.get(str(self._extruder_position))
+# if not extruder_stack:
+#     return
+# nozzle_name = extruder_stack.variant.getName()
+
 
 # start code 
 ;(*** front of start-gcode for Rokit Healthcare ***)\n
