@@ -55,6 +55,23 @@ uv start layer 항목 추가
 #     return
 # nozzle_name = extruder_stack.variant.getName()
 
+- 06.22
+M301/M330 시퀀스 변경
+start point (.0)처리**
+G0 변질 문제 해결하기
+E 명령어 --> 다른 표시로 변경
+Z축을 C축으로 수정
+
+
+- 06.27
+# build volume 구별
+# syringe 또는 fff, hot melt 구별
+# 슬라이싱에 참여하는 노즐을 구별
+# operation = GroupedOperation()
+# node = SceneNode
+# adfas = ExtruderManager.getInstance()
+# active_extruder = node.callDecoration("getActiveExtruder")
+
 
 # start code 
 ;(*** front of start-gcode for Rokit Healthcare ***)\n
