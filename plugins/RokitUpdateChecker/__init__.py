@@ -1,7 +1,7 @@
 # Copyright (c) 2015 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
-from . import UpdateChecker
+from . import RokitUpdateChecker
 
 
 def getMetaData():
@@ -9,4 +9,4 @@ def getMetaData():
     }
 
 def register(app):
-    return { "extension": UpdateChecker.UpdateChecker() }
+    return { "extension": RokitUpdateChecker.RokitUpdateChecker() }

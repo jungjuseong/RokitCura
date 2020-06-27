@@ -106,9 +106,9 @@ fragment41core =
     }
 
 [defaults]
-u_ambientColor = [1.0, 1.0, 1.0, 1.0]
-u_diffuseColor = [0.0, 0, 0, 1.0]
-u_opacity = 0
+u_ambientColor = [0.1, 0.1, 0.1, 1.0]
+u_diffuseColor = [0.4, 0.4, 0.4, 1.0]
+u_opacity = 0.5
 
 [bindings]
 u_modelMatrix = model_matrix

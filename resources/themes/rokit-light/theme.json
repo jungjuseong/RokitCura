@@ -365,7 +365,7 @@
         "buildplate_grid": [129, 131, 134, 255],
         "buildplate_grid_minor": [230, 230, 231, 255],
 
-        "convex_hull": [35, 35, 35, 127],
+        "convex_hull": [35, 0, 0, 127],
         "disallowed_area": [0, 0, 0, 40],
         "error_area": [255, 0, 0, 127],
 

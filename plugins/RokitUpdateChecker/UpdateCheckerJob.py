@@ -101,7 +101,7 @@ class UpdateCheckerJob(Job):
     def showUpdate(self, newest_version: Version, download_url: str) -> None:
         application_display_name = Application.getInstance().getApplicationDisplayName().title()
         title_message = i18n_catalog.i18nc("@info:status",
-                                           "{application_name} {version_number} is available!".format(application_name = application_display_name, version_number = newest_version))
+                                           "{application_name} {version_number} is available!!".format(application_name = application_display_name, version_number = newest_version))
         content_message = i18n_catalog.i18nc("@info:status",
                                              "{application_name} {version_number} provides a better and more reliable printing experience.".format(application_name = application_display_name, version_number = newest_version))
 

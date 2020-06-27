@@ -1,4 +1,21 @@
 {
+    "RokitUpdateChecker": {
+        "package_info": {
+            "package_id": "RokitUpdateChecker",
+            "package_type": "plugin",
+            "display_name": "Update Checker",
+            "description": "Checks for updates of the software.",
+            "package_version": "1.0.1",
+            "sdk_version": "7.0",
+            "website": "https://clbee.com",
+            "author": {
+                "author_id": "RokitPackages",
+                "display_name": "Clbee System.",
+                "email": "juseong.jung@clbee.com",
+                "website": "https://clbee.com"
+            }
+        }
+    },
     "3MFReader": {
         "package_info": {
             "package_id": "3MFReader",

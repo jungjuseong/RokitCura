@@ -201,6 +201,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
         self._convex_hull_node = hull_node
 
     def _onSettingValueChanged(self, key: str, property_name: str) -> None:
+
         if property_name != "value":  # Not the value that was changed.
             return
 
