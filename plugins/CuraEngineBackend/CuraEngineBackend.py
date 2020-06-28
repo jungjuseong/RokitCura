@@ -28,6 +28,7 @@ from .ProcessSlicedLayersJob import ProcessSlicedLayersJob
 from .StartSliceJob import StartSliceJob, StartJobResult
 import Arcus
 
+# from UM.Settings.ContainerRegistry import ContainerRegistry  # To find all the variants for this machine.
 # from UM.Operations.GroupedOperation import GroupedOperation
 
 if TYPE_CHECKING:
@@ -665,9 +666,26 @@ class CuraEngineBackend(QObject, Backend):
         self.processingProgress.emit(1.0)
 
 
-        # 실린지, 익트루더, 핫멜트 자료
-        active_extruder = self._global_container_stack.extruderList[1].getId()
-        machine_nozzle_id = self._global_container_stack.extruderList[0].getProperty("machine_nozzle_id", "value")
+        # Left 노즐 타입 (syringe, fff, hot)
+        machine_nozzle_id = self._global_container_stack.extruderList[0].variant.getName()
+
+        # 슬라이스에 참여하는 익스트루더 active_extruder
+        # a = self._global_container_stack.extruderList[1].getId()
+        asdf = self._application.getMachineManager()
+        # asdf = self._application.getMachineManager().getInstance().getActiveExtruderStacks()
+        # asdf = self._application.getMachineManager().activeMachine
+        # asdh = self._application.getMachineManager().activeStack
+        # akjdl = self._application.getMachineActionManager()
+        # machine_nozzle_id = self._global_container_stack.extruderList[0].getMetaDataEntry("varient", "value")
+        # akjdl = self._application.getMachineManager().
+
+        # container_registry = ContainerRegistry.getInstance()
+        # my_metadata = container_registry.findContainersMetadata(id = "global_variant")[0]
+        # self.preferred_variant_name = my_metadata.get("preferred_variant_name", "")
+
+
+
+        
         nozzle_type = machine_nozzle_id.split(" ") # 노즐 타입과, 노즐게이지 분리
 
         # 프린트 온도 설정
@@ -727,7 +745,7 @@ class CuraEngineBackend(QObject, Backend):
             gcode_list = []
         
         uv_type = uv_value_list[2]
-        if uv_type[0] == '365': # ----------------------------------------수정해야함.
+        if uv_type[0] == '365': # -------------------------------수정 사항 : 슬라이스에 참여하는 익스트루더에 따라 오프셋 변경
             uv_command = ['M172','M173'] # UV type: curing ON/OFF
         elif uv_type[0] == '405': 
             uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
@@ -755,35 +773,44 @@ class CuraEngineBackend(QObject, Backend):
                     replaced += ";UV"+ uv_command[0]+"; UV ON\nG4 P" + str(uv_time[0]*1000) + "\n" + uv_command[1] + "; UV OFF\n\n"
             gcode_list[index] = replaced
 
+        firstZ = gcode_list[2].find("Z")
+        zLocation = gcode_list[2][firstZ + 1 : gcode_list[2].find("\n;",firstZ)]
+        zToJ = -20.0 - float(zLocation)
+
         for index, lines in enumerate(gcode_list):
             # E 명령어를 J명령어로 변경
             # Change to D command from T
             # SHOT & STOP sequence
             shotFlag = True
             replaced = lines
-            layer_commands = replaced.split("\n")
-            for command_index, command in enumerate(layer_commands):
-                if nozzle_type[0] == "Syringe":
-                    if command.startswith("G1"):
-                        # 실린지 일 때만 E --> J 변환
-                        layer_commands[command_index] = layer_commands[command_index].replace("E","J")
-                        if shotFlag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
-                            comand_number= command.split()
-                            if len(comand_number) > 3: # split한 후 인자의 갯수로 판단
-                                layer_commands[command_index] = "M301 ;SHOT\n" + layer_commands[command_index]
-                                shotFlag = False
-                    elif command.startswith("G0"): 
-                        layer_commands[command_index] = layer_commands[command_index].replace("Z","C")
-                        if shotFlag == False:
-                            layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
-                            shotFlag =True
+            if index < len(gcode_list) - 1:
+                layer_commands = replaced.split("\n")
+                for command_index, command in enumerate(layer_commands):
 
-                if command.startswith("T"):
-                    layer_commands[command_index] = "D"+ str(int(command[-1]) + 1) # syringe number
+                    if nozzle_type[0] == "Syringe": # 실린지 일 때만 E --> J 변환
+                        if command.startswith("G1"):
+                            layer_commands[command_index] = layer_commands[command_index].replace("E","J")
+                            if shotFlag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
+                                comand_number= command.split()
+                                if len(comand_number) > 3: # split한 후 인자의 갯수로 판단
+                                    layer_commands[command_index] = "M301 ;SHOT\n" + layer_commands[command_index]
+                                    shotFlag = False
+                        elif command.startswith("G0"): 
+                            # layer_commands[command_index] = layer_commands[command_index].replace("Z","C")
+                            if command.find("Z") != -1:
+                                sfsf = float(command[command.find("Z") + 1:])+ zToJ
+                                dfdf = command[:command.find("Z")]
+                                layer_commands[command_index] = command[:command.find("Z")]+ "C"+ str(float(command[command.find("Z") + 1:])+ zToJ)
+                            if shotFlag == False:
+                                layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
+                                shotFlag =True
 
-                layer_commands[command_index] = layer_commands[command_index].replace("-.","-0.")
+                    if command.startswith("T"):
+                        layer_commands[command_index] = "D"+ str(int(command[-1]) + 1) # syringe number
 
-            replaced = "\n".join(layer_commands)
+                    layer_commands[command_index] = layer_commands[command_index].replace("-.","-0.")
+
+                replaced = "\n".join(layer_commands)
             gcode_list[index] = replaced
 
         # Well Plate's clonning part
