@@ -16,7 +16,7 @@
         <density>1.24</density>
         <diameter>1.75</diameter>
     </properties>
-        <setting key="print temperature">4</setting>
+        <setting key="print temperature">182</setting>
         <setting key="heated bed temperature">7</setting>
         <setting key="standby temperature">4</setting>
         <setting key="adhesion tendency">0</setting>

@@ -71,126 +71,58 @@
         "layer_height": { 
             "settable_per_extruder": true 
         },
-        "machine_name": { 
+        "machine_name": {
+            "label": "Bio printer",
+            "description": "Dr Invivo 4D6",
             "default_value": "Dr. INVIVO 4D6" 
         },
         "print_sequence": {
             "default_value": "one_at_a_time"
         },
         "machine_width": { 
-            "default_value": 85.4,
-            "minimum_value": 85,
-            "maximum_value": 86
+            "default_value": 85.4
         },
         "machine_depth": { 
-            "default_value": 127.6,
-            "minimum_value": 127,
-            "maximum_value": 128
+            "default_value": 127.6
         },
         "machine_height": { 
-            "default_value": 14, 
-            "minimum_value": 10,
-            "maximum_value": 25
+            "default_value": 14
         },
         "machine_shape": { 
             "default_value": "rectangular"
         },
-        "machine_center_is_zero": { "default_value": true },
-
-        "machine_build_dish_type": { "default_value": "Culture Dish:11035" },
-
-        "machine_heated_build_volume": { "default_value": true },
-        "default_material_print_temperature":
-        {
-            "default_value": 32,
-            "minimum_value_warning": "25",
-            "maximum_value_warning": "200",
-            "maximum_value": "210",
-            "minimum_value": "0",
-            "settable_per_extruder": true
-        },
-        "material_print_temperature":
-        {
-            "default_value": 32,
-            "minimum_value": "0",
-            "minimum_value_warning": "0",
-            "maximum_value_warning": "201",
-            "maximum_value": "210",
-            "enabled": "machine_nozzle_temp_enabled and not (material_flow_dependent_temperature)",
-            "settable_per_extruder": true
-        },
-        "material_initial_print_temperature": { 
-            "default_value": "material_print_temperature",
-            "value": "max(-0, material_print_temperature - 10)",
-            "minimum_value": "0",
-            "minimum_value_warning": "material_standby_temperature",
-            "maximum_value_warning": "material_print_temperature",
-            "maximum_value": "215"
-        },
-        "material_final_print_temperature":
-        {
-            "default_value": "material_print_temperature",
-            "value": "max(-0, material_print_temperature - 10)",
-            "minimum_value": "0",
-            "minimum_value_warning": "material_standby_temperature",
-            "maximum_value_warning": "material_print_temperature",
-            "maximum_value": "215"
-        },
-        "material_print_temperature_layer_0":
-        {
-            "default_value": 32,
-            "value": "material_print_temperature",
-            "minimum_value": "0",
-            "minimum_value_warning": "0",
-            "maximum_value_warning": "200",
-            "maximum_value": "210"
-        },
-        "build_volume_temperature":
-        {
-            "default_value": 18,
-            "resolve": "min(extruderValues('build_volume_temperature'))",
-            "minimum_value": "0",
-            "minimum_value_warning": "0",
-            "maximum_value_warning": "10",
-            "enabled": "machine_heated_build_volume",
-            "settable_per_extruder": true
-        },
-        "default_material_bed_temperature":
-        {
-            "resolve": "max(extruderValues('default_material_bed_temperature'))",
-            "default_value": 15,
-            "minimum_value": "0",
-            "minimum_value_warning": "build_volume_temperature",
-            "maximum_value_warning": "40",
-            "maximum_value": "60",
-            "enabled": true,
-            "settable_per_extruder": false
-        },
-        "material_bed_temperature":
-        {
-            "default_value": 15,
-            "value": "default_material_bed_temperature",
-            "resolve": "max(extruderValues('material_bed_temperature'))",
-            "minimum_value": "0",
-            "minimum_value_warning": "build_volume_temperature",
-            "maximum_value_warning": "40",
-            "maximum_value": "60",
-            "settable_per_extruder": false
+        "machine_center_is_zero": { 
+            "default_value": true 
         },
 
-        "infill_pattern": {"value": "'triangles'" },
-        "infill_before_walls": {"value": false },
-        
-        "adhesion_type": { "default_value": "none" },
-        "speed_travel_layer_0": { "value": "20" },
+        "machine_build_dish_type": { 
+            "default_value": "Culture Dish:11035" 
+        },
 
-        "machine_gcode_flavor": { "default_value": "RepRap (Marlin/Sprinter)" },
+        "machine_heated_build_volume": { 
+            "default_value": true 
+        },
+
+        "infill_pattern": {
+            "default_value": "'triangles'" 
+        },
+        "infill_before_walls": {
+            "default_value": false 
+        },
+        "material_bed_temperature": { 
+            "settable_per_extruder": true 
+        },
+        "machine_gcode_flavor": { 
+            "default_value": "RepRap (Marlin/Sprinter)" 
+        },
         "machine_start_gcode": {
             "default_value": "\n;(*** front of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.\nM29 B\n{shot_time}\n{vac_time}\n{interval}\n{shot_p}\n{vac_p}\n{print_temp}\nM309 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Set PID value\nM310 5 ; Set toggle level\n;(*** back of start-gcode ***)\n"
         },
         "machine_end_gcode": {
             "default_value": ";(*** front of end-gcode for Rokit Healthcare ****)\nG0 B0.\nG0 A0.\nG0 X0. Y0. Z0. C0. ; Motor home\nM140 S0 ;Turn-off bed\nM75 ;IO dis \nM79 ; light OFF\nM177 ;comp off\nM73; motor drive off\n;(*** rear of end-gcode ***)"
         },
-        "machine_extruder_count": { "default_value": 6 }
+        "machine_extruder_count": { 
+            "default_value": 6 
+        }
     }
 }
