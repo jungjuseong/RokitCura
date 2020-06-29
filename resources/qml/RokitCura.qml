@@ -117,13 +117,18 @@ UM.MainWindow {
             }
             // application menu
             if (event.key === Qt.Key_F2) {
-                applicationMenu.visible = !applicationMenu.visible
+                applicationMenu.visible = (applicationMenu.visible) ? false : true
+                applicationMenu.height = (applicationMenu.visible) ? 20 :  0 
+            }
+            if (event.key === Qt.Key_F3) {
+                backgroundImage.visible = (backgroundImage.visible) ? false : true
             }
         }
 
         ApplicationMenu {
            id: applicationMenu
            visible: false
+           height: 0
            window: base
         }
 
@@ -165,9 +170,11 @@ UM.MainWindow {
                 right: parent.right
                 top: applicationMenu.bottom
             }
+            z: applicationMenu - 1
         }
 
         Image {
+            id: backgroundImage
             source: '../images/rokit-background-dna-1920x1080.png'
             width: base.width
             height: base.height
