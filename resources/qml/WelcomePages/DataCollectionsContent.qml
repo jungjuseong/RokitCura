@@ -9,7 +9,7 @@ import Cura 1.1 as Cura
 
 
 //
-// This component contains the content for the "Help us to improve Organ Regenerator" page of the welcome on-boarding process.
+// This component contains the content for the "Help us to improve OrganRegenerator" page of the welcome on-boarding process.
 //
 Item
 {
@@ -21,7 +21,7 @@ Item
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
-        text: catalog.i18nc("@label", "Help us to improve Organ Regenerator")
+        text: catalog.i18nc("@label", "Help us to improve OrganRegenerator")
         color: UM.Theme.getColor("primary_button")
         font: UM.Theme.getFont("huge")
         renderType: Text.NativeRendering
@@ -54,7 +54,7 @@ Item
                 width: parent.width
                 anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: catalog.i18nc("@text", "Organ Regenerator collects anonymous data to improve print quality and user experience, including:")
+                text: catalog.i18nc("@text", "OrganRegenerator collects anonymous data to improve print quality and user experience, including:")
                 wrapMode: Text.WordWrap
                 font: UM.Theme.getFont("medium")
                 color: UM.Theme.getColor("text")
@@ -99,7 +99,7 @@ Item
                 horizontalAlignment: Text.AlignHCenter
                 text:
                 {
-                    var t = catalog.i18nc("@text", "Data collected by Organ Regenerator will not contain any personal information.")
+                    var t = catalog.i18nc("@text", "Data collected by OrganRegenerator will not contain any personal information.")
                     var t2 = catalog.i18nc("@text", "More information")
                     t += " <a href='https://notusedref'>" + t2 + "</a>"
                     return t

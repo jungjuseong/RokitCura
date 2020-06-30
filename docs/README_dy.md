@@ -15,7 +15,7 @@ print 출력 순서 변경
 - 2020.06.08.
 
 - 2020.06.11.
-Organ Regeneration --> Organ Regenerator
+Organ Regeneration --> OrganRegenerator
 syringe 전체 적용과 syringe 각각 적용 구분
 T 명령어 --> D 명령어 
 
