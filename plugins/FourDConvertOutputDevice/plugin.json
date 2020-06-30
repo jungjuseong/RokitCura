@@ -1,0 +1,8 @@
+{
+    "name": "convert gcode to 4d format and save to file",
+    "description": "Enables convert gcode to 4d format.",
+    "author": "Rokit Healthcar B.V",
+    "version": "1.0.1",
+    "api": "7.2.0",
+    "i18n-catalog": "cura"
+}
