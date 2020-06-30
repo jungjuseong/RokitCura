@@ -757,56 +757,64 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{filament_cost}", str(self._application.getPrintInformation().materialCosts))
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
             
-            if nozzle_type[0] == "Syringe":
+            if nozzle_type[0] != "FFF":
                 # set the dispenser commands
-                replaced = replaced.replace("{shot_time}","M303 " + shot_times) 
-                replaced = replaced.replace("{vac_time}","M304 " + vac_times) 
-                replaced = replaced.replace("{interval}","M305 " + intervals)
-                replaced = replaced.replace("{shot_p}","M306 " + shot_pressures)
-                replaced = replaced.replace("{vac_p}","M307 " + vac_pressures)
-                replaced = replaced.replace("{print_temp}", "M308 "+ print_temperature)
+                replaced = replaced.replace(";{shot_time}","M303 " + shot_times) 
+                replaced = replaced.replace(";{vac_time}","M304 " + vac_times) 
+                replaced = replaced.replace(";{interval}","M305 " + intervals)
+                replaced = replaced.replace(";{shot_p}","M306 " + shot_pressures)
+                replaced = replaced.replace(";{vac_p}","M307 " + vac_pressures)
+                replaced = replaced.replace(";{print_temp}", "M308 "+ print_temperature)
+                replaced = replaced.replace("M104", ";M104")
+                replaced = replaced.replace("M105", ";M105")
+                replaced = replaced.replace("M140", ";M140")
+                replaced = replaced.replace("M82", ";M82")
+                replaced = replaced.replace("M141", ";M141")
+                replaced = replaced.replace("M109 S", ";M109 S") # 임시
+                replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.6.8.0")
+                replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
 
             # add the UV commends - 수정 필요
             if replaced.startswith(";LAYER:"):
                 layer_no = int(replaced[len(";LAYER:"):replaced.find("\n")])
                 if (layer_no % uv_per_layers[0]) == 0:
-                    replaced += ";UV"+ uv_command[0]+"; UV ON\nG4 P" + str(uv_time[0]*1000) + "\n" + uv_command[1] + "; UV OFF\n\n"
+                    replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(uv_time[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"
             gcode_list[index] = replaced
 
         firstZ = gcode_list[2].find("Z")
-        zLocation = gcode_list[2][firstZ + 1 : gcode_list[2].find("\n;",firstZ)]
-        zToJ = -20.0 - float(zLocation)
+        z_Location = gcode_list[2][firstZ + 1 : gcode_list[2].find("\n",firstZ)]
+        to_be_jvalue = -20.0 - float(z_Location)
 
         for index, lines in enumerate(gcode_list):
             # E 명령어를 J명령어로 변경
             # Change to D command from T
             # SHOT & STOP sequence
-            shotFlag = True
+            shot_flag = True
             replaced = lines
             if index < len(gcode_list) - 1:
                 layer_commands = replaced.split("\n")
                 for command_index, command in enumerate(layer_commands):
 
-                    if nozzle_type[0] == "Syringe": # 실린지 일 때만 E --> J 변환
+                    if nozzle_type[0] != "FFF": # 실린지 일 때만 E --> J 변환
                         if command.startswith("G1"):
-                            layer_commands[command_index] = layer_commands[command_index].replace("E","J")
-                            if shotFlag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
+                            # layer_commands[command_index] = layer_commands[command_index].replace("E","J")
+                            if shot_flag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
                                 comand_number= command.split()
                                 if len(comand_number) > 3: # split한 후 인자의 갯수로 판단
                                     layer_commands[command_index] = "M301 ;SHOT\n" + layer_commands[command_index]
-                                    shotFlag = False
+                                    shot_flag = False
                         elif command.startswith("G0"): 
-                            # layer_commands[command_index] = layer_commands[command_index].replace("Z","C")
                             if command.find("Z") != -1:
-                                sfsf = float(command[command.find("Z") + 1:])+ zToJ
-                                dfdf = command[:command.find("Z")]
-                                layer_commands[command_index] = command[:command.find("Z")]+ "C"+ str(float(command[command.find("Z") + 1:])+ zToJ)
-                            if shotFlag == False:
+                                j_location = float(command[command.find("Z") + 1:])+ to_be_jvalue
+                                j_location = round(j_location,2)
+                                remove_z_value = command[:command.find("Z")]
+                                layer_commands[command_index] = command[:command.find("Z")]+ "\nG0 C"+ str(j_location) # 기존 z값 + 
+                            if shot_flag == False:
                                 layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
-                                shotFlag =True
-
-                    if command.startswith("T"):
-                        layer_commands[command_index] = "D"+ str(int(command[-1]) + 1) # syringe number
+                                shot_flag =True
+                        elif command.startswith("T"):
+                            layer_commands[command_index] = layer_commands[command_index].replace("T0","D6")
+                            layer_commands[command_index] = layer_commands[command_index].replace("T","D")
 
                     layer_commands[command_index] = layer_commands[command_index].replace("-.","-0.")
 
@@ -817,8 +825,8 @@ class CuraEngineBackend(QObject, Backend):
         dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
 
         if (dishType[:dishType.find(':')] == "Culture Dish"):
-            selected_extruder = "G0 A0. F1500\n"
-            axisControl = "G0 B9.0\n"
+            selected_extruder = "\nD1\nG0 A0. F1500\n"
+            axisControl = "G0 X-42.5 Y0.0\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
             gcode_list[1] += selected_extruder
             gcode_list[1] += axisControl
             
@@ -842,8 +850,8 @@ class CuraEngineBackend(QObject, Backend):
             start_point = trip["start_point"]
 
             # 원점 재설정 
-            selected_extruder = "G0 A0. F1500\n"
-            axisControl = "G0 B9.0\nG0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 C10.0\n\n"
+            selected_extruder = "\nD1\nG0 A0. F1500\n"
+            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
             gcode_list[1] += selected_extruder
             gcode_list[1] += axisControl
 

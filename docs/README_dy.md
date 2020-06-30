@@ -73,59 +73,10 @@ Z축을 C축으로 수정
 # active_extruder = node.callDecoration("getActiveExtruder")
 
 
-# start code 
-;(*** front of start-gcode for Rokit Healthcare ***)\n
-M72 ; Motor enable 
-M74 ;  Enabel IO 
-M78 ; LED Light ON 
-M176 ; Comp ON 
-G21 ; Set unit to mm 
-; Axis Home
-M29 Y
-M29 X
-M29 Z
-M29 C
-M29 A
-G78 B50.
-M29 B
-// G90
-M311 ; Get shot time
-M321 ; Get vaccum time
-M313 ; Get interval time
-M314 ; Get shot pressure
-M315 ; Get vaccum pressure
-
-M316 ; Get real temp
-M317 ; Get set temp
-M318 ; Get PID value
-M319 ; Get toggle temp
-G92 E0 ; Set E to 0 only FFF
-
-; (1, 2, 3, 4, 5, EX, BED)
-M303 0 0 0 0 0 0 ; Set shot time
-M304 0 0 0 0 0 0 ; Set vaccum time
-M305 0 0 0 0 0 0 ; Set interval time
-M306 0 0 0 0 0 0 ; Set shot pressure
-M307 0 0 0 0 0 0 ; Set vaccum pressure
-M308 0 0 0 0 0 0 0 ; Set temp
-M309 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Set PID value
-
-M310 5 ; Set toggle level
-
-M316 ; Get real temp 
-; (M190 0 0 0 0 0 0 0 Wait for set temp)
-
-; (G54 G00 X0. Y0. Z0. Set positioning to absolute right printing zone)
-; (G55 G00 X0. Y0. Z0. Set positioning to absolute left printing zone)
-;(*** back of start-gcode ***)
-
-
-# end code
-(**** start of end-gcode for Rokit Healthcare ****)
-M73 P100 ;end progress
-M104 T0 S0 ;extruder heater off
-M140 S0 ;Turn-off bed
-M75 ;IO dis 
-M79 ; uv off
-M177 ;comp off
-;(*** end of end-gcode ***)
+<디스펜서 임시 디폴드 값>
+M303 5 5 5 5 5 5
+M304 0.3 0.3 0.3 0.3 0.3 0.3
+M305 0 0 0 0 0 0
+M306 90 90 90 90 90 90
+M307 90 90 90 90 90 90
+M308 30 30 30 30 30 30 30
