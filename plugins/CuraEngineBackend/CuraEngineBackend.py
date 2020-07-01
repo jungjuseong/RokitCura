@@ -830,7 +830,6 @@ class CuraEngineBackend(QObject, Backend):
             gcode_list[1] += selected_extruder
             gcode_list[1] += axisControl
             
-        # g코드를 집적적으로 바꾸지 말고 간접적으로 바꾸기
         if (dishType[:dishType.find(':')] == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})                
             trip = {}
