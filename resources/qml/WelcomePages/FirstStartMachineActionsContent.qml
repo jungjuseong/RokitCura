@@ -9,7 +9,7 @@ import Cura 1.1 as Cura
 
 
 //
-// This component contains the content for the "What's new in OrganRegenerator" page of the welcome on-boarding process.
+// This component contains the content for the "What's new in Organ Regenerator" page of the welcome on-boarding process.
 //
 Item
 {

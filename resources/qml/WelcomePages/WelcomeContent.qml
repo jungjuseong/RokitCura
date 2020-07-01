@@ -26,7 +26,7 @@ Item
             id: titleLabel
             anchors.horizontalCenter: parent.horizontalCenter
             horizontalAlignment: Text.AlignHCenter
-            text: catalog.i18nc("@label", "Welcome to OrganRegenerator")
+            text: catalog.i18nc("@label", "Welcome to Organ Regenerator")
             color: UM.Theme.getColor("primary_button")
             font: UM.Theme.getFont("huge")
             renderType: Text.NativeRendering
@@ -44,7 +44,7 @@ Item
             id: textLabel
             anchors.horizontalCenter: parent.horizontalCenter
             horizontalAlignment: Text.AlignHCenter
-            text: catalog.i18nc("@text", "Please follow these steps to set up\nOrganRegenerator. This will only take a few moments.")
+            text: catalog.i18nc("@text", "Please follow these steps to set up\nOrgan Regenerator. This will only take a few moments.")
             font: UM.Theme.getFont("medium")
             color: UM.Theme.getColor("text")
             renderType: Text.NativeRendering
