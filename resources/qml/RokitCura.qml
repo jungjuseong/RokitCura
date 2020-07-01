@@ -172,23 +172,6 @@ UM.MainWindow {
             }
             z: applicationMenu - 1
         }
-        CheckBox
-        {
-            id: backgorundButton
-            anchors {
-                right : parent.right
-                bottom: parent.bottom
-                bottomMargin: UM.Theme.getSize("narrow_margin").width
-                rightMargin: UM.Theme.getSize("default_margin").width
-            }
-            text: catalog.i18nc("@label:checkbox", "Show Background")
-            style: UM.Theme.styles.partially_checkbox
-            tooltip: catalog.i18nc("@label", "Show Background")
-            width: text.width
-            height: text.height
-            checked: true
-            onClicked: backgroundImage.visible = checked
-        }
 
         Image {
             id: backgroundImage

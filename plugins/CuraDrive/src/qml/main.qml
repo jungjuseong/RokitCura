@@ -21,7 +21,7 @@ Window
     modality: Qt.ApplicationModal
     width: minimumWidth
     height: minimumHeight
-    color: UM.Theme.getColor("main_background")
+    color: UM.Theme.getColor("rokit_generation_title_background")
     title: catalog.i18nc("@title:window", "Cura Backups")
 
     // Globally available.

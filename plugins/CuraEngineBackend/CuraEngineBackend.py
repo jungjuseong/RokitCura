@@ -683,11 +683,6 @@ class CuraEngineBackend(QObject, Backend):
         # my_metadata = container_registry.findContainersMetadata(id = "global_variant")[0]
         # self.preferred_variant_name = my_metadata.get("preferred_variant_name", "")
 
-
-
-        
-        nozzle_type = machine_nozzle_id.split(" ") # 노즐 타입과, 노즐게이지 분리
-
         # 프린트 온도 설정
         print_temperature_list =[]
 
@@ -757,22 +752,22 @@ class CuraEngineBackend(QObject, Backend):
             replaced = replaced.replace("{filament_cost}", str(self._application.getPrintInformation().materialCosts))
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
             
-            if nozzle_type[0] != "FFF":
+            replaced = replaced.replace(";{print_temp}", "M308 "+ print_temperature)
+            replaced = replaced.replace("M104", ";M104")
+            replaced = replaced.replace("M105", ";M105")
+            replaced = replaced.replace("M109 S", ";M109 S") # 임시
+            replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
+            if machine_nozzle_id != "FFF Extruder":
                 # set the dispenser commands
                 replaced = replaced.replace(";{shot_time}","M303 " + shot_times) 
                 replaced = replaced.replace(";{vac_time}","M304 " + vac_times) 
                 replaced = replaced.replace(";{interval}","M305 " + intervals)
                 replaced = replaced.replace(";{shot_p}","M306 " + shot_pressures)
                 replaced = replaced.replace(";{vac_p}","M307 " + vac_pressures)
-                replaced = replaced.replace(";{print_temp}", "M308 "+ print_temperature)
-                replaced = replaced.replace("M104", ";M104")
-                replaced = replaced.replace("M105", ";M105")
                 replaced = replaced.replace("M140", ";M140")
                 replaced = replaced.replace("M82", ";M82")
                 replaced = replaced.replace("M141", ";M141")
-                replaced = replaced.replace("M109 S", ";M109 S") # 임시
                 replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.6.8.0")
-                replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
 
             # add the UV commends - 수정 필요
             if replaced.startswith(";LAYER:"):
@@ -795,7 +790,7 @@ class CuraEngineBackend(QObject, Backend):
                 layer_commands = replaced.split("\n")
                 for command_index, command in enumerate(layer_commands):
 
-                    if nozzle_type[0] != "FFF": # 실린지 일 때만 E --> J 변환
+                    if machine_nozzle_id != "FFF Extruder": # 실린지 일 때만 E --> J 변환
                         if command.startswith("G1"):
                             # layer_commands[command_index] = layer_commands[command_index].replace("E","J")
                             if shot_flag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
@@ -812,9 +807,10 @@ class CuraEngineBackend(QObject, Backend):
                             if shot_flag == False:
                                 layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
                                 shot_flag =True
-                        elif command.startswith("T"):
-                            layer_commands[command_index] = layer_commands[command_index].replace("T0","D6")
-                            layer_commands[command_index] = layer_commands[command_index].replace("T","D")
+                    
+                    if command.startswith("T"):
+                        layer_commands[command_index] = layer_commands[command_index].replace("T0","D6")
+                        layer_commands[command_index] = layer_commands[command_index].replace("T","D")
 
                     layer_commands[command_index] = layer_commands[command_index].replace("-.","-0.")
 
