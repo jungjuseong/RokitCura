@@ -822,9 +822,12 @@ class CuraEngineBackend(QObject, Backend):
 
         if (dishType[:dishType.find(':')] == "Culture Dish"):
             selected_extruder = "\nD1\nG0 A0. F1500\n"
-            axisControl = "G0 X-42.5 Y0.0\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
-            gcode_list[1] += selected_extruder
-            gcode_list[1] += axisControl
+            axisControl = "G0 X-42.5 Y0.0\nG92 X0.0 Y0.0\n"
+            b_axis_control = "G0 B20.0\n\n"
+            if machine_nozzle_id != "FFF Extruder":
+                gcode_list[1] += selected_extruder
+                gcode_list[1] += axisControl
+                gcode_list[1] += b_axis_control
             
         if (dishType[:dishType.find(':')] == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})                
@@ -847,8 +850,9 @@ class CuraEngineBackend(QObject, Backend):
             # 원점 재설정 
             selected_extruder = "\nD1\nG0 A0. F1500\n"
             axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
-            gcode_list[1] += selected_extruder
-            gcode_list[1] += axisControl
+            if machine_nozzle_id != "FFF Extruder":
+                gcode_list[1] += selected_extruder
+                gcode_list[1] += axisControl
 
             # Clonning process
             gcode_clone = gcode_list[2:-1]
