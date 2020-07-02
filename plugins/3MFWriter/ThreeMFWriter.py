@@ -77,7 +77,7 @@ class ThreeMFWriter(MeshWriter):
             return
 
         savitar_node = Savitar.SceneNode()
-        savitar_node.setName(um_node.getName())
+        savitar_node.setSetting("name", um_node.getName()) # or setName(um_node.getName())
 
         node_matrix = um_node.getLocalTransformation()
 
