@@ -32,7 +32,7 @@ Item {
 
     Label {
         id: header
-        text: catalog.i18nc("@header", "Material Configuration")
+        text: catalog.i18nc("@header", "Material and Nozzle Configuration")
         font: UM.Theme.getFont("medium")
         color: UM.Theme.getColor("small_button_text")
         height: contentHeight
@@ -150,7 +150,7 @@ Item {
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
                 Label {
-                    text: catalog.i18nc("@label", "Material & Nozzle")
+                    text: catalog.i18nc("@label", "Material")
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")

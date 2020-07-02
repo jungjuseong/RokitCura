@@ -7,15 +7,15 @@ import QtQuick.Controls 2.0
 import UM 1.3 as UM
 import Cura 1.0 as Cura
 
-Cura.ExpandableComponent {
+Cura.ExpandablePopup {
     id: printSetupSelector
 
-    dragPreferencesNamePrefix: "view/settings"
+    // dragPreferencesNamePrefix: "view/settings"
 
     property bool preSlicedData: PrintInformation !== null && PrintInformation.preSliced
 
     contentPadding: UM.Theme.getSize("default_lining").width
-    contentHeaderTitle: catalog.i18nc("@label", "Layer Quality")
+    // contentHeaderTitle: catalog.i18nc("@label", "Layer Quality")
     enabled: !preSlicedData
     disabledText: catalog.i18nc("@label shown when we load a Gcode file", "Print setup disabled. G-code file can not be modified.")
 
@@ -25,7 +25,7 @@ Cura.ExpandableComponent {
     }
 
     headerItem: Cura.IconWithText {
-        text: "Layer Quality"
+        text: "Print Quality"
         source: UM.Theme.getIcon("category_layer_height")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")

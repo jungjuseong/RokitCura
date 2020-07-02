@@ -32,7 +32,7 @@ Cura.ExpandablePopup {
     enabled: Cura.MachineManager.activeMachine.hasMaterials || Cura.MachineManager.activeMachine.hasVariants || Cura.MachineManager.activeMachine.hasVariantBuildplates; //Only let it drop down if there is any configuration that you could change.
 
     headerItem: Cura.IconWithText {
-        text: "Material"
+        text: "Material & Nozzle"
         source: UM.Theme.getIcon("hk_syringe_button")
         font: UM.Theme.getFont("medium")
         iconColor: UM.Theme.getColor("machine_selector_printer_icon")
