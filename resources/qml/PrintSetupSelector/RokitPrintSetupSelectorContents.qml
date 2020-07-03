@@ -61,7 +61,7 @@ Item {
                             )
                         );
 
-                    updateDragPosition();
+                    //updateDragPosition();
                 }
             }
         }
