@@ -10,11 +10,15 @@ class RokitCommandModel():
     # ChangeAtZ 참고
     ChangeStrings = {
         "moveToOriginCenter": "G90 G0 X0.0 Y0.0\n",
-        "moveToAbsolute": "G90 G0 X%f Y%f\n",
-        "moveToRelative": "G91 G0 X%f Y%f\n",
+        "moveToAbsoluteXY": "G90 G0 X%.2f Y%.2f\n",
+        "moveToAbsolute": "G90 G0 %c%.2f\n",
 
-        "changeNewAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
-        "changeNewAbsoluteAxis": "G92 X%f Y%f\n",
+        "moveToRelativeXY": "G91 G0 X%.2f Y%.2f\n",
+        "moveToRelative": "G91 G0 %c%.2f\n",
+
+        "changeAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
+        "changeToNewAbsoluteAxis": "G92 X%.2f Y%.2f\n",
+        "csetNewAbsoluteAxis": "G92 E0\n",
 
         "uvCuringOn": "M172\n",
         "uvCuringOff": "M173\n",
@@ -27,6 +31,7 @@ class RokitCommandModel():
         "uvTime": "G4 P%d\n",
 
         "printTemperature": "M308 %s",
+        "waitingTemperature": "M109",
 
         "shotTime": "M303 %s",
         "vacuumTime": "M304 %s",
@@ -37,8 +42,8 @@ class RokitCommandModel():
         "shotStart": "M301\n",
         "shotStop": "M330\n",
 
-        "MechanicallySelectExtruder": "G0 A%f F%d\n",
-        "MechanicallySelectExtruder": "G0 B%f\n",
+        "move_A_Coordinate": "G0 A%.2f F%d\n",
+        "move_B_Coordinate": "G0 B%.2f\n",
         
         "selectRightExtruder": "D",
         "selectLeftExtruder": "D6",        
@@ -58,6 +63,9 @@ class RokitCommandModel():
 
         "default_speed" : 10,
         "move_speed" : 20,
+
+        "selected_extruder" : { "D1" : 0, "D2" : 72, "D3" : -72, "D4" : -144, "D5" : -216 },       
+
         "static_uv_position" : QPointF(42.5 , 0.0)
     }
 

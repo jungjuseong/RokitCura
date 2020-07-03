@@ -102,5 +102,38 @@ asdf = self._application.getMachineManager()
 3) Left 노즐에서의 익스트루더 타입
 4) 
 
-
+-0702  
 # replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(self._uv_time_list[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"
+
+-0703
+# gcode_spacing += ";dy_spacing\nG92 E0\n"+std_str+"\nG90 G0 C4.0\nG91 G0 "+dire+"\nG90 G0 C-20.0\nG92 "+new_position+"\n\n" 
+
+
+<!-- selected_extruder = "\nD1\n"
+axis_control = command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
+axis_control += command_dic['MechanicallySelectExtruder'] % (0.0, 1500)
+axis_control += command_dic['changeAbsoluteAxisToCenter']
+axis_control += command_dic['changeAbsoluteAxisToCenter']
+axis_control += "G0 B20.0\n\n"
+
+axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y()) command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
+axis_control += "G92 X0.0 Y0.0\nG0 B20.0\n\n" -->
+
+  >>> print("%.2f" % a)
+  13.95
+  >>> round(a,2)
+  13.949999999999999
+  >>> print("%.2f" % round(a,2))
+  13.95
+  >>> print("{0:.2f}".format(a))
+  13.95
+  >>> print("{0:.2f}".format(round(a,2)))
+  13.95
+  >>> print("{0:.15f}".format(round(a,2)))
+  13.949999999999999
+
+<!-- G0 B0.0		
+D(1,2,3,4,5,6)		
+G0 A(0.72,-72,-144,-216)		
+G0 B20.0		
+M109		 -->
