@@ -80,3 +80,27 @@ M305 0 0 0 0 0 0
 M306 90 90 90 90 90 90
 M307 90 90 90 90 90 90
 M308 30 30 30 30 30 30 30
+
+
+# 슬라이스에 참여하는 익스트루더 active_extruder
+# a = self._global_container_stack.extruderList[1].getId()
+asdf = self._application.getMachineManager()
+# asdf = self._application.getMachineManager().getInstance().getActiveExtruderStacks()
+# asdf = self._application.getMachineManager().activeMachine
+# asdh = self._application.getMachineManager().activeStack
+# akjdl = self._application.getMachineActionManager()
+# machine_nozzle_id = self._global_container_stack.extruderList[0].getMetaDataEntry("varient", "value")
+# akjdl = self._application.getMachineManager().
+
+# container_registry = ContainerRegistry.getInstance()
+# my_metadata = container_registry.findContainersMetadata(id = "global_variant")[0]
+# self.preferred_variant_name = my_metadata.get("preferred_variant_name", "")
+
+
+1) Left or Right 노즐
+2) 슬라이스에 참여하는 익스트루더
+3) Left 노즐에서의 익스트루더 타입
+4) 
+
+
+# replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(self._uv_time_list[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"

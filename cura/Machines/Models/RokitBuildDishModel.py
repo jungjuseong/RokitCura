@@ -33,9 +33,9 @@ class RokitBuildDishModel(ListModel):
         item_list.append({"product_id": "Well Plate:12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 17.50), "trip": {"line_seq":12/3, "spacing":28.87, "z": 17.50, "start_point": QPointF(74.0,49.5)}})
         item_list.append({"product_id": "Well Plate:6", "shape": "elliptic", "volume": QVector3D(35.0, 35.0, 17.50), "trip": {"line_seq":6/2, "spacing":38.5, "z": 17.50, "start_point": QPointF(74.0,49.5)}})
 
-        item_list.append({"product_id": "Culture Dish:11035", "shape": "elliptic", "volume": QVector3D(35,35,10)})
-        item_list.append({"product_id": "Culture Dish:11060", "shape": "elliptic", "volume": QVector3D(60,60,10)})
-        item_list.append({"product_id": "Culture Dish:11090", "shape": "elliptic", "volume": QVector3D(90,90,15)})
+        item_list.append({"product_id": "Culture Dish:11035", "shape": "elliptic", "volume": QVector3D(35,35,10), "start_point": QPointF(42.5,0.0)})
+        item_list.append({"product_id": "Culture Dish:11060", "shape": "elliptic", "volume": QVector3D(60,60,10), "start_point": QPointF(42.5,0.0)})
+        item_list.append({"product_id": "Culture Dish:11090", "shape": "elliptic", "volume": QVector3D(90,90,15), "start_point": QPointF(42.5,0.0)})
 
         item_list.append({"product_id": "Culture Slide:11035", "shape": "rectangular", "volume": QVector3D(20,40,12)})
         item_list.append({"product_id": "Culture Slide:11060", "shape": "rectangular", "volume": QVector3D(30,60,12)})

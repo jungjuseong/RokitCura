@@ -28,9 +28,6 @@ from .ProcessSlicedLayersJob import ProcessSlicedLayersJob
 from .StartSliceJob import StartSliceJob, StartJobResult
 import Arcus
 
-# from UM.Settings.ContainerRegistry import ContainerRegistry  # To find all the variants for this machine.
-# from UM.Operations.GroupedOperation import GroupedOperation
-
 if TYPE_CHECKING:
     from cura.Machines.Models.MultiBuildPlateModel import MultiBuildPlateModel
     from cura.Machines.MachineErrorChecker import MachineErrorChecker
@@ -38,6 +35,7 @@ if TYPE_CHECKING:
     from UM.Settings.ContainerStack import ContainerStack
 
 from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
+from cura.Machines.Models.RokitCommandModel import RokitCommandModel
 
 from UM.i18n import i18nCatalog
 catalog = i18nCatalog("cura")
@@ -84,6 +82,7 @@ class CuraEngineBackend(QObject, Backend):
                     break
 
         self._build_dish_model = RokitBuildDishModel()
+        self._command_model = RokitCommandModel()
 
         self._application = CuraApplication.getInstance() #type: CuraApplication
         self._multi_build_plate_model = None #type: Optional[MultiBuildPlateModel]
@@ -665,116 +664,100 @@ class CuraEngineBackend(QObject, Backend):
         self.setState(BackendState.Done)
         self.processingProgress.emit(1.0)
 
+        self._extruder_list = self._global_container_stack.extruderList
+        extruder_sequence = [1,2,3,4,5,0]
 
-        # Left 노즐 타입 (syringe, fff, hot)
-        machine_nozzle_id = self._global_container_stack.extruderList[0].variant.getName()
-
-        # 슬라이스에 참여하는 익스트루더 active_extruder
-        # a = self._global_container_stack.extruderList[1].getId()
-        asdf = self._application.getMachineManager()
-        # asdf = self._application.getMachineManager().getInstance().getActiveExtruderStacks()
-        # asdf = self._application.getMachineManager().activeMachine
-        # asdh = self._application.getMachineManager().activeStack
-        # akjdl = self._application.getMachineActionManager()
-        # machine_nozzle_id = self._global_container_stack.extruderList[0].getMetaDataEntry("varient", "value")
-        # akjdl = self._application.getMachineManager().
-
-        # container_registry = ContainerRegistry.getInstance()
-        # my_metadata = container_registry.findContainersMetadata(id = "global_variant")[0]
-        # self.preferred_variant_name = my_metadata.get("preferred_variant_name", "")
+        # Left 노즐 타입 (Syringe, FFF, Hot)
+        self._left_nozzle_type = self._extruder_list[0].variant.getName()
+        self._right_nozzle_type = "Syringe"
 
         # 프린트 온도 설정
-        print_temperature_list =[]
-
-        for index in range(1,6):
-            extruder = self._global_container_stack.extruderList[index]
-            print_temperature_list.append(extruder.getProperty("material_print_temperature","value"))
-
-        left_extruder = self._global_container_stack.extruderList[0]
-        print_temperature_list.append(left_extruder.getProperty("material_print_temperature","value"))
-        print_temperature_list.append(self._global_container_stack.getProperty("material_bed_temperature","value"))
-        print_temperature = " ".join(map(str,print_temperature_list))
+        self._print_temperature_list =[self._extruder_list[index].getProperty("material_print_temperature","value") for index in extruder_sequence]
+        self._print_temperature_list.append(self._global_container_stack.getProperty("material_bed_temperature","value"))
+        self._print_temperature = " ".join(map(str,self._print_temperature_list))
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
-        uv_value_list = [[],[],[],[],[]]
-        for index in range(1,6):
-            extruder = self._global_container_stack.extruderList[index]
-            uv_value_list[0].append(extruder.getProperty("uv_enable","value")) #
-            uv_value_list[1].append(extruder.getProperty("uv_per_layers","value")) 
-            uv_value_list[2].append(extruder.getProperty("uv_type","value")) 
-            uv_value_list[3].append(extruder.getProperty("uv_time","value"))
-            uv_value_list[4].append(extruder.getProperty("uv_dimming","value")) # 미구현
-        
-        uv_per_layers = uv_value_list[1] # UV per layers
-        uv_time = uv_value_list[3] # UV time
-        uv_dimming = uv_value_list[4] # UV dimming - 미구현
+        self._uv_enable_list = [self._extruder_list[index].getProperty("uv_enable","value") for index in extruder_sequence]
+        self._uv_per_layers_list = [self._extruder_list[index].getProperty("uv_per_layers","value") for index in extruder_sequence]
+        self._uv_type_list = [self._extruder_list[index].getProperty("uv_type","value") for index in extruder_sequence]
+        self._uv_time_list = [self._extruder_list[index].getProperty("uv_time","value") for index in extruder_sequence]
+        self._uv_dimming_list = [self._extruder_list[index].getProperty("uv_dimming","value") for index in extruder_sequence] # - 미구현
 
         # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p
-        dispenser_value_list = [[],[],[],[],[],[]]
-
-        for index in range(1,6):
-            extruder = self._global_container_stack.extruderList[index]
-            dispenser_value_list[0].append(extruder.getProperty("dispensor_enable","value"))
-            dispenser_value_list[1].append(extruder.getProperty("dispensor_shot","value"))
-            dispenser_value_list[2].append(extruder.getProperty("dispensor_vac","value"))
-            dispenser_value_list[3].append(extruder.getProperty("dispensor_int","value"))
-            dispenser_value_list[4].append(extruder.getProperty("dispensor_shot_power","value"))
-            dispenser_value_list[5].append(extruder.getProperty("dispensor_vac_power","value"))
+        self._dispensor_enable_list = [self._extruder_list[index].getProperty("dispensor_enable","value") for index in extruder_sequence] # - 미구현
+        self._dispensor_shot_list = [self._extruder_list[index].getProperty("dispensor_shot","value") for index in extruder_sequence]
+        self._dispensor_vac_list = [self._extruder_list[index].getProperty("dispensor_vac","value") for index in extruder_sequence]
+        self._dispensor_int_list = [self._extruder_list[index].getProperty("dispensor_int","value") for index in extruder_sequence]
+        self._dispensor_shot_pressure_list = [self._extruder_list[index].getProperty("dispensor_shot_power","value") for index in extruder_sequence]
+        self._dispensor_vac_pressure_list = [self._extruder_list[index].getProperty("dispensor_vac_power","value") for index in extruder_sequence]
         
-        dispenser_value_list[0].append(left_extruder.getProperty("dispensor_enable","value"))
-        dispenser_value_list[1].append(left_extruder.getProperty("dispensor_shot","value"))
-        dispenser_value_list[2].append(left_extruder.getProperty("dispensor_vac","value"))
-        dispenser_value_list[3].append(left_extruder.getProperty("dispensor_int","value"))
-        dispenser_value_list[4].append(left_extruder.getProperty("dispensor_shot_power","value"))
-        dispenser_value_list[5].append(left_extruder.getProperty("dispensor_vac_power","value"))
-        
-        shot_times = " ".join(map(str,dispenser_value_list[1]))
-        vac_times = " ".join(map(str,dispenser_value_list[2]))
-        intervals = " ".join(map(str,dispenser_value_list[3]))
-        shot_pressures = " ".join(map(str,dispenser_value_list[4]))
-        vac_pressures = " ".join(map(str,dispenser_value_list[5]))
+        # 디스펜서 Join (한개의 string문으로 묶기)
+        self._dispensor_enables = " ".join(map(str,self._dispensor_enable_list)) #
+        self._shot_times = " ".join(map(str,self._dispensor_shot_list))
+        self._vac_times = " ".join(map(str,self._dispensor_vac_list))
+        self._intervals = " ".join(map(str,self._dispensor_int_list))
+        self._shot_pressures = " ".join(map(str,self._dispensor_shot_pressure_list))
+        self._vac_pressures = " ".join(map(str,self._dispensor_vac_pressure_list))
 
         try:
             gcode_list = self._scene.gcode_dict[self._start_slice_job_build_plate] #type: ignore Because we generate this attribute dynamically.
+            command_dic = self._command_model.ChangeStrings
         except KeyError:  # Can occur if the g-code has been cleared while a slice message is still arriving from the other end.
             gcode_list = []
-        
-        uv_type = uv_value_list[2]
-        if uv_type[0] == '365': # -------------------------------수정 사항 : 슬라이스에 참여하는 익스트루더에 따라 오프셋 변경
-            uv_command = ['M172','M173'] # UV type: curing ON/OFF
-        elif uv_type[0] == '405': 
-            uv_command = ['M174','M175'] # UV type: disinfect ON/OFF
 
-        for index, lines in enumerate(gcode_list):            
+
+        if self._uv_type_list[0] == '365':
+            self._uv_command = command_dic['uvCuring'] # UV type: Curing
+        elif self._uv_type_list[0] == '405':
+            self._uv_command = command_dic['uvDisinfect'] # UV type: Disinfect
+
+        # Set Start Code
+        for index, lines in enumerate(gcode_list):
             replaced = lines.replace("{print_time}", str(self._application.getPrintInformation().currentPrintTime.getDisplayString(DurationFormat.Format.ISO8601)))
             replaced = replaced.replace("{filament_amount}", str(self._application.getPrintInformation().materialLengths))
             replaced = replaced.replace("{filament_weight}", str(self._application.getPrintInformation().materialWeights))
             replaced = replaced.replace("{filament_cost}", str(self._application.getPrintInformation().materialCosts))
             replaced = replaced.replace("{jobname}", str(self._application.getPrintInformation().jobName))
-            
-            replaced = replaced.replace(";{print_temp}", "M308 "+ print_temperature)
+
+            replaced = replaced.replace("{print_temp}", command_dic['printTemperature'] % self._print_temperature)
             replaced = replaced.replace("M104", ";M104")
             replaced = replaced.replace("M105", ";M105")
             replaced = replaced.replace("M109 S", ";M109 S") # 임시
+            replaced = replaced.replace("M140", ";M140")
+            replaced = replaced.replace("M141", ";M141")
             replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
-            if machine_nozzle_id != "FFF Extruder":
-                # set the dispenser commands
-                replaced = replaced.replace(";{shot_time}","M303 " + shot_times) 
-                replaced = replaced.replace(";{vac_time}","M304 " + vac_times) 
-                replaced = replaced.replace(";{interval}","M305 " + intervals)
-                replaced = replaced.replace(";{shot_p}","M306 " + shot_pressures)
-                replaced = replaced.replace(";{vac_p}","M307 " + vac_pressures)
-                replaced = replaced.replace("M140", ";M140")
-                replaced = replaced.replace("M82", ";M82")
-                replaced = replaced.replace("M141", ";M141")
+            replaced = replaced.replace("M82", ";M82")
+            
+            if self._left_nozzle_type != "FFF Extruder":
                 replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.6.8.0")
+                replaced = replaced.replace(";{shot_time}", command_dic['shotTime'] % self._shot_times)
+                replaced = replaced.replace(";{vac_time}", command_dic['vacuumTime'] % self._vac_times)
+                replaced = replaced.replace(";{interval}", command_dic['interval'] % self._intervals)
+                replaced = replaced.replace(";{shot_p}", command_dic['shotPressure'] % self._shot_pressures)
+                replaced = replaced.replace(";{vac_p}", command_dic['vacuumPressure'] % self._vac_pressures)
 
-            # add the UV commends - 수정 필요
-            if replaced.startswith(";LAYER:"):
-                layer_no = int(replaced[len(";LAYER:"):replaced.find("\n")])
-                if (layer_no % uv_per_layers[0]) == 0:
-                    replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(uv_time[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"
             gcode_list[index] = replaced
+
+
+        # Add UV commends
+        for index, lines in enumerate(gcode_list):
+            replaced = lines
+            if replaced.startswith(";LAYER:"):
+                self._layer_no = int(replaced[len(";LAYER:"):replaced.find("\n")])
+                self._uv_position = command_dic["static_uv_position"]
+
+                if (self._layer_no % self._uv_per_layers_list[0]) == 0:
+                    uv_part = command_dic['moveToOriginCenter']
+                    uv_part += command_dic['moveToRelative'] % (self._uv_position.x(), self._uv_position.y())
+                    uv_part += self._uv_command['on'] # UV ON
+                    uv_part += command_dic['uvTime'] % (self._uv_time_list[0] * 1000)
+                    uv_part += self._uv_command['off'] # UV Off
+                    uv_part += command_dic['moveToOriginCenter']
+                    replaced += uv_part
+
+            gcode_list[index] = replaced
+
+        ##################################################################################################
 
         firstZ = gcode_list[2].find("Z")
         z_Location = gcode_list[2][firstZ + 1 : gcode_list[2].find("\n",firstZ)]
@@ -788,27 +771,27 @@ class CuraEngineBackend(QObject, Backend):
             replaced = lines
             if index < len(gcode_list) - 1:
                 layer_commands = replaced.split("\n")
-                for command_index, command in enumerate(layer_commands):
+                for command_index, command_line in enumerate(layer_commands):
 
-                    if machine_nozzle_id != "FFF Extruder": # 실린지 일 때만 E --> J 변환
-                        if command.startswith("G1"):
+                    if self._left_nozzle_type != "FFF Extruder": # 실린지 일 때만 E --> J 변환
+                        if command_line.startswith("G1"):
                             # layer_commands[command_index] = layer_commands[command_index].replace("E","J")
                             if shot_flag == True: # shot 플래그 : G1에서 G0으로 변할 때만 명령어 삽입
-                                comand_number= command.split()
+                                comand_number= command_line.split()
                                 if len(comand_number) > 3: # split한 후 인자의 갯수로 판단
                                     layer_commands[command_index] = "M301 ;SHOT\n" + layer_commands[command_index]
                                     shot_flag = False
-                        elif command.startswith("G0"): 
-                            if command.find("Z") != -1:
-                                j_location = float(command[command.find("Z") + 1:])+ to_be_jvalue
+                        elif command_line.startswith("G0"): 
+                            if command_line.find("Z") != -1:
+                                j_location = float(command_line[command_line.find("Z") + 1:])+ to_be_jvalue
                                 j_location = round(j_location,2)
-                                remove_z_value = command[:command.find("Z")]
-                                layer_commands[command_index] = command[:command.find("Z")]+ "\nG0 C"+ str(j_location) # 기존 z값 + 
+                                remove_z_value = command_line[:command_line.find("Z")]
+                                layer_commands[command_index] = command_line[:command_line.find("Z")]+ "\nG0 C"+ str(j_location) # 기존 z값 + 
                             if shot_flag == False:
                                 layer_commands[command_index] = "M330 ;STOP\n" + layer_commands[command_index]
                                 shot_flag =True
                     
-                    if command.startswith("T"):
+                    if command_line.startswith("T"):                        
                         layer_commands[command_index] = layer_commands[command_index].replace("T0","D6")
                         layer_commands[command_index] = layer_commands[command_index].replace("T","D")
 
@@ -817,29 +800,31 @@ class CuraEngineBackend(QObject, Backend):
                 replaced = "\n".join(layer_commands)
             gcode_list[index] = replaced
 
-        # Well Plate's clonning part
-        dishType = self._global_container_stack.getProperty("machine_build_dish_type", "value")
 
-        if (dishType[:dishType.find(':')] == "Culture Dish"):
+        # 빌드 플레이트 타입
+        self._build_plate = self._global_container_stack.getProperty("machine_build_dish_type", "value")
+        self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
+        
+        trip = {}
+
+        if (self._build_plate_type == "Culture Dish"):
             selected_extruder = "\nD1\nG0 A0.0 F1500\n"
-            axisControl = "G0 X-42.5 Y0.0\nG92 X0.0 Y0.0\n"
+            axis_control = "G0 X-42.5 Y0.0\nG92 X0.0 Y0.0\n"
             b_axis_control = "G0 B20.0\n\n"
-            if machine_nozzle_id != "FFF Extruder":
+            if self._left_nozzle_type != "FFF Extruder":
                 gcode_list[1] += selected_extruder
-                gcode_list[1] += axisControl
+                gcode_list[1] += axis_control
                 gcode_list[1] += b_axis_control
-            
-        if (dishType[:dishType.find(':')] == "Well Plate"):
-            # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})                
-            trip = {}
+        elif (self._build_plate_type == "Well Plate"):
+            # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
             
             for index in range(self._build_dish_model.count):
                 dish = self._build_dish_model.getItem(index)
-                if dish['product_id'] == dishType:
+                if dish['product_id'] == self._build_plate_type:
                     trip = dish['trip']
                     break
 
-            well_plate_num = dishType[dishType.find(':')+1:]
+            well_plate_num = self._build_plate_type[self._build_plate_type.find(':')+1:]
 
             clone_num = int(well_plate_num)-1
             line_seq = trip["line_seq"] 
@@ -849,14 +834,14 @@ class CuraEngineBackend(QObject, Backend):
 
             # 원점 재설정 
             selected_extruder = "\nD1\nG0 A0.0 F1500\n"
-            axisControl = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
-            if machine_nozzle_id != "FFF Extruder":
+            axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y())+"; start point*\nG92 X0.0 Y0.0\nG0 B20.0\n\n"
+            if self._left_nozzle_type != "FFF Extruder":
                 gcode_list[1] += selected_extruder
-                gcode_list[1] += axisControl
+                gcode_list[1] += axis_control
 
-            # Clonning process
+            # 복제 시스템
             gcode_clone = gcode_list[2:-1]
-            std_str = "G90 G1 X0.0 Y0.0"
+            std_str = "G90 G0 X0.0 Y0.0"
             new_position ="X0.0 Y0.0"
             line_ctrl = 1 # forward
 
