@@ -72,12 +72,13 @@
             "settable_per_extruder": true 
         },
         "machine_name": {
-            "label": "Bio printer",
-            "description": "Dr Invivo 4D6",
-            "default_value": "Dr. INVIVO 4D6" 
+            "label": "Dr.Invivo 4D6",
+            "description": "rokt_invivo_4d6",
+            "default_value": "rokt_invivo_4d6" 
         },
         "print_sequence": {
-            "default_value": "one_at_a_time"
+            "default_value": "one_at_a_time",
+            "enabled": "extruders_enabled_count > 1"
         },
         "machine_width": { 
             "default_value": 85.4
@@ -86,7 +87,7 @@
             "default_value": 127.6
         },
         "machine_height": { 
-            "default_value": 14
+            "default_value": 20
         },
         "machine_shape": { 
             "default_value": "rectangular"
@@ -94,15 +95,18 @@
         "machine_center_is_zero": { 
             "default_value": true 
         },
-
+        "adhesion_type": { 
+            "default_value": "none" 
+        },
         "machine_build_dish_type": { 
             "default_value": "Culture Dish:11035" 
         },
-
+        "machine_heated_bed": {
+            "default_value": true
+        },
         "machine_heated_build_volume": { 
             "default_value": true 
         },
-
         "infill_pattern": {
             "default_value": "'triangles'" 
         },

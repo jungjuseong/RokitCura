@@ -356,6 +356,7 @@
 - Spiralize Outer Contour(magic_spiralize): Spiralize smooths out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid model into a single walled print with a solid bottom. This feature should only be enabled when each layer only contains a single part.
 - Smooth Spiralized Contours(smooth_spiralized_contours): Smooth the spiralized contours to reduce the visibility of the Z seam (the Z seam should be barely visible on the print but will still be visible in the layer view). Note that smoothing will tend to blur fine surface details.
 - Relative Extrusion(relative_extrusion): Use relative extrusion rather than absolute extrusion. Using relative E-steps makes for easier post-processing of the g-code. However, it's not supported by all printers and it may produce very slight deviations in the amount of deposited material compared to absolute E-steps. Irrespective of this setting, the extrusion mode will always be set to absolute before any g-code script is output.
+
 ### Experimental
 -------
 - Tree Support(support_tree_enable): Generate a tree-like support with branches that support your print. This may reduce material usage and print time, but greatly increases slicing time.

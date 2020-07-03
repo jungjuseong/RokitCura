@@ -19,10 +19,6 @@ import "WelcomePages"
 UM.MainWindow {
     id: base
 
-    property var am: ApplicationMenu {
-           window: base
-    }
-
     // Cura application window title
     title: {
         const title = (PrintInformation !== null && PrintInformation.jobName != "") ? PrintInformation.jobName + " - " : ""
@@ -112,15 +108,17 @@ UM.MainWindow {
 
         //DeleteSelection on the keypress backspace event
         Keys.onPressed: {
+
             if (event.key === Qt.Key_Backspace) {
                 Cura.Actions.deleteSelection.trigger()
             }
             // application menu
-            if (event.key === Qt.Key_F2) {
+            else if (event.key === Qt.Key_F2 || event.key === Qt.Key_M)  {
+                
                 applicationMenu.visible = (applicationMenu.visible) ? false : true
                 applicationMenu.height = (applicationMenu.visible) ? 20 :  0 
             }
-            if (event.key === Qt.Key_F3) {
+            else if (event.key === Qt.Key_F3 || event.key === Qt.Key_B) {
                 backgroundImage.visible = (backgroundImage.visible) ? false : true
             }
         }
