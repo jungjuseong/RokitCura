@@ -64,7 +64,7 @@ class RokitCommandModel():
         "default_speed" : 10,
         "move_speed" : 20,
 
-        "selected_extruder" : { "D1" : 0, "D2" : 72, "D3" : -72, "D4" : -144, "D5" : -216 },       
+        "selected_extruders_A_location" : { "D1" : 0, "D2" : 72, "D3" : -72, "D4" : -144, "D5" : -216 },       
 
         "static_uv_position" : QPointF(42.5 , 0.0)
     }

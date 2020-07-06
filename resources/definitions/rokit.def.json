@@ -37,7 +37,7 @@
                     "label": "Enable UV",
                     "description": "Enable UV. Without these setting, such layers would collapse during printing.",
                     "type": "bool",
-                    "default_value": false,
+                    "default_value": true,
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -122,7 +122,7 @@
                     "label": "Enable Dispensor Setting",
                     "description": "Enable UV. Without these setting, such layers would collapse during printing.",
                     "type": "bool",
-                    "default_value": false,
+                    "default_value": true,
                     "enabled": "extruder_nr >= 0",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
