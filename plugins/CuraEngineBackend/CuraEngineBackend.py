@@ -665,7 +665,7 @@ class CuraEngineBackend(QObject, Backend):
         self.processingProgress.emit(1.0)
 
         self._extruder_list = self._global_container_stack.extruderList
-        extruder_sequence = [1,2,3,4,5,0]
+        extruder_sequence = [0,1,2,3,4,5,0]
 
         # Left 노즐 타입 (Syringe, FFF, Hot)
         # self._nozzle_type = self._extruder_list[0].variant.getName()
@@ -816,7 +816,7 @@ class CuraEngineBackend(QObject, Backend):
             if lines.startswith(";LAYER:"):
                 self._layer_no = int(lines[len(";LAYER:"):lines.find("\n")])
                 self._uv_position = command_dic["static_uv_position"]
-                if (self._uv_enable_list[self._selcted_num]) == True:
+                if self._uv_enable_list[self._selcted_num] == True:
                     if (self._layer_no % self._uv_per_layers_list[self._selcted_num]) == 0:
                         uv_part = ";UV\n"
                         uv_part += command_dic['moveToOriginCenter']
