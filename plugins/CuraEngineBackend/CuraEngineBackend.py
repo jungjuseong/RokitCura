@@ -665,7 +665,7 @@ class CuraEngineBackend(QObject, Backend):
         self.processingProgress.emit(1.0)
 
         self._extruder_list = self._global_container_stack.extruderList
-        extruder_sequence = [0,1,2,3,4,5,0]
+        extruder_sequence = [1,2,3,4,5,0]
 
         # Left 노즐 타입 (Syringe, FFF, Hot)
         # self._nozzle_type = self._extruder_list[0].variant.getName()
@@ -732,6 +732,7 @@ class CuraEngineBackend(QObject, Backend):
 
         to_be_jvalue = -20.0 - float(z_Location)
         self._selected_extruder = ""
+        self._selected_extruder_hop_number = []
         self._selected_extruder_number = []
         self._nozzle_type = ""
         self._selcted_num = 0
@@ -752,11 +753,12 @@ class CuraEngineBackend(QObject, Backend):
 
                 # T 명령어를 통해 선택한 시린지 확인
                 if command_line.startswith("T"):
-                    self._selected_extruder_number.append(command_line[-1]) # T 명령어 정보 (0,1,2,3,4,5)
+                    self._selected_extruder_hop_number.append(replaced_command[-1]) # T 명령어 정보 (0,1,2,3,4,5)
                     
                     replaced_command = replaced_command.replace("T0","D6")
                     replaced_command = replaced_command.replace("T","D")
                     self._selected_extruder = replaced_command              # D 명령어 정보 (D1,D2,D3,D4,D5,D6 )
+                    self._selected_extruder_number.append(replaced_command[-1]) # T 명령어 정보 (0,1,2,3,4,5)
 
                     # 노즐 타입 결정 -> Left : FFF/HOT/Syr
                     # Rigth : Only Syringe
@@ -772,9 +774,11 @@ class CuraEngineBackend(QObject, Backend):
                         replaced_command += command_dic["move_B_Coordinate"] % 20.0
                         # replaced_command += command_dic["waitingTemperature"]       # M109
 
-                    self._selcted_num = int(self._selected_extruder_number[0])
-                    self._retraction_hop_enabled = self._extruder_list[self._selcted_num].getProperty("retraction_hop_enabled","value")
-                    self._retraction_hop_height = self._extruder_list[self._selcted_num].getProperty("retraction_hop_after_extruder_switch_height","value")
+                    self._selcted_hop_num = int(self._selected_extruder_hop_number[0]) 
+                    self._selcted_num = int(self._selected_extruder_number[0]) - 1 
+                    
+                    self._retraction_hop_enabled = self._extruder_list[self._selcted_hop_num].getProperty("retraction_hop_enabled","value")
+                    self._retraction_hop_height = self._extruder_list[self._selcted_hop_num].getProperty("retraction_hop_after_extruder_switch_height","value")
                     if self._retraction_hop_enabled == True:
                         to_be_jvalue += self._retraction_hop_height
 
