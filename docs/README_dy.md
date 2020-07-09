@@ -137,3 +137,19 @@ D(1,2,3,4,5,6)
 G0 A(0.72,-72,-144,-216)		
 G0 B20.0		
 M109		 -->
+
+
+# 슬라이스에 참여하는 익스트루더 알아내는 메소드
+<!-- def _parseSelectedExtruder(self, command_line):
+  replaced_command = self._replaced_command
+  if command_line.startswith("T"):
+      self._checkSelectedExtruder(replaced_command)
+      
+      replaced_command = replaced_command.replace("T0","D6")
+      replaced_command = replaced_command.replace("T","D") 
+
+      self._selected_extruder = replaced_command              # D 명령어 정보 (D1,D2,D3,D4,D5,D6 )
+      self._setNozzleType()
+      if self._nozzle_type != "FFF Extruder":
+          replaced_command = self._addExtruderSelectCommand(replaced_command)
+      self._replaced_command = replaced_command -->
