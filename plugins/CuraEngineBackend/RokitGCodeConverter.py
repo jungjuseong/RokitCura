@@ -104,6 +104,7 @@ class RokitGCodeConverter:
 
         self._command_dic = self._command_model.ChangeStrings # {}
         self._calculateCLocation()
+        self._shot_flag = True
         
     # 시작 + local 변수 초기화
     def run(self):
@@ -124,7 +125,7 @@ class RokitGCodeConverter:
         # set UVCommand
         # 
         for index, lines in enumerate(self._repalced_gcode_list): # lines(layer) 마다
-            if index == len(gcode_list) -1 :
+            if index == len(self._repalced_gcode_list) -1 :
                 break 
             self._replaced_line = lines
             layer_command_list = lines.split("\n")
@@ -253,8 +254,10 @@ class RokitGCodeConverter:
         selected_num = self._selected_extruder_num_list[0]
         self._retraction_hop_enabled = self._extruder_list[selected_num].getProperty("retraction_hop_enabled","value")
         self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch_height","value")
+        # self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch","value")
+        # self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch","value")
         if self._retraction_hop_enabled == True:
-            self._to_c_value += self._retraction_hop_height
+            self._to_c_value = -20.0 - float(self._z_value) + self._retraction_hop_height
     
     def _calculateCLocation(self) -> None:
         self._first_z = self._repalced_gcode_list[2].find("Z")
@@ -286,15 +289,14 @@ class RokitGCodeConverter:
             return
 
         replaced = self._replaced_command
-        shot_flag = True
         if command_line.startswith("G1") :
-            if len(replaced.split()) > 4 and shot_flag == True:
+            if len(replaced.split()) > 4 and self._shot_flag == True:
                 replaced = self._command_dic["shotStart"] + replaced
-                shot_flag = False
+                self._shot_flag = False
         elif command_line.startswith("G0") :
-            if shot_flag == False:
+            if self._shot_flag == False:
                 replaced = self._command_dic["shotStop"] + replaced
-                shot_flag =True
+                self._shot_flag =True
         self._replaced_command = replaced
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -329,8 +331,13 @@ class RokitGCodeConverter:
                     uv_part += self._command_dic['moveToOriginCenter']
                     self._replaced_line += uv_part
 
-    def _clonning(self):
+    def _clonning(self, trip):
         # 복제 시스템 -------------------------> def로 변환
+
+        clone_num = trip["well_number"] -1 # 본코드를 제외판 복제 코드는 전체에서 1개를 빼야함.
+        line_seq = trip["line_seq"]
+        # z_height = trip["z"]
+
         gcode_clone = self._repalced_gcode_list[2:-1]
         std_str = self._command_dic['moveToOriginCenter']
         self._line_controller = 1 # forward
@@ -353,7 +360,7 @@ class RokitGCodeConverter:
             gcode_spacing = ";hop_spacing\n"
             gcode_spacing += "G92 E0\n" 
             gcode_spacing += self._command_dic['moveToOriginCenter']
-            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', 4.0)
+            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', -4.0)
             gcode_spacing += self._command_dic['moveToRelative'] % (direction , distance)
             gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', -20.0)
             gcode_spacing += self._command_dic['changeAbsoluteAxisToCenter']
@@ -363,21 +370,23 @@ class RokitGCodeConverter:
             # gcode_body.append(gcode_clone)
             gcode_clone.remove(gcode_spacing)
 
-        self._repalced_gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
+        # self._repalced_gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
 
     def _setBuildPlateProperty(self):
         # 빌드 플레이트 타입
         self._build_plate = self._global_container_stack.getProperty("machine_build_dish_type", "value")
         self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
 
+
         if (self._build_plate_type == "Culture Dish"):
             if self._nozzle_type != "FFF Extruder":
                 extruder_selecting = "\n;start point\n"
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
                 extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+                extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
+
                 self._repalced_gcode_list[1] += extruder_selecting
             # gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
-
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
             for index in range(self._build_dish_model.count):
@@ -386,31 +395,14 @@ class RokitGCodeConverter:
                     trip = self._dish['trip']
                     break
 
-            clone_num = trip["well_number"] -1 # 본코드를 제외판 복제 코드는 전체에서 1개를 빼야함.
-            line_seq = trip["line_seq"]
-            z_height = trip["z"]
             start_point = trip["start_point"]
-
             if self._nozzle_type != "FFF Extruder":
                 # 원점 재설정 # 익스트루더 선택 (left, r1, r2, r3, r4, r5)
                 extruder_selecting = "\n;start point\n"
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
                 extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+                extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
                 self._repalced_gcode_list[1] += extruder_selecting
 
-            self._clonning()
+            self._clonning(trip)
 
-
-    # def getSliceMessage(self) -> Arcus.PythonMessage:
-    #     return self._slice_message
-
-    # def setBuildPlate(self, build_plate_number: int) -> None:
-    #     self._build_plate_number = build_plate_number
-
-    # ##  Check if a stack has any errors.
-    # ##  returns true if it has errors, false otherwise.
-
-    # def isCancelled(self) -> bool:
-
-    # def setIsCancelled(self, value: bool):
-        
