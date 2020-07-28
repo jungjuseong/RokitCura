@@ -4,7 +4,7 @@
     "metadata":
     {
         "type": "machine",
-        "author": "Rokit Healthcare",
+        "author": "Iron",
         "category": "Other",
         "manufacturer": "Rokit Healthcare",
         "setting_version": 13,
@@ -29,13 +29,13 @@
             "label": "UV",
             "type": "category",
             "icon": "category_uv",
-            "description": "UV enable",
+            "description": "UV",
             "children":
             {
                 "uv_enable":
                 {
                     "label": "Enable UV",
-                    "description": "Enable UV. Without these setting, such layers would collapse during printing.",
+                    "description": "Enable UV",
                     "type": "bool",
                     "default_value": true,
                     "settable_per_mesh": false,
@@ -85,7 +85,7 @@
                     "label": "Time",
                     "description": "time per UV",
                     "unit": "sec",
-                    "type": "int",
+                    "type": "float",
                     "minimum_value": "1",
                     "maximum_value": "60",
                     "maximum_value_warning": "55",
@@ -132,7 +132,7 @@
                     "label": "SHOT",
                     "description": "time of shot",
                     "unit": "sec",
-                    "type": "int",
+                    "type": "float",
                     "default_value": 5,
                     "minimum_value": "1",
                     "maximum_value": "12",
@@ -145,7 +145,7 @@
                 {
                     "label": "VAC",
                     "description": "sec of dispensor vacume",
-                    "type": "int",
+                    "type": "float",
                     "unit": "sec",
                     "default_value": 0.3,
                     "minimum_value": "0",

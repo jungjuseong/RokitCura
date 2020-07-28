@@ -73,12 +73,12 @@
         },
         "machine_name": {
             "label": "Dr.Invivo 4D6",
-            "description": "rokt_invivo_4d6",
-            "default_value": "rokt_invivo_4d6" 
+            "description": "rokit_invivo_4d6",
+            "default_value": "rokit_invivo_4d6" 
         },
         "print_sequence": {
-            "default_value": "one_at_a_time",
-            "enabled": "extruders_enabled_count > 1"
+            "default_value": "all_at_once",
+            "enabled": true
         },
         "machine_width": { 
             "default_value": 85.4
@@ -95,11 +95,8 @@
         "machine_center_is_zero": { 
             "default_value": true 
         },
-        "adhesion_type": { 
-            "default_value": "none" 
-        },
         "machine_build_dish_type": { 
-            "default_value": "Culture Dish:11035" 
+            "default_value": "Culture Dish:11060" 
         },
         "machine_heated_bed": {
             "default_value": true
@@ -116,6 +113,9 @@
         "material_bed_temperature": { 
             "settable_per_extruder": true 
         },
+        "machine_disallowed_areas": { "default_value": [
+            [[-50,50],[-50,40],[50,40],[50,50]]
+        ]},
         "machine_gcode_flavor": { 
             "default_value": "RepRap (Marlin/Sprinter)" 
         },
