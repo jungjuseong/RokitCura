@@ -224,7 +224,7 @@ class RokitGCodeConverter:
             self._selected_extruder_num_list.append(t_index) # T 명령어 정보 (0,1,2,3,4,5)
         previous_extruder_index = t_index
     
-    # 노즐 타입 결정 -> Left : FFF/HOT/Syr 
+    # 노즐 타입 결정 -> Left : FFF/HOT/Syringe 
     # Rigth : Only Syringe
     def _setNozzleType(self) -> None:
         if self._selected_extruder == "D6":
