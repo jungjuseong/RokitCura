@@ -13,8 +13,8 @@
         "has_materials": true,
         "preferred_material": "generic_pla",
         "has_variants": true,
-        "variants_name": "Nozzle Type",
-        "preferred_variant_name": "Syringe 0.25mm",
+        "variants_name": "Nozzle Size",
+        "preferred_variant_name": "G23 0.41mm",
         "has_variant_buildplates": true,
         "preferred_variant_buildplate_name": "Culture Dish",
         "supports_network_connection": false,
@@ -73,12 +73,15 @@
         },
         "machine_name": {
             "label": "Dr.Invivo 4D6",
-            "description": "rokt_invivo_4d6",
-            "default_value": "rokt_invivo_4d6" 
+            "description": "rokit_invivo_4d6",
+            "default_value": "rokit_invivo_4d6" 
         },
         "print_sequence": {
-            "default_value": "one_at_a_time",
-            "enabled": "extruders_enabled_count > 1"
+            "default_value": "all_at_once",
+            "enabled": true
+        },
+        "left_first": {
+            "default_value": false
         },
         "machine_width": { 
             "default_value": 85.4
@@ -95,11 +98,8 @@
         "machine_center_is_zero": { 
             "default_value": true 
         },
-        "adhesion_type": { 
-            "default_value": "none" 
-        },
         "machine_build_dish_type": { 
-            "default_value": "Culture Dish:11035" 
+            "default_value": "Culture Dish:11060" 
         },
         "machine_heated_bed": {
             "default_value": true
@@ -116,6 +116,9 @@
         "material_bed_temperature": { 
             "settable_per_extruder": true 
         },
+        "machine_disallowed_areas": { "default_value": [
+            [[-50,50],[-50,40],[50,40],[50,50]]
+        ]},
         "machine_gcode_flavor": { 
             "default_value": "RepRap (Marlin/Sprinter)" 
         },

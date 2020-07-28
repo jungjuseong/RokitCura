@@ -11,7 +11,7 @@
         "extruder_nr": {
             "default_value": 3
         },
-        "machine_nozzle_id": { "default_value": "Syringe 0.25mm" },
+        "machine_nozzle_id": { "default_value": "G23 0.41mm" },
         "machine_nozzle_offset_x": { "default_value": 0.0 },
         "machine_nozzle_offset_y": { "default_value": 0.0 },
         "material_diameter": { "default_value": 1.75 },
