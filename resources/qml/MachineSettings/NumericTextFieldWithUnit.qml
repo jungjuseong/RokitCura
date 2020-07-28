@@ -41,7 +41,7 @@ UM.TooltipArea
 
     property string tooltipText: propertyProvider.properties.description ? propertyProvider.properties.description : ""
 
-    property real minimum: 0
+    property real minimum: -273
     property real maximum: Number.POSITIVE_INFINITY
     property int decimals: 6
 
