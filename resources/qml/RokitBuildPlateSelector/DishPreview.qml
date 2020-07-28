@@ -45,7 +45,7 @@ Rectangle {
                     shape = { rows:2, cols:3, size_factor:1 }
             }
         }
-        shape.radius = (category !== "Culture Slide") ? (base.diameter * shape.size_factor) / 2 : 0
+        shape.radius = (base.diameter * shape.size_factor) / 2
 
         return shape
     }

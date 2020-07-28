@@ -80,6 +80,9 @@
             "default_value": "all_at_once",
             "enabled": true
         },
+        "left_first": {
+            "default_value": false
+        },
         "machine_width": { 
             "default_value": 85.4
         },

@@ -6185,6 +6185,17 @@
             "description": "Non-traditional ways to print your models.",
             "children":
             {
+                "left_first":
+                {
+                    "label": "extruder print sequence",
+                    "description": "Whether to print left extruder first",
+                    "type": "bool",
+                    "default_value": true,
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false,
+                    "settable_globally": true
+                },
                 "print_sequence":
                 {
                     "label": "Print Sequence",

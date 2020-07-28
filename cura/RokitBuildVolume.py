@@ -1210,13 +1210,13 @@ class BuildVolume(SceneNode):
         farthest_shield_distance = self._calculateFarthestShieldDistance(self._global_container_stack)
         move_from_wall_radius = self._calculateMoveFromWallRadius(used_extruders)
  
-        Logger.log("d", "bed_adhesion_size: {0}", bed_adhesion_size)
+        # Logger.log("d", "bed_adhesion_size: {0}", bed_adhesion_size)
         if (bed_adhesion_size == None):
             bed_adhesion_size = 0
 
-        Logger.log("d", "support_expansion: {0}", support_expansion)
-        Logger.log("d", "farthest_shield_distance: {0}", farthest_shield_distance)
-        Logger.log("d", "move_from_wall_radius: {0}", move_from_wall_radius)
+        # Logger.log("d", "support_expansion: {0}", support_expansion)
+        # Logger.log("d", "farthest_shield_distance: {0}", farthest_shield_distance)
+        # Logger.log("d", "move_from_wall_radius: {0}", move_from_wall_radius)
 
         # Now combine our different pieces of data to get the final border size.
         # Support expansion is added to the bed adhesion, since the bed adhesion goes around support.
