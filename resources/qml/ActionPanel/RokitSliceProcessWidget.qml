@@ -16,7 +16,6 @@ import Cura 1.0 as Cura
 Column {
     id: widget
     
-    property string leftFirst
 
     spacing: UM.Theme.getSize("thin_margin").height
 
@@ -72,14 +71,14 @@ Column {
     }
 
     CheckBox {            
-        id: leftFirstCheckbox
+        id: leftFirstCheckBox
 
         anchors.bottomMargin: UM.Theme.getSize("default_margin").height;
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
 
         text: catalog.i18nc("@option:check","Left First");
         style: UM.Theme.styles.partially_checkbox
-        tooltip: catalog.i18nc("@label", "slice in the left model first")
+        tooltip: catalog.i18nc("@label", "slice first in the left extruder's model")
 
         enabled: sliceButton.enabled
         visible: sliceButton.visible
@@ -95,27 +94,25 @@ Column {
         }
 
         function getCheckBoxState() {
-            if (widget.leftFirst == "true"){
-                leftFirstCheckbox.checked = true
+            if (leftFirst.properties.value == true) {
+                leftFirstCheckBox.checked = true
                 return 1;
             }
-            else if (widget.leftFirst == "partially"){
-                leftFirstCheckbox.checked = true
-                return 2;
-            }
             else{
-                leftFirstCheckbox.checked = false
+                leftFirstCheckBox.checked = false
                 return 0;
             }
         }
         onClicked: {
             // If state is partially, then set Checked
             if (checkbox_state == 2) {
-                leftFirstCheckbox.checked = true
-                UM.ActiveTool.setProperty("LeftFirst", true);
+                leftFirstCheckBox.checked = true
+                //UM.ActiveTool.setProperty("LeftFirst", true);
+                leftFirst.setPropertyValue("value", true)
             }
             else {
-                UM.ActiveTool.setProperty("LeftFirst", leftFirstCheckbox.checked);
+                //UM.ActiveTool.setProperty("LeftFirst", leftFirstCheckBox.checked);
+                leftFirst.setPropertyValue("value", leftFirstCheckBox.checked)
             }
 
             // After clicking the widget.leftFirst is not refreshed, fot this reason manually update the state
@@ -201,5 +198,13 @@ Column {
         target: widget
         property: "leftFirst"
         value: UM.ActiveTool.properties.getValue("LeftFirst")
+    }
+
+    UM.SettingPropertyProvider {
+        id: leftFirst
+        containerStack: Cura.MachineManager.activeMachine
+        key: "left_first"
+        watchedProperties: [ "value" ]
+        storeIndex: 0
     }
 }

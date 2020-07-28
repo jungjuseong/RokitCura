@@ -312,6 +312,7 @@
 
 ### Dual Extrusion
 -------
+
 - prime_tower_enable: 노즐을 바꾼 후 재료를 준비하는 프린트물 옆에서 타워를 프린트
 - prime_tower_size: 프라임 타워의 너비
 - prime_tower_min_volume: 재료를 충분히 비우기 위해 프리임 타워의 각 레이어의 최소 볼륨
@@ -319,6 +320,7 @@
 - prime_tower_position_y: 프라임 타워의 위치
 - prime_tower_wipe_enabled: 한 노즐로 프라임 타워릉 프린트 한 후 프라임 타워에서 떨어진 다른 노즐로부터 oozed 재료를 닦음
 - prime_tower_brim_enable: Prime-towers might need the extra adhesion afforded by a brim even if the model doesn't. Presently can't be used with the 'Raft' adhesion-type.
+
 - Enable Ooze Shield(ooze_shield_enabled): Enable exterior ooze shield. This will create a shell around the model which is likely to wipe a second nozzle if it's at the same height as the first nozzle.
 - Ooze Shield Angle(ooze_shield_angle): The maximum angle a part in the ooze shield will have. With 0 degrees being vertical, and 90 degrees being horizontal. A smaller angle leads to less failed ooze shields, but more material.
 - Ooze Shield Distance(ooze_shield_dist): Distance of the ooze shield from the print, in the X/Y directions.
@@ -343,8 +345,12 @@
   
 ### Special Modes
 -------
+<<<<<<< HEAD
 
 - print_sequence: 모든 모델을 한 레이어에서 프린트하거나 한번에 한 모델씩 프린트 함. 한번에 한 모델씩 프린트는 a) 압출기가 하나이고 b) 모든 모델이 전체 프린트 헤드가 그들 사이로 움직일 수 있도록 분리되어 있고 모든 모델들은 노즐과 X/Y 축 사이의 거리보다 낮아야 한다
+=======
+- 프린트 순서(print_sequence): 한 레이어에 모든 모델을 프린트하거나 한번에 한 모델씩 프린트 함. 한번에 한 모델씩 프린트는 a) 압출기를 하나만 사용하고 b) 모든 모델이 전체 프린트 헤드가 그들 사이로 움직일 수 있도록 분리되어 있고 모든 모델들은 노즐과 X/Y 축 사이의 거리보다 낮아야 한다
+>>>>>>> e8df4c7832f6028ac99df96ec97e5de783289d36
 - Infill Mesh(infill_mesh): Use this mesh to modify the infill of other meshes with which it overlaps. Replaces infill regions of other meshes with regions for this mesh. It's suggested to only print one Wall and no Top/Bottom Skin for this mesh.
 - Infill Mesh Order(infill_mesh_order): Determines which infill mesh is inside the infill of another infill mesh. An infill mesh with a higher order will modify the infill of infill meshes with lower order and normal meshes.
 - Cutting Mesh(cutting_mesh): Limit the volume of this mesh to within other meshes. You can use this to make certain areas of one mesh print with different settings and with a whole different extruder.

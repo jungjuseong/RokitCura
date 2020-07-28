@@ -39,7 +39,7 @@ Item {
         const variantName = Cura.MachineManager.activeStack.variant.name
         const lists = variantName.split(" ")
         if (lists.length > 0)
-            return lists[0]
+            return lists[0][0]
         
         return ""
     }
@@ -442,7 +442,7 @@ Item {
             }
 
             Row { // Dispensor Bar
-                visible: getExtruderType() === "Syringe"
+                visible: getExtruderType() === "G"
                 Rectangle {
                     width:  selectors.bar_width
                     height: selectors.bar_height
@@ -467,7 +467,7 @@ Item {
             GridLayout {
                 id: dispensor
 
-                visible: getExtruderType() === "Syringe"
+                visible: getExtruderType() === "G"
 
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor
