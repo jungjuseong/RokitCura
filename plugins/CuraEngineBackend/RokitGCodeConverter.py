@@ -182,6 +182,7 @@ class RokitGCodeConverter:
 
         replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
         replaced = replaced.replace("M105\n", "")
+        replaced = replaced.replace("M82 ;absolute extrusion mode\n", "")
         replaced = replaced.replace(";{blank}\n", "")
         self._replaced_line = replaced
         
