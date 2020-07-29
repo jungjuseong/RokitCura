@@ -3,18 +3,18 @@
     <metadata>
         <name>
             <brand>Rokit Healthcare</brand>
-            <material>BioInk 2</material>
+            <material>BioInk2</material>
             <color>Blue</color>
         </name>
         <adhesion_info>Use with standard build plate</adhesion_info>
         <description>Bio Ink - Customizable</description>
         <version>1</version>
-        <color_code>#00387b</color_code>
+        <color_code>#0058ab</color_code>
         <GUID>2780b345-577b-4a24-ccaa-12e6aad3e692</GUID>
     </metadata>
     <properties>
         <density>1.24</density>
-        <diameter>1.75</diameter>
+        <diameter>12.7</diameter>
     </properties>
     <settings>
         <setting key="print temperature">35</setting>

@@ -3,7 +3,7 @@
     <metadata>
         <name>
             <brand>Rokit Healthcare</brand>
-            <material>BioInk 4</material>
+            <material>BioInk4</material>
             <color>Green</color>
         </name>
         <adhesion_info>Use with standard build plate</adhesion_info>
@@ -14,7 +14,7 @@
     </metadata>
     <properties>
         <density>1.24</density>
-        <diameter>1.75</diameter>
+        <diameter>12.7</diameter>
     </properties>
     <settings>
         <setting key="print temperature">35</setting>

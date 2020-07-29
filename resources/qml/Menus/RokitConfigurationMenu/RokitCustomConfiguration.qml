@@ -25,6 +25,13 @@ Item {
         return (activeExtruder !== undefined) ? activeExtruder.name : ""
     }
 
+    property var forceUpdateFunction: manager.forceUpdate
+
+    function updateMaterialDiameter()
+    {
+        manager.updateMaterialForDiameter(extruderPosition)
+    }
+
     UM.I18nCatalog {id: catalog; name: "cura" }
 
     width: parent.width
@@ -270,6 +277,27 @@ Item {
                 }
             }
 
+            // Row {
+            //     height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+            //     visible: Cura.MachineManager.activeMachine.hasVariants
+
+            //     Cura.NumericTextFieldWithUnit  // "Nozzle size"
+            //     {
+            //         //id: extruderNozzleSizeField
+            //         visible: Cura.MachineManager.activeMachine.hasVariants
+            //         containerStackId: activeExtruderId
+            //         settingKey: "material_diameter"
+            //         settingStoreIndex: 0
+            //         labelText: catalog.i18nc("@label", "material_diameter")
+            //         labelFont: UM.Theme.getFont("default")
+            //         labelWidth: selectors.textWidth - 8
+            //         controlWidth: selectors.controlWidth
+            //         controlHeight: parent.height
+            //         unitText: catalog.i18nc("@label", "mm")
+            //         forceUpdateOnChangeFunction: forceUpdateFunction
+            //     }
+            // }
+
             Row  { // material_print_temperature
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasVariants
@@ -284,6 +312,8 @@ Item {
                     controlWidth: selectors.controlWidth
                     controlHeight: parent.height
                     unitText: catalog.i18nc("@label", "°C")
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+
                 }
             }
 
@@ -301,6 +331,8 @@ Item {
                     controlWidth: selectors.controlWidth
                     controlHeight: parent.height
                     unitText: catalog.i18nc("@label", "°C")
+                    forceUpdateOnChangeFunction: forceUpdateFunction
+
                 }
             }
             
