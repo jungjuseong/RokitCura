@@ -61,7 +61,6 @@ Item {
                 model: ListModel {
                     ListElement { name: "Culture Dish" }
                     ListElement { name: "Well Plate" }
-                    ListElement { name: "Culture Slide" }
                 }                
                 delegate: UM.TabRowButton {
                     Text {
@@ -108,11 +107,6 @@ Item {
             category: "Culture Dish"
         }
 
-        RokitBuildDishMenu {
-            id: cultureSlideMenu
-            category: "Culture Slide"
-        }
-
         anchors.fill: parent
         anchors.top : parent.top
         width: parent.width
@@ -141,8 +135,6 @@ Item {
             menu: {
                 if (category === "Well Plate")
                     return wellPlateMenu
-                else if (category === "Culture Slide")
-                    return cultureSlideMenu
                 else if (category === "Culture Dish")
                     return cultureDishMenu
                 

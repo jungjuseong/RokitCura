@@ -4,7 +4,7 @@
     "metadata":
     {
         "type": "machine",
-        "author": "Rokit Healthcare",
+        "author": "Iron",
         "category": "Other",
         "manufacturer": "Rokit Healthcare",
         "setting_version": 13,
@@ -29,13 +29,13 @@
             "label": "UV",
             "type": "category",
             "icon": "category_uv",
-            "description": "UV enable",
+            "description": "UV",
             "children":
             {
                 "uv_enable":
                 {
                     "label": "Enable UV",
-                    "description": "Enable UV. Without these setting, such layers would collapse during printing.",
+                    "description": "Enable UV",
                     "type": "bool",
                     "default_value": false,
                     "settable_per_mesh": false,
@@ -132,7 +132,7 @@
                     "label": "SHOT",
                     "description": "time of shot",
                     "unit": "sec",
-                    "type": "int",
+                    "type": "float",
                     "default_value": 5,
                     "minimum_value": "0",
                     "maximum_value": "100",
@@ -177,7 +177,7 @@
                     "type": "int",
                     "minimum_value": "0",
                     "maximum_value": "700",
-                    "maximum_value_warning": "690",
+                    "maximum_value_warning": "600",
                     "default_value": 90,
                     "enabled": "dispensor_enable",
                     "settable_per_mesh": false,
@@ -191,7 +191,7 @@
                     "type": "int",
                     "minimum_value": "0",
                     "maximum_value": "700",
-                    "maximum_value_warning": "690",
+                    "maximum_value_warning": "600",
                     "default_value": 90,
                     "enabled": "dispensor_enable",
                     "settable_per_mesh": false,
@@ -6185,6 +6185,17 @@
             "description": "Non-traditional ways to print your models.",
             "children":
             {
+                "left_first":
+                {
+                    "label": "extruder print sequence",
+                    "description": "Whether to print left extruder first",
+                    "type": "bool",
+                    "default_value": true,
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false,
+                    "settable_per_meshgroup": false,
+                    "settable_globally": true
+                },
                 "print_sequence":
                 {
                     "label": "Print Sequence",
