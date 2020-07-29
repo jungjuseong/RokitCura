@@ -37,7 +37,7 @@
                     "label": "Enable UV",
                     "description": "Enable UV",
                     "type": "bool",
-                    "default_value": true,
+                    "default_value": false,
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -136,7 +136,7 @@
                     "default_value": 5,
                     "minimum_value": "0",
                     "maximum_value": "100",
-                    "maximum_value_warning": "90",
+                    "maximum_value_warning": "99",
                     "enabled": "dispensor_enable",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
@@ -150,7 +150,7 @@
                     "default_value": 0.3,
                     "minimum_value": "0",
                     "maximum_value": "5",
-                    "maximum_value_warning": "10",
+                    "maximum_value_warning": "4",
                     "enabled": "dispensor_enable",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true

@@ -14,6 +14,7 @@ class RokitCommandModel():
         "moveToAbsolute": "G90 G0 %c%.2f\n",
 
         "moveToRelativeXY": "G91 G0 X%.2f Y%.2f\n",
+        "moveToRelativeZ": "G91 G0 Z%.2f\n",
         "moveToRelative": "G91 G0 %c%.2f\n",
 
         "changeAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
@@ -66,11 +67,15 @@ class RokitCommandModel():
 
         "selected_extruders_A_location" : { "D1" : 0, "D2" : 72, "D3" : -72, "D4" : -144, "D5" : -216 },       
 
-        "static_uv_position" : QPointF(42.5 , 0.0)
+        "static_uv_position" : {"x" : 0.0,"y" : 62.0,"z" : 40.0 }
+    }
+
+    marlin = {
+        "command" : ["M140", "M190", "M104", "M109", "M141"]
     }
 
 
-
+    # "static_uv_position" : QPointF(0.0 , 62.0 , 40.0)
     # target_values = {
     #     "speed": self.getSettingValueByKey("e2_speed"),
     #     "printspeed": self.getSettingValueByKey("f2_printspeed"),
