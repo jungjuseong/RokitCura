@@ -72,6 +72,7 @@ class RokitGCodeConverter:
         self._z_value = None
         self._to_c_value = None
 
+        self._selected_extruder = None
         self._selected_extruder_index = None  # 0(left), 1, 2, 3, 4, 5
         self._previous_extruder_index = None
         self._selected_extruder_num_list = []   # 0(Left), 1, 2, 3, 4, 5
@@ -268,7 +269,8 @@ class RokitGCodeConverter:
 
     # C 좌표로 변환    
     def _convertZToC(self, command_line):
-        if self._nozzle_type == "FFF Extruder": 
+        # if self._nozzle_type == "FFF Extruder": 
+        if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
             return
         
         replaced = self._replaced_command

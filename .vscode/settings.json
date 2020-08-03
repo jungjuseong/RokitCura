@@ -1,3 +1,4 @@
 {
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "/Users/macpro/workspace/Python_3.5.4-PyQt_5.10/bin/python"
 }

@@ -14,14 +14,7 @@
         "machine_nozzle_id": { "default_value": "G23 0.41mm" },
         "machine_nozzle_offset_x": { "default_value": 0.0 },
         "machine_nozzle_offset_y": { "default_value": 0.0 },
-        "material_diameter": { "default_value": 1.75 },
-        "build_volume_temperature": {"default_value": 15.0},
-
-        "machine_extruder_start_pos_abs": { "default_value": true },
-        "machine_extruder_start_pos_x": { "value": "prime_tower_position_x" },
-        "machine_extruder_start_pos_y": { "value": "prime_tower_position_y" },
-        "machine_extruder_end_pos_abs": { "default_value": true },
-        "machine_extruder_end_pos_x": { "value": "prime_tower_position_x" },
-        "machine_extruder_end_pos_y": { "value": "prime_tower_position_y" }
+        "material_diameter": { "default_value": 12.7 },
+        "machine_nozzle_size": { "default_value": 0.41 }
     }
 }
