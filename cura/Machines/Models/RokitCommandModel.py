@@ -71,7 +71,7 @@ class RokitCommandModel():
     }
 
     marlin = {
-        "command" : ["M140", "M190", "M104", "M109", "M141"]
+        "command" : ["M140", "M190", "M104", "M109", "M141", "M205"]
     }
 
 
