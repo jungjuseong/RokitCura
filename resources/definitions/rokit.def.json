@@ -53,18 +53,6 @@
                     "enabled": "uv_enable",
                     "settable_per_extruder": true
                 },
-                "uv_start_layer":
-                {
-                    "label": "Start Layer",
-                    "description": "UV start layer",
-                    "type": "int",
-                    "unit": "layers",
-                    "default_value": 1,
-                    "minimum_value": "1",
-                    "maximum_value_warning": "10",
-                    "enabled": "uv_enable",
-                    "settable_per_extruder": true
-                },
                 "uv_type":
                 {
                     "label": "Nano Meter",
@@ -2443,7 +2431,7 @@
                     "minimum_value": "-273",
                     "minimum_value_warning": "build_volume_temperature",
                     "maximum_value_warning": "130",
-                    "maximum_value": "60",
+                    "maximum_value": "90",
                     "enabled": "machine_heated_bed and machine_gcode_flavor != \"UltiGCode\"",
                     "settable_per_mesh": false,
                     "settable_per_extruder": false,
