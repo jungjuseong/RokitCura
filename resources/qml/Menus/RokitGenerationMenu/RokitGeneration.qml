@@ -349,6 +349,19 @@ Item {
                     controlHeight: base.controlHeight
                     textField.readOnly: true
                 }
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: activeExtruderId
+                    settingKey: "speed_print"
+                    labelText: catalog.i18nc("@label", "Print Speed")
+                    unitText: catalog.i18nc("@label", "mm/s")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
             }
 
             Row { // UV Bar
