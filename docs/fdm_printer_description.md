@@ -1,74 +1,74 @@
 ### Machine
 -------
-- Machine Type(machine_name): 프린터 모델의 이름
-- Show Machine Variants(machine_show_variants): 이 프린터의 다른 변종을 보여줄지의 여부
-- Start G-code(machine_start_gcode): 맨 처음 실행할 G-code 명령
-- End G-code(machine_end_gcode): 맨 마지막에 실행할 G-code 명령
+- machine_name: 프린터 모델의 이름
+- machine_show_variants: 이 프린터의 다른 변종을 보여줄지의 여부
+- machine_start_gcode: 시작 G-code
+- machine_end_gcode: 종료 G-code
 - 재료 GUID(material_guid): 재료의 GUID. 자동으로 설정됨.
-- 구경(material_diameter): 사용한 필라멘트의 지름을 조정. 사용한 필라멘트의 지름에 이 값을 맞춘다.
-- 제작판의 적정 온도를 대기(material_bed_temp_wait): 재작판 온도가 적정할 때까지 기다리는 명령을 삽입할지
-- 노즐의 적정 온도를 대기(material_print_temp_wait): 노즐 온도가 시작 지점에 도달할 때까지 기다릴지
-- 재료 온도를 포함(material_print_temp_prepend): 노즐 온도 명렬을 gcode 시작에 넣을지 여부. start_gcode에 노즐 온도 명령이 있다면 Cura가 이 설정을 자동으로 불가로 만듬.
+- material_diameter: 사용한 필라멘트의 구경을 조정. 사용한 필라멘트의 지름에 이 값을 맞춘다.
+- 제작판 온도 대기(material_bed_temp_wait): 재작판 온도가 적정할 때까지 기다리는 명령을 삽입할지
+- 노즐 온도 대기(material_print_temp_wait): 노즐 온도가 시작 지점에 도달할 때까지 기다릴지
+- 재료 온도 포함(material_print_temp_prepend): 노즐 온도 명렬을 시작 g-code에 넣을지 여부. start_gcode에 노즐 온도 명령이 있다면 Cura가 이 설정을 자동으로 불가로 만듬.
 - 제작판 온도를 포함(material_bed_temp_prepend): gcode 초반에 제작판 온도를 넣을지 여부. start_gcodee에 이미 제작판 온도 명령이 있으면 Cura 프론트엔드가 자동으로 이 설정을 불가로 만듬
-- 프린트 영역 너비(machine_width): The width (X-direction) of the printable area.
-- 프린트 영역 깊이(machine_depth): The depth (Y-direction) of the printable area.
-- 프린트 영역 높이(machine_height): The height (Z-direction) of the printable area.
+- 프린트 영역 너비(machine_width): 프린트 가능 영역의 너비(X 방향)
+- 프린트 영역 깊이(machine_depth): 프린트 가능 영역의 깊이(Y 방향)
+- 프린트 영역 높이(machine_height): 프린트 가능 영역의 높이(Z 방향)
 - 제작판 모양(machine_shape): 제작판의 모양(프린트 불가 영역을 고려하지 않음)
-- 제작판 재질(machine_buildplate_type): 제작판의 재질
+- 제작판 재질(machine_buildplate_type): 제작판의 재질. 알루미뉼/ 유리
 - 가열된 제작판이 있는지(machine_heated_bed): Whether the machine has a heated build plate present.
 - 빌드 볼륨 온도 안정화 기능이 있는지(machine_heated_build_volume): 프린터가 빌드 볼륨 온도를 안정화할 수 있는지
 - 중심이 원점(machine_center_is_zero): 프린터의 X/Y 원점 위치가 프린터 영역의 중심
 - 압출기 갯수(machine_extruder_count): 압출기 트레인의 갯수. 압출기 트레인은 feeder, bowden tube, and nozzle의 조합
-- 사용할 압출기의 수(extruders_enabled_count): 사용할 압출기 트레인의 갯수
+- 압출기 개수(extruders_enabled_count): 사용할 압출기 트레인의 갯수
 - 노즐의 외구경(machine_nozzle_tip_outer_diameter): 노즐 팁의 바깥 구경
 - 노즐 길이(machine_nozzle_head_distance): 노즐의 팁과 프린트 헤드의 최저점과의 높낮이
 - 노즐 각도(machine_nozzle_expansion_angle): 수평면과 노즐 팁 바로 위의 콘모양 파트와의 각도
-- 가열 구역 길이(machine_heat_zone_length): The distance from the tip of the nozzle in which heat from the nozzle is transferred to the filament.
+- 가열 구역의 길이(machine_heat_zone_length): The distance from the tip of the nozzle in which heat from the nozzle is transferred to the filament.
 - 필라멘트 파크 거리(machine_filament_park_distance): The distance from the tip of the nozzle where to park the filament when an extruder is no longer used.
 - 노즐 온도 제어 가능(machine_nozzle_temp_enabled): Cura로 노즐 온도를 제어. 아니면 이 설정을 끈다.
-- 가열 속도(machine_nozzle_heat_up_speed): The speed (°C/s) by which the nozzle heats up averaged over the window of normal printing temperatures and the standby temperature.
-- 쿨다운 속도(machine_nozzle_cool_down_speed): The speed (°C/s) by which the nozzle cools down averaged over the window of normal printing temperatures and the standby temperature.
-- Minimal Time Standby Temperature(machine_min_cool_heat_time_window): 노즐이 식기 전에 압출기가 비활성되어야 하는 최소 시간. 이 시간보다 오랫동안 압출기를 사용하지 않을 경우에만 대기 온도까지 냉각 될 수 있음
-- 선호 G-code(machine_gcode_flavor): The type of g-code to be generated. 
-- 펌웨어 Retraction(machine_firmware_retract): Whether to use firmware retract commands (G10/G11) instead of using the E property in G1 commands to retract the material.
-- 압출기의 가열기 공유(machine_extruders_share_heater): 압출기들이 가열기를 공유하는지
-- 프린트 헤드 비허가 구역(machine_disallowed_areas): 프린트 헤드가 들어갈 수 없는 영역
-- 노즐 비허가 구역(nozzle_disallowed_areas): 노즐이 들어갈 수 없는 영역
-- Machine Head & Fan Polygon(machine_head_with_fans_polygon): A 2D silhouette of the print head (fan caps included).
-- Gantry Height(gantry_height): The height difference between the tip of the nozzle and the gantry system (X and Y axes).
-- 노즐 ID(machine_nozzle_id): 압출기 트레인의 노즐 ID(such as "AA 0.4" and "BB 0.8")
-- 노즐 구경(machine_nozzle_size): 노즐의 내측 지름. 표준이 아닌 노즐 크기를 사용할 때 이 설정을 바꿈
-- 압출기 위치(machine_use_extruder_offset_to_offset_coords): 압출기 위치를 좌표계에 적용
-- 압출기 대기 Z 위치(extruder_prime_pos_z): 프린팅 시작시 노즐이 대기할 Z 축 위치
-- 압출기 대기 절대 위치(extruder_prime_pos_abs): 압출기 대기 위치를 헤드의 최근 위치에 상대적 위치가 아니라 절대 위치로 만듬
-- Maximum Speed X(machine_max_feedrate_x): The maximum speed for the motor of the X-direction.
-- Maximum Speed Y(machine_max_feedrate_y): The maximum speed for the motor of the Y-direction.
-- Maximum Speed Z(machine_max_feedrate_z): The maximum speed for the motor of the Z-direction.
-- Maximum Feedrate(machine_max_feedrate_e): The maximum speed of the filament.
-- Maximum Acceleration X(machine_max_acceleration_x): Maximum acceleration for the motor of the X-direction
-- Maximum Acceleration Y(machine_max_acceleration_y): Maximum acceleration for the motor of the Y-direction.
-- Maximum Acceleration Z(machine_max_acceleration_z): Maximum acceleration for the motor of the Z-direction.
-- Maximum Filament Acceleration(machine_max_acceleration_e): Maximum acceleration for the motor of the filament.
-- Default Acceleration(machine_acceleration): The default acceleration of print head movement.
-- Default X-Y Jerk(machine_max_jerk_xy): Default jerk for movement in the horizontal plane.
-- Default Z Jerk(machine_max_jerk_z): Default jerk for the motor of the Z-direction.
-- Default Filament Jerk(machine_max_jerk_e): Default jerk for the motor of the filament.
-- Steps per Millimeter (X)(machine_steps_per_mm_x): How many steps of the stepper motor will result in one millimeter of movement in the X direction.
-- Steps per Millimeter (Y)(machine_steps_per_mm_y): How many steps of the stepper motor will result in one millimeter of movement in the Y direction.
-- Steps per Millimeter (Z)(machine_steps_per_mm_z): How many steps of the stepper motor will result in one millimeter of movement in the Z direction.
-- Steps per Millimeter (E)(machine_steps_per_mm_e): How many steps of the stepper motors will result in one millimeter of extrusion.
-- X Endstop in Positive Direction(machine_endstop_positive_direction_x): Whether the endstop of the X axis is in the positive direction (high X coordinate) or negative (low X coordinate).
-- Y Endstop in Positive Direction(machine_endstop_positive_direction_y): Whether the endstop of the Y axis is in the positive direction (high Y coordinate) or negative (low Y coordinate).
-- Z Endstop in Positive Direction(machine_endstop_positive_direction_z): Whether the endstop of the Z axis is in the positive direction (high Z coordinate) or negative (low Z coordinate).
-- Minimum Feedrate(machine_minimum_feedrate): The minimal movement speed of the print head.
-- Feeder Wheel Diameter(machine_feeder_wheel_diameter): The diameter of the wheel that drives the material in the feeder.
+- machine_nozzle_heat_up_speed: 노즐의 가열 속도((°C/s)는 일반 프린트 온도와 대기 온도의 창에서 평균
+- machine_nozzle_cool_down_speed: 노즐의 냉각 속도는 일반 프린트 온도와 대기 온도의 창에서 평균
+- machine_min_cool_heat_time_window: 노즐이 식기 전에 압출기가 비활성되어야 하는 최소 시간. 이 시간보다 오랫동안 압출기를 사용하지 않을 경우에만 대기 온도까지 냉각 될 수 있음
+- machine_gcode_flavor: 생성할 g-code의 타입 
+- 펌웨어 Retraction(machine_firmware_retract): 재료 흡입을 위해 G1의 E 값 대신 펌웨어 명령(G10/G11)을 사용
+- machine_extruders_share_heater: 압출기들이 히터를 공유
+- machine_disallowed_areas: 프린트 헤드가 들어갈 수 없는 영역
+- nozzle_disallowed_areas): 노즐이 들어갈 수 없는 영역
+- machine_head_with_fans_polygon: 프린트 헤트의 2D 윤곽
+- gantry_height: 노즐 팁과 갠트리 시스템과의 높이 차이.
+- machine_nozzle_id: 압출기 트레인의 노즐 ID(such as "AA 0.4" and "BB 0.8")
+- machine_nozzle_size: 노즐의 내측 지름. 비표준 노즐의 크기는 이것으로 설정
+- machine_use_extruder_offset_to_offset_coords: 압출기 위치를 좌표계에 적용
+- extruder_prime_pos_z: 프린팅 시작시 노즐이 대기할 Z 축 위치
+- extruder_prime_pos_abs: 압출기 대기 위치(절대값)
+- machine_max_feedrate_x: X 방향 최고 속도
+- machine_max_feedrate_y: Y 방향 최고 속도
+- machine_max_feedrate_z: Z 방향 최고 속도
+- machine_max_feedrate_e: 필라민트의 최대 속도
+- machine_max_acceleration_x: X 방향 모터의 최대 가속
+- machine_max_acceleration_y: Y 방향 모터의 최대 가속.
+- machine_max_acceleration_z: Z 방향 모터의 최대 가속.
+- machine_max_acceleration_e: 필라멘트 모터의 최대 가속도.
+- 디폴트 가속도(machine_acceleration): 프린트 헤드 이동의 디폴트 가속도
+- 디폴트 X-Y Jerk(machine_max_jerk_xy): Default jerk for movement in the horizontal plane.
+- 디폴트 Z Jerk(machine_max_jerk_z): Default jerk for the motor of the Z-direction.
+- 디폴트 필라먼트 저크(machine_max_jerk_e): 필라먼트 모터의 디폴트 저크.
+- machine_steps_per_mm_x: How many steps of the stepper motor will result in one millimeter of movement in the X direction.
+- machine_steps_per_mm_y: How many steps of the stepper motor will result in one millimeter of movement in the Y direction.
+- machine_steps_per_mm_z: How many steps of the stepper motor will result in one millimeter of movement in the Z direction.
+- machine_steps_per_mm_e: How many steps of the stepper motors will result in one millimeter of extrusion.
+- machine_endstop_positive_direction_x: Whether the endstop of the X axis is in the positive direction (high X coordinate) or negative (low X coordinate).
+- machine_endstop_positive_direction_y: Whether the endstop of the Y axis is in the positive direction (high Y coordinate) or negative (low Y coordinate).
+- machine_endstop_positive_direction_z: Whether the endstop of the Z axis is in the positive direction (high Z coordinate) or negative (low Z coordinate).
+- machine_minimum_feedrate: The minimal movement speed of the print head.
+- machine_feeder_wheel_diameter: The diameter of the wheel that drives the material in the feeder.
   
 ### Quality
 -------
-- Layer Height(layer_height): The height of each layer in mm. Higher values produce faster prints in lower resolution, lower values produce slower prints in higher resolution.
-- Initial Layer Height(layer_height_0): The height of the initial layer in mm. A thicker initial layer makes adhesion to the build plate easier.
-- Line Width(line_width): Width of a single line. Generally, the width of each line should correspond to the width of the nozzle. However, slightly reducing this value could produce better prints.
-- Initial Layer Line Width(initial_layer_line_width_factor): Multiplier of the line width on the first layer. Increasing this could improve bed adhesion.
+- layer_height: 각 레이어의 높이. 갚이 클수록 빠르며 저해상도로 프린트 함.
+- layer_height_0: 첫 레이어의 높이. 첫 레이어가 두꺼울수록 제작판에 더 잘 붙는다.
+- line_width: 한 라인의 폭. 일반적으로 각 라인의 너비는 노즐의 너비에 해당한다. 하지만 이 값을 약간 줄이면 더 좋게 프린트한다.
+- initial_layer_line_width_factor: 첫 레이어의 선 너비에 곱하는 배수. 이 값이 커질수록 제작판에 잘 달라붙는다.
   
 ### Shell
 -------
@@ -143,82 +143,82 @@
 
 ### Material
 -------
-- 디폴트 프린트 온도(default_material_print_temperature): 프린팅에 사용하는 기본 온도. 이것이 재료의 기본 온도가 되야 함. 다른 모든 프린트 온도는 이 값과의 차이를 사용해야 함.
-- 빌드 볼륨 온도(build_volume_temperature): 프린트 되는 환경의 온도. 값이 0이면 온도가 조절되지 않는다.
-- 프린트 온도(material_print_temperature): 프린트 할 때의 온도.
-- 첫 레이어의 프린팅 온도(material_print_temperature_layer_0): 첫 층에 사용되는 프린팅 온도. 첫 층을 특별하게 처리하지 않는다면 0으로 둔다.
-- 처음의 프린팅 온도(material_initial_print_temperature): 프린팅 온도로 가열하는 동안 프린팅이 사작횔 수 있는 최소 온도.
-- 마지막 프린팅 온도(material_final_print_temperature): The temperature to which to already start cooling down just before the end of printing.
-- Extrusion Cool Down Speed Modifier(material_extrusion_cool_down_speed): The extra speed by which the nozzle cools while extruding. The same value is used to signify the heat up speed lost when heating up while extruding.
-- Default Build Plate Temperature(default_material_bed_temperature): The default temperature used for the heated build plate. This should be the "base" temperature of a build plate. All other print temperatures should use offsets based on this value
-- Build Plate Temperature(material_bed_temperature): The temperature used for the heated build plate. If this is 0, the bed temperature will not be adjusted.
-- Build Plate Temperature Initial Layer(material_bed_temperature_layer_0): 첫 층에서 가열된 제작판에 사용되는 온도.
-- Adhesion Tendency(material_adhesion_tendency): 표면 접착도.
-- Surface Energy(material_surface_energy): 표면 에너지
-- Shrinkage Ratio(material_shrinkage_percentage): 수축율
-- Crystalline Material(material_crystallinity): 잘 떨어지는 재질(크리스탈)인지 길게 늘어지는 재질인지(논 크리스탈) ?
-- Anti-ooze Retracted Position(material_anti_ooze_retracted_position): How far the material needs to be retracted before it stops oozing.
-- Anti-ooze Retraction Speed(material_anti_ooze_retraction_speed): How fast the material needs to be retracted during a filament switch to prevent oozing.
-- Break Preparation Retracted Position(material_break_preparation_retracted_position): How far the filament can be stretched before it breaks, while heated.
-- Break Preparation Retraction Speed(material_break_preparation_speed): How fast the filament needs to be retracted just before breaking it off in a retraction.
-- Break Preparation Temperature(material_break_preparation_temperature): The temperature used to purge material, should be roughly equal to the highest possible printing temperature.
-- Break Retracted Position(material_break_retracted_position): How far to retract the filament in order to break it cleanly.
-- Break Retraction Speed(material_break_speed): The speed at which to retract the filament in order to break it cleanly.
-- Break Temperature(material_break_temperature): The temperature at which the filament is broken for a clean break.
+- default_material_print_temperature: 기본 프린트 온도로서 재료의 기본 온도가 되어야 함. 다른 프린트 온도들은 이 값과의 차이를 사용해야 함.
+- build_volume_temperature: 프린트 환경의 온도. 값이 0이면 온도가 조절되지 않는다.
+- material_print_temperature: 프린트 온도.
+- material_print_temperature_layer_0: 첫 레이어의 프린트 온도. 첫 레이어를 특별하게 처리하지 않는다면 0으로 둔다.
+- material_initial_print_temperature: 프린트 온도로 가열하는 동안 프린팅이 사작횔 수 있는 최소 온도.
+- material_final_print_temperature: 프린트 종료 바로 전에 냉각을 시작하는 온도
+- material_extrusion_cool_down_speed: The extra speed by which the nozzle cools while extruding. The same value is used to signify the heat up speed lost when heating up while extruding.
+- default_material_bed_temperature: 제작판의 디폴트 온도로서 제작판의 베이스 온도로 사용되어야 한다. 다른 프린트 온도들은 이 값과의 차이를 사용해야 한다.
+- material_bed_temperature: 제작판의 온도. 0 일때는 제작판의 온도가 조정되지 않음
+- material_bed_temperature_layer_0: 첫 레이어에서 제작판 가열 온도.
+- material_adhesion_tendency: 표면 접착도.
+- material_surface_energy: 표면 에너지
+- material_shrinkage_percentage: 수축율
+- material_crystallinity: 잘 떨어지는 재질(크리스탈)인지 길게 늘어지는 재질인지(논 크리스탈) ?
+- material_anti_ooze_retracted_position: How far the material needs to be retracted before it stops oozing.
+- material_anti_ooze_retraction_speed: How fast the material needs to be retracted during a filament switch to prevent oozing.
+- material_break_preparation_retracted_position: How far the filament can be stretched before it breaks, while heated.
+- material_break_preparation_speed: How fast the filament needs to be retracted just before breaking it off in a retraction.
+- material_break_preparation_temperature: 재료를 정리하는 온도로서 대략 프린트 최고 온도와 같아야 한다.
+- material_break_retracted_position: 필라멘트가 깔끔하게 끊어지는 거리
+- material_break_speed: 필라멘트가 깔끔하게 끊어지는 속도
+- material_break_temperature: 필라멘트를 깔끔하게 자르는 온도
 - Flush Purge Speed(material_flush_purge_speed): Material Station internal value
 - Flush Purge Length(material_flush_purge_length): Material Station internal value
 - End Of Filament Purge Speed(material_end_of_filament_purge_speed): Material Station internal value
 - End Of Filament Purge Length(material_end_of_filament_purge_length): Material Station internal value
 - Maximum Park Duration(material_maximum_park_duration): Material Station internal value
 - No Load Move Factor(material_no_load_move_factor): Material Station internal value
-- Flow(material_flow): Flow compensation: the amount of material extruded is multiplied by this value.
+- 플로우(material_flow): Flow compensation: the amount of material extruded is multiplied by this value.
 - Initial Layer Flow(material_flow_layer_0): Flow compensation for the first layer: the amount of material extruded on the initial layer is multiplied by this value.
 - Standby Temperature(material_standby_temperature): The temperature of the nozzle when another nozzle is currently used for printing.
 
 ### Speed
 -------
-- 프린트 스피드(speed_print): 프린팅 할때의 속도
-- 트레블 스피드(speed_travel): 이동만할 때의 속도.
-- Initial Layer Speed(speed_layer_0): The speed for the initial layer. A lower value is advised to improve adhesion to the build plate.
-- Skirt/Brim Speed(skirt_brim_speed): The speed at which the skirt and brim are printed. Normally this is done at the initial layer speed, but sometimes you might want to print the skirt or brim at a different speed.
-- Z Hop Speed(speed_z_hop): The speed at which the vertical Z movement is made for Z Hops. This is typically lower than the print speed since the build plate or machine's gantry is harder to move.
-- Number of Slower Layers(speed_slowdown_layers): The first few layers are printed slower than the rest of the model, to get better adhesion to the build plate and improve the overall success rate of prints. The speed is gradually increased over these layers.
-- 필라멘트 플로우를 이퀄라이즈(speed_equalize_flow_enabled): Print thinner than normal lines faster so that the amount of material extruded per second remains the same. Thin pieces in your model might require lines printed with smaller line width than provided in the settings. This setting controls the speed changes for such lines.
-- 플로우 이퀄라이즈를 위한 최대 스피드(speed_equalize_flow_max): Maximum print speed when adjusting the print speed in order to equalize flow.
-- 가속 제어 가능(acceleration_enabled): Enables adjusting the print head acceleration. Increasing the accelerations can reduce printing time at the cost of print quality.
-- Print Acceleration(acceleration_print): The acceleration with which printing happens.
-- Travel Acceleration(acceleration_travel): The acceleration with which travel moves are made.
-- Initial Layer Acceleration(acceleration_layer_0): The acceleration for the initial layer.
-- Skirt/Brim Acceleration(acceleration_skirt_brim): The acceleration with which the skirt and brim are printed. Normally this is done with the initial layer acceleration, but sometimes you might want to print the skirt or brim at a different acceleration.
-- Enable Jerk Control(jerk_enabled): Enables adjusting the jerk of print head when the velocity in the X or Y axis changes. Increasing the jerk can reduce printing time at the cost of print quality.
-- Print Jerk(jerk_print): The maximum instantaneous velocity change of the print head.
-- Travel Jerk(jerk_travel): The maximum instantaneous velocity change with which travel moves are made.
-- Initial Layer Jerk(jerk_layer_0): The print maximum instantaneous velocity change for the initial layer.
-- Skirt/Brim Jerk(jerk_skirt_brim): The maximum instantaneous velocity change with which the skirt and brim are printed.
+- speed_print: 프린트 속도
+- speed_travel: 이동 속도.
+- speed_layer_0: 첫 레이어에서의 속도. 제작판에 잘 달라붙게 하려면 이 값을 낮춘다
+- skirt_brim_speed: skirt와 brim을 프린트할 때 속도. 보통은 첫 레이어 속도로 되지만 때로는 다른 속도로 프린트할 경우가 필요하다
+- speed_z_hop: Z hof를 하기 위해 Z축 수직 이동 속도. 제작판 또는 프린터의 갠트리의 이동이 더 어려우므로 프린트 속도보다는 낮춘다
+- speed_slowdown_layers: 처음 레이어들은 나머지 레이버보다 느리게 프린트하면 제작파에 더 잘 달라붙으며 전반적인 성공율이 개선된다. 이 레이어들 이후에는 점진적으로 속도가 빨라진다.
+- speed_equalize_flow_enabled: Print thinner than normal lines faster so that the amount of material extruded per second remains the same. Thin pieces in your model might require lines printed with smaller line width than provided in the settings. This setting controls the speed changes for such lines.
+- speed_equalize_flow_max: 흐름을 평탄하게 하기 위해 프린트 속도를 조절시 최대 프린트 속도
+- acceleration_enabled: 프린트 헤드의 가속도 조정이 가능. 가속도를 올리면 품질을 줄어들지만 프린트 시간이 단축된다.
+- acceleration_print: 프린트 할 때 가속도
+- acceleration_travel: 트레블 시 가속도
+- acceleration_layer_0: 첫 레이어에서 가속도
+- Skirt/Brim Acceleration(acceleration_skirt_brim: The acceleration with which the skirt and brim are printed. Normally this is done with the initial layer acceleration, but sometimes you might want to print the skirt or brim at a different acceleration.
+- jerk_enabled: X/Y축의 속도가 바뀔 때 프린트의 저크를 조정할 수 있음. 저크를 늘리면 품질은 줄지만 프린트 시간을 줄일 수 있음.
+- jerk_print: 프린트 헤드의 순간 최대 속도 변화
+- jerk_travel: 트레블 할 때 순간 최대 속도 변화
+- jerk_layer_0: 첫 레이어에서 순간 프린트 최대 속도 변화
+- jerk_skirt_brim: skirt and brim을 프린트할 때 슌건 최대 속도 변화.
 
 ### Travel
 -------
-- 리트랙션 가능(retraction_enable): 노즐이 프린팅하지 않는 영역으로 이동할때 필라멘트를 흡입함
-- 레이어 변경시 리트랙트(retract_at_layer_change): 노즐이 다음 층으로 이동할때 필라멘트를 흡입함
-- 리트랙션 거리(retraction_amount): 흡입 이동 동안 흡입되는 재료의 길이
-- 리트랙션 속도(retraction_speed): 흡입 이동 동안 필라멘트가 흡입되고 프라임되는 속도.
-- Retraction Extra Prime Amount(retraction_extra_prime_amount): Some material can ooze away during a travel move, which can be compensated for here.
-- Retraction Minimum Travel(retraction_min_travel): The minimum distance of travel needed for a retraction to happen at all. This helps to get fewer retractions in a small area.
-- Maximum Retraction Count(retraction_count_max): This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
+- retraction_enable: 노즐이 비프린트 영역으로 이동시 필라멘트를 흡입
+- retract_at_layer_change: 노즐이 다음 레이어로 이동시 필라멘트를 흡입
+- retraction_amount: 이동시 흡입되는 재료의 길이
+- retraction_speed: 이동시 필라멘트가 흡입되고 프라임되는 속도.
+- retraction_extra_prime_amount: Some material can ooze away during a travel move, which can be compensated for here.
+- retraction_min_travel: The minimum distance of travel needed for a retraction to happen at all. This helps to get fewer retractions in a small area.
+- retraction_count_max): This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
 - Minimum Extrusion Distance Window(retraction_extrusion_window): The window in which the maximum retraction count is enforced. This value should be approximately the same as the retraction distance, so that effectively the number of times a retraction passes the same patch of material is limited.
-- Limit Support Retractions(limit_support_retractions): Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
-- Combing 모드(retraction_combing): Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
-- 흡입없이 최대 Comb 거리(retraction_combing_max_distance): When non-zero, combing travel moves that are longer than this distance will use retraction.
-- 외벽 전에 리트랙트(travel_retract_before_outer_wall): 외곽 벽을 시작하기 위해 이동할 때 항상 압입됨.
-- 트레블링 시 인쇄된 부분 회피(travel_avoid_other_parts): 노즐이 트래블링 시에 이미 인쇄된 파트를 회피함. 이 옵션은 combing이 활성일때만 사용 가능한다
-- 트레블링 시 지지대를 회피(travel_avoid_supports): 노즐이 트래블링 시 이미 프린트된 지지대를 회피함. 이 옵션은 combing이 활성일때만 사용 가능
-- Travel Avoid Distance(travel_avoid_distance): 트래블 이동 동안 회피 시 노즐과 이미 인쇄된 파트 간의 거리
-- Layer Start X(layer_start_x): The X coordinate of the position near where to find the part to start printing each layer.
-- Layer Start Y(layer_start_y): The Y coordinate of the position near where to find the part to start printing each layer.
+- limit_support_retractions): Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
+- retraction_combing: Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
+- retraction_combing_max_distance: When non-zero, combing travel moves that are longer than this distance will use retraction.
+- travel_retract_before_outer_wall: 외벽을 시작하기 위해 이동할 때 항상 압입됨.
+- travel_avoid_other_parts: 노즐이 트래블링 시에 이미 프린트된 파트를 회피. 이 옵션은 combing이 활성일때만 사용가능
+- travel_avoid_supports: 노즐이 트래블링 시 이미 프린트된 지지대를 회피. 이 옵션은 combing이 활성일때만 사용가능
+- travel_avoid_distance: 트래블 이동 회피 시 노즐과 이미 프린트된 부분과의 거리
+- layer_start_x: The X coordinate of the position near where to find the part to start printing each layer.
+- layer_start_y: The Y coordinate of the position near where to find the part to start printing each layer.
 - Z Hop When Retracted(retraction_hop_enabled): Whenever a retraction is done, the build plate is lowered to create clearance between the nozzle and the print. It prevents the nozzle from hitting the print during travel moves, reducing the chance to knock the print from the build plate.
 - Z Hop Only Over Printed Parts(retraction_hop_only_when_collides): Only perform a Z Hop when moving over printed parts which cannot be avoided by horizontal motion by Avoid Printed Parts when Traveling.
-- Z Hop Height(retraction_hop): The height difference when performing a Z Hop.
-- Z Hop After Extruder Switch(retraction_hop_after_extruder_switch): After the machine switched from one extruder to the other, the build plate is lowered to create clearance between the nozzle and the print. This prevents the nozzle from leaving oozed material on the outside of a print.
+- retraction_hop: Z hopf 수행시 높아 차이
+- retraction_hop_after_extruder_switch: 프린터가 압출기를 교체한 후 노즐과 프린트 사이의 클리어런스를 만들기 위해 제작판을 낮춘다. 이렇게 하면 프린트의 바깥에 있는 oozed 재료를 그냥 놔두는 것을 방지한다.
 - Z Hop After Extruder Switch Height(retraction_hop_after_extruder_switch_height): The height difference when performing a Z Hop after extruder switch.
 
 ### Cooling
@@ -236,23 +236,23 @@
 ### Support
 -------
 
-- 지지대 사용(support_enable): Generate structures to support parts of the model which have overhangs. Without these structures, such parts would collapse during printing.
-- 지지대에 사용할 압출기(support_extruder_nr): The extruder train to use for printing the support. This is used in multi-extrusion.
-- Support Placement(support_type): Adjusts the placement of the support structures. The placement can be set to touching build plate or everywhere. When set to everywhere the support structures will also be printed on the model.
-- Support Overhang Angle(support_angle): The minimum angle of overhangs for which support is added. At a value of 0° all overhangs are supported, 90° will not provide any support.
-- Support Pattern(support_pattern): The pattern of the support structures of the print. The different options available result in sturdy or easy to remove support.
-- Support Wall Line Count(support_wall_count): The number of walls with which to surround support infill. Adding a wall can make support print more reliably and can support overhangs better, but increases print time and material used.
-- Connect Support Lines(zig_zaggify_support): Connect the ends of the support lines together. Enabling this setting can make your support more sturdy and reduce underextrusion, but it will cost more material.
+- support_enable: Generate structures to support parts of the model which have overhangs. Without these structures, such parts would collapse during printing.
+- support_extruder_nr: The extruder train to use for printing the support. This is used in multi-extrusion.
+- support_type: Adjusts the placement of the support structures. The placement can be set to touching build plate or everywhere. When set to everywhere the support structures will also be printed on the model.
+- support_angle: The minimum angle of overhangs for which support is added. At a value of 0° all overhangs are supported, 90° will not provide any support.
+- support_pattern: The pattern of the support structures of the print. The different options available result in sturdy or easy to remove support.
+- support_wall_count: The number of walls with which to surround support infill. Adding a wall can make support print more reliably and can support overhangs better, but increases print time and material used.
+- zig_zaggify_support: Connect the ends of the support lines together. Enabling this setting can make your support more sturdy and reduce underextrusion, but it will cost more material.
 - Connect Support ZigZags(support_connect_zigzags): Connect the ZigZags. This will increase the strength of the zig zag support structure.
 - Support Density(support_infill_rate): Adjusts the density of the support structure. A higher value results in better overhangs, but the supports are harder to remove.
 - Support Infill Line Directions(support_infill_angles): A list of integer line directions to use. Elements from the list are used sequentially as the layers progress and when the end of the list is reached, it starts at the beginning again. The list items are separated by commas and the whole list is contained in square brackets. Default is an empty list which means use the default angle 0 degrees.
-- 지지대 Brim 사용(support_brim_enable): Generate a brim within the support infill regions of the first layer. This brim is printed underneath the support, not around it. Enabling this setting increases the adhesion of support to the build plate.
-- 지지대 Brim 너비(support_brim_width): The width of the brim to print underneath the support. A larger brim enhances adhesion to the build plate, at the cost of some extra material.
-- Support Z Distance(support_z_distance): Distance from the top/bottom of the support structure to the print. This gap provides clearance to remove the supports after the model is printed. This value is rounded up to a multiple of the layer height.
-- Support X/Y Distance(support_xy_distance): Distance of the support structure from the print in the X/Y directions.
-- Support Distance Priority(support_xy_overrides_z): Whether the Support X/Y Distance overrides the Support Z Distance or vice versa. When X/Y overrides Z the X/Y distance can push away the support from the model, influencing the actual Z distance to the overhang. We can disable this by not applying the X/Y distance around overhangs.
-- Minimum Support X/Y Distance(support_xy_distance_overhang): Distance of the support structure from the overhang in the X/Y directions.
-- Support Stair Step Height(support_bottom_stair_step_height): The height of the steps of the stair-like bottom of support resting on the model. A low value makes the support harder to remove, but too high values can lead to unstable support structures. Set to zero to turn off the stair-like behaviour.
+- support_brim_enable: Generate a brim within the support infill regions of the first layer. This brim is printed underneath the support, not around it. Enabling this setting increases the adhesion of support to the build plate.
+- support_brim_width: The width of the brim to print underneath the support. A larger brim enhances adhesion to the build plate, at the cost of some extra material.
+- support_z_distance: Distance from the top/bottom of the support structure to the print. This gap provides clearance to remove the supports after the model is printed. This value is rounded up to a multiple of the layer height.
+- support_xy_distance: Distance of the support structure from the print in the X/Y directions.
+- support_xy_overrides_z: Whether the Support X/Y Distance overrides the Support Z Distance or vice versa. When X/Y overrides Z the X/Y distance can push away the support from the model, influencing the actual Z distance to the overhang. We can disable this by not applying the X/Y distance around overhangs.
+- support_xy_distance_overhang: Distance of the support structure from the overhang in the X/Y directions.
+- support_bottom_stair_step_height: The height of the steps of the stair-like bottom of support resting on the model. A low value makes the support harder to remove, but too high values can lead to unstable support structures. Set to zero to turn off the stair-like behaviour.
 - Support Stair Step Maximum Width(support_bottom_stair_step_width): The maximum width of the steps of the stair-like bottom of support resting on the model. A low value makes the support harder to remove, but too high values can lead to unstable support structures.
 - Support Join Distance(support_join_distance): The maximum distance between support structures in the X/Y directions. When separate structures are closer together than this value, the structures merge into one.
 - 지지대 수평 확장(support_offset): Amount of offset applied to all support polygons in each layer. Positive values can smooth out the support areas and result in more sturdy support.
@@ -312,12 +312,15 @@
 
 ### Dual Extrusion
 -------
-- 주탑 사용(prime_tower_enable): 노즐을 바꾼 후 재료를 준비하는 프린트물 옆에 타워를 인쇄
-- 주탑 크기(prime_tower_size): 프라임 타워의 너비
-- 주탑 최소 볼륨(prime_tower_min_volume): 재료를 충분히 청소하기 위해 필요한 프라임 타워의 각 레이어의 최소 볼륨.
-- 주탑 위치(prime_tower_position_x): 프라임 타워의 x 위치
-- 주탑에 있는 비활성 노즐을 닦음(prime_tower_wipe_enabled): 한 노즐이 프라임 타워를 프린트 한 후, wipe the oozed material from the other nozzle off on the prime tower.
-- 주탑의 Brim(prime_tower_brim_enable): Prime-towers might need the extra adhesion afforded by a brim even if the model doesn't. Presently can't be used with the 'Raft' adhesion-type.
+
+- prime_tower_enable: 노즐을 바꾼 후 재료를 준비하는 프린트물 옆에서 타워를 프린트
+- prime_tower_size: 프라임 타워의 너비
+- prime_tower_min_volume: 재료를 충분히 비우기 위해 프리임 타워의 각 레이어의 최소 볼륨
+- prime_tower_position_x: 프라임 타워의 위치
+- prime_tower_position_y: 프라임 타워의 위치
+- prime_tower_wipe_enabled: 한 노즐로 프라임 타워릉 프린트 한 후 프라임 타워에서 떨어진 다른 노즐로부터 oozed 재료를 닦음
+- prime_tower_brim_enable: Prime-towers might need the extra adhesion afforded by a brim even if the model doesn't. Presently can't be used with the 'Raft' adhesion-type.
+
 - Enable Ooze Shield(ooze_shield_enabled): Enable exterior ooze shield. This will create a shell around the model which is likely to wipe a second nozzle if it's at the same height as the first nozzle.
 - Ooze Shield Angle(ooze_shield_angle): The maximum angle a part in the ooze shield will have. With 0 degrees being vertical, and 90 degrees being horizontal. A smaller angle leads to less failed ooze shields, but more material.
 - Ooze Shield Distance(ooze_shield_dist): Distance of the ooze shield from the print, in the X/Y directions.
@@ -327,21 +330,27 @@
 
 ### Mesh Fixes
 -------
-- Union Overlapping Volumes(meshfix_union_all): Ignore the internal geometry arising from overlapping volumes within a mesh and print the volumes as one. This may cause unintended internal cavities to disappear.
-- Remove All Holes(meshfix_union_all_remove_holes): Remove the holes in each layer and keep only the outside shape. This will ignore any invisible internal geometry. However, it also ignores layer holes which can be viewed from above or below.
-- Extensive Stitching(meshfix_extensive_stitching): Extensive stitching tries to stitch up open holes in the mesh by closing the hole with touching polygons. This option can introduce a lot of processing time.
+
+- meshfix_union_all: 메쉬 내에서 겹치는 볼륨으로 인해 생기는 내부 지오메트리는 무시하고 볼륨을 하나로 프린트. 이렇게 하면 의도하지 않은 내부 구멍을 없앨 수 있다.
+- meshfix_union_all_remove_holes: 각 레이어의 구명을 제거하고 바깐 모양만 유지한다. 이것은 보이지 않는 내부 기하를 무시한다. 하지만 위나 아래에서 볼 수 있는 레이어도 무시한다
+- meshfix_extensive_stitching: Extensive stitching tries to stitch up open holes in the mesh by closing the hole with touching polygons. This option can introduce a lot of processing time.
 - Keep Disconnected Faces(meshfix_keep_open_polygons): Normally Cura tries to stitch up small holes in the mesh and remove parts of a layer with big holes. Enabling this option keeps those parts which cannot be stitched. This option should be used as a last resort option when everything else fails to produce proper g-code.
-- Merged Meshes Overlap(multiple_mesh_overlap): Make meshes which are touching each other overlap a bit. This makes them bond together better.
+- multiple_mesh_overlap: 서로 약간씩 붙은 메쉬들을 중첩시킨다. 이것은 서로 더 잘 붙는다.
 - Remove Mesh Intersection(carve_multiple_volumes): Remove areas where multiple meshes are overlapping with each other. This may be used if merged dual material objects overlap with each other.
-- Alternate Mesh Removal(alternate_carve_order): Switch to which mesh intersecting volumes will belong with every layer, so that the overlapping meshes become interwoven. Turning this setting off will cause one of the meshes to obtain all of the volume in the overlap, while it is removed from the other meshes.
-- Remove Empty First Layers(remove_empty_first_layers): Remove empty layers beneath the first printed layer if they are present. Disabling this setting can cause empty first layers if the Slicing Tolerance setting is set to Exclusive or Middle.
-- Maximum Resolution(meshfix_maximum_resolution): The minimum size of a line segment after slicing. If you increase this, the mesh will have a lower resolution. This may allow the printer to keep up with the speed it has to process g-code and will increase slice speed by removing details of the mesh that it can't process anyway.
-- Maximum Travel Resolution(meshfix_maximum_travel_resolution): The minimum size of a travel line segment after slicing. If you increase this, the travel moves will have less smooth corners. This may allow the printer to keep up with the speed it has to process g-code, but it may cause model avoidance to become less accurate.
-- Maximum Deviation(meshfix_maximum_deviation): The maximum deviation allowed when reducing the resolution for the Maximum Resolution setting. If you increase this, the print will be less accurate, but the g-code will be smaller. Maximum Deviation is a limit for Maximum Resolution, so if the two conflict the Maximum Deviation will always be held true.
+- alternate_carve_order: Switch to which mesh intersecting volumes will belong with every layer, so that the overlapping meshes become interwoven. Turning this setting off will cause one of the meshes to obtain all of the volume in the overlap, while it is removed from the other meshes.
+- remove_empty_first_layers: Remove empty layers beneath the first printed layer if they are present. Disabling this setting can cause empty first layers if the Slicing Tolerance setting is set to Exclusive or Middle.
+- meshfix_maximum_resolution: 슬라이싱 후에 선분의 최소 크기. 이 값을 키우면 메쉬는 낮은 해상도가 된다. 프린터는 g-code를 처리하는 속도가 좋아지며 슬라이싱 속도가 좋아진다. .
+- meshfix_maximum_travel_resolution: 슬라이싱 후에 트레이블 선분의 최소 길이. 이 값을 키우면 트레블 이동이 코너들을 덜 부드럽게 만든다. 프린터의 g-code 처리가 빨라지지만 모델 회피의 정확도가 떨어진다.
+- meshfix_maximum_deviation: The maximum deviation allowed when reducing the resolution for the Maximum Resolution setting. If you increase this, the print will be less accurate, but the g-code will be smaller. Maximum Deviation is a limit for Maximum Resolution, so if the two conflict the Maximum Deviation will always be held true.
   
 ### Special Modes
 -------
+<<<<<<< HEAD
+
+- print_sequence: 모든 모델을 한 레이어에서 프린트하거나 한번에 한 모델씩 프린트 함. 한번에 한 모델씩 프린트는 a) 압출기가 하나이고 b) 모든 모델이 전체 프린트 헤드가 그들 사이로 움직일 수 있도록 분리되어 있고 모든 모델들은 노즐과 X/Y 축 사이의 거리보다 낮아야 한다
+=======
 - 프린트 순서(print_sequence): 한 레이어에 모든 모델을 프린트하거나 한번에 한 모델씩 프린트 함. 한번에 한 모델씩 프린트는 a) 압출기를 하나만 사용하고 b) 모든 모델이 전체 프린트 헤드가 그들 사이로 움직일 수 있도록 분리되어 있고 모든 모델들은 노즐과 X/Y 축 사이의 거리보다 낮아야 한다
+>>>>>>> e8df4c7832f6028ac99df96ec97e5de783289d36
 - Infill Mesh(infill_mesh): Use this mesh to modify the infill of other meshes with which it overlaps. Replaces infill regions of other meshes with regions for this mesh. It's suggested to only print one Wall and no Top/Bottom Skin for this mesh.
 - Infill Mesh Order(infill_mesh_order): Determines which infill mesh is inside the infill of another infill mesh. An infill mesh with a higher order will modify the infill of infill meshes with lower order and normal meshes.
 - Cutting Mesh(cutting_mesh): Limit the volume of this mesh to within other meshes. You can use this to make certain areas of one mesh print with different settings and with a whole different extruder.
@@ -358,6 +367,7 @@
 
 ### Experimental
 -------
+
 - Tree Support(support_tree_enable): Generate a tree-like support with branches that support your print. This may reduce material usage and print time, but greatly increases slicing time.
 - Tree Support Branch Angle(support_tree_angle): The angle of the branches. Use a lower angle to make them more vertical and more stable. Use a higher angle to be able to have more reach.
 - Tree Support Branch Distance(support_tree_branch_distance): How far apart the branches need to be when they touch the model. Making this distance small will cause the tree support to touch the model at more points, causing better overhang but making support harder to remove.
@@ -463,7 +473,9 @@
 - Small Hole Max Size(small_hole_max_size): Holes and part outlines with a diameter smaller than this will be printed using Small Feature Speed.
 - Small Feature Speed(small_feature_speed_factor): Small features will be printed at this percentage of their normal print speed. Slower printing can help with adhesion and accuracy.
 - Small Feature Initial Layer Speed(small_feature_speed_factor_0): Small features on the first layer will be printed at this percentage of their normal print speed. Slower printing can help with adhesion and accuracy.
+
 ### Command Line Settings
+
 -------
 - Center Object(center_object): Whether to center the object on the middle of the build platform (0,0), instead of using the coordinate system in which the object was saved.
 - Mesh Position X(mesh_position_x): Offset applied to the object in the x direction.
