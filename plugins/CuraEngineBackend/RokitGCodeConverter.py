@@ -257,7 +257,7 @@ class RokitGCodeConverter:
             self._selected_extruder = replaced_command # 수정 필요
 
             replaced_command = self._addExtruderSelectingCommand(replaced_command)
-            if self._nozzle_type != "FFF Extruder" and not self._nozzle_type.endswith("Nozzle"):
+            if self._selected_extruder != 'D6': # Right
                 self._affectCLocationWithHop() # 선택되는 익스트루더가 바뀔 때 -> 선택된 익스트루더의 홉이 C좌표에 영향을 준다.
             self._replaced_command = replaced_command
             self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출
@@ -405,6 +405,7 @@ class RokitGCodeConverter:
 
     def _setBuildPlateProperty(self):
         # 빌드 플레이트 타입
+        # start 코드 다음으로 붙는 준비 명령어
         a_command = self._command_dic["selected_extruders_A_location"]
         self._build_plate = self._global_container_stack.getProperty("machine_build_dish_type", "value")
         self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
@@ -416,18 +417,14 @@ class RokitGCodeConverter:
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
             else: # Right
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
-
-            if self._nozzle_type != "FFF Extruder" and not self._nozzle_type.endswith("Nozzle"):
                 extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
-
-            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
-            if self._selected_extruder != 'D6':
-                # extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
-
-
+            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
             self._repalced_gcode_list[1] += extruder_selecting
             # gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
+
+
+        # 수정해야함. (left right 관련된 스타트 포인트가 없음.)
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
             for index in range(self._build_dish_model.count):
@@ -443,10 +440,7 @@ class RokitGCodeConverter:
             extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
             extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
             if self._selected_extruder != 'D6':
-                # extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
-
             self._repalced_gcode_list[1] += extruder_selecting
-
             self._clonning(trip)
 
