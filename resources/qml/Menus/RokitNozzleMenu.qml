@@ -34,7 +34,7 @@ Menu {
             exclusiveGroup: group
             enabled: {
                 var activeMachine = Cura.MachineManager.activeMachine
-                var HotEnds = ["FFF Extruder","Hot Melt","0.6mm Nozzle","0.8mm Nozzle","1.0mm Nozzle"]
+                var HotEnds = ["FFF Extruder","Hot Melt","0.2mm Nozzle","0.4mm Nozzle","0.6mm Nozzle","0.8mm Nozzle","1.0mm Nozzle"]
                 
                 if (activeMachine === null || (extruderIndex > 0 && (HotEnds.indexOf(model.hotend_name) != -1)))  {
                     return false
