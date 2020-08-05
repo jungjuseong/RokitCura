@@ -84,6 +84,9 @@ class RokitGCodeConverter:
         self._replaced_command = ""
         self._replaced_line = ""
 
+        self._change_current_position_for_uv = None
+        self._move_to_uv_position = None
+
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._repalced_gcode_list = replaced_gcode_list
 
@@ -220,14 +223,15 @@ class RokitGCodeConverter:
             return replaced
 
         a_command = self._command_dic["selected_extruders_A_location"] 
-        replaced += self._command_dic["move_B_Coordinate"] % (0.0)
+        replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300)
         if self._selected_extruder != 'D6': # Right
             replaced += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
-            replaced += self._command_dic["move_B_Coordinate"] % (20.0)
-            replaced += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
+            # replaced += self._command_dic["move_B_Coordinate"] % (20.0)
+            replaced += self._command_dic["goToLimitDetacted"]
+            replaced += self._command_dic["moveToAbsoluteXY"] % (42.5, 0.0)
         else:  # Left
-            replaced += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
-        replaced += self._command_dic['changeAbsoluteAxisToCenter']
+            replaced += self._command_dic["moveToAbsoluteXY"] % (-42.5, 0.0)
+        replaced += self._command_dic["changeAbsoluteAxisToCenter"]
         # replaced += self._command_dic["waitingTemperature"]       # M109 Keep
         return replaced
     
@@ -252,8 +256,8 @@ class RokitGCodeConverter:
             replaced_command = replaced_command.replace("T","D")
             self._selected_extruder = replaced_command # 수정 필요
 
-            if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
-                replaced_command = self._addExtruderSelectingCommand(replaced_command)
+            replaced_command = self._addExtruderSelectingCommand(replaced_command)
+            if self._nozzle_type != "FFF Extruder" and not self._nozzle_type.endswith("Nozzle"):
                 self._affectCLocationWithHop() # 선택되는 익스트루더가 바뀔 때 -> 선택된 익스트루더의 홉이 C좌표에 영향을 준다.
             self._replaced_command = replaced_command
             self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출
@@ -316,6 +320,8 @@ class RokitGCodeConverter:
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _setUVCommand(self):
+        self._uv_position = self._command_dic["static_uv_position"]
+        
         self._uv_per_layers = self._extruder_list[self._selected_extruder_num_list[0]].getProperty("uv_per_layers","value")
         self._uv_type = self._extruder_list[self._selected_extruder_num_list[0]].getProperty("uv_type","value")
         self._uv_time = self._extruder_list[self._selected_extruder_num_list[0]].getProperty("uv_time","value")
@@ -327,26 +333,33 @@ class RokitGCodeConverter:
         elif self._uv_type == '405':
             self._uv_command = self._command_dic['uvDisinfect'] # UV type: Disinfect
 
+        if self._selected_extruder == "D6": # Left
+            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (-42.50, 0.00)
+            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (-42.50, 0.00)
+        else: # Right
+            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (42.50, 0.00)
+            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (42.50, 0.00)
+
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
     def _addUVCommand(self, lines) -> None:
         if lines.startswith(";LAYER:"):
             self._layer_no = int(lines[len(";LAYER:"):lines.find("\n")])
-            self._uv_position = self._command_dic["static_uv_position"]
 
             if self._uv_enable_list[self._selected_extruder_num_list[0]] == True:
                 if (self._layer_no % self._uv_per_layers) == 0:
                     uv_part = ";UV\n"
-                    # uv_part += self._command_dic['moveToOriginCenter']
-                    uv_part += self._command_dic['moveToRelativeZ'] % (self._uv_position['z'])
-                    uv_part += self._command_dic['moveToRelativeXY'] % (self._uv_position['x'], self._uv_position['y'])
+                    uv_part += self._command_dic['moveToOriginCenter']
+                    uv_part += self._change_current_position_for_uv
+                    uv_part += self._command_dic['moveToAbsoluteXY'] % (self._uv_position['x'], self._uv_position['y'])
+                    uv_part += self._command_dic['moveToAbsoluteZ'] % (self._uv_position['z'])
                     uv_part += self._uv_command['on'] # UV ON
                     uv_part += self._command_dic['uvTime'] % (self._uv_time * 1000)
                     uv_part += self._uv_command['off'] # UV Off
-                    uv_part += self._command_dic['moveToRelativeXY'] % (self._uv_position['x'], -self._uv_position['y'])
-                    uv_part += self._command_dic['moveToRelativeZ'] % (-self._uv_position['z'])
-                    # uv_part += self._command_dic['moveToOriginCenter']
+                    uv_part += self._command_dic['moveToAbsoluteZ'] % (0.00)
+                    uv_part += self._move_to_uv_position
+                    uv_part += self._command_dic['changeToNewAbsoluteAxis'] % (0.00, 0.00)
                     self._replaced_line += uv_part
 
     def _clonning(self, trip):
@@ -398,19 +411,22 @@ class RokitGCodeConverter:
 
 
         if (self._build_plate_type == "Culture Dish"):
-            if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
-                extruder_selecting = "\n;start point\n"
-                if self._selected_extruder == "D6": # Left
-                    extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
-                else: # Right
-                    extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
-                    extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
+            extruder_selecting = "\n;start point\n"
+            if self._selected_extruder == "D6": # Left
+                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
+            else: # Right
+                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
 
-                extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
-                if self._selected_extruder != 'D6':
-                    extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
+            if self._nozzle_type != "FFF Extruder" and not self._nozzle_type.endswith("Nozzle"):
+                extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
 
-                self._repalced_gcode_list[1] += extruder_selecting
+            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+            if self._selected_extruder != 'D6':
+                # extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
+                extruder_selecting += self._command_dic["goToLimitDetacted"]
+
+
+            self._repalced_gcode_list[1] += extruder_selecting
             # gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
@@ -421,14 +437,16 @@ class RokitGCodeConverter:
                     break
 
             start_point = trip["start_point"]
-            if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
-                # 원점 재설정 # 익스트루더 선택 (left, r1, r2, r3, r4, r5)
-                extruder_selecting = "\n;start point\n"
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
-                extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
-                if self._selected_extruder != 'D6':
-                    extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
-                self._repalced_gcode_list[1] += extruder_selecting
+            # if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
+            # 원점 재설정 # 익스트루더 선택 (left, r1, r2, r3, r4, r5)
+            extruder_selecting = "\n;start point\n"
+            extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
+            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+            if self._selected_extruder != 'D6':
+                # extruder_selecting += self._command_dic["move_B_Coordinate"] % (20.0)
+                extruder_selecting += self._command_dic["goToLimitDetacted"]
+
+            self._repalced_gcode_list[1] += extruder_selecting
 
             self._clonning(trip)
 

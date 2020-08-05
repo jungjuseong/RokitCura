@@ -15,12 +15,26 @@ class RokitCommandModel():
 
         "moveToRelativeXY": "G91 G0 X%.2f Y%.2f\n",
         "moveToRelativeZ": "G91 G0 Z%.2f\n",
+
+        "moveToAbsoluteZ": "G90 G0 Z%.2f\n",
         "moveToRelative": "G91 G0 %c%.2f\n",
 
         "changeAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
         "changeToNewAbsoluteAxis": "G92 X%.2f Y%.2f\n",
         "csetNewAbsoluteAxis": "G92 E0\n",
 
+
+        "move_A_Coordinate": "G0 A%.2f F%d\n",
+        "move_B_Coordinate": "G0 B%.2f\n",
+        "move_B_Coordinate_with_speed": "G0 B%.2f F%d\n",
+        "goToLimitDetacted": "G78 B50. F300\n",
+
+        "selectRightExtruder": "D",
+        "selectLeftExtruder": "D6",        
+
+        "originCenter": "X0.0 Y0.0",
+        "restoreToOriginState": "G0 X0 Y0 Z0 A0 F800\n",
+        
         "uvCuringOn": "M172\n",
         "uvCuringOff": "M173\n",
         "uvDisinfectOn": "M174\n",
@@ -42,16 +56,6 @@ class RokitCommandModel():
 
         "shotStart": "M301\n",
         "shotStop": "M330\n",
-
-        "move_A_Coordinate": "G0 A%.2f F%d\n",
-        "move_B_Coordinate": "G0 B%.2f\n",
-        
-        "selectRightExtruder": "D",
-        "selectLeftExtruder": "D6",        
-
-        "originCenter": "X0.0 Y0.0",
-        "restoreToOriginState": "G0 X0 Y0 Z0 A0 F800\n",
-
 
         "speed": "M220 S%f\n",
         "flowrate": "M221 S%f\n",
