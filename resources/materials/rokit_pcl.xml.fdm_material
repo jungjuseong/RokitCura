@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<fdmmaterial version="1.3" xmlns="http://www.ultimaker.com/material">
+    <metadata>
+        <name>
+            <brand>Rokit</brand>
+            <material>PCL</material>
+            <color>Generic</color>
+        </name>
+        <adhesion_info>Use with standard build plate</adhesion_info>
+        <description>PCL Bio Ink - Customizable</description>
+        <version>1</version>
+        <color_code>#FFC924</color_code>
+        <GUID>2780b345-577b-4a24-ccaa-12e6aad3e6f</GUID>
+    </metadata>
+    <properties>
+        <density>1.24</density>
+        <diameter>1.75</diameter>
+    </properties>
+    <settings>
+        <setting key="print temperature">110</setting>
+        <setting key="heated bed temperature">25</setting>
+        <setting key="standby temperature">60</setting>
+        <setting key="adhesion tendency">0</setting>
+        <setting key="build volume temperature">25</setting>
+
+        <machine>
+            <machine_identifier manufacturer="Rokit BioHealth" product="Dr. Invivo 4D6"/>
+
+            <hotend id="FFF Extruder" />
+            <hotend id="Hot Melt" />
+            <hotend id="0.2mm Nozzle" />
+            <hotend id="0.4mm Nozzle" />
+            <hotend id="0.6mm Nozzle" />
+            <hotend id="0.8mm Nozzle" />
+            <hotend id="1.0mm Nozzle" />
+        </machine>
+    </settings>
+</fdmmaterial>
