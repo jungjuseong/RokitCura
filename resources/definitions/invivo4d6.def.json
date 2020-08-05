@@ -1,7 +1,7 @@
 {
     "version": 2,
     "name": "Dr. INVIVO 4D6",
-    "inherits": "rokit",
+    "inherits": "rokitprinter",
     "metadata": {
         "author": "IRON",
         "manufacturer": "Rokit HealthCare",
@@ -9,23 +9,20 @@
         "file_formats": "text/x-gcode",
 
         "has_machine_quality": true,
-        "preferred_quality_type": "normal",
+        "quality_definition": "invivo4d6",
         "has_materials": true,
-        "preferred_material": "rokit_healthcare_bioink1",
         "has_variants": true,
         "variants_name": "Nozzle Size",
         "preferred_variant_name": "G23 0.41mm",
-        "has_variant_buildplates": true,
-        "preferred_variant_buildplate_name": "Culture Dish:11060",
         "supports_network_connection": false,
         "machine_extruder_trains":
         {
-            "0": "rokit_invivo_4d6_left",
-            "1": "rokit_invivo_4d6_right1",
-            "2": "rokit_invivo_4d6_right2",
-            "3": "rokit_invivo_4d6_right3",
-            "4": "rokit_invivo_4d6_right4",
-            "5": "rokit_invivo_4d6_right5"
+            "0": "invivo4d6_left",
+            "1": "invivo4d6_right1",
+            "2": "invivo4d6_right2",
+            "3": "invivo4d6_right3",
+            "4": "invivo4d6_right4",
+            "5": "invivo4d6_right5"
         },
         "firmware_update_info": {
             "id": 9051,
@@ -63,7 +60,8 @@
             "Vertex_Delta_PLA_Satin","Vertex_Delta_PLA_Wood","Vertex_Delta_PLA","Vertex_Delta_TPU",
             "zyyx_pro_flex","zyyx_pro_pla",
             "tizyx_pla","tizyx_abs","tizyx_pla_bois" 
-        ]
+        ],
+        "preferred_material": "rokit_pcl"
 
     },
     "overrides": {
@@ -73,8 +71,8 @@
         },
         "machine_name": {
             "label": "Dr.Invivo 4D6",
-            "description": "rokit_invivo_4d6",
-            "default_value": "rokit_invivo_4d6" 
+            "description": "Rokit Invivo-4D6 printer",
+            "default_value": "invivo4d6" 
         },
         "print_sequence": {
             "default_value": "all_at_once",

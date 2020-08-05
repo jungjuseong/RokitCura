@@ -1,9 +1,9 @@
 {
     "version": 2,
     "name": "Left",
-    "inherits": "rokit_extruder",
+    "inherits": "rokitextruder",
     "metadata": {
-        "machine": "rokt_invivo_4d6",
+        "machine": "invivo4d6",
         "position": "0"
     },
 
@@ -11,9 +11,7 @@
         "extruder_nr": {
             "default_value": 0
         },
-        "machine_nozzle_id": { "default_value": "FFF Extruder" },
-        "machine_nozzle_offset_x": { "default_value": 0.0 },
-        "machine_nozzle_offset_y": { "default_value": 0.0 },        
+        "machine_nozzle_id": { "default_value": "FFF Extruder" },      
         "material_diameter": { "default_value": 1.75 },
         "machine_nozzle_size": { "default_value": 0.4 }
     }
