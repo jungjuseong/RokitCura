@@ -161,7 +161,7 @@ class RokitGCodeConverter:
             self._repalced_gcode_list[index] = self._replaced_line
             
     # Shot/Stop 명령어
-    def _insertShotCommand(self, command_line):
+    def _insertShotCommand(self, command_line) -> None:
         if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
             return
         command = self._replaced_command
@@ -302,11 +302,11 @@ class RokitGCodeConverter:
             replaced_command = replaced_command.replace("T","D")
             self._selected_extruder = replaced_command # 수정 필요* 함수로 바꿔서 String화
             # -------------------------------------------------------------------------------------익스트루더가 바뀔 때 변경되는 설정작업
-            replaced_command = self._addExtruderSelectingCommand(replaced_command) #***
-            if self._selected_extruder != 'D6': # <Right ㅌxtruder>
-                self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업
-            self._replaced_command = replaced_command # 멤버 변수에 저장
-            self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출
+            replaced_command = self._addExtruderSelectingCommand(replaced_command) #*** (1)
+            if self._selected_extruder != 'D6': # <Right Extruder>
+                self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
+            self._replaced_command = replaced_command # 멤버 변수에 저장 
+            self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출 (3)
             self._noteSelectedExtruder()
 
     def _affectCLocationWithHop(self) -> None:
@@ -338,7 +338,8 @@ class RokitGCodeConverter:
 
     # E 커맨드 제거
     def _removeECommand(self, command_line):
-        command_line = command_line[:command_line.find("E")-1]
+        if command_line.find("E") != -1:
+            command_line = command_line[:command_line.find("E")-1]
         return command_line
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
