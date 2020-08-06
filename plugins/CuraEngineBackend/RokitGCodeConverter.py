@@ -133,7 +133,7 @@ class RokitGCodeConverter:
 
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
                 self._insertShotCommand(command_line)
-                self._convertZToC(command_line)
+                self._convertZToC(command_line, index)
                 self._remove_marlin_command(command_line)
 
                 if self._replaced_command is not None:
@@ -294,15 +294,18 @@ class RokitGCodeConverter:
             self._to_c_value = -20.0 - float(self._first_z_value) + self._retraction_hop_height
 
     # C 좌표로 변환    
-    def _convertZToC(self, command_line):        
+    def _convertZToC(self, command_line, line_index):        
         replaced = self._replaced_command
         if command_line.startswith("G"):
             if command_line.find("Z") != -1:
                 self._current_z_value = float(command_line[command_line.find("Z") + 1:])
+                c_location = self._current_z_value + self._to_c_value
+                c_location = round(c_location,2)
+                
+                if line_index == len(self._repalced_gcode_list) -1:
+                    return
                 if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
                     return
-                c_location = self._current_z_value + self._to_c_value
-                c_location = round(c_location,2)          
 
                 replaced = replaced[:replaced.find("Z")]
                 replaced += "\nG0 C"+ str(c_location) # 기존 z값
