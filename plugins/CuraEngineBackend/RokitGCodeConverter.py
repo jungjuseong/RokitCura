@@ -64,8 +64,9 @@ class RokitGCodeConverter:
 
         # z를 c축으로
         self._first_z = None # firstZ
-        self._z_value = None
+        self._first_z_value = None
         self._to_c_value = None
+        self._current_z_value = None
 
         self._selected_extruder = None
         self._previous_extruder = None
@@ -110,8 +111,8 @@ class RokitGCodeConverter:
     def _calculateCLocation(self) -> None:
         # -------------------------------------------------------------------------------------가장 처음 등장하는 Z값 찾기
         self._first_z = self._repalced_gcode_list[2].find("Z")
-        self._z_value = self._repalced_gcode_list[2][self._first_z + 1 : self._repalced_gcode_list[2].find("\n",self._first_z)]
-        self._to_c_value = -20.0 - float(self._z_value)
+        self._first_z_value = self._repalced_gcode_list[2][self._first_z + 1 : self._repalced_gcode_list[2].find("\n",self._first_z)]
+        self._to_c_value = -20.0 - float(self._first_z_value)
         
     # 시작 + local 변수 초기화
     def run(self):
@@ -314,26 +315,23 @@ class RokitGCodeConverter:
         self._retraction_hop_enabled = self._extruder_list[selected_num].getProperty("retraction_hop_enabled","value")
         self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch_height","value")
         if self._retraction_hop_enabled == True:
-            self._to_c_value = -20.0 - float(self._z_value) + self._retraction_hop_height
-    
-    
+            self._to_c_value = -20.0 - float(self._first_z_value) + self._retraction_hop_height
 
     # C 좌표로 변환    
     def _convertZToC(self, command_line):
         if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
+            if command_line.startswith("G") and command_line.find("Z") != -1:
+                self._current_z_value = float(command_line[command_line.find("Z") + 1:])
             return
         
         replaced = self._replaced_command
-        if command_line.startswith("G") :
+        if command_line.startswith("G"):
             if command_line.find("Z") != -1:
-                z_value = command_line[command_line.find("Z") + 1:]
-                j_location = float(z_value)+ self._to_c_value
-                j_location = round(j_location,2)
-
-                remove_z_value = command_line[:command_line.find("Z")]                
+                c_location = self._current_z_value + self._to_c_value
+                c_location = round(c_location,2)          
 
                 replaced = replaced[:replaced.find("Z")]
-                replaced += "\nG0 C"+ str(j_location) # 기존 z값
+                replaced += "\nG0 C"+ str(c_location) # 기존 z값
         self._replaced_command = replaced
 
     # E 커맨드 제거
@@ -383,7 +381,10 @@ class RokitGCodeConverter:
                     uv_part += self._uv_command['on'] # UV ON
                     uv_part += self._command_dic['uvTime'] % (self._uv_time * 1000)
                     uv_part += self._uv_command['off'] # UV Off
-                    uv_part += self._command_dic['moveToAbsoluteZ'] % (0.00)
+                    if self._selected_extruder != 'D6':
+                        uv_part += self._command_dic['moveToAbsoluteZ'] % (0.00)
+                    else:
+                        uv_part += self._command_dic['moveToAbsoluteZ'] % (self._current_z_value)
                     uv_part += self._move_to_uv_position
                     uv_part += self._command_dic['changeToNewAbsoluteAxis'] % (0.00, 0.00)
                     self._replaced_line += uv_part
