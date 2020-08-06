@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "name": "R4",
+    "inherits": "fdmextruder",
+    "metadata": {
+        "machine": "rokit_invivo4d6",
+        "position": "4"
+    },
+
+    "overrides": {
+        "extruder_nr": {
+            "default_value": 4
+        }
+    }
+}

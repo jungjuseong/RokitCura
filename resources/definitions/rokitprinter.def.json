@@ -6,7 +6,7 @@
         "type": "machine",
         "author": "Iron",
         "category": "Other",
-        "manufacturer": "Rokit Healthcare",
+        "manufacturer": "Rokit",
         "setting_version": 13,
         "file_formats": "text/x-gcode;application/x-stl-ascii;application/x-stl-binary;application/x-wavefront-obj;application/x3g",
         "visible": false,
@@ -113,7 +113,7 @@
                     "default_value": true,
                     "enabled": "extruder_nr >= 0",
                     "settable_per_mesh": false,
-                    "settable_per_extruder": true
+                    "settable_per_extruder": false
                 },
                 "dispensor_shot":
                 {

@@ -97,7 +97,7 @@ Item {
             text: catalog.i18nc("@button", "Rokit Invivo 4D6")
             iconSource: UM.Theme.getIcon("arrow_left")
             onClicked: {         
-                settingVisibilityPresetsModel.setActivePreset("invivo4d6")
+                settingVisibilityPresetsModel.setActivePreset("rokit_invivo4d6")
             }
         }
         Cura.SecondaryButton {
