@@ -111,7 +111,6 @@
                     "description": "Enable UV. Without these setting, such layers would collapse during printing.",
                     "type": "bool",
                     "default_value": true,
-                    "enabled": "extruder_nr >= 0",
                     "settable_per_mesh": false,
                     "settable_per_extruder": false
                 },
