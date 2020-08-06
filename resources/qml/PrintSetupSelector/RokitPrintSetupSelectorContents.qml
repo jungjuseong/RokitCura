@@ -94,7 +94,7 @@ Item {
             anchors.margins: parent.padding
             leftPadding: UM.Theme.getSize("default_margin").width
             rightPadding: UM.Theme.getSize("default_margin").width
-            text: catalog.i18nc("@button", "Rokit Invivo 4D6")
+            text: catalog.i18nc("@button", "Rokit Invivo4d6")
             iconSource: UM.Theme.getIcon("arrow_left")
             onClicked: {         
                 settingVisibilityPresetsModel.setActivePreset("rokit_invivo4d6")
