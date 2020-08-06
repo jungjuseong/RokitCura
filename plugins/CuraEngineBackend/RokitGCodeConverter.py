@@ -38,19 +38,15 @@ class RokitGCodeConverter:
         # 필요
         self._command_model = None
         self._build_dish_model = None
-
         self._data_join_sequence = []
         self._extruder_sequence = []
         
         # 프린트 온도 설정
         self._print_temperature_list = []
+
         # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p
         self._is_enable_dispensor = None
-        self._dispensor_shot_list = []
-        self._dispensor_vac_list = []
-        self._dispensor_int_list = []
-        self._dispensor_shot_pressure_list = []
-        self._dispensor_vac_pressure_list = []
+
         # UV 설정 - extruder에서 읽도록 바꿔야 함
         self._uv_enable_list = []
         self._uv_per_layers = []
@@ -124,14 +120,6 @@ class RokitGCodeConverter:
     
     # Main
     def _convertGCode(self):
-        # 
-        # parse Selected Extruder : 선택한 익스트루더를 파싱 --> (선택한 익스트루더의 1. 노즐타입,)
-        # affect C Location With Hop
-        # insert Shot Command
-        # convert Z To C
-        # 
-        # set UVCommand
-        # 
         self.is_first_selectedExtruder = True
 
         for index, lines in enumerate(self._repalced_gcode_list): # lines(layer) 마다
@@ -265,18 +253,6 @@ class RokitGCodeConverter:
             if self._previous_extruder == 'D6':
                 replaced += self._command_dic["moveToAbsoluteXY"] % (85.0, 0.0)
         replaced += self._command_dic["changeAbsoluteAxisToCenter"]
-
-
-        # a_command = self._command_dic["selected_extruders_A_location"] 
-        # replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300)
-        # if self._selected_extruder != 'D6': # Right
-        #     replaced += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
-        #     replaced += self._command_dic["goToLimitDetacted"]
-        #     replaced += self._command_dic["moveToAbsoluteXY"] % (42.5, 0.0)
-        # else:  # Left
-        #     replaced += self._command_dic["moveToAbsoluteXY"] % (-42.5, 0.0)
-        # replaced += self._command_dic["changeAbsoluteAxisToCenter"]
-
         # replaced += self._command_dic["waitingTemperature"]       # M109 Keep
         return replaced
     
@@ -318,15 +294,13 @@ class RokitGCodeConverter:
             self._to_c_value = -20.0 - float(self._first_z_value) + self._retraction_hop_height
 
     # C 좌표로 변환    
-    def _convertZToC(self, command_line):
-        if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
-            if command_line.startswith("G") and command_line.find("Z") != -1:
-                self._current_z_value = float(command_line[command_line.find("Z") + 1:])
-            return
-        
+    def _convertZToC(self, command_line):        
         replaced = self._replaced_command
         if command_line.startswith("G"):
             if command_line.find("Z") != -1:
+                self._current_z_value = float(command_line[command_line.find("Z") + 1:])
+                if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
+                    return
                 c_location = self._current_z_value + self._to_c_value
                 c_location = round(c_location,2)          
 
