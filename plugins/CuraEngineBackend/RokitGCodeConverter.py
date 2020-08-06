@@ -3,6 +3,7 @@
 
 from string import Formatter
 from enum import IntEnum
+from UM.Logger import Logger
 from typing import Any, cast, Dict, List, Optional, Set
 import re
 import Arcus #For typing.
@@ -298,21 +299,27 @@ class RokitGCodeConverter:
         replaced = self._replaced_command
         if command_line.startswith("G"):
             if command_line.find("Z") != -1:
-                self._current_z_value = float(command_line[command_line.find("Z") + 1:])
-                c_location = self._current_z_value + self._to_c_value
-                c_location = round(c_location,2)
-                
-                if line_index == len(self._repalced_gcode_list) -1:
-                    return
-                if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
-                    return
+                try:
+                    self._current_z_value = float(command_line[command_line.find("Z") + 1:])
+                    c_location = self._current_z_value + self._to_c_value
+                    c_location = round(c_location,2)
 
-                replaced = replaced[:replaced.find("Z")]
-                replaced += "\nG0 C"+ str(c_location) # 기존 z값
+                    if line_index == len(self._repalced_gcode_list) -1:
+                        return
+                    if self._selected_extruder == 'D6': # Left일 때는 C좌표로 변환 안함.
+                        return
+                    replaced = replaced[:replaced.find("Z")]
+                    replaced += "\nG0 C"+ str(c_location) # 기존 z값
+                
+                except Exception:
+                    Logger.logException("w","Could not check normal Z value")
+                    pass
         self._replaced_command = replaced
 
     # E 커맨드 제거
     def _removeECommand(self, command_line):
+        # if line_index == len(self._repalced_gcode_list) -1:
+        #     return
         if command_line.find("E") != -1:
             command_line = command_line[:command_line.find("E")-1]
         return command_line
