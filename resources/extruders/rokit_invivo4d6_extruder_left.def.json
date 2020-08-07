@@ -10,6 +10,14 @@
     "overrides": {
         "extruder_nr": {
             "default_value": 0
+        },
+        "material_diameter":
+        {
+            "default_value": 1.75,
+            "minimum_value": "1.0",
+            "minimum_value_warning": "3",
+            "maximum_value_warning": "13",
+            "enabled": true
         }
     }
 }

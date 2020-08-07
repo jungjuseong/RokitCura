@@ -152,6 +152,32 @@ Item {
             }
             property string instructionLink: Cura.MachineManager.activeStack != null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "instruction_link", ""): ""
 
+            Row { // Nozzle
+                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
+                visible: Cura.MachineManager.activeMachine.hasVariants
+
+                Label {
+                    text: (activeExtruderName === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    verticalAlignment: Text.AlignVCenter
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    height: parent.height
+                    width: selectors.textWidth
+                    renderType: Text.NativeRendering
+                }
+
+                OldControls.ToolButton {
+                    id: variantSelection
+                    text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
+                    tooltip: text
+                    height: parent.height
+                    width: selectors.controlWidth
+                    style: UM.Theme.styles.print_setup_header_button
+                    activeFocusOnPress: true
+                    menu: Cura.RokitNozzleMenu { extruderIndex: Cura.ExtruderManager.activeExtruderIndex }
+                }
+            }
+            
             Row { // Material
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
@@ -206,31 +232,6 @@ Item {
                 }
             }
 
-            Row { // Nozzle
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasVariants
-
-                Label {
-                    text: (activeExtruderName === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
-                    verticalAlignment: Text.AlignVCenter
-                    font: UM.Theme.getFont("default")
-                    color: UM.Theme.getColor("text")
-                    height: parent.height
-                    width: selectors.textWidth
-                    renderType: Text.NativeRendering
-                }
-
-                OldControls.ToolButton {
-                    id: variantSelection
-                    text: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.variant.name : ""
-                    tooltip: text
-                    height: parent.height
-                    width: selectors.controlWidth
-                    style: UM.Theme.styles.print_setup_header_button
-                    activeFocusOnPress: true
-                    menu: Cura.RokitNozzleMenu { extruderIndex: Cura.ExtruderManager.activeExtruderIndex }
-                }
-            }
 
             Row {
                 id: warnings
