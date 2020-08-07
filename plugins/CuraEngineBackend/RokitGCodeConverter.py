@@ -163,12 +163,7 @@ class RokitGCodeConverter:
             
     # Shot/Stop 명령어
     def _insertShotCommand(self, command_line) -> None:
-        if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
-            return
-            # if line_index == len(self._repalced_gcode_list) -1:
-            #     return
         command = self._replaced_command
-
         if command_line.startswith("G1") :
             command = self._removeECommand(command)
             if len(command_line.split()) > 3 and self._is_shot_moment == True: # *******
@@ -194,6 +189,7 @@ class RokitGCodeConverter:
 
         replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
         replaced = replaced.replace("M105\n", "")
+        replaced = replaced.replace("M107\n", "")
         replaced = replaced.replace("M82 ;absolute extrusion mode\n", "")
         replaced = replaced.replace(";{blank}\n", "")
         self._replaced_line = replaced
