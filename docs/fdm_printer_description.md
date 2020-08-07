@@ -5,7 +5,7 @@
 - machine_start_gcode: 시작 G-code
 - machine_end_gcode: 종료 G-code
 - 재료 GUID(material_guid): 재료의 GUID. 자동으로 설정됨.
-- material_diameter: 사용한 필라멘트의 구경을 조정. 사용한 필라멘트의 지름에 이 값을 맞춘다.
+- material_diameter: 사용할 필라멘트의 구경을 조정. 사용할 필라멘트의 지름에 이 값을 맞춘다.
 - 제작판 온도 대기(material_bed_temp_wait): 재작판 온도가 적정할 때까지 기다리는 명령을 삽입할지
 - 노즐 온도 대기(material_print_temp_wait): 노즐 온도가 시작 지점에 도달할 때까지 기다릴지
 - 재료 온도 포함(material_print_temp_prepend): 노즐 온도 명렬을 시작 g-code에 넣을지 여부. start_gcode에 노즐 온도 명령이 있다면 Cura가 이 설정을 자동으로 불가로 만듬.
