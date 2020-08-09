@@ -24,168 +24,6 @@
     },
     "settings":
     {
-        "uv":
-        {
-            "label": "UV",
-            "type": "category",
-            "icon": "category_uv",
-            "description": "UV",
-            "children":
-            {
-                "uv_enable":
-                {
-                    "label": "Enable UV",
-                    "description": "Enable UV",
-                    "type": "bool",
-                    "default_value": false,
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                },
-                "uv_per_layers":
-                {
-                    "label": "Layers",
-                    "description": "UV per layers",
-                    "type": "int",
-                    "unit": "layers",
-                    "default_value": 3,
-                    "minimum_value": "1",
-                    "maximum_value_warning": "10",
-                    "enabled": "uv_enable",
-                    "settable_per_extruder": true
-                },
-                "uv_type":
-                {
-                    "label": "Nano Meter",
-                    "description": "UV type",
-                    "type": "enum",
-                    "unit": "nm",
-                    "options":
-                    {
-                        "365": "365 nm",
-                        "405": "405 nm"
-                    },
-                    "default_value": "365",
-                    "enabled": "uv_enable",
-                    "settable_per_extruder": true
-                },
-                "uv_time":
-                {
-                    "label": "Time",
-                    "description": "time per UV",
-                    "unit": "sec",
-                    "type": "float",
-                    "minimum_value": "1",
-                    "maximum_value": "60",
-                    "maximum_value_warning": "55",
-                    "default_value": 5,
-                    "enabled": "uv_enable",
-                    "settable_per_extruder": true
-                },
-                "uv_dimming":
-                {
-                    "label": "Dimming",
-                    "description": "dimming rate",
-                    "unit": "%",
-                    "type": "int",
-                    "minimum_value": "10",
-                    "maximum_value": "100",
-                    "maximum_value_warning": "99",
-                    "default_value": 80,
-                    "enabled": "uv_enable",
-                    "settable_per_extruder": true
-                }
-            }
-        },
-        "dispensor":
-        {
-            "label": "Dispenser",
-            "type": "category",
-            "icon": "category_dispenser",
-            "description": "Dispenser Settings",
-            "enabled": "extruder_nr >= 0",
-            "children":
-            {
-                "dispensor_enable":
-                {
-                    "label": "Enable Dispensor Setting",
-                    "description": "Enable UV. Without these setting, such layers would collapse during printing.",
-                    "type": "bool",
-                    "default_value": true,
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": false
-                },
-                "dispensor_shot":
-                {
-                    "label": "SHOT",
-                    "description": "time of shot",
-                    "unit": "sec",
-                    "type": "float",
-                    "default_value": 5,
-                    "minimum_value": "0",
-                    "maximum_value": "100",
-                    "maximum_value_warning": "99",
-                    "enabled": "dispensor_enable",
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                },
-                "dispensor_vac":
-                {
-                    "label": "VAC",
-                    "description": "sec of dispensor vacume",
-                    "type": "float",
-                    "unit": "sec",
-                    "default_value": 0.3,
-                    "minimum_value": "0",
-                    "maximum_value": "5",
-                    "maximum_value_warning": "4",
-                    "enabled": "dispensor_enable",
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                },
-                "dispensor_int":
-                {
-                    "label": "INT",
-                    "description": "sec of dispensor vacume",
-                    "unit": "kpa",
-                    "type": "float",
-                    "default_value": 0,
-                    "minimum_value": "0",
-                    "maximum_value": "12",
-                    "maximum_value_warning": "10",
-                    "enabled": "dispensor_enable",
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                },
-                "dispensor_shot_power":
-                {
-                    "label": "SET.P",
-                    "description": "SHOT Power",
-                    "unit": "kpa",
-                    "type": "int",
-                    "minimum_value": "0",
-                    "maximum_value": "700",
-                    "maximum_value_warning": "600",
-                    "default_value": 90,
-                    "enabled": "dispensor_enable",
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                },
-                "dispensor_vac_power":
-                {
-                    "label": "VAC.P",
-                    "description": "VAC Power",
-                    "unit": "kpa",
-                    "type": "int",
-                    "minimum_value": "0",
-                    "maximum_value": "700",
-                    "maximum_value_warning": "600",
-                    "default_value": 90,
-                    "enabled": "dispensor_enable",
-                    "settable_per_mesh": false,
-                    "settable_per_extruder": true
-                }
-            }
-        },
         "machine_settings":
         {
             "label": "Machine",
@@ -7927,6 +7765,168 @@
                     "type": "str",
                     "default_value": "[[1,0,0], [0,1,0], [0,0,1]]",
                     "enabled": false
+                }
+            }
+        },
+        "uv":
+        {
+            "label": "UV",
+            "type": "category",
+            "icon": "category_uv",
+            "description": "UV",
+            "children":
+            {
+                "uv_enable":
+                {
+                    "label": "Enable UV",
+                    "description": "Enable UV",
+                    "type": "bool",
+                    "default_value": false,
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "uv_per_layers":
+                {
+                    "label": "Layers",
+                    "description": "UV per layers",
+                    "type": "int",
+                    "unit": "layers",
+                    "default_value": 3,
+                    "minimum_value": "1",
+                    "maximum_value_warning": "10",
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": true
+                },
+                "uv_type":
+                {
+                    "label": "Nano Meter",
+                    "description": "UV type",
+                    "type": "enum",
+                    "unit": "nm",
+                    "options":
+                    {
+                        "365": "365 nm",
+                        "405": "405 nm"
+                    },
+                    "default_value": "365",
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": true
+                },
+                "uv_time":
+                {
+                    "label": "Time",
+                    "description": "time per UV",
+                    "unit": "sec",
+                    "type": "float",
+                    "minimum_value": "1",
+                    "maximum_value": "60",
+                    "maximum_value_warning": "55",
+                    "default_value": 5,
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": true
+                },
+                "uv_dimming":
+                {
+                    "label": "Dimming",
+                    "description": "dimming rate",
+                    "unit": "%",
+                    "type": "int",
+                    "minimum_value": "10",
+                    "maximum_value": "100",
+                    "maximum_value_warning": "99",
+                    "default_value": 80,
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": true
+                }
+            }
+        },
+        "dispensor":
+        {
+            "label": "Dispenser",
+            "type": "category",
+            "icon": "category_dispenser",
+            "description": "Dispenser Settings",
+            "enabled": "extruder_nr >= 0",
+            "children":
+            {
+                "dispensor_enable":
+                {
+                    "label": "Enable Dispensor Setting",
+                    "description": "Enable UV. Without these setting, such layers would collapse during printing.",
+                    "type": "bool",
+                    "default_value": true,
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": false
+                },
+                "dispensor_shot":
+                {
+                    "label": "SHOT",
+                    "description": "time of shot",
+                    "unit": "sec",
+                    "type": "float",
+                    "default_value": 5,
+                    "minimum_value": "0",
+                    "maximum_value": "100",
+                    "maximum_value_warning": "99",
+                    "enabled": "dispensor_enable",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "dispensor_vac":
+                {
+                    "label": "VAC",
+                    "description": "sec of dispensor vacume",
+                    "type": "float",
+                    "unit": "sec",
+                    "default_value": 0.3,
+                    "minimum_value": "0",
+                    "maximum_value": "5",
+                    "maximum_value_warning": "4",
+                    "enabled": "dispensor_enable",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "dispensor_int":
+                {
+                    "label": "INT",
+                    "description": "sec of dispensor vacume",
+                    "unit": "kpa",
+                    "type": "float",
+                    "default_value": 0,
+                    "minimum_value": "0",
+                    "maximum_value": "12",
+                    "maximum_value_warning": "10",
+                    "enabled": "dispensor_enable",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "dispensor_shot_power":
+                {
+                    "label": "SET.P",
+                    "description": "SHOT Power",
+                    "unit": "kpa",
+                    "type": "int",
+                    "minimum_value": "0",
+                    "maximum_value": "700",
+                    "maximum_value_warning": "600",
+                    "default_value": 90,
+                    "enabled": "dispensor_enable",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
+                },
+                "dispensor_vac_power":
+                {
+                    "label": "VAC.P",
+                    "description": "VAC Power",
+                    "unit": "kpa",
+                    "type": "int",
+                    "minimum_value": "0",
+                    "maximum_value": "700",
+                    "maximum_value_warning": "600",
+                    "default_value": 90,
+                    "enabled": "dispensor_enable",
+                    "settable_per_mesh": false,
+                    "settable_per_extruder": true
                 }
             }
         }

@@ -72,7 +72,7 @@ from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
 from cura.Machines.Models.QualityManagementModel import QualityManagementModel
 from cura.Machines.Models.QualityProfilesDropDownMenuModel import QualityProfilesDropDownMenuModel
 from cura.Machines.Models.QualitySettingsModel import QualitySettingsModel
-from cura.Machines.Models.SettingVisibilityPresetsModel import SettingVisibilityPresetsModel
+from cura.Machines.Models.RokitSettingVisibilityPresetsModel import SettingVisibilityPresetsModel
 from cura.Machines.Models.UserChangesModel import UserChangesModel
 from cura.Operations.SetParentOperation import SetParentOperation
 from cura.PrinterOutput.NetworkMJPGImage import NetworkMJPGImage

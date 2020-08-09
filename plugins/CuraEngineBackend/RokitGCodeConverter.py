@@ -163,7 +163,7 @@ class RokitGCodeConverter:
             
     # Shot/Stop 명령어
     def _insertShotCommand(self, command_line) -> None:
-        if self._nozzle_type[0] == "F":
+        if self._nozzle_type.startswith('FFF'):
             return
             # if line_index == len(self._repalced_gcode_list) -1:
             #     return
@@ -200,7 +200,7 @@ class RokitGCodeConverter:
         
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p   # - 데이터 조인 순서
     def _replaceStartDispenserCode(self) -> None:
-        if self._nozzle_type[0] == "F" or not self._is_enable_dispensor:
+        if self._nozzle_type.startswith('FFF') or not self._is_enable_dispensor:
             return
         replaced = self._replaced_line
         self._dispensor_shot_list = [self._extruder_list[index].getProperty("dispensor_shot","value") for index in self._data_join_sequence] 
