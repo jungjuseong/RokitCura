@@ -455,7 +455,7 @@ Item {
             }
 
             Row { // Dispensor Bar
-                visible: getExtruderType() === "G"
+                visible: getExtruderType() === "Dispensor"
                 Rectangle {
                     width:  selectors.bar_width
                     height: selectors.bar_height
@@ -480,7 +480,7 @@ Item {
             GridLayout {
                 id: dispensor
 
-                visible: getExtruderType() === "G"
+                visible: getExtruderType() === "Dispensor"
 
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor

@@ -24,10 +24,10 @@ v   <settings>
         <setting key="build volume temperature">25</setting>
         <machine>
             <machine_identifier manufacturer="Rokit Healthcare" product="Rokit Invivo4d6"/>
-            <hotend id="G19 0.79" />
-            <hotend id="G20 0.64" />
-            <hotend id="G23 0.41" />
-            <hotend id="G27 0.23" />
+            <hotend id="Dispensor G19 0.79" />
+            <hotend id="Dispensor G20 0.64" />
+            <hotend id="Dispensor G23 0.41" />
+            <hotend id="Dispensor G27 0.23" />
         </machine>
     </settings>
 </fdmmaterial>

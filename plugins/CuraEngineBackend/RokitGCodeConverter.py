@@ -30,6 +30,8 @@ class RokitGCodeConverter:
     def __init__(self) -> None:
         # super().__init__()
 
+        self._start_coord = { 'c': -40.0, 'z': -40.0 }
+
         # 외부
         self._application = None
         self._global_container_stack = None
@@ -109,7 +111,7 @@ class RokitGCodeConverter:
         # -------------------------------------------------------------------------------------가장 처음 등장하는 Z값 찾기
         self._first_z = self._repalced_gcode_list[2].find("Z")
         self._first_z_value = self._repalced_gcode_list[2][self._first_z + 1 : self._repalced_gcode_list[2].find("\n",self._first_z)]
-        self._to_c_value = -20.0 - float(self._first_z_value)
+        self._to_c_value = self._start_coord['c'] - float(self._first_z_value)
         
     # 시작 (준비 작업)
     def run(self):
@@ -288,10 +290,10 @@ class RokitGCodeConverter:
         self._retraction_hop_enabled = self._extruder_list[selected_num].getProperty("retraction_hop_enabled","value")
         self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch_height","value")
         if self._retraction_hop_enabled == True:
-            self._to_c_value = -20.0 - float(self._first_z_value) + self._retraction_hop_height
+            self._to_c_value = self._start_coord['c'] - float(self._first_z_value) + self._retraction_hop_height
 
     def _convertZCommand(self, command_line):
-        if command_line.startswith("G") and command_line.find("Z") != -1:
+        if command_line.startswith("Dispensor") and command_line.find("Z") != -1:
             try:
                 self._current_z_value = float(command_line[command_line.find("Z") + 1:])
                 c_location = self._current_z_value + self._to_c_value
@@ -397,7 +399,7 @@ class RokitGCodeConverter:
             gcode_spacing += self._command_dic['moveToOriginCenter']
             gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', -4.0)
             gcode_spacing += self._command_dic['moveToRelative'] % (direction , distance)
-            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', -20.0)
+            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', self._start_coord['c'])
             gcode_spacing += self._command_dic['changeAbsoluteAxisToCenter']
 
             gcode_clone.insert(0,gcode_spacing)

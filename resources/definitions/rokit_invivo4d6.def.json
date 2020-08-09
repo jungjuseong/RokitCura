@@ -6,7 +6,7 @@
         "visible": true,
         "file_formats": "text/x-gcode",
         "variants_name": "Nozzle Size",
-        "preferred_variant_name": "G23 0.41",
+        "preferred_variant_name": "preferred_variant_name,
         "exclude_materials": [
             "Vertex_Delta_ABS", "Vertex_Delta_PET", "Vertex_Delta_PLA", "Vertex_Delta_PLA_Glitter", "Vertex_Delta_PLA_Mat", "Vertex_Delta_PLA_Satin", "Vertex_Delta_PLA_Wood", "Vertex_Delta_TPU",
             "chromatik_pla",
