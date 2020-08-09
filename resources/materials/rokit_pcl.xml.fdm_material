@@ -14,7 +14,7 @@
     </metadata>
     <properties>
         <density>1.24</density>
-        <diameter>2.85</diameter>
+        <diameter>1.75</diameter>
     </properties>
     <settings>
         <setting key="print temperature">110</setting>
@@ -25,13 +25,11 @@
 
         <machine>
             <machine_identifier manufacturer="Rokit Healthcare" product="Rokit Invivo4d6"/>
-            <hotend id="FFF Extruder" />
-            <hotend id="Hot Melt" />
-            <hotend id="0.2mm Nozzle" />
-            <hotend id="0.4mm Nozzle" />
-            <hotend id="0.6mm Nozzle" />
-            <hotend id="0.8mm Nozzle" />
-            <hotend id="1.0mm Nozzle" />
+            <hotend id="FFF 0.2mm Nozzle" />
+            <hotend id="FFF 0.4mm Nozzle" />
+            <hotend id="FFF 0.6mm Nozzle" />
+            <hotend id="FFF 0.8mm Nozzle" />
+            <hotend id="FFF 1.0mm Nozzle" />
         </machine>
     </settings>
 </fdmmaterial>

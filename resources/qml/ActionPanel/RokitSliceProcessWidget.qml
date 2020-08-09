@@ -70,56 +70,56 @@ Column {
         visible: (widget.backendState == UM.Backend.Processing || (prepareButtons.autoSlice && widget.backendState == UM.Backend.NotStarted))
     }
 
-    CheckBox {            
-        id: leftFirstCheckBox
+    // CheckBox {            
+    //     id: leftFirstCheckBox
 
-        anchors.bottomMargin: UM.Theme.getSize("default_margin").height;
-        anchors.leftMargin: UM.Theme.getSize("default_margin").width
+    //     anchors.bottomMargin: UM.Theme.getSize("default_margin").height;
+    //     anchors.leftMargin: UM.Theme.getSize("default_margin").width
 
-        text: catalog.i18nc("@option:check","Left First");
-        style: UM.Theme.styles.partially_checkbox
-        tooltip: catalog.i18nc("@label", "slice first in the left extruder's model")
+    //     text: catalog.i18nc("@option:check","Left First");
+    //     style: UM.Theme.styles.partially_checkbox
+    //     tooltip: catalog.i18nc("@label", "slice first in the left extruder's model")
 
-        enabled: sliceButton.enabled
-        visible: sliceButton.visible
+    //     enabled: sliceButton.enabled
+    //     visible: sliceButton.visible
 
-        property var checkbox_state: 0; // if the state number is 2 then the checkbox has "partially" state
+    //     property var checkbox_state: 0; // if the state number is 2 then the checkbox has "partially" state
 
-        // temporary property, which is used to recalculate checkbox state and keeps reference of the
-        // binging object. If the binding object changes then checkBox state will be updated.
-        property var temp_checkBox_value: {
-            checkbox_state = getCheckBoxState()
-            // returning the slicePriority the propery will keep reference, for updating
-            return widget.slicePriority
-        }
+    //     // temporary property, which is used to recalculate checkbox state and keeps reference of the
+    //     // binging object. If the binding object changes then checkBox state will be updated.
+    //     property var temp_checkBox_value: {
+    //         checkbox_state = getCheckBoxState()
+    //         // returning the slicePriority the propery will keep reference, for updating
+    //         return widget.slicePriority
+    //     }
 
-        function getCheckBoxState() {
-            if (leftFirst.properties.value == true) {
-                leftFirstCheckBox.checked = true
-                return 1;
-            }
-            else{
-                leftFirstCheckBox.checked = false
-                return 0;
-            }
-        }
-        onClicked: {
-            // If state is partially, then set Checked
-            if (checkbox_state == 2) {
-                leftFirstCheckBox.checked = true
-                //UM.ActiveTool.setProperty("LeftFirst", true);
-                leftFirst.setPropertyValue("value", true)
-            }
-            else {
-                //UM.ActiveTool.setProperty("LeftFirst", leftFirstCheckBox.checked);
-                leftFirst.setPropertyValue("value", leftFirstCheckBox.checked)
-            }
+    //     function getCheckBoxState() {
+    //         if (leftFirst.properties.value == true) {
+    //             leftFirstCheckBox.checked = true
+    //             return 1;
+    //         }
+    //         else{
+    //             leftFirstCheckBox.checked = false
+    //             return 0;
+    //         }
+    //     }
+    //     onClicked: {
+    //         // If state is partially, then set Checked
+    //         if (checkbox_state == 2) {
+    //             leftFirstCheckBox.checked = true
+    //             //UM.ActiveTool.setProperty("LeftFirst", true);
+    //             leftFirst.setPropertyValue("value", true)
+    //         }
+    //         else {
+    //             //UM.ActiveTool.setProperty("LeftFirst", leftFirstCheckBox.checked);
+    //             leftFirst.setPropertyValue("value", leftFirstCheckBox.checked)
+    //         }
 
-            // After clicking the widget.leftFirst is not refreshed, fot this reason manually update the state
-            // Set zero because only 2 will show partially icon in checkbox
-            checkbox_state = 0;
-        }
-    }
+    //         // After clicking the widget.leftFirst is not refreshed, fot this reason manually update the state
+    //         // Set zero because only 2 will show partially icon in checkbox
+    //         checkbox_state = 0;
+    //     }
+    // }
 
     Item {
         id: prepareButtons
