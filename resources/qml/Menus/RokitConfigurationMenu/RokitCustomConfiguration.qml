@@ -13,14 +13,14 @@ import UM 1.3 as UM
 Item {
     id: base
 
-    property var extrudersModel:  Cura.ExtrudersModel{} 
+    property var extrudersModel: Cura.ExtrudersModel{} 
     
-    property string activeExtruderId: {
+    function getActiveExtruderId() {
         const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
         return (activeExtruder !== undefined) ? activeExtruder.id : ""
     }
 
-    property string activeExtruderName: {
+    function getActiveExtruderName() {
         const activeExtruder = extrudersModel.getItem(tabBar.currentIndex)
         return (activeExtruder !== undefined) ? activeExtruder.name : ""
     }
@@ -153,11 +153,10 @@ Item {
             property string instructionLink: Cura.MachineManager.activeStack != null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "instruction_link", ""): ""
 
             Row { // Nozzle
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasVariants
+                height: UM.Theme.getSize("print_setup_big_item").height
 
                 Label {
-                    text: (activeExtruderName === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")
@@ -179,8 +178,7 @@ Item {
             }
             
             Row { // Material
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasMaterials
+                height: UM.Theme.getSize("print_setup_big_item").height
 
                 Label {
                     text: catalog.i18nc("@label", "Material")
@@ -300,11 +298,10 @@ Item {
             // }
 
             Row  { // material_print_temperature
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasVariants
+                height: UM.Theme.getSize("print_setup_big_item").height
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: activeExtruderId
+                    containerStackId: base.getActiveExtruderId()
                     settingKey: "material_print_temperature"
                     settingStoreIndex: 0
                     labelText: catalog.i18nc("@label", "Print Temperature")
@@ -319,11 +316,10 @@ Item {
             }
 
             Row  { // material_bed_temperature
-                height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
-                visible: Cura.MachineManager.activeMachine.hasVariants
+                height: UM.Theme.getSize("print_setup_big_item").height
 
                 Cura.NumericTextFieldWithUnit {
-                    containerStackId: activeExtruderId
+                    containerStackId: base.getActiveExtruderId()
                     settingKey: "material_bed_temperature"
                     settingStoreIndex: 0
                     labelText: catalog.i18nc("@label", "Bed Temperature")

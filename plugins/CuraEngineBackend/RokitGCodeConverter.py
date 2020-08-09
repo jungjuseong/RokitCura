@@ -87,6 +87,10 @@ class RokitGCodeConverter:
         self._change_current_position_for_uv = None
         self._move_to_uv_position = None
 
+        self._machine_extruder_start_pos_x = 0.0
+        self._machine_extruder_start_pos_y = 0.0
+
+
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._repalced_gcode_list = replaced_gcode_list
 
@@ -322,12 +326,13 @@ class RokitGCodeConverter:
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _setUVCommand(self):
+        index = self._selected_extruder_index
         self._uv_position = self._command_dic["static_uv_position"]
         
-        self._uv_per_layers = self._extruder_list[self._selected_extruder_index].getProperty("uv_per_layers","value")
-        self._uv_type = self._extruder_list[self._selected_extruder_index].getProperty("uv_type","value")
-        self._uv_time = self._extruder_list[self._selected_extruder_index].getProperty("uv_time","value")
-        self._uv_dimming = self._extruder_list[self._selected_extruder_index].getProperty("uv_dimming","value") # - 미구현
+        self._uv_per_layers = self._extruder_list[index].getProperty("uv_per_layers","value")
+        self._uv_type = self._extruder_list[index].getProperty("uv_type","value")
+        self._uv_time = self._extruder_list[index].getProperty("uv_time","value")
+        self._uv_dimming = self._extruder_list[index].getProperty("uv_dimming","value") # - 미구현
         
         # UV 타입에 따른 UV 명령어 선정        
         if self._uv_type == '365':
@@ -335,12 +340,11 @@ class RokitGCodeConverter:
         elif self._uv_type == '405':
             self._uv_command = self._command_dic['uvDisinfect'] # UV type: Disinfect
 
-        if self._selected_extruder == "D6": # Left
-            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (-42.50, 0.00)
-            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (-42.50, 0.00)
-        else: # Right
-            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (42.50, 0.00)
-            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (42.50, 0.00)
+        self._machine_extruder_start_pos_x = self._extruder_list[index].getProperty("machine_extruder_start_pos_x","value")
+        self._machine_extruder_start_pos_y = self._extruder_list[index].getProperty("machine_extruder_start_pos_y","value")
+
+        self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
+        self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
 
 
     # Layer 주기를 기준으로 UV 명령어 삽입
