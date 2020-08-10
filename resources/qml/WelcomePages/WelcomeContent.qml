@@ -44,7 +44,7 @@ Item
             id: textLabel
             anchors.horizontalCenter: parent.horizontalCenter
             horizontalAlignment: Text.AlignHCenter
-            text: catalog.i18nc("@text", "Please follow these steps to set up\nOrgan Regenerator. This will only take a few moments.")
+            text: catalog.i18nc("@text", "Please setup the Organ Regenerator.")
             font: UM.Theme.getFont("medium")
             color: UM.Theme.getColor("text")
             renderType: Text.NativeRendering
