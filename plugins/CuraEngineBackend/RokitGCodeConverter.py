@@ -173,15 +173,12 @@ class RokitGCodeConverter:
 
     # Shot/Stop 명령어
     def _insertShotCommand(self, command_line) -> None:
-        if self._nozzle_type.startswith('FFF'):
-            return
-
         command = self._replaced_command
         if command_line.startswith("G1") :
             command = self._removeECommand(command)
             
             #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
-            if (self._g1_command_with_F_X_Y_params.match(command) or self.__g1_command_with_X_Y_params) and self._is_shot_moment:
+            if (self._g1_command_with_F_X_Y_params.match(command) or self._g1_command_with_X_Y_params) and self._is_shot_moment:
                 command = self._command_dic["shotStart"] + command
                 self._is_shot_moment = False
         elif command_line.startswith("G0") :
@@ -300,7 +297,7 @@ class RokitGCodeConverter:
             self._to_c_value = self._start_coord['c'] - float(self._first_z_value) + self._retraction_hop_height
 
     def _convertZCommand(self, command_line):
-        if command_line.startswith("Dispensor") and command_line.find("Z") != -1:
+        if command_line.startswith(('G0','G1')) and command_line.find("Z") != -1:
             try:
                 self._current_z_value = float(command_line[command_line.find("Z") + 1:])
                 c_location = self._current_z_value + self._to_c_value
@@ -428,12 +425,10 @@ class RokitGCodeConverter:
             extruder_selecting = "\n;start point\n"
             if self._selected_extruder_list[0] is None:
                 self._selected_extruder_list.append("D6")
-            # if self._selected_extruder == "D6": # Left
             if self._selected_extruder_list[0] == "D6":
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
             else: # Right
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
-                # extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
                 extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder_num_list[0]], 600)
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
             extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
