@@ -91,6 +91,9 @@ class RokitGCodeConverter:
         self._machine_extruder_start_pos_x = 0.0
         self._machine_extruder_start_pos_y = 0.0
 
+        self._g1_command_with_F_X_Y_params = re.compile('G1 F[0-9.]+ X[0-9.]+ Y[0-9.]+')
+        self._g1_command_with_X_Y_params = re.compile('G1 X[0-9.]+ Y[0-9.]+')
+
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._repalced_gcode_list = replaced_gcode_list
@@ -172,12 +175,13 @@ class RokitGCodeConverter:
     def _insertShotCommand(self, command_line) -> None:
         if self._nozzle_type.startswith('FFF'):
             return
-            # if line_index == len(self._repalced_gcode_list) -1:
-            #     return
+
         command = self._replaced_command
         if command_line.startswith("G1") :
             command = self._removeECommand(command)
-            if len(command_line.split()) > 3 and self._is_shot_moment == True: # *******
+            
+            #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
+            if (self._g1_command_with_F_X_Y_params.match(command) or self.__g1_command_with_X_Y_params) and self._is_shot_moment:
                 command = self._command_dic["shotStart"] + command
                 self._is_shot_moment = False
         elif command_line.startswith("G0") :
