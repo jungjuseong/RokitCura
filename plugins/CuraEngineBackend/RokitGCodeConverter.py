@@ -93,8 +93,8 @@ class RokitGCodeConverter:
         # self._machine_extruder_start_pos_x = 0.0
         # self._machine_extruder_start_pos_y = 0.0
 
-        self._g1_command_with_F_X_Y_params = re.compile('G1 F[0-9.]+ X[0-9.]+ Y[0-9.]+')
-        self._g1_command_with_X_Y_params = re.compile('G1 X[0-9.]+ Y[0-9.]+')
+        self._G1_with_F_X_Y = re.compile('G1 F[0-9.]+ X[0-9.]+ Y[0-9.]+')
+        self._G1_with_X_Y = re.compile('G1 X[0-9.]+ Y[0-9.]+')
 
         self._is_shot_moment = None
         self._is_left_extruder = None
@@ -183,13 +183,19 @@ class RokitGCodeConverter:
             command = self._removeECommand(command)
             
             #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
-            if (self._g1_command_with_F_X_Y_params.match(command) or self._g1_command_with_X_Y_params.match(command)) and self._is_shot_moment:
-                command = self._command_dic["shotStart"] + command
-                self._is_shot_moment = False
-        elif command_line.startswith("G0") :
-            if self._is_shot_moment == False:
+            if self._G1_with_F_X_Y.match(command) or self._G1_with_X_Y.match(command):
+                if  self._is_shot_moment == True:
+                    command = self._command_dic["shotStart"] + command
+                    self._is_shot_moment = False
+            else:
+                if self._is_shot_moment == False:
+                    command = self._command_dic["shotStop"] + command
+                    self._is_shot_moment = True
+
+        elif command_line.startswith("G0") and self._is_shot_moment == False:
                 command = self._command_dic["shotStop"] + command
-                self._is_shot_moment =True
+                self._is_shot_moment = True
+
         self._replaced_command = command
 
     # Marlin 커맨드 제거
