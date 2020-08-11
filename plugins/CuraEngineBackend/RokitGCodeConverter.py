@@ -157,7 +157,7 @@ class RokitGCodeConverter:
             layer_command_list = lines.split("\n")
             for num, command_line in enumerate(layer_command_list): # Command 마다
                 self._replaced_command = command_line
-                self._removeMarlinCommand(command_line)
+                self._removeUnnecessaryCommand(command_line)
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
 
                 if index != len(self._repalced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 수정해야함.
@@ -178,39 +178,50 @@ class RokitGCodeConverter:
 
     # Shot/Stop 명령어
     def _insertShotCommand(self, command_line) -> None:
+        # command : 변하는 커맨드
+        # command_line : 조건에 필요한 커맨드 (변하지 않는 커맨드)
         command = self._replaced_command
         if command_line.startswith("G1") :
             command = self._removeECommand(command)
             
             #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
-            if (self._g1_command_with_F_X_Y_params.match(command) or self._g1_command_with_X_Y_params.match(command)) and self._is_shot_moment:
+            if (self._g1_command_with_F_X_Y_params.match(command_line) or self._g1_command_with_X_Y_params.match(command_line)) and self._is_shot_moment:
                 command = self._command_dic["shotStart"] + command
                 self._is_shot_moment = False
+
+            if not self._g1_command_with_F_X_Y_params.match(command_line):
+                if not self._g1_command_with_X_Y_params.match(command_line):
+                    if self._is_shot_moment == False:
+                        command = self._command_dic["shotStop"] + command
+                        self._is_shot_moment =True
+
         elif command_line.startswith("G0") :
             if self._is_shot_moment == False:
                 command = self._command_dic["shotStop"] + command
                 self._is_shot_moment =True
         self._replaced_command = command
 
-    # Marlin 커맨드 제거
-    def _removeMarlinCommand(self, command) -> None:
-        for marlin_command in self._marlin_command_dic:
-            if command.startswith(marlin_command):
+    def _removeUnnecessaryCommand(self, command) -> None:
+        # Marlin 커맨드 제거
+        if command.startswith("M"):
+            for marlin_command in self._marlin_command_dic:
+                if command.startswith(marlin_command):
+                    self._replaced_command = None
+                    return
+        
+        if command == "G92 E0":
+            if not self._nozzle_type.startswith('FFF'):
                 self._replaced_command = None
-                return
+        # try:
+        # except Exception:
+        #     Logger.logException("w", "Could not check _is_left_extruder variable")
+        
 
     # 기타 명령어 관리
     def _replaceSomeCommands(self):
         replaced = self._replaced_line
         replaced = replaced.replace("{print_temp}", self._command_dic['printTemperature'] % self._print_temperature)
         replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x") # 7.6.8.0 --> 7.7.1.x
-        try:
-            if self._is_left_extruder:
-                replaced = replaced.replace("G92 E0\n", "") 
-            else:
-                pass
-        except Exception:
-            Logger.logException("w", "Could not check _is_left_extruder variable")
         replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
         replaced = replaced.replace("M105\n", "")
         replaced = replaced.replace("M107\n", "")
@@ -220,7 +231,7 @@ class RokitGCodeConverter:
         
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
     def _replaceStartDispenserCode(self) -> None:
-        if self._nozzle_type.startswith('FFF') or not self._is_enable_dispensor:
+        if not self._is_enable_dispensor:
             return
         replaced = self._replaced_line
         self._dispensor_shot_list = [self._extruder_list[index].getProperty("dispensor_shot","value") for index in self._data_join_sequence] 
@@ -248,7 +259,7 @@ class RokitGCodeConverter:
 #--------------------------------------------------------------------------------------------------------------------------------------------
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
     def _addExtruderSelectingCommand(self,replaced): # FFF 예외처리 필요
-        replaced += " ;selected extruder\n;Nozzle type : %s\n" % self._nozzle_type
+        replaced += " ;selected nozzle\n;Nozzle type : %s\n" % self._nozzle_type
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
             return replaced
@@ -299,9 +310,9 @@ class RokitGCodeConverter:
             replaced_command = self._addExtruderSelectingCommand(replaced_command) #*** (1)
             if self._selected_extruder != 'D6': # <Right Extruder>
                 self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
-                self._is_left_extruder = True
-            else:
                 self._is_left_extruder = False
+            else:
+                self._is_left_extruder = True
 
             self._replaced_command = replaced_command # 멤버 변수에 저장 
             self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출 (3)
