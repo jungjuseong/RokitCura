@@ -324,7 +324,7 @@ class RokitGCodeConverter:
         if self._retraction_hop_enabled == True:
             self._to_c_value = self._start_coord['c'] - float(self._first_z_value) + self._retraction_hop_height
 
-    # z좌표를 관리
+    # z좌표 관리
     def _convertZCommand(self, command_line):
         if command_line.startswith(('G0','G1')) and command_line.find("Z") != -1:
             try:
@@ -342,7 +342,8 @@ class RokitGCodeConverter:
     def _convertFromZToC(self, c_location):
         replaced = self._replaced_command
         replaced = replaced[:replaced.find("Z")]
-        replaced += "\nG0 C"+ str(c_location)
+        # replaced += "\nG0 C"+ str(c_location)
+        replaced += "\nG0 C"+ str(self._current_z_value)
         return replaced
 
     # E 커맨드 제거
@@ -449,27 +450,39 @@ class RokitGCodeConverter:
 
         # self._repalced_gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
 
+    # start 코드 다음으로 붙는 준비 명령어
     def _setBuildPlateProperty(self):
-        # 빌드 플레이트 타입
-        # start 코드 다음으로 붙는 준비 명령어
         a_command = self._command_dic["selected_extruders_A_location"]
         self._build_plate = self._global_container_stack.getProperty("machine_build_dish_type", "value")
         self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
 
-
+        # 
         if (self._build_plate_type == "Culture Dish"):
             extruder_selecting = "\n;start point\n"
-            if self._selected_extruder_list[0] is None:
+            if self._selected_extruder_list[0] is None: # 예외 처리
                 self._selected_extruder_list.append("D6")
+
             if self._selected_extruder_list[0] == "D6":
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
+                extruder_selecting += self._command_dic["set_Rokit_abs_z_Axis"] # G92 Z40
+                extruder_selecting += self._command_dic["set_Rokit_abs_c_Axis"] # G92 C40
             else: # Right
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
                 extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder_num_list[0]], 600)
+                extruder_selecting += self._command_dic["set_Rokit_abs_z_Axis"] # G92 Z40
+                extruder_selecting += self._command_dic["set_Rokit_abs_c_Axis"] # G92 C40
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
+                
+
             extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
             self._repalced_gcode_list[1] += extruder_selecting
             # gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
+            
+            self._repalced_gcode_list.insert(-1,self._command_dic['moveToAbsoluteZ'] % (40.0))
+            self._repalced_gcode_list.insert(-1,self._command_dic['moveToAbsoluteC'] % (40.0))
+            self._repalced_gcode_list.insert(-1,self._command_dic['restore_Rokit_abs_z_Axis'])
+            self._repalced_gcode_list.insert(-1,self._command_dic['restore_Rokit_abs_c_Axis'])
+        
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
             for index in range(self._build_dish_model.count):

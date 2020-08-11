@@ -14,14 +14,21 @@ class RokitCommandModel():
         "moveToAbsolute": "G90 G0 %c%.2f\n",
 
         "moveToRelativeXY": "G91 G0 X%.2f Y%.2f\n",
+
         "moveToRelativeZ": "G91 G0 Z%.2f\n",
         "moveToAbsoluteZ": "G90 G0 Z%.2f\n",
+
+        "moveToAbsoluteC": "G90 G0 C%.2f\n",
 
         "moveToRelative": "G91 G0 %c%.2f\n",
 
         "changeAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
         "changeToNewAbsoluteAxis": "G92 X%.2f Y%.2f\n",
-        "csetNewAbsoluteAxis": "G92 E0\n",
+        "setNewAbsoluteAxis": "G92 E0\n",
+        "set_Rokit_abs_z_Axis": "G92 Z40\n",
+        "set_Rokit_abs_c_Axis": "G92 C40\n",
+        "restore_Rokit_abs_z_Axis": "G92 Z0.0\n",
+        "restore_Rokit_abs_c_Axis": "G92 C0.0\n",
 
 
         "move_A_Coordinate": "G0 A%.2f F%d\n",
