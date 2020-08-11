@@ -184,7 +184,6 @@ class RokitGCodeConverter:
         if command_line.startswith("G1") :
             command = self._removeECommand(command) # E 값을 지우는 매소드
             
-            #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
             if self._G1_with_F_X_Y.match(command_line) or self._G1_with_X_Y.match(command_line):
                 if  self._is_shot_moment == True:
                     command = self._command_dic["shotStart"] + command
