@@ -7890,7 +7890,7 @@
                 {
                     "label": "INT",
                     "description": "sec of dispensor vacume",
-                    "unit": "kpa",
+                    "unit": "sec",
                     "type": "float",
                     "default_value": 0,
                     "minimum_value": "0",

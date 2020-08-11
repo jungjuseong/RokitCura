@@ -15,8 +15,8 @@ class RokitCommandModel():
 
         "moveToRelativeXY": "G91 G0 X%.2f Y%.2f\n",
         "moveToRelativeZ": "G91 G0 Z%.2f\n",
-
         "moveToAbsoluteZ": "G90 G0 Z%.2f\n",
+
         "moveToRelative": "G91 G0 %c%.2f\n",
 
         "changeAbsoluteAxisToCenter": "G92 X0.0 Y0.0\n",
@@ -69,7 +69,7 @@ class RokitCommandModel():
         "default_speed" : 10,
         "move_speed" : 20,
 
-        "selected_extruders_A_location" : { "D1" : 0, "D2" : 72, "D3" : -72, "D4" : -144, "D5" : -216 },       
+        "selected_extruders_A_location" : { "D1" : 0, "D2" : -72, "D3" : 72, "D4" : 144, "D5" : 216 },       
 
         "static_uv_position" : {"x" : 0.0,"y" : 62.0,"z" : 40.0 }
     }

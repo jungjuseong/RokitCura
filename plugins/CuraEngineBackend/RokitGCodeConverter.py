@@ -182,7 +182,7 @@ class RokitGCodeConverter:
         # command_line : 조건에 필요한 커맨드 (변하지 않는 커맨드)
         command = self._replaced_command
         if command_line.startswith("G1") :
-            command = self._removeECommand(command)
+            command = self._removeECommand(command) # E 값을 지우는 매소드
             
             #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
             if self._G1_with_F_X_Y.match(command_line) or self._G1_with_X_Y.match(command_line):
@@ -264,6 +264,7 @@ class RokitGCodeConverter:
             return replaced
 
         a_command = self._command_dic["selected_extruders_A_location"] 
+        # replaced += self._command_dic["moveToAbsoluteZ"] % (0.0) # Z축 초기화도 필요함. **
         replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300) # Z축 초기화도 필요함. **
         
         if self._selected_extruder == 'D6':
@@ -425,7 +426,7 @@ class RokitGCodeConverter:
             if i % line_seq ==0:
                 direction = 'X'
                 distance = -trip["spacing"]
-                self._line_controller = abs(self._line_controller-1) # direction control
+                self._line_controller = abs(self._line_controller - 1) # direction control
             else:
                 if self._line_controller == 1:
                     direction = 'Y'
