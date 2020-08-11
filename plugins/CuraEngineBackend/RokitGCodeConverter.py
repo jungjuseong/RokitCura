@@ -377,12 +377,12 @@ class RokitGCodeConverter:
         # self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
         # self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
         
-        if self._selected_extruder == "D6": # Left
-            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (42.50, 0.00)
-            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (42.50, 0.00)
-        else: # Right
-            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (-42.50, 0.00)
-            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (-42.50, 0.00)
+        x = 42.5
+        if (self._selected_extruder != "D6"):
+            x = -x
+
+        self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] %  (x, 0)
+        self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (x, 0)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
@@ -463,14 +463,12 @@ class RokitGCodeConverter:
                 self._selected_extruder_list.append("D6")
 
             if self._selected_extruder_list[0] == "D6":
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
-                extruder_selecting += self._command_dic["set_Rokit_abs_z_Axis"] # G92 Z40
-                extruder_selecting += self._command_dic["set_Rokit_abs_c_Axis"] # G92 C40
-            else: # Right
                 extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
+                extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 Z40
+            else: # Right
+                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
                 extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder_num_list[0]], 600)
-                extruder_selecting += self._command_dic["set_Rokit_abs_z_Axis"] # G92 Z40
-                extruder_selecting += self._command_dic["set_Rokit_abs_c_Axis"] # G92 C40
+                extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 C40
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
                 
 
