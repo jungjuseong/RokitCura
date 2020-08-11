@@ -204,9 +204,9 @@
 - retraction_speed: 이동시 필라멘트가 흡입되고 프라임되는 속도.
 - retraction_extra_prime_amount: Some material can ooze away during a travel move, which can be compensated for here.
 - retraction_min_travel: The minimum distance of travel needed for a retraction to happen at all. This helps to get fewer retractions in a small area.
-- retraction_count_max): This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
+- retraction_count_max: This setting limits the number of retractions occurring within the minimum extrusion distance window. Further retractions within this window will be ignored. This avoids retracting repeatedly on the same piece of filament, as that can flatten the filament and cause grinding issues.
 - Minimum Extrusion Distance Window(retraction_extrusion_window): The window in which the maximum retraction count is enforced. This value should be approximately the same as the retraction distance, so that effectively the number of times a retraction passes the same patch of material is limited.
-- limit_support_retractions): Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
+- limit_support_retractions: Omit retraction when moving from support to support in a straight line. Enabling this setting saves print time, but can lead to excessive stringing within the support structure.
 - retraction_combing: Combing keeps the nozzle within already printed areas when traveling. This results in slightly longer travel moves but reduces the need for retractions. If combing is off, the material will retract and the nozzle moves in a straight line to the next point. It is also possible to avoid combing over top/bottom skin areas or to only comb within the infill.
 - retraction_combing_max_distance: When non-zero, combing travel moves that are longer than this distance will use retraction.
 - travel_retract_before_outer_wall: 외벽을 시작하기 위해 이동할 때 항상 압입됨.

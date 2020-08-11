@@ -93,8 +93,8 @@ class RokitGCodeConverter:
         # self._machine_extruder_start_pos_x = 0.0
         # self._machine_extruder_start_pos_y = 0.0
 
-        self._G1_with_F_X_Y = re.compile('G1 F[0-9.]+ X[0-9.]+ Y[0-9.]+')
-        self._G1_with_X_Y = re.compile('G1 X[0-9.]+ Y[0-9.]+')
+        self._G1_with_F_X_Y_E = re.compile('G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
+        self._G1_with_X_Y_E = re.compile('G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
 
         self._is_shot_moment = None
         self._is_left_extruder = None
@@ -184,7 +184,7 @@ class RokitGCodeConverter:
         if command_line.startswith("G1") :
             command = self._removeECommand(command) # E 값을 지우는 매소드
             
-            if self._G1_with_F_X_Y.match(command_line) or self._G1_with_X_Y.match(command_line):
+            if self._G1_with_F_X_Y_E.match(command_line) or self._G1_with_X_Y_E.match(command_line):
                 if  self._is_shot_moment == True:
                     command = self._command_dic["shotStart"] + command
                     self._is_shot_moment = False
