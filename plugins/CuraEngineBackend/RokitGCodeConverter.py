@@ -185,7 +185,7 @@ class RokitGCodeConverter:
             command = self._removeECommand(command)
             
             #if len(command_line.split()) > 3 and self._is_shot_moment: # *******
-            if self._G1_with_F_X_Y.match(command) or self._G1_with_X_Y.match(command):
+            if self._G1_with_F_X_Y.match(command_line) or self._G1_with_X_Y.match(command_line):
                 if  self._is_shot_moment == True:
                     command = self._command_dic["shotStart"] + command
                     self._is_shot_moment = False
