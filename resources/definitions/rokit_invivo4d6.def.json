@@ -74,6 +74,10 @@
         "machine_height": { 
             "default_value": 20
         },
+        "machine_center_is_zero":
+        {
+            "default_value": true
+        },
         "machine_build_dish_type": { 
             "default_value": "Culture Dish:11060" 
         },
