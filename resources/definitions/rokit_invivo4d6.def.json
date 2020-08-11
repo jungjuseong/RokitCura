@@ -72,7 +72,7 @@
             "default_value": 127.6
         },
         "machine_height": { 
-            "default_value": 20
+            "default_value": 80
         },
         "machine_center_is_zero":
         {

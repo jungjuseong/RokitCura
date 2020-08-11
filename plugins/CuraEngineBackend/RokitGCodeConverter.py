@@ -378,11 +378,11 @@ class RokitGCodeConverter:
         # self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
         
         if self._selected_extruder == "D6": # Left
-            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (-42.50, 0.00)
-            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (-42.50, 0.00)
-        else: # Right
             self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (42.50, 0.00)
             self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (42.50, 0.00)
+        else: # Right
+            self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (-42.50, 0.00)
+            self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (-42.50, 0.00)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
