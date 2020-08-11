@@ -261,11 +261,10 @@ class RokitGCodeConverter:
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
             return replaced
-
         a_command = self._command_dic["selected_extruders_A_location"] 
-        # replaced += self._command_dic["moveToAbsoluteZ"] % (0.0) # Z축 초기화도 필요함. **
-        replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300) # Z축 초기화도 필요함. **
         
+        # replaced += self._command_dic["moveToAbsoluteZ"] % (0.0) # Z축 초기화도 필요함. **
+        replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300)
         if self._selected_extruder == 'D6':
             # Left --> Right
             if self._previous_extruder != 'D6':
@@ -273,7 +272,7 @@ class RokitGCodeConverter:
                 replaced += self._command_dic["changeAbsoluteAxisToCenter"]
         else:
             replaced += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
-            replaced += self._command_dic["goToLimitDetacted"]
+            replaced += self._command_dic["goToLimitDetacted"] # B좌표 끝까지 이동
             # Right --> Left
             if self._previous_extruder == 'D6':
                 replaced += self._command_dic["moveToAbsoluteXY"] % (85.0, 0.0)
@@ -486,8 +485,8 @@ class RokitGCodeConverter:
             # 수정해야함. (left right 관련된 스타트 포인트가 없음.)
             extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
             extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
-            if self._selected_extruder != 'D6':
-                extruder_selecting += self._command_dic["goToLimitDetacted"]
+            if self._selected_extruder_list[0] != 'D6':
+                extruder_selecting += self._command_dic["goToLimitDetacted"] # G78 B50.
             self._repalced_gcode_list[1] += extruder_selecting
             self._clonning(trip)
 
