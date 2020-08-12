@@ -19,7 +19,7 @@ class RokitGCodeModel():
         "MoveToAxisOrigin": "G92 X0.0 Y0.0 Z0.0 C0.0\n",
         "SetToNewAxis": "G92 X%.2f Y%.2f\n",
         "SetNewAxis": "G92 E0\n",
-        "ResetAxis": "G90 G0 Z-40.0 C-30.0\n",
+        "ResetAxis": "G90 G0 Z-40.0 C-40.0\n",
         "ResetZAxisToZeo": "G92 Z0.0\n",
         "ResetCAxisToZeo": "G92 C0.0\n",
         "MoveToAF": "G0 A%.2f F%d\n",
