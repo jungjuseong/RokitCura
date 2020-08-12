@@ -264,7 +264,7 @@ class RokitGCodeConverter:
         list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]))
         m = m.replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % list)
 
-        self._replaced_line = modified
+        self._replaced_line = m
 
     # 정수자리에 0을 삽입
     def _fillIntegerWithZero(self) -> None:
