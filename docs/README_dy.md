@@ -110,13 +110,13 @@ asdf = self._application.getMachineManager()
 
 
 <!-- selected_extruder = "\nD1\n"
-axis_control = command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
+axis_control = command_dic['RMoveToXY'] % (start_point.x(), start_point.y())
 axis_control += command_dic['MechanicallySelectExtruder'] % (0.0, 1500)
-axis_control += command_dic['changeAbsoluteAxisToCenter']
-axis_control += command_dic['changeAbsoluteAxisToCenter']
+axis_control += command_dic['MoveToAxisOrigin']
+axis_control += command_dic['MoveToAxisOrigin']
 axis_control += "G0 B20.0\n\n"
 
-axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y()) command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
+axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y()) command_dic['RMoveToXY'] % (start_point.x(), start_point.y())
 axis_control += "G92 X0.0 Y0.0\nG0 B20.0\n\n" -->
 
   >>> print("%.2f" % a)
@@ -141,7 +141,7 @@ M109		 -->
 
 # 슬라이스에 참여하는 익스트루더 알아내는 메소드
 <!-- def _parseSelectedExtruder(self, command_line):
-  replaced_command = self._replaced_command
+  replaced_command = self._replaced_code
   if command_line.startswith("T"):
       self._checkSelectedExtruder(replaced_command)
       
@@ -152,10 +152,10 @@ M109		 -->
       self._setNozzleType()
       if self._nozzle_type != "FFF":
           replaced_command = self._addExtruderSelectCommand(replaced_command)
-      self._replaced_command = replaced_command -->
+      self._replaced_code = replaced_command -->
 
 # 1차 프로젝트의 start code
 
-*** start of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n;{shot_time}\n;{vac_time}\n;{interval}\n;{shot_p}\n;{vac_p}\n{print_temp}\nM109\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.0\nM29 B\n;(*** end of start-gcode ***)
+*** start of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n;{shot_time}\n;{vac_time}\n;{nterval}\n;{shot_p}\n;{vac_p}\n{print_temp}\nM109\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.0\nM29 B\n;(*** end of start-gcode ***)
 
 *** start of end-gcode for Rokit Healthcare ***)\nG0 B0.0\nG0 A0.0\nG0 X0.0 Y0.0 C0.0 Z0.0\nM75 ;IO dis \nM79 ; light OFF\nM177 ;comp off\nM73; motor drive off\n;(*** end of end-gcode ***)

@@ -313,7 +313,7 @@ class ChangeAtZ(Script):
              "extruderTwo": self.getSettingValueByKey("i3_Change_extruderTwo"),
              "fanSpeed": self.getSettingValueByKey("j1_Change_fanSpeed")}
         ChangePrintSpeed = self.getSettingValueByKey("f1_Change_printspeed")
-        ChangeStrings = {"speed": "M220 S%f\n",
+        TranslateToCommand = {"speed": "M220 S%f\n",
             "flowrate": "M221 S%f\n",
             "flowrateOne": "M221 T0 S%f\n",
             "flowrateTwo": "M221 T1 S%f\n",
@@ -465,7 +465,7 @@ class ChangeAtZ(Script):
                                     modified_gcode += "M117 Printing... ch@%5.1f\n" % z
                                 for key in ChangeProp:
                                     if ChangeProp[key]:
-                                        modified_gcode += ChangeStrings[key] % float(old[key]+(float(target_values[key])-float(old[key]))/float(twLayers)*float(done_layers+1))
+                                        modified_gcode += TranslateToCommand[key] % float(old[key]+(float(target_values[key])-float(old[key]))/float(twLayers)*float(done_layers+1))
                                 done_layers += 1
                             else:
                                 state = 4
@@ -479,7 +479,7 @@ class ChangeAtZ(Script):
                                     else: #executes on RepRap, UM2 with Ultigcode and Cura setting
                                         for key in ChangeProp:
                                             if ChangeProp[key]:
-                                                modified_gcode += ChangeStrings[key] % float(old[key])
+                                                modified_gcode += TranslateToCommand[key] % float(old[key])
                         # re-activates the plugin if executed by pre-print G-command, resets settings:
                         if (z < targetZ or layer == 0) and state >= 3: #resets if below change level or at level 0
                             state = 2
@@ -493,7 +493,7 @@ class ChangeAtZ(Script):
                             else: #executes on RepRap, UM2 with Ultigcode and Cura setting
                                 for key in ChangeProp:
                                     if ChangeProp[key]:
-                                        modified_gcode += ChangeStrings[key] % float(old[key])
+                                        modified_gcode += TranslateToCommand[key] % float(old[key])
             data[index] = modified_gcode
             index += 1
         return data

@@ -9,7 +9,7 @@ import re
 import Arcus #For typing.
 
 from cura.CuraApplication import CuraApplication
-from cura.Machines.Models.RokitCommandModel import RokitCommandModel
+from cura.Machines.Models.RokitGCodeModel import RokitGCodeModel
 from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
 
 # class dishType():
@@ -33,18 +33,23 @@ class RokitGCodeConverter:
         self._start_coord = { 'c': -40.0, 'z': -40.0 }
 
         # 외부
-        self._application = None
-        self._global_container_stack = None
+        self._application = CuraApplication.getInstance()
+        self._global_container_stack = self._application.getMachineManager().activeMachine
         self._extruder_list = None 
 
         # 필요
-        self._command_model = None
+        self._gcode_model = RokitGCodeModel()        
+        self._TraslateToGcode = self._gcode_model.TranslateToGCode # {}
+        self._marlin_code_dic = self._gcode_model.marlin_codes # {}
+
         self._build_dish_model = None
-        self._data_join_sequence = []
-        self._extruder_sequence = []
         
+        # for naming extruders
+        self._JoinSequence = [1,2,3,4,5,0] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
+        self._ExtruderSequence = [0,1,2,3,4,5] # - 익스트루더 순서 : 호출하는 데이터에 사용
+
         # 프린트 온도 설정
-        self._print_temperature_list = []
+        self._print_temperature = []
 
         # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p
         self._is_enable_dispensor = None
@@ -57,7 +62,6 @@ class RokitGCodeConverter:
         self._uv_dimming = []
 
         # 외부 dict
-        self._command_dic = {}
         self._dish = {}
 
         # z를 c좌표로
@@ -84,20 +88,19 @@ class RokitGCodeConverter:
 
         # *** G-code Line(command) 관리 변수
         self._repalced_gcode_list = []        
-        self._replaced_command = ""
+        self._replaced_code = ""
         self._replaced_line = ""
 
         self._change_current_position_for_uv = None
         self._move_to_uv_position = None
 
-        # self._machine_extruder_start_pos_x = 0.0
-        # self._machine_extruder_start_pos_y = 0.0
-
-        self._G1_with_F_X_Y_E = re.compile('G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
-        self._G1_with_X_Y_E = re.compile('G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
+        # match patterns
+        self._G1_F_X_Y_E = re.compile('G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
+        self._G1_X_Y_E = re.compile('G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
 
         self._is_shot_moment = None
         self._is_left_extruder = None
+        self._left_extruder_x_position = 42.5
 
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
@@ -108,20 +111,14 @@ class RokitGCodeConverter:
 
     # 멤버 변수들 초기화
     def _initialiizeConverter(self):
-        self._application = CuraApplication.getInstance()
-        self._global_container_stack = self._application.getMachineManager().activeMachine
 
-        self._command_model = RokitCommandModel()
         self._build_dish_model = RokitBuildDishModel()
-
-        self._command_dic = self._command_model.ChangeStrings # {}
-        self._marlin_command_dic = self._command_model.marlin["command"] # {}
         self._calculateCLocation()
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
 
     def _calculateCLocation(self) -> None:
-        # -------------------------------------------------------------------------------------가장 처음 등장하는 Z값 찾기
+        # --가장 처음 등장하는 Z값 찾기
         first_z = self._repalced_gcode_list[2].find("Z")
         self._first_z_value = self._repalced_gcode_list[2][first_z + 1 : self._repalced_gcode_list[2].find("\n",first_z)]
         self._to_c_value = self._start_coord['c'] - float(self._first_z_value)
@@ -129,25 +126,28 @@ class RokitGCodeConverter:
     # 시작 (준비 작업)
     def run(self):
         self._initialiizeConverter()
-
         self._getPrintProperty() # gcode 가져오기
         self._convertGCode() # 기본 변환
         self._setBuildPlateProperty() # 플레이트에 따라 변환 # 수정 필요
 
+    def _getExtrudersProperty(self, index, property):
+        return self._global_container_stack.extruderList[index].getProperty(property,"value")
+
+    def _getGlobalContainerStackProperty(self, property):
+        return self._global_container_stack.getProperty(property,"value")
+
+    def _getVariantName(self, index):
+        return self._global_container_stack.extruderList[index].variant.getName()
+
     def _getPrintProperty(self):
-        self._data_join_sequence = [1,2,3,4,5,0] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
-        self._extruder_sequence = [0,1,2,3,4,5] # - 익스트루더 순서 : 호출하는 데이터에 사용
-
-        self._extruder_list = self._global_container_stack.extruderList
-
         # 프린트 온도 설정
-        self._print_temperature_list =[self._extruder_list[index].getProperty("material_print_temperature","value") for index in self._data_join_sequence] # - 데이터 조인 순서
-        self._print_temperature_list.append(self._global_container_stack.getProperty("material_bed_temperature","value"))
-        self._print_temperature = " ".join(map(str,self._print_temperature_list))
+        list =[self._getExtrudersProperty(index,"material_print_temperature") for index in self._JoinSequence] # - 데이터 조인 순서
+        list.append(self._getGlobalContainerStackProperty("material_bed_temperature"))
+        self._print_temperature = " ".join(map(str, list))
         # UV 사용 여부
-        self._uv_enable_list = [self._extruder_list[index].getProperty("uv_enable","value") for index in self._extruder_sequence]
+        self._uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._ExtruderSequence]
         # Dispenser 사용 여부
-        self._is_enable_dispensor = self._global_container_stack.getProperty("dispensor_enable","value")
+        self._is_enable_dispensor = self._getGlobalContainerStackProperty("dispensor_enable")
         
     # Main
     def _convertGCode(self):
@@ -156,16 +156,16 @@ class RokitGCodeConverter:
 
             layer_command_list = lines.split("\n")
             for num, command_line in enumerate(layer_command_list): # Command 마다
-                self._replaced_command = command_line
-                self._removeUnnecessaryCommand(command_line)
+                self._replaced_code = command_line
+                self._removeUnnecessaryCode(command_line)
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
 
                 if index != len(self._repalced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 수정해야함.
                     self._insertShotCommand(command_line)
                     self._convertZCommand(command_line)
 
-                if self._replaced_command is not None:
-                    layer_command_list[num] = self._replaced_command
+                if self._replaced_code is not None:
+                    layer_command_list[num] = self._replaced_code
                 else:
                     layer_command_list[num] = ";{blank}"
             self._replaced_line = "\n".join(layer_command_list)
@@ -180,36 +180,38 @@ class RokitGCodeConverter:
     def _insertShotCommand(self, command_line) -> None:
         # command : 변하는 커맨드
         # command_line : 조건에 필요한 커맨드 (변하지 않는 커맨드)
-        command = self._replaced_command
+        gcode = self._replaced_code
         if command_line.startswith("G1") :
-            command = self._removeECommand(command) # E 값을 지우는 매소드
+            gcode = self._removeECommand(gcode) # E 값을 지우는 매소드
             
-            if self._G1_with_F_X_Y_E.match(command_line) or self._G1_with_X_Y_E.match(command_line):
+            if self._G1_F_X_Y_E.match(command_line) or self._G1_X_Y_E.match(command_line):
                 if  self._is_shot_moment == True:
-                    command = self._command_dic["shotStart"] + command
+                    gcode = self._TraslateToGcode["StartShot"] + gcode
                     self._is_shot_moment = False
             else:
                 if self._is_shot_moment == False:
-                    command = self._command_dic["shotStop"] + command
+                    gcode = self._TraslateToGcode["StopShot"] + gcode
                     self._is_shot_moment = True
 
         elif command_line.startswith("G0") and self._is_shot_moment == False:
-                command = self._command_dic["shotStop"] + command
+                gcode = self._TraslateToGcode["StopShot"] + gcode
                 self._is_shot_moment = True
 
-        self._replaced_command = command
+        self._replaced_code = gcode
 
-    def _removeUnnecessaryCommand(self, command) -> None:
+    def _removeUnnecessaryCode(self, code) -> None:
         # Marlin 커맨드 제거
-        if command.startswith("M"):
-            for marlin_command in self._marlin_command_dic:
-                if command.startswith(marlin_command):
-                    self._replaced_command = None
+        MarlinCodePattern = re.compile("M140|M190|M104|M109|M141|M205")
+
+        if code.startswith("M"):
+            for marlin_code in self._marlin_code_dic:
+                if code.startswith(marlin_code):
+                    self._replaced_code = None
                     return
         
-        if command == "G92 E0":
+        if code == "G92 E0":
             if not self._nozzle_type.startswith('FFF'):
-                self._replaced_command = None
+                self._replaced_code = None
         # try:
         # except Exception:
         #     Logger.logException("w", "Could not check _is_left_extruder variable")
@@ -218,8 +220,8 @@ class RokitGCodeConverter:
     # 기타 명령어 관리
     def _replaceSomeCommands(self):
         replaced = self._replaced_line
-        replaced = replaced.replace("{print_temp}", self._command_dic['printTemperature'] % self._print_temperature)
-        replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x") # 7.6.8.0 --> 7.7.1.x
+        replaced = replaced.replace("{print_temp}", self._TraslateToGcode["SetPrintTemperature"] % self._print_temperature)
+        replaced = replaced.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
         replaced = replaced.replace("G92 E0\nG92 E0", "G92 E0")
         replaced = replaced.replace("M105\n", "")
         replaced = replaced.replace("M107\n", "")
@@ -231,24 +233,25 @@ class RokitGCodeConverter:
     def _replaceStartDispenserCode(self) -> None:
         if not self._is_enable_dispensor:
             return
-        replaced = self._replaced_line
-        self._dispensor_shot_list = [self._extruder_list[index].getProperty("dispensor_shot","value") for index in self._data_join_sequence] 
-        self._dispensor_vac_list = [self._extruder_list[index].getProperty("dispensor_vac","value") for index in self._data_join_sequence]
-        self._dispensor_int_list = [self._extruder_list[index].getProperty("dispensor_int","value") for index in self._data_join_sequence]
-        self._dispensor_shot_pressure_list = [self._extruder_list[index].getProperty("dispensor_shot_power","value") for index in self._data_join_sequence]
-        self._dispensor_vac_pressure_list = [self._extruder_list[index].getProperty("dispensor_vac_power","value") for index in self._data_join_sequence]
+
+        self._dispensor_shot_list = [self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence] 
+        self._dispensor_vac_list = [self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]
+        self._dispensor_int_list = [self._getExtrudersProperty(index,"dispensor_int") for index in self._JoinSequence]
+        self._dispensor_shot_pressure_list = [self._getExtrudersProperty(index,"dispensor_shot_power") for index in self._JoinSequence]
+        self._dispensor_vac_pressure_list = [self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]
         
         shot_times = " ".join(map(str,self._dispensor_shot_list))
         vac_times = " ".join(map(str,self._dispensor_vac_list))
-        intervals = " ".join(map(str,self._dispensor_int_list))
+        interval = " ".join(map(str,self._dispensor_int_list))
         shot_pressures = " ".join(map(str,self._dispensor_shot_pressure_list))
         vac_pressures = " ".join(map(str,self._dispensor_vac_pressure_list))
         
-        replaced = replaced.replace(";{shot_time}", self._command_dic['shotTime'] % shot_times)
-        replaced = replaced.replace(";{vac_time}", self._command_dic['vacuumTime'] % vac_times)
-        replaced = replaced.replace(";{interval}", self._command_dic['interval'] % intervals)
-        replaced = replaced.replace(";{shot_p}", self._command_dic['shotPressure'] % shot_pressures)
-        replaced = replaced.replace(";{vac_p}", self._command_dic['vacuumPressure'] % vac_pressures)
+        replaced = self._replaced_line
+        replaced = replaced.replace(";{shot_time}", self._TraslateToGcode['SetShotTime'] % shot_times)
+        replaced = replaced.replace(";{vac_time}", self._TraslateToGcode['SetVacuumTime'] % vac_times)
+        replaced = replaced.replace(";{interval}", self._TraslateToGcode['Interval'] % interval)
+        replaced = replaced.replace(";{shot_p}", self._TraslateToGcode['SetShotPressure'] % shot_pressures)
+        replaced = replaced.replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % vac_pressures)
         self._replaced_line = replaced
 
     # 정수자리에 0을 삽입
@@ -257,27 +260,27 @@ class RokitGCodeConverter:
 #--------------------------------------------------------------------------------------------------------------------------------------------
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
     def _addExtruderSelectingCommand(self,replaced): # FFF 예외처리 필요
-        replaced += " ;selected nozzle\n;Nozzle type : %s\n" % self._nozzle_type
+        replaced += " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
             return replaced
-        a_command = self._command_dic["selected_extruders_A_location"] 
+        a_command = self._TraslateToGcode["AAxisPosition"] 
         
-        # replaced += self._command_dic["moveToAbsoluteZ"] % (0.0) # Z축 초기화도 필요함. **
-        replaced += self._command_dic["move_B_Coordinate_with_speed"] % (0.0, 300)
+        # replaced += self._TraslateToGcode["MoveToZ"] % (0.0) # Z축 초기화도 필요함. **
+        replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300)
         if self._selected_extruder == 'D6':
             # Left --> Right
             if self._previous_extruder != 'D6':
-                replaced += self._command_dic["moveToAbsoluteXY"] % (-85.0, 0.0)
-                replaced += self._command_dic["changeAbsoluteAxisToCenter"]
+                replaced += self._TraslateToGcode["RMoveToXY"] % (-85.0, 0.0)
+                replaced += self._TraslateToGcode["MoveToAxisOrigin"]
         else:
-            replaced += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder], 600)
-            replaced += self._command_dic["goToLimitDetacted"] # B좌표 끝까지 이동
+            replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600)
+            replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
             # Right --> Left
             if self._previous_extruder == 'D6':
-                replaced += self._command_dic["moveToAbsoluteXY"] % (85.0, 0.0)
-                replaced += self._command_dic["changeAbsoluteAxisToCenter"]
-        # replaced += self._command_dic["waitingTemperature"]       # M109 Keep
+                replaced += self._TraslateToGcode["RMoveToXY"] % (85.0, 0.0)
+                replaced += self._TraslateToGcode["MoveToAxisOrigin"]
+
         return replaced
 
     # 익스트루더 index 기록
@@ -288,18 +291,15 @@ class RokitGCodeConverter:
         
         self._previous_extruder_index = self._selected_extruder_index
         self._previous_extruder = self._selected_extruder
-    
-    def _setNozzleType(self, replaced_command) -> None:
-        self._nozzle_type = self._extruder_list[self._selected_extruder_index].variant.getName()
 
     # T 명령어를 통해 선택한 시린지 확인
     def _parseSelectedExtruder(self, command_line) -> None:
-        replaced_command = self._replaced_command
+        replaced_command = self._replaced_code
 
         if command_line.startswith("T"):
             # -------------------------------------------------------------------------------------익스트루더 인덱스 및 이름 저장
             self._selected_extruder_index = int(replaced_command[-1]) # 현재 익스트루더의 인덱스
-            self._setNozzleType(replaced_command)
+            self._nozzle_type = self._getVariantName(self._selected_extruder_index)
             # -------------------------------------------------------------------------------------익스트루더 이름 변환
             replaced_command = replaced_command.replace("T0","D6")
             replaced_command = replaced_command.replace("T","D")
@@ -312,77 +312,73 @@ class RokitGCodeConverter:
             else:
                 self._is_left_extruder = True
 
-            self._replaced_command = replaced_command # 멤버 변수에 저장 
+            self._replaced_code = replaced_command # 멤버 변수에 저장 
             self._setUVCommand() # 익스트루더가 바뀔떄 마다 호출 (3)
             self._noteSelectedExtruder() # 사용되는 익스트루더를 리스트에 저장
 
     # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업
     def _affectCLocationWithHop(self) -> None:
-        selected_num = self._selected_extruder_index
-        self._retraction_hop_enabled = self._extruder_list[selected_num].getProperty("retraction_hop_enabled","value")
-        self._retraction_hop_height = self._extruder_list[selected_num].getProperty("retraction_hop_after_extruder_switch_height","value")
+        index = self._selected_extruder_index
+        self._retraction_hop_enabled = self._getExtrudersProperty(index,"retraction_hop_enabled")
+        self._retraction_hop_height = self._getExtrudersProperty(index,"retraction_hop_after_extruder_switch_height")
         if self._retraction_hop_enabled == True:
             self._to_c_value = self._start_coord['c'] - float(self._first_z_value) + self._retraction_hop_height
 
     # z좌표 관리
-    def _convertZCommand(self, command_line):
-        if command_line.startswith(('G0','G1')) and command_line.find("Z") != -1:
+    def _convertZCommand(self, gcode):
+        if gcode.startswith(('G0','G1')) and gcode.find("Z") != -1:
             try:
-                self._current_z_value = float(command_line[command_line.find("Z") + 1:]) # ***
+                self._current_z_value = float(gcode[gcode.find("Z") + 1:]) # ***
                 c_location = self._current_z_value + self._to_c_value
                 c_location = round(c_location,2)
 
                 if self._selected_extruder != 'D6': # Right
-                    self._replaced_command = self._convertFromZToC(c_location) # C 좌표로 변환
+                    self._replaced_code = self._convertFromZToC(c_location) # C 좌표로 변환
             except Exception:
                 Logger.logException("w","Could not convert from Z to C")
                 pass
 
     # C 좌표로 변환
     def _convertFromZToC(self, c_location):
-        replaced = self._replaced_command
+        replaced = self._replaced_code
         replaced = replaced[:replaced.find("Z")]
-        # replaced += "\nG0 C"+ str(c_location)
         replaced += "\nG0 C"+ str(self._current_z_value)
         return replaced
 
     # E 커맨드 제거
-    def _removeECommand(self, command_line):
+    def _removeECommand(self, gcode):
         if self._nozzle_type.startswith('FFF'):
-            return command_line
-        if command_line.find("E") != -1:
-            command_line = command_line[:command_line.find("E")-1]
-        return command_line
+            return gcode
+        if gcode.find("E") != -1:
+            gcode = gcode[:gcode.find("E")-1]
+        return gcode
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _setUVCommand(self):
         index = self._selected_extruder_index
-        self._uv_position = self._command_dic["static_uv_position"]
-        
-        self._uv_per_layers = self._extruder_list[index].getProperty("uv_per_layers","value")
-        self._uv_type = self._extruder_list[index].getProperty("uv_type","value")
-        self._uv_time = self._extruder_list[index].getProperty("uv_time","value")
-        self._uv_dimming = self._extruder_list[index].getProperty("uv_dimming","value") # - 미구현
+        self._uv_position = self._TraslateToGcode["UVDevicePosition"]
+        self._uv_per_layers = self._getExtrudersProperty(index,"uv_per_layers")
+        self._uv_type = self._getExtrudersProperty(index,"uv_type")
+        self._uv_time = self._getExtrudersProperty(index,"uv_time")
+        self._uv_dimming = self._getExtrudersProperty(index,"uv_dimming") # - 미구현
         
         # UV 타입에 따른 UV 명령어 선정        
         if self._uv_type == '365':
-            self._uv_command = self._command_dic['uvCuring'] # UV type: Curing
+            self._uv_on_code = self._TraslateToGcode['UVCuringOn'] # UV type: Curing
+            self._uv_off_code = self._TraslateToGcode['UVCuringOff'] # UV type: Curing
         elif self._uv_type == '405':
-            self._uv_command = self._command_dic['uvDisinfect'] # UV type: Disinfect
+            self._uv_on_code = self._TraslateToGcode['UVDisinfectionOn'] # UV type: Disinfect
+            self._uv_off_code = self._TraslateToGcode['UVDisinfectionOff'] # UV type: Disinfect
 
-        # self._machine_extruder_start_pos_x = self._extruder_list[index].getProperty("machine_extruder_start_pos_x","value")
-        # self._machine_extruder_start_pos_y = self._extruder_list[index].getProperty("machine_extruder_start_pos_y","value")
-        # self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
-        # self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (self._machine_extruder_start_pos_x, self._machine_extruder_start_pos_y)
         
-        x = 42.5
+        x_position = self._left_extruder_x_position
         if (self._selected_extruder != "D6"):
-            x = -x
+            x_position = -x_position
 
-        self._change_current_position_for_uv = self._command_dic['changeToNewAbsoluteAxis'] %  (x, 0)
-        self._move_to_uv_position = self._command_dic['moveToAbsoluteXY'] % (x, 0)
+        self._change_current_position_for_uv = self._TraslateToGcode['SetToNewAxis'] %  (x_position, 0)
+        self._move_to_uv_position = self._TraslateToGcode['RMoveToXY'] % (x_position, 0)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
@@ -395,19 +391,19 @@ class RokitGCodeConverter:
                     self._current_z_value = 0.00
                 if (self._layer_no % self._uv_per_layers) == 0:
                     uv_part = ";UV\n"
-                    uv_part += self._command_dic['moveToOriginCenter']
+                    uv_part += self._TraslateToGcode['MoveToOrigin']
                     uv_part += self._change_current_position_for_uv
-                    uv_part += self._command_dic['moveToAbsoluteXY'] % (self._uv_position['x'], self._uv_position['y'])
-                    uv_part += self._command_dic['moveToAbsoluteZ'] % (self._uv_position['z'])
-                    uv_part += self._uv_command['on'] # UV ON
-                    uv_part += self._command_dic['uvTime'] % (self._uv_time * 1000)
-                    uv_part += self._uv_command['off'] # UV Off
+                    uv_part += self._TraslateToGcode['RMoveToXY'] % (self._uv_position['x'], self._uv_position['y'])
+                    uv_part += self._TraslateToGcode['MoveToZ'] % (self._uv_position['z'])
+                    uv_part += self._uv_on_code # UV ON
+                    uv_part += self._TraslateToGcode['UVTime'] % (self._uv_time * 1000)
+                    uv_part += self._uv_off_code # UV Off
                     if self._selected_extruder != 'D6':
-                        uv_part += self._command_dic['moveToAbsoluteZ'] % (0.00)
+                        uv_part += self._TraslateToGcode['MoveToZ'] % (0.00)
                     else:
-                        uv_part += self._command_dic['moveToAbsoluteZ'] % (self._current_z_value)
+                        uv_part += self._TraslateToGcode['MoveToZ'] % (self._current_z_value)
                     uv_part += self._move_to_uv_position
-                    uv_part += self._command_dic['changeToNewAbsoluteAxis'] % (0.00, 0.00)
+                    uv_part += self._TraslateToGcode['SetToNewAxis'] % (0.00, 0.00)
                     self._replaced_line += uv_part
 
     # Well plate 복제 기능
@@ -417,7 +413,7 @@ class RokitGCodeConverter:
         # z_height = trip["z"]
 
         gcode_clone = self._repalced_gcode_list[2:-1]
-        std_str = self._command_dic['moveToOriginCenter']
+        std_str = self._TraslateToGcode['MoveToOrigin']
         self._line_controller = 1 # forward
 
         gcode_body = []
@@ -437,23 +433,23 @@ class RokitGCodeConverter:
             # control spacing about build plate after printing one model
             gcode_spacing = ";hop_spacing\n"
             gcode_spacing += "G92 E0\n" 
-            gcode_spacing += self._command_dic['moveToOriginCenter']
-            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', -4.0)
-            gcode_spacing += self._command_dic['moveToRelative'] % (direction , distance)
-            gcode_spacing += self._command_dic['moveToAbsolute'] % ('C', self._start_coord['c'])
-            gcode_spacing += self._command_dic['changeAbsoluteAxisToCenter']
+            gcode_spacing += self._TraslateToGcode['MoveToOrigin']
+            gcode_spacing += self._TraslateToGcode['MoveTo'] % ('C', -4.0)
+            gcode_spacing += self._TraslateToGcode['RMoveTo'] % (direction , distance)
+            gcode_spacing += self._TraslateToGcode['MoveTo'] % ('C', self._start_coord['c'])
+            gcode_spacing += self._TraslateToGcode['MoveToAxisOrigin']
 
             gcode_clone.insert(0,gcode_spacing)
             self._repalced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
             # gcode_body.append(gcode_clone)
             gcode_clone.remove(gcode_spacing)
 
-        # self._repalced_gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
+        # self._repalced_gcode_list.insert(-1,self._TraslateToGcode['SetToNewAxis'] % (11, start_point.y()))
 
     # start 코드 다음으로 붙는 준비 명령어
     def _setBuildPlateProperty(self):
-        a_command = self._command_dic["selected_extruders_A_location"]
-        self._build_plate = self._global_container_stack.getProperty("machine_build_dish_type", "value")
+        a_command = self._TraslateToGcode["AAxisPosition"]
+        self._build_plate = self._getGlobalContainerStackProperty("machine_build_dish_type")
         self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
 
         # 
@@ -463,23 +459,23 @@ class RokitGCodeConverter:
                 self._selected_extruder_list.append("D6")
 
             if self._selected_extruder_list[0] == "D6":
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0)
-                extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 Z40
+                extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (self._left_extruder_x_position, 0)
+                extruder_selecting += self._TraslateToGcode["ResetAxis"] # G92 Z40
             else: # Right
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0)
-                extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder_num_list[0]], 600)
-                extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 C40
-                extruder_selecting += self._command_dic["goToLimitDetacted"]
+                extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (-self._left_extruder_x_position, 0)
+                extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_num_list[0]], 600)
+                extruder_selecting += self._TraslateToGcode["ResetAxis"] # G92 C40
+                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"]
                 
 
-            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+            extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
             self._repalced_gcode_list[1] += extruder_selecting
-            # gcode_list.insert(-1,self._command_dic['changeToNewAbsoluteAxis'] % (11, start_point.y()))
+            # gcode_list.insert(-1,self._TraslateToGcode['SetToNewAxis'] % (11, start_point.y()))
             
-            self._repalced_gcode_list.insert(-1,self._command_dic['moveToAbsoluteZ'] % (40.0))
-            self._repalced_gcode_list.insert(-1,self._command_dic['moveToAbsoluteC'] % (40.0))
-            self._repalced_gcode_list.insert(-1,self._command_dic['restore_Rokit_abs_z_Axis'])
-            self._repalced_gcode_list.insert(-1,self._command_dic['restore_Rokit_abs_c_Axis'])
+            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
+            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
+            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
+            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
         
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
@@ -490,14 +486,14 @@ class RokitGCodeConverter:
                     break
 
             start_point = trip["start_point"]
-            # if self._nozzle_type == "FFF Extruder" or self._nozzle_type.endswith("Nozzle"):
+            # if self._nozzle_type.startsWith == "FFF" or self._nozzle_type.endswith("Nozzle"):
             # 원점 재설정 # 익스트루더 선택 (left, r1, r2, r3, r4, r5)
             extruder_selecting = "\n;start point\n"
             # 수정해야함. (left right 관련된 스타트 포인트가 없음.)
-            extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (start_point.x(), start_point.y())
-            extruder_selecting += self._command_dic['changeAbsoluteAxisToCenter']
+            extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (start_point.x(), start_point.y())
+            extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
             if self._selected_extruder_list[0] != 'D6':
-                extruder_selecting += self._command_dic["goToLimitDetacted"] # G78 B50.
+                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
             self._repalced_gcode_list[1] += extruder_selecting
             self._clonning(trip)
 
