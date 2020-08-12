@@ -159,7 +159,7 @@ class RokitGCodeConverter:
                 self._removeUnnecessaryCode(command_line)
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
 
-                if index != len(self._repalced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 수정해야함.
+                if index != len(self._repalced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 안하게 수정해야함.
                     self._insertShotCommand(command_line)
                     self._convertZCommand(command_line)
 
@@ -175,7 +175,7 @@ class RokitGCodeConverter:
             
             self._replaceLayerInfo()
 
-            self._replaceStartDispenserCode() # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
+            self._replaceStartDispenserCode(index) # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
             self._repalced_gcode_list[index] = self._replaced_line
 
     # Shot/Stop 명령어
@@ -243,7 +243,9 @@ class RokitGCodeConverter:
         self._replaced_line = m
 
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
-    def _replaceStartDispenserCode(self) -> None:
+    def _replaceStartDispenserCode(self, layer_index) -> None:
+        if layer_index != 1: # start 코드일때만 
+            return
         if not self._is_enable_dispensor:
             return
 
@@ -264,7 +266,7 @@ class RokitGCodeConverter:
         list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]))
         m = m.replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % list)
 
-        self._replaced_line = modified
+        self._replaced_line = m
 
     # 정수자리에 0을 삽입
     def _fillIntegerWithZero(self) -> None:
@@ -278,18 +280,19 @@ class RokitGCodeConverter:
             return replaced
         a_command = self._TraslateToGcode["AAxisPosition"] 
         
-        # replaced += self._TraslateToGcode["MoveToZ"] % (0.0) # Z축 초기화도 필요함. **
         replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300)
         if self._selected_extruder == 'D6':
-            # Left --> Right
+            # Right --> Left
             if self._previous_extruder != 'D6':
+                replaced += self._TraslateToGcode["MoveToC"] % (40.0) # Right Extruder를 위로 올림
                 replaced += self._TraslateToGcode["RMoveToXY"] % (-85.0, 0.0)
                 replaced += self._TraslateToGcode["MoveToAxisOrigin"]
         else:
             replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600)
             replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
-            # Right --> Left
+            # Left --> Right
             if self._previous_extruder == 'D6':
+                replaced += self._TraslateToGcode["MoveToZ"] % (40.0) # Left Extruder를 위로 올림
                 replaced += self._TraslateToGcode["RMoveToXY"] % (85.0, 0.0)
                 replaced += self._TraslateToGcode["MoveToAxisOrigin"]
 
