@@ -42,8 +42,8 @@ class RokitGCodeConverter:
         self._TraslateToGcode = self._gcode_model.TranslateToGCode # {}
         self._marlin_code_dic = self._gcode_model.marlin_codes # {}
 
-        self._build_dish_model = None
-        
+        self._build_dish_model = RokitBuildDishModel()
+
         # for naming extruders
         self._JoinSequence = [1,2,3,4,5,0] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
         self._ExtruderSequence = [0,1,2,3,4,5] # - 익스트루더 순서 : 호출하는 데이터에 사용
@@ -87,7 +87,7 @@ class RokitGCodeConverter:
         self._build_plate_type = ""
 
         # *** G-code Line(command) 관리 변수
-        self._repalced_gcode_list = []        
+        self._replaced_gcode_list = []        
         self._replaced_code = ""
         self._replaced_line = ""
 
@@ -103,23 +103,21 @@ class RokitGCodeConverter:
 
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
-        self._repalced_gcode_list = replaced_gcode_list
+        self._replaced_gcode_list = replaced_gcode_list
 
     def getReplacedlist(self):
-        return self._repalced_gcode_list
+        return self._replaced_gcode_list
 
     # 멤버 변수들 초기화
     def _initialiizeConverter(self):
-
-        self._build_dish_model = RokitBuildDishModel()
         self._calculateCLocation()
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
 
     def _calculateCLocation(self) -> None:
         # --가장 처음 등장하는 Z값 찾기
-        first_z = self._repalced_gcode_list[2].find("Z")
-        self._first_z_value = self._repalced_gcode_list[2][first_z + 1 : self._repalced_gcode_list[2].find("\n",first_z)]
+        first_z = self._replaced_gcode_list[2].find("Z")
+        self._first_z_value = self._replaced_gcode_list[2][first_z + 1 : self._replaced_gcode_list[2].find("\n",first_z)]
         self._to_c_value = self._start_coord['c'] - float(self._first_z_value)
         
     # 시작 (준비 작업)
@@ -150,7 +148,7 @@ class RokitGCodeConverter:
         
     # Main
     def _convertGCode(self):
-        for index, lines in enumerate(self._repalced_gcode_list): # lines(layer) 마다
+        for index, lines in enumerate(self._replaced_gcode_list): # lines(layer) 마다
             self._replaced_line = lines
 
             layer_command_list = lines.split("\n")
@@ -159,7 +157,7 @@ class RokitGCodeConverter:
                 self._removeUnnecessaryCode(command_line)
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
 
-                if index != len(self._repalced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 안하게 수정해야함.
+                if index != len(self._replaced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 안하게 수정해야함.
                     self._insertShotCommand(command_line)
                     self._convertZCommand(command_line)
 
@@ -176,7 +174,7 @@ class RokitGCodeConverter:
             self._replaceLayerInfo()
 
             self._replaceStartDispenserCode(index) # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
-            self._repalced_gcode_list[index] = self._replaced_line
+            self._replaced_gcode_list[index] = self._replaced_line
 
     # Shot/Stop 명령어
     def _insertShotCommand(self, command_line) -> None:
@@ -217,30 +215,24 @@ class RokitGCodeConverter:
 
     # 기타 명령어 관리
     def _replaceSomeCommands(self):
-        m = self._replaced_line
-        m = m.replace("{print_temp}", self._TraslateToGcode["SetPrintTemperature"] % self._print_temperature)
-        m = m.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
-        m = m.replace("G92 E0\nG92 E0", "G92 E0")
-        m = m.replace("M105\n", "")
-        m = m.replace("M107\n", "")
-        m = m.replace("M82 ;absolute extrusion mode\n", "")
-        m = m.replace(";{blank}\n", "")
-        self._replaced_line = m
-    
+        self._replaced_line = self._replaced_line\
+            .replace("{print_temp}", self._TraslateToGcode["SetPrintTemperature"] % self._print_temperature)\
+            .replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")\
+            .replace("G92 E0\nG92 E0", "G92 E0")\
+            .replace("M105\n", "")\
+            .replace("M107\n", "")\
+            .replace("M82 ;absolute extrusion mode\n", "")\
+            .replace(";{blank}\n", "")   
 
     def _replaceLayerInfo(self) -> None:
-        m = self._replaced_line
+        layer_height = " ".join(map(str,[self._getExtrudersProperty(index,"layer_height") for index in self._JoinSequence]))
+        wall_thickness = " ".join(map(str,[self._getExtrudersProperty(index,"wall_thickness") for index in self._JoinSequence]))
+        infill_sparse_density = " ".join(map(str,[self._getExtrudersProperty(index,"infill_sparse_density") for index in self._JoinSequence]))
 
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"layer_height") for index in self._JoinSequence]))
-        m = m.replace("{layer_height}", list)
-
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"wall_thickness") for index in self._JoinSequence]))
-        m = m.replace("{wall_thickness}", list)
-
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"infill_sparse_density") for index in self._JoinSequence]))
-        m = m.replace("{infill_sparse_density}", list)
-
-        self._replaced_line = m
+        self._replaced_line = self._replaced_line\
+            .replace("{layer_height}", layer_height)\
+            .replace("{wall_thickness}", wall_thickness)\
+            .replace("{infill_sparse_density}", infill_sparse_density)
 
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
     def _replaceStartDispenserCode(self, layer_index) -> None:
@@ -249,24 +241,19 @@ class RokitGCodeConverter:
         if not self._is_enable_dispensor:
             return
 
-        m = self._replaced_line
+        shot_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
+        vac_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]))
+        int_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_int") for index in self._JoinSequence]))
+        shot_power = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot_power") for index in self._JoinSequence]))
+        vac_power = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]))
 
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
-        m = m.replace(";{shot_time}", self._TraslateToGcode['SetShotTime'] % list)
+        self._replaced_line = self._replaced_line\
+            .replace(";{shot_time}", self._TraslateToGcode['SetShotTime'] % shot_time)\
+            .replace(";{vac_time}", self._TraslateToGcode['SetVacuumTime'] % vac_time)\
+            .replace(";{interval}", self._TraslateToGcode['SetInterval'] % int_time)\
+            .replace(";{shot_p}", self._TraslateToGcode['SetShotPressure'] % shot_power)\
+            .replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % vac_power)
 
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]))
-        m = m.replace(";{vac_time}", self._TraslateToGcode['SetVacuumTime'] % list)
-
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_int") for index in self._JoinSequence]))
-        m = m.replace(";{interval}", self._TraslateToGcode['SetInterval'] % list)
-
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot_power") for index in self._JoinSequence]))
-        m = m.replace(";{shot_p}", self._TraslateToGcode['SetShotPressure'] % list)
-
-        list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]))
-        m = m.replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % list)
-
-        self._replaced_line = m
 
     # 정수자리에 0을 삽입
     def _fillIntegerWithZero(self) -> None:
@@ -316,8 +303,7 @@ class RokitGCodeConverter:
             self._selected_extruder_index = int(m[-1]) # 현재 익스트루더의 인덱스
             self._nozzle_type = self._getVariantName(self._selected_extruder_index)
             # 익스트루더 이름 변환
-            m = m.replace("T0","D6")
-            m = m.replace("T","D")
+            m = m.replace("T0","D6").replace("T","D")
             self._selected_extruder = m # 수정 필요* 함수로 바꿔서 String화
             # 익스트루더가 바뀔 때 변경되는 설정
             m = self._addExtruderSelectingCode(m) #*** (1)
@@ -425,7 +411,7 @@ class RokitGCodeConverter:
         line_seq = trip["line_seq"]
         # z_height = trip["z"]
 
-        gcode_clone = self._repalced_gcode_list[2:-1]
+        gcode_clone = self._replaced_gcode_list[2:-1]
         std_str = self._TraslateToGcode['MoveToOrigin']
         self._line_controller = 1 # forward
 
@@ -453,11 +439,9 @@ class RokitGCodeConverter:
             gcode_spacing += self._TraslateToGcode['MoveToAxisOrigin']
 
             gcode_clone.insert(0,gcode_spacing)
-            self._repalced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
+            self._replaced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
             # gcode_body.append(gcode_clone)
             gcode_clone.remove(gcode_spacing)
-
-        # self._repalced_gcode_list.insert(-1,self._TraslateToGcode['SetToNewAxis'] % (11, start_point.y()))
 
     # start 코드 다음으로 붙는 준비 명령어
     def _setBuildPlateProperty(self):
@@ -482,13 +466,13 @@ class RokitGCodeConverter:
                 
 
             extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
-            self._repalced_gcode_list[1] += extruder_selecting
+            self._replaced_gcode_list[1] += extruder_selecting
             # gcode_list.insert(-1,self._TraslateToGcode['SetToNewAxis'] % (11, start_point.y()))
             
-            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
-            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
-            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
-            self._repalced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
+            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
+            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
+            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
+            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
         
         elif (self._build_plate_type == "Well Plate"):
             # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
@@ -507,6 +491,6 @@ class RokitGCodeConverter:
             extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
             if self._selected_extruder_list[0] != 'D6':
                 extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
-            self._repalced_gcode_list[1] += extruder_selecting
+            self._replaced_gcode_list[1] += extruder_selecting
             self._clonning(trip)
 
