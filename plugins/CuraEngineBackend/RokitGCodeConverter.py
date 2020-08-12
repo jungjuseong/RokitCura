@@ -463,10 +463,10 @@ class RokitGCodeConverter:
                 self._selected_extruder_list.append("D6")
 
             if self._selected_extruder_list[0] == "D6":
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0.0)
+                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (42.5, 0)
                 extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 Z40
             else: # Right
-                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0.0)
+                extruder_selecting += self._command_dic['moveToAbsoluteXY'] % (-42.5, 0)
                 extruder_selecting += self._command_dic["move_A_Coordinate"] % (a_command[self._selected_extruder_num_list[0]], 600)
                 extruder_selecting += self._command_dic["set_Rokit_abs_c_and_z_Axis"] # G92 C40
                 extruder_selecting += self._command_dic["goToLimitDetacted"]
