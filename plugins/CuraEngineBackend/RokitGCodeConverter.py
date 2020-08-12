@@ -217,15 +217,15 @@ class RokitGCodeConverter:
 
     # 기타 명령어 관리
     def _replaceSomeCommands(self):
-        modified_code = self._replaced_line
-        modified_code = modified_code.replace("{print_temp}", self._TraslateToGcode["SetPrintTemperature"] % self._print_temperature)
-        modified_code = modified_code.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
-        modified_code = modified_code.replace("G92 E0\nG92 E0", "G92 E0")
-        modified_code = modified_code.replace("M105\n", "")
-        modified_code = modified_code.replace("M107\n", "")
-        modified_code = modified_code.replace("M82 ;absolute extrusion mode\n", "")
-        modified_code = modified_code.replace(";{blank}\n", "")
-        self._replaced_line = modified_code
+        m = self._replaced_line
+        m = m.replace("{print_temp}", self._TraslateToGcode["SetPrintTemperature"] % self._print_temperature)
+        m = m.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
+        m = m.replace("G92 E0\nG92 E0", "G92 E0")
+        m = m.replace("M105\n", "")
+        m = m.replace("M107\n", "")
+        m = m.replace("M82 ;absolute extrusion mode\n", "")
+        m = m.replace(";{blank}\n", "")
+        self._replaced_line = m
     
 
     def _replaceLayerInfo(self) -> None:
@@ -273,7 +273,7 @@ class RokitGCodeConverter:
         self._replaced_line = self._replaced_line.replace("-.","-0.")
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
-    def _addExtruderSelectingCommand(self,replaced): # FFF 예외처리 필요
+    def _addExtruderSelectingCode(self,replaced): # FFF 예외처리 필요
         replaced += " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
@@ -309,23 +309,23 @@ class RokitGCodeConverter:
 
     # T 명령어를 통해 선택한 시린지 확인
     def _parseSelectedExtruder(self, gcode) -> None:
-        modified_code = self._replaced_code
+        m = self._replaced_code
 
         if gcode.startswith("T"):
             # 익스트루더 인덱스 및 이름 저장
-            self._selected_extruder_index = int(modified_code[-1]) # 현재 익스트루더의 인덱스
+            self._selected_extruder_index = int(m[-1]) # 현재 익스트루더의 인덱스
             self._nozzle_type = self._getVariantName(self._selected_extruder_index)
             # 익스트루더 이름 변환
-            modified_code = modified_code.replace("T0","D6")
-            modified_code = modified_code.replace("T","D")
-            self._selected_extruder = modified_code # 수정 필요* 함수로 바꿔서 String화
+            m = m.replace("T0","D6")
+            m = m.replace("T","D")
+            self._selected_extruder = m # 수정 필요* 함수로 바꿔서 String화
             # 익스트루더가 바뀔 때 변경되는 설정
-            modified_code = self._addExtruderSelectingCommand(modified_code) #*** (1)
+            m = self.(m) #*** (1)
 
             if self._selected_extruder != 'D6': # Right Extruder
                 self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
 
-            self._replaced_code = modified_code # 멤버 변수에 저장 
+            self._replaced_code = m # 멤버 변수에 저장 
             self._setUVCode() # 익스트루더가 바뀔떄 마다 호출 (3)
             self._noteSelectedExtruder() # 사용되는 익스트루더를 리스트에 저장
 
