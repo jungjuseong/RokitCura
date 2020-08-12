@@ -320,7 +320,7 @@ class RokitGCodeConverter:
             m = m.replace("T","D")
             self._selected_extruder = m # 수정 필요* 함수로 바꿔서 String화
             # 익스트루더가 바뀔 때 변경되는 설정
-            m = self.(m) #*** (1)
+            m = self._addExtruderSelectingCode(m) #*** (1)
 
             if self._selected_extruder != 'D6': # Right Extruder
                 self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
