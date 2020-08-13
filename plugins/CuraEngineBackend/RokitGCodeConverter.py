@@ -78,9 +78,6 @@ class RokitGCodeConverter:
         self._layer_no = None
         self._uv_position = None
 
-        # 빌드 플레이트 타입
-        self._build_plate_type = ""
-
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
         self._replaced_code = ""
@@ -383,7 +380,7 @@ class RokitGCodeConverter:
 
         gcode_body = []
         for i in range(1,clone_num): # Clone number ex) 1 ~ 96
-            if i % line_seq ==0:
+            if i % line_seq == 0:
                 direction = 'X'
                 distance = -trip["spacing"]
                 self._line_controller = abs(self._line_controller - 1) # direction control
@@ -414,26 +411,27 @@ class RokitGCodeConverter:
         trip= {}
         a_command = self._TraslateToGcode["AAxisPosition"]
         build_plate = self._getGlobalContainerStackProperty("machine_build_dish_type")
+        build_plate_type = build_plate[:build_plate.find(':')]
         for index in range(self._build_dish_model.count):
             self._dish = self._build_dish_model.getItem(index)
             if self._dish['product_id'] == build_plate:
                 trip = self._dish['trip'] # Build plate가 정해짐
                 break
         start_point = trip["start_point"]
+        if self._selected_extruder_list[0] == 'D6':
+            x = start_point.x()
+        else:
+            x = -start_point.x()
 
-        self._build_plate_type = build_plate[:build_plate.find(':')]
         extruder_selecting = "\n;start point\n"
-        extruder_selecting += self._TraslateToGcode['MoveToXY'] % (start_point.x(), start_point.y())
+        extruder_selecting += self._TraslateToGcode['MoveToXY'] % (x, start_point.y())
         extruder_selecting += self._TraslateToGcode["ResetAxis"]
 
-        if (self._build_plate_type == "Culture Dish"):
-            if self._selected_extruder_list[0] != "D6": # Right
-                extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_list[0]], 600)
-                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"]
-
-        elif (self._build_plate_type == "Well Plate"):
-            if self._selected_extruder_list[0] != 'D6':
-                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
+        if self._selected_extruder_list[0] != "D6": # Right
+            extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_list[0]], 600)
+            extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
+        
+        if (build_plate_type == "Well Plate"):
             self._clonning(trip)
 
         extruder_selecting += self._TraslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
