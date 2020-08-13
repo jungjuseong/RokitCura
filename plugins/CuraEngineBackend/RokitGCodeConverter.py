@@ -158,7 +158,7 @@ class RokitGCodeConverter:
                 self._parseSelectedExtruder(command_line) # *** 가장 먼저, 선택된 익스트루더를 확인해야함.
 
                 if index != len(self._replaced_gcode_list) -1: # 마지막 엔드 코드는 고려 안함. # start 코드도 고려하게 안하게 수정해야함.
-                    self._insertShotCommand(command_line)
+                    self._insertShotCode(command_line)
                     self._convertZCommand(command_line)
 
                 if self._replaced_code is not None:
@@ -167,7 +167,7 @@ class RokitGCodeConverter:
                     layer_command_list[num] = ";{blank}"
             self._replaced_line = "\n".join(layer_command_list)
 
-            self._addUVCommand(lines) # 레이어 주기에 맞춰 커맨드 삽입
+            self._addUVCode(lines) # 레이어 주기에 맞춰 커맨드 삽입
             self._replaceSomeCommands() # 
             self._fillIntegerWithZero() # 정수를 0으로 채우기 함수
             
@@ -177,7 +177,7 @@ class RokitGCodeConverter:
             self._replaced_gcode_list[index] = self._replaced_line
 
     # Shot/Stop 명령어
-    def _insertShotCommand(self, command_line) -> None:
+    def _insertShotCode(self, command_line) -> None:
         # command : 변하는 커맨드
         # command_line : 조건에 필요한 커맨드 (변하지 않는 커맨드)
         gcode = self._replaced_code
@@ -381,7 +381,7 @@ class RokitGCodeConverter:
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
-    def _addUVCommand(self, lines) -> None:
+    def _addUVCode(self, lines) -> None:
         if lines.startswith(";LAYER:"):
             self._layer_no = int(lines[len(";LAYER:"):lines.find("\n")])
             if self._uv_enable_list[self._selected_extruder_index]:
@@ -406,7 +406,7 @@ class RokitGCodeConverter:
                     self._replaced_line += uv_part
 
     # Well plate 복제 기능
-    def _clonning(self, trip):
+    def _cloneWellPlate(self, trip):
         clone_num = trip["well_number"] -1 # 본코드를 제외판 복제 코드는 전체에서 1개를 빼야함.
         line_seq = trip["line_seq"]
         # z_height = trip["z"]
@@ -462,8 +462,7 @@ class RokitGCodeConverter:
                 extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (-self._LeftExtruderXPosition, 0)
                 extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_num_list[0]], 600)
                 extruder_selecting += self._TraslateToGcode["ResetAxis"] # G92 C40
-                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"]
-                
+                extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"]                
 
             extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
             self._replaced_gcode_list[1] += extruder_selecting
@@ -492,5 +491,5 @@ class RokitGCodeConverter:
             if self._selected_extruder_list[0] != 'D6':
                 extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
             self._replaced_gcode_list[1] += extruder_selecting
-            self._clonning(trip)
+            self._cloneWellPlate(trip)
 
