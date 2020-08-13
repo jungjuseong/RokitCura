@@ -293,8 +293,8 @@ class RokitGCodeConverter:
             # 익스트루더가 바뀔 때 변경되는 설정
             m = self._addExtruderSelectingCode(m) #*** (1)
 
-            if self._selected_extruder != 'D6': # Right Extruder
-                self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
+            # if self._selected_extruder != 'D6': # Right Extruder
+            #     self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
 
             self._replaced_code = m # 멤버 변수에 저장 
             self._setUVCode() # 익스트루더가 바뀔떄 마다 호출 (3)
