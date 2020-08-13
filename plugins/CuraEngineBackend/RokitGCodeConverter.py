@@ -64,9 +64,7 @@ class RokitGCodeConverter:
         # 외부 dict
         self._dish = {}
 
-        # z를 c좌표로
-        self._first_z_value = None
-        self._to_c_value = None
+        # z좌표 관리
         self._current_z_value = None
 
         # 선택한 명령어
@@ -98,31 +96,19 @@ class RokitGCodeConverter:
         self._G1_F_X_Y_E = re.compile('G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
         self._G1_X_Y_E = re.compile('G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
 
-        self._is_shot_moment = None
+        self._is_shot_moment = True
+        self.is_first_selectedExtruder = True
         self._LeftExtruderXPosition = 42.5
-
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
 
     def getReplacedlist(self):
         return self._replaced_gcode_list
-
-    # 멤버 변수들 초기화
-    def _initialiizeConverter(self):
-        self._calculateCLocation()
-        self._is_shot_moment = True
-        self.is_first_selectedExtruder = True
-
-    def _calculateCLocation(self) -> None:
-        # --가장 처음 등장하는 Z값 찾기
-        first_z = self._replaced_gcode_list[2].find("Z")
-        self._first_z_value = self._replaced_gcode_list[2][first_z + 1 : self._replaced_gcode_list[2].find("\n",first_z)]
-        self._to_c_value = self._start_coord['c'] - float(self._first_z_value)
         
     # 시작 (준비 작업)
     def run(self):
-        self._initialiizeConverter()
+        # self._initialiizeConverter()
         self._getPrintProperty() # gcode 가져오기
         self._convertGCode() # 기본 변환
         self._setBuildPlateProperty() # 플레이트에 따라 변환 # 수정 필요
@@ -254,7 +240,6 @@ class RokitGCodeConverter:
             .replace(";{shot_p}", self._TraslateToGcode['SetShotPressure'] % shot_power)\
             .replace(";{vac_p}", self._TraslateToGcode['SetVacuumPressure'] % vac_power)
 
-
     # 정수자리에 0을 삽입
     def _fillIntegerWithZero(self) -> None:
         self._replaced_line = self._replaced_line.replace("-.","-0.")
@@ -315,30 +300,20 @@ class RokitGCodeConverter:
             self._setUVCode() # 익스트루더가 바뀔떄 마다 호출 (3)
             self._noteSelectedExtruder() # 사용되는 익스트루더를 리스트에 저장
 
-    # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업
-    def _affectCLocationWithHop(self) -> None:
-        index = self._selected_extruder_index
-        self._retraction_hop_enabled = self._getExtrudersProperty(index,"retraction_hop_enabled")
-        self._retraction_hop_height = self._getExtrudersProperty(index,"retraction_hop_after_extruder_switch_height")
-        if self._retraction_hop_enabled == True:
-            self._to_c_value = self._start_coord['c'] - float(self._first_z_value) + self._retraction_hop_height
-
     # z좌표 관리
     def _convertZCommand(self, gcode):
         if gcode.startswith(('G0','G1')) and gcode.find("Z") != -1:
             try:
                 self._current_z_value = float(gcode[gcode.find("Z") + 1:]) # ***
-                c_location = self._current_z_value + self._to_c_value
-                c_location = round(c_location,2)
 
                 if self._selected_extruder != 'D6': # Right
-                    self._replaced_code = self._convertFromZToC(c_location) # C 좌표로 변환
+                    self._replaced_code = self._convertFromZToC() # C 좌표로 변환
             except Exception:
                 Logger.logException("w","Could not convert from Z to C")
                 pass
 
     # C 좌표로 변환
-    def _convertFromZToC(self, c_location):
+    def _convertFromZToC(self):
         replaced = self._replaced_code
         replaced = replaced[:replaced.find("Z")]
         replaced += "\nG0 C"+ str(self._current_z_value)
@@ -346,7 +321,7 @@ class RokitGCodeConverter:
 
     # E 커맨드 제거
     def _removeECommand(self, gcode):
-        if self._nozzle_type.startswith('FFF'):
+        if self._nozzle_type.startswith('FFF'): 
             return gcode
         if gcode.find("E") != -1:
             gcode = gcode[:gcode.find("E")-1]
@@ -370,7 +345,6 @@ class RokitGCodeConverter:
         elif self._uv_type == '405':
             self._uv_on_code = self._TraslateToGcode['UVDisinfectionOn'] # UV type: Disinfect
             self._uv_off_code = self._TraslateToGcode['UVDisinfectionOff'] # UV type: Disinfect
-
         
         x_position = self._LeftExtruderXPosition
         if (self._selected_extruder != "D6"):
