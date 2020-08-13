@@ -33,7 +33,7 @@ class RokitBuildDishModel(ListModel):
         item_list.append({"product_id": "Well Plate:12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 8.0), "trip": {"line_seq":12/3, "spacing":28.87, "z": 17.50, "start_point": QPointF(74.0,49.5), "well_number": 96}})
         item_list.append({"product_id": "Well Plate:6", "shape": "elliptic", "volume": QVector3D(35.0, 35.0, 8.0), "trip": {"line_seq":6/2, "spacing":38.5, "z": 17.50, "start_point": QPointF(74.0,49.5), "well_number": 96}})
 
-        item_list.append({"product_id": "Culture Dish:11060", "shape": "elliptic", "volume": QVector3D(52.8,52.8,8.0), "start_point": QPointF(42.5,0.0)})
-        item_list.append({"product_id": "Culture Dish:11090", "shape": "elliptic", "volume": QVector3D(80,80,8.0), "start_point": QPointF(42.5,0.0)})
+        item_list.append({"product_id": "Culture Dish:11060", "shape": "elliptic", "volume": QVector3D(52.8,52.8,8.0), "trip": {"start_point": QPointF(42.5,0.0)}})
+        item_list.append({"product_id": "Culture Dish:11090", "shape": "elliptic", "volume": QVector3D(80,80,8.0), "trip": {"start_point": QPointF(42.5,0.0)}})
 
         self.setItems(item_list)

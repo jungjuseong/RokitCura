@@ -9,14 +9,14 @@ class RokitGCodeModel():
 
     TranslateToGCode = {
         "MoveToOrigin": "G90 G0 X0.0 Y0.0\n",
-        "RMoveToXY": "G90 G0 X%.2f Y%.2f\n",
+        "MoveToXY": "G90 G0 X%.2f Y%.2f\n",
         "MoveTo": "G90 G0 %c%.2f\n",
         "RMoveToXY": "G91 G0 X%.2f Y%.2f\n",
         "RMoveToZ": "G91 G0 Z%.2f\n",
         "MoveToZ": "G90 G0 Z%.2f\n",
         "MoveToC": "G90 G0 C%.2f\n",
         "RMoveTo": "G91 G0 %c%.2f\n",
-        "MoveToAxisOrigin": "G92 X0.0 Y0.0 Z0.0 C0.0\n",
+        "SetAxisOrigin": "G92 X0.0 Y0.0 Z0.0 C0.0\n",
         "SetToNewAxis": "G92 X%.2f Y%.2f\n",
         "SetNewAxis": "G92 E0\n",
         "ResetAxis": "G90 G0 Z-40.0 C-40.0\n",
