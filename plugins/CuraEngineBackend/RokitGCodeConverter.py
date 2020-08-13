@@ -70,18 +70,15 @@ class RokitGCodeConverter:
         # 선택한 명령어
         self._selected_extruder = None
         self._selected_extruder_index = None  # 0(left), 1, 2, 3, 4, 5
-        self._selected_extruder_num_list = []   # [0(Left), 1, 2, 3, 4, 5]
         self._selected_extruder_list = []   # [D6(Left), D1, D2, D3, D4, D5]
 
         self._previous_extruder = None
-        self._previous_extruder_index = None
         self._nozzle_type = ""
         
         self._layer_no = None
-        self._uv_position = None        
+        self._uv_position = None
 
         # 빌드 플레이트 타입
-        self._build_plate = ""
         self._build_plate_type = ""
 
         # *** G-code Line(command) 관리 변수
@@ -258,7 +255,7 @@ class RokitGCodeConverter:
             if self._previous_extruder != 'D6':
                 replaced += self._TraslateToGcode["MoveToC"] % (40.0) # Right Extruder를 위로 올림
                 replaced += self._TraslateToGcode["RMoveToXY"] % (-85.0, 0.0)
-                replaced += self._TraslateToGcode["MoveToAxisOrigin"]
+                replaced += self._TraslateToGcode["SetAxisOrigin"]
         else:
             replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600)
             replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
@@ -266,18 +263,16 @@ class RokitGCodeConverter:
             if self._previous_extruder == 'D6':
                 replaced += self._TraslateToGcode["MoveToZ"] % (40.0) # Left Extruder를 위로 올림
                 replaced += self._TraslateToGcode["RMoveToXY"] % (85.0, 0.0)
-                replaced += self._TraslateToGcode["MoveToAxisOrigin"]
+                replaced += self._TraslateToGcode["SetAxisOrigin"]
 
         return replaced
 
     # 익스트루더 index 기록
     def _noteSelectedExtruder(self) -> None:
-        if self._selected_extruder not in self._selected_extruder_list:
-            self._selected_extruder_num_list.append(self._selected_extruder_index) # T 명령어 정보 (0,1,2,3,4,5)
-            self._selected_extruder_list.append(self._selected_extruder) # T 명령어 정보 (0,1,2,3,4,5)
-        
-        self._previous_extruder_index = self._selected_extruder_index
         self._previous_extruder = self._selected_extruder
+        if self._selected_extruder not in self._selected_extruder_list:
+            self._selected_extruder_list.append(self._selected_extruder) # T 명령어 정보 (0,1,2,3,4,5)
+
 
     # T 명령어를 통해 선택한 시린지 확인
     def _parseSelectedExtruder(self, gcode) -> None:
@@ -292,9 +287,6 @@ class RokitGCodeConverter:
             self._selected_extruder = m # 수정 필요* 함수로 바꿔서 String화
             # 익스트루더가 바뀔 때 변경되는 설정
             m = self._addExtruderSelectingCode(m) #*** (1)
-
-            # if self._selected_extruder != 'D6': # Right Extruder
-            #     self._affectCLocationWithHop() # 선택된 익스트루더의 Hop으로 인한 C좌표 변경 작업 (2)
 
             self._replaced_code = m # 멤버 변수에 저장 
             self._setUVCode() # 익스트루더가 바뀔떄 마다 호출 (3)
@@ -410,61 +402,44 @@ class RokitGCodeConverter:
             gcode_spacing += self._TraslateToGcode['MoveTo'] % ('C', -4.0)
             gcode_spacing += self._TraslateToGcode['RMoveTo'] % (direction , distance)
             gcode_spacing += self._TraslateToGcode['MoveTo'] % ('C', self._start_coord['c'])
-            gcode_spacing += self._TraslateToGcode['MoveToAxisOrigin']
+            gcode_spacing += self._TraslateToGcode['SetAxisOrigin']
 
             gcode_clone.insert(0,gcode_spacing)
             self._replaced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
-            # gcode_body.append(gcode_clone)
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
+    # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
     def _setBuildPlateProperty(self):
+        trip= {}
         a_command = self._TraslateToGcode["AAxisPosition"]
-        self._build_plate = self._getGlobalContainerStackProperty("machine_build_dish_type")
-        self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
+        build_plate = self._getGlobalContainerStackProperty("machine_build_dish_type")
+        for index in range(self._build_dish_model.count):
+            self._dish = self._build_dish_model.getItem(index)
+            if self._dish['product_id'] == build_plate:
+                trip = self._dish['trip'] # Build plate가 정해짐
+                break
+        start_point = trip["start_point"]
 
-        # 
+        self._build_plate_type = build_plate[:build_plate.find(':')]
+        extruder_selecting = "\n;start point\n"
+        extruder_selecting += self._TraslateToGcode['MoveToXY'] % (start_point.x(), start_point.y())
+        extruder_selecting += self._TraslateToGcode["ResetAxis"]
+
         if (self._build_plate_type == "Culture Dish"):
-            extruder_selecting = "\n;start point\n"
-            if self._selected_extruder_list[0] is None: # 예외 처리
-                self._selected_extruder_list.append("D6")
-
-            if self._selected_extruder_list[0] == "D6":
-                extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (self._LeftExtruderXPosition, 0)
-                extruder_selecting += self._TraslateToGcode["ResetAxis"] # G92 Z40
-            else: # Right
-                extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (-self._LeftExtruderXPosition, 0)
-                extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_num_list[0]], 600)
-                extruder_selecting += self._TraslateToGcode["ResetAxis"] # G92 C40
+            if self._selected_extruder_list[0] != "D6": # Right
+                extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_list[0]], 600)
                 extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"]
-                
 
-            extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
-            self._replaced_gcode_list[1] += extruder_selecting
-            # gcode_list.insert(-1,self._TraslateToGcode['SetToNewAxis'] % (11, start_point.y()))
-            
-            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
-            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
-            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
-            self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
-        
         elif (self._build_plate_type == "Well Plate"):
-            # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
-            for index in range(self._build_dish_model.count):
-                self._dish = self._build_dish_model.getItem(index)
-                if self._dish['product_id'] == self._build_plate:
-                    trip = self._dish['trip']
-                    break
-
-            start_point = trip["start_point"]
-            # if self._nozzle_type.startsWith == "FFF" or self._nozzle_type.endswith("Nozzle"):
-            # 원점 재설정 # 익스트루더 선택 (left, r1, r2, r3, r4, r5)
-            extruder_selecting = "\n;start point\n"
-            # 수정해야함. (left right 관련된 스타트 포인트가 없음.)
-            extruder_selecting += self._TraslateToGcode['RMoveToXY'] % (start_point.x(), start_point.y())
-            extruder_selecting += self._TraslateToGcode['MoveToAxisOrigin']
             if self._selected_extruder_list[0] != 'D6':
                 extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
-            self._replaced_gcode_list[1] += extruder_selecting
             self._clonning(trip)
+
+        extruder_selecting += self._TraslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
+        self._replaced_gcode_list[1] += extruder_selecting
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
 
