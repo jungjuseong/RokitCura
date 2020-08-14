@@ -68,8 +68,8 @@ class RokitGCodeConverter:
         self._current_z_value = None
 
         # 선택한 명령어
-        self._current_extruder = None
         self._current_extruder_index = None  # 0(left), 1, 2, 3, 4, 5
+        self._ExtruderNames = ["D6","D1","D2","D3","D4","D5"]
         self._activated_extruders = []   # [D6(Left), D1, D2, D3, D4, D5]
 
         self._previous_extruder = None
@@ -93,6 +93,8 @@ class RokitGCodeConverter:
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
         self._LeftExtruderXPosition = 42.5
+        self._RightExtruderXPosition = -42.5
+
 
         self._MarlinCodePattern = re.compile("M(140|190|104|109|141|205|105|107)")
         self._UnnecessaryCodePattern = re.compile("M82 ;absolute extrusion mode|;;}")
@@ -140,11 +142,13 @@ class RokitGCodeConverter:
                 self._current_extruder_index = int(gcode[-1])
                 self._nozzle_type = self._getVariantName(self._current_extruder_index)
 
-                modified_gcode = gcode.replace("T","D").replace("0","6") + self._addExtraExtruderCode()
-                self._current_extruder = modified_gcode[:2]
+                current_extruder =  self._ExtruderNames[self._current_extruder_index]
+                modified_gcode = current_extruder + self._addExtraExtruderCode(current_extruder)
 
-                self._set_UV_Code(self._current_extruder_index)
-                self._addToActivatedExtruders()
+                x_position = self._LeftExtruderXPosition if (current_extruder != "D6") else self._RightExtruderXPosition
+                self._set_UV_Code(self._current_extruder_index,x_position)
+
+                self._addToActivatedExtruders(current_extruder)
                 #if index == (len(gcode_list) - 1): # 마지막 end 코드는 고려 안함
                 #    break
             elif gcode.startswith("G1"):
@@ -216,47 +220,47 @@ class RokitGCodeConverter:
 
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
-    def _addExtraExtruderCode(self) -> str: # FFF 예외처리 필요
+    def _addExtraExtruderCode(self, current_extruder) -> str: # FFF 예외처리 필요
         extra_code = " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type
+
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
             return extra_code
 
-        extra_code += self._TranslateToGcode["MoveToBF"] % (0.0, 300)
-        if self._current_extruder == 'D6':
+        if current_extruder == 'D6':
             if self._previous_extruder != 'D6':
-                extra_code += self._TranslateToGcode["Reset_Z_Axis"] +\
-                    self._TranslateToGcode["ResetZAxisToZero"] + \
-                    self._TranslateToGcode["MoveToC"] % (40.0) + \
-                    self._TranslateToGcode["RMoveToXY"] % (-85.0, 0.0) + \
+                extra_code += self._TranslateToGcode["MoveToXY"] % (85.0, 0.0) +\
+                    self._TranslateToGcode["MoveToBF"] % (0.0, 300) +\
+                    self._TranslateToGcode["Reset_Z_Axis"] +\
+                    self._TranslateToGcode["ResetZAxisToZero"] +\
                     self._TranslateToGcode["SetAxisOrigin"]
         else:
-            axisCodes = self._TranslateToGcode["A_AxisPosition"]
-            current_A_axis_pos = axisCodes[self._current_extruder]
-            extra_code += self._TranslateToGcode["MoveToAF"] % (current_A_axis_pos, 600) + self._TranslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
             # Left --> Right
-            if self._previous_extruder == 'D6' or True:
-                extra_code += self._TranslateToGcode["Reset_C_Axis"] + \
-                    self._TranslateToGcode["ResetCAxisToZero"] + \
-                    self._TranslateToGcode["MoveToZ"] % (40.0) + \
-                    self._TranslateToGcode["RMoveToXY"] % (85.0, 0.0) + \
-                    self._TranslateToGcode["SetAxisOrigin"]
-
+            if self._previous_extruder == 'D6':
+                extra_code += self._TranslateToGcode["MoveToXY"] % (-85.0, 0.0) + \
+                    self._TranslateToGcode["MoveToBF"] % (0.0, 300) + \
+                    self._TranslateToGcode["Reset_C_Axis"] + \
+                    self._TranslateToGcode["ResetCAxisToZero"]                     
+                    
+            axisCodes = self._TranslateToGcode["A_AxisPosition"]
+            current_A_axis_pos = axisCodes[current_extruder]
+            extra_code += self._TranslateToGcode["MoveToAF"] % (current_A_axis_pos, 600) + \
+                        self._TranslateToGcode["GoToDetectedLimit"] + \
+                        self._TranslateToGcode["SetAxisOrigin"]
         return extra_code
 
     # 익스트루더 index 기록
-    def _addToActivatedExtruders(self) -> None:
-        self._previous_extruder = self._current_extruder
-        if self._current_extruder not in self._activated_extruders:
-            self._activated_extruders.append(self._current_extruder) # T 명령어 정보 (0,1,2,3,4,5)
-
+    def _addToActivatedExtruders(self, current_extruder) -> None:
+        if current_extruder not in self._activated_extruders:
+            self._activated_extruders.append(current_extruder) # T 명령어 정보 (0,1,2,3,4,5)
+        self._previous_extruder = current_extruder
 
     # z좌표 관리
     def _convert_Z_To_C(self, gcode) -> str:
         if gcode.startswith(('G0','G1')) and gcode.find("Z") != -1:
             try:
                 self._current_z_value = float(gcode[gcode.find("Z") + 1:]) # ***
-                if self._current_extruder != 'D6':
+                if self._current_extruder_index != '6':
                     gcode = self._convertFromZToC(gcode) # C 좌표로 변환
             except Exception:
                 Logger.logException("w","Could not convert from Z to C")
@@ -276,7 +280,7 @@ class RokitGCodeConverter:
         return gcode
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
-    def _set_UV_Code(self,index) -> None:
+    def _set_UV_Code(self,index,x_position) -> None:
         self._uv_position = self._TranslateToGcode["UVDevicePosition"]
         self._uv_per_layers = self._getExtrudersProperty(index,"uv_per_layers")
         self._uv_type = self._getExtrudersProperty(index,"uv_type")
@@ -291,9 +295,7 @@ class RokitGCodeConverter:
             self._uv_on_code = self._TranslateToGcode['UVDisinfectionOn'] # UV type: Disinfect
             self._uv_off_code = self._TranslateToGcode['UVDisinfectionOff'] # UV type: Disinfect
         
-        x_position = self._LeftExtruderXPosition
-        if (self._current_extruder != "D6"):
-            x_position = -x_position
+
 
         self._change_current_position_for_uv = self._TranslateToGcode['SetToNewAxis'] %  (x_position, 0)
         self._move_to_uv_position = self._TranslateToGcode['RMoveToXY'] % (x_position, 0)
@@ -307,7 +309,7 @@ class RokitGCodeConverter:
 
         self._layer_no = int(line_per_layer[len(";LAYER:"):line_per_layer.find("\n")])
         if (self._layer_no % self._uv_per_layers) == 0:
-            moveToCode = self._TranslateToGcode['MoveToZ'] % (0.00) if self._current_extruder != 'D6' else self._TranslateToGcode['MoveToZ'] % (self._current_z_value)
+            moveToCode = self._TranslateToGcode['MoveToZ'] % (0.00) if self._current_extruder_index != 0 else self._TranslateToGcode['MoveToZ'] % (self._current_z_value)
             uv_code = ";UV\n" + \
                 self._TranslateToGcode['MoveToOrigin'] + \
                 self._change_current_position_for_uv + \

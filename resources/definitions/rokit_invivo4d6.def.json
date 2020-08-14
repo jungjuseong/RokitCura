@@ -81,6 +81,9 @@
         "machine_build_dish_type": { 
             "default_value": "Culture Dish:11060" 
         },
+        "layer_height_0": {
+            "default_value": 0.001
+        },
         "retraction_amount": { 
             "default_value": 1 
         },
