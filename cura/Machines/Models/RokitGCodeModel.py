@@ -46,7 +46,7 @@ class RokitGCodeModel():
         "StartShot": "M301\n",
         "StopShot": "M330\n",
 
-        "AAxisPosition" : { "D1" : 0, "D2" : -72, "D3" : 72, "D4" : 144, "D5" : 216 },       
+        "A_AxisPosition" : { "D1": 0, "D2": -72, "D3": 72, "D4": 144, "D5": 216, "D6": 0 },       
         "UVDevicePosition" : {"x" : 0.0,"y" : 62.0,"z" : 40.0 }
     }
 

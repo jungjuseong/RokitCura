@@ -10,6 +10,12 @@
     "overrides": {
         "extruder_nr": {
             "default_value": 3
+        },
+        "machine_extruder_start_code": {
+            "default_value": ";;switch to extruder (*** start of start code for Right3 = {nozzle_type})"
+        },
+        "machine_end_gcode": {
+            "machine_extruder_end_code": "; (*** end of start code for Right3) "
         }
     }
 }
