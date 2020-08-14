@@ -80,8 +80,6 @@ class RokitGCodeConverter:
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
-        self._replaced_code = ""
-        self._replaced_line = ""
 
         self._change_current_position_for_uv = None
         self._move_to_uv_position = None
@@ -92,7 +90,9 @@ class RokitGCodeConverter:
 
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
-        self._LeftExtruderXPosition = 42.5
+        self._LeftExtruder_X_Position = 42.5
+        self._UV_CuringType = '365'
+        self._UV_DisinfectionType = '405'
 
         self._MarlinCodePattern = re.compile("^M[140|190|104|109|141|205|105|107]")
         self._UnnecessaryCodePattern = re.compile("M82 ;absolute extrusion mode|;;}")
@@ -282,15 +282,11 @@ class RokitGCodeConverter:
         self._uv_time = self._getExtrudersProperty(index,"uv_time")
         self._uv_dimming = self._getExtrudersProperty(index,"uv_dimming") # - 미구현
         
-        # UV 타입에 따른 UV 명령어 선정        
-        if self._uv_type == '365':
-            self._uv_on_code = self._TraslateToGcode['UVCuringOn'] # UV type: Curing
-            self._uv_off_code = self._TraslateToGcode['UVCuringOff'] # UV type: Curing
-        elif self._uv_type == '405':
-            self._uv_on_code = self._TraslateToGcode['UVDisinfectionOn'] # UV type: Disinfect
-            self._uv_off_code = self._TraslateToGcode['UVDisinfectionOff'] # UV type: Disinfect
+        # UV 타입에 따른 UV 명령어 선정  
+        self._uv_on_code = self._TraslateToGcode['UVCuringOn'] if self._uv_type == self._UV_CuringType else self._TraslateToGcode['UVDisinfectionOn']
+        self._uv_off_code = self._TraslateToGcode['UVCuringOff'] if self._uv_type == self._UV_CuringType else self._TraslateToGcode['UVDisinfectionOff']
         
-        x_position = self._LeftExtruderXPosition
+        x_position = self._LeftExtruder_X_Position
         if (self._current_extruder != "D6"):
             x_position = -x_position
 

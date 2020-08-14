@@ -12,10 +12,10 @@
             "default_value": 4
         },        
         "machine_extruder_start_code": {
-            "default_value": ";;switch to extruder (*** start of start code for Right4 = {nozzle_type})"
+            "default_value": ";switch to extruder (*** start of start code for Right4 = {nozzle_type})"
         },
-        "machine_end_gcode": {
-            "machine_extruder_end_code": "; (*** end of start code for Right4) "
+        "machine_extruder_end_code": {
+            "default_value": "; (*** end of start code for Right4) "
         }
     }
 }
