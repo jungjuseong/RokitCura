@@ -217,36 +217,57 @@ class RokitGCodeConverter:
         return self._current_extruder != self._previous_extruder
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
-    def _addExtraExtruderCode(self) -> str: # FFF 예외처리 필요
-        extra_code = " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type
+    def _addExtruderSelectingCode(self,replaced): # FFF 예외처리 필요
+        replaced += " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type # (0)
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
-            return extra_code
-
-        extra_code += self._TraslateToGcode["MoveToBF"] % (0.0, 300)
-        if self._current_extruder == 'D6':
-            if self._extruderChanged():
-                extra_code += self._TraslateToGcode["MoveToC"] % (40.0) + \
-                    self._TraslateToGcode["RMoveToXY"] % (-85.0, 0.0) + \
-                    self._TraslateToGcode["SetAxisOrigin"]
+            return replaced
+        to = {'Left' : 85, 'Right' : -85}
+        a_command = self._TraslateToGcode["AAxisPosition"]
+        
+        if self._selected_extruder == 'D6':
+            if self._previous_extruder != 'D6':
+            # Right --> Left
+                replaced += self._TraslateToGcode["MoveToXY"] % (to['Left'], 0.0) # (1)
+                replaced += self._TraslateToGcode["MoveToC"] % (30.00)# (+)
+                replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300) # (2)
+                replaced += self._TraslateToGcode["SetAxisOrigin"] # (5)
         else:
-            axisCodes = self._TraslateToGcode["A_AxisPosition"]
-            current_A_axis_pos = axisCodes[self._current_extruder]
-            extra_code += self._TraslateToGcode["MoveToAF"] % (current_A_axis_pos, 600) + self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
             # Left --> Right
-            if self._extruderChanged():
-                extra_code += self._TraslateToGcode["MoveToZ"] % (40.0) + \
-                    self._TraslateToGcode["RMoveToXY"] % (85.0, 0.0) + \
-                    self._TraslateToGcode["SetAxisOrigin"]
-
-        return extra_code
+            if self._previous_extruder == 'D6':
+                replaced += self._TraslateToGcode["MoveToXY"] % (to['Right'], 0.0) # (1)
+            replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300) # (2)
+            replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600) # (3)
+            replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동  (4)
+            if self._previous_extruder == 'D6':
+                replaced += self._TraslateToGcode["SetAxisOrigin"] #(5)
+            
+        return replaced
 
     # 익스트루더 index 기록
-    def _addToActivatedExtruders(self) -> None:
-        self._previous_extruder = self._current_extruder
-        if self._current_extruder not in self._activated_extruders:
-            self._activated_extruders.append(self._current_extruder) # T 명령어 정보 (0,1,2,3,4,5)
+    def _noteSelectedExtruder(self) -> None:
+        self._previous_extruder = self._selected_extruder
+        if self._selected_extruder not in self._selected_extruder_list:
+            self._selected_extruder_list.append(self._selected_extruder) # D6 D1 D2 ..
 
+
+    # T 명령어를 통해 선택한 시린지 확인
+    def _parseSelectedExtruder(self, gcode) -> None:
+        m = self._replaced_code
+
+        if gcode.startswith("T"):
+            # 익스트루더 인덱스 및 이름 저장
+            self._selected_extruder_index = int(m[-1]) # 현재 익스트루더의 인덱스
+            self._nozzle_type = self._getVariantName(self._selected_extruder_index)
+            # 익스트루더 이름 변환
+            m = m.replace("T0","D6").replace("T","D")
+            self._selected_extruder = m # 수정 필요* 함수로 바꿔서 String화
+            # 익스트루더가 바뀔 때 변경되는 설정
+            m = self._addExtruderSelectingCode(m) #*** (1)
+
+            self._replaced_code = m # 멤버 변수에 저장 
+            self._setUVCode() # 익스트루더가 바뀔떄 마다 호출 (3)
+            self._noteSelectedExtruder() # 사용되는 익스트루더를 리스트에 저장
 
     # z좌표 관리
     def _convert_Z_To_C(self, gcode) -> str:
@@ -376,9 +397,11 @@ class RokitGCodeConverter:
         else:
             x = -start_point.x()
 
-        select_extruder = "\n;start point\n" + \
-            self._TraslateToGcode['MoveToXY'] % (x, start_point.y()) + \
-            self._TraslateToGcode["ResetAxis"]
+        extruder_selecting = "\n;start point\n"
+        extruder_selecting += self._TraslateToGcode['MoveToXY'] % (x, start_point.y())
+        # extruder_selecting += self._TraslateToGcode["ResetAxis"]
+        extruder_selecting += self._TraslateToGcode["setZAxisToBed"]
+        extruder_selecting += self._TraslateToGcode["setCAxisToBed"]
 
         if self._activated_extruders[0] != "D6": # Right
             select_extruder += self._TraslateToGcode["MoveToAF"] % (axi_code[self._activated_extruders[0]], 600)
@@ -390,7 +413,7 @@ class RokitGCodeConverter:
         select_extruder += self._TraslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
         self._replaced_gcode_list[1] += select_extruder
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
-        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (30.0))
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
 
