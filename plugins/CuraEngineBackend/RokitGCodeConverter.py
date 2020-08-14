@@ -436,7 +436,7 @@ class RokitGCodeConverter:
             extruder_selecting += self._TraslateToGcode["GoToDetectedLimit"] # G78 B50.
         
         if (build_plate_type == "Well Plate"):
-            self._clonning(trip)
+            self._cloneWellPlate(trip)
 
         extruder_selecting += self._TraslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
         self._replaced_gcode_list[1] += extruder_selecting
