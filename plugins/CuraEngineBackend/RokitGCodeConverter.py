@@ -240,35 +240,37 @@ class RokitGCodeConverter:
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
     def _addExtruderSelectingCode(self,replaced): # FFF 예외처리 필요
-        replaced += " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type
+        replaced += " ; Selected Nozzle\n; Nozzle type : %s\n" % self._nozzle_type # (0)
         if self.is_first_selectedExtruder:
             self.is_first_selectedExtruder = False
             return replaced
-        a_command = self._TraslateToGcode["AAxisPosition"] 
+        to = {'Left' : 85, 'Right' : -85}
+        a_command = self._TraslateToGcode["AAxisPosition"]
         
-        replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300)
         if self._selected_extruder == 'D6':
-            # Right --> Left
             if self._previous_extruder != 'D6':
-                replaced += self._TraslateToGcode["MoveToC"] % (40.0) # Right Extruder를 위로 올림
-                replaced += self._TraslateToGcode["RMoveToXY"] % (-85.0, 0.0)
-                replaced += self._TraslateToGcode["SetAxisOrigin"]
+            # Right --> Left
+                replaced += self._TraslateToGcode["MoveToXY"] % (to['Left'], 0.0) # (1)
+                replaced += self._TraslateToGcode["MoveToC"] % (30.00)# (+)
+                replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300) # (2)
+                replaced += self._TraslateToGcode["SetAxisOrigin"] # (5)
         else:
-            replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600)
-            replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동
             # Left --> Right
             if self._previous_extruder == 'D6':
-                replaced += self._TraslateToGcode["MoveToZ"] % (40.0) # Left Extruder를 위로 올림
-                replaced += self._TraslateToGcode["RMoveToXY"] % (85.0, 0.0)
-                replaced += self._TraslateToGcode["SetAxisOrigin"]
-
+                replaced += self._TraslateToGcode["MoveToXY"] % (to['Right'], 0.0) # (1)
+            replaced += self._TraslateToGcode["MoveToBF"] % (0.0, 300) # (2)
+            replaced += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder], 600) # (3)
+            replaced += self._TraslateToGcode["GoToDetectedLimit"] # B좌표 끝까지 이동  (4)
+            if self._previous_extruder == 'D6':
+                replaced += self._TraslateToGcode["SetAxisOrigin"] #(5)
+            
         return replaced
 
     # 익스트루더 index 기록
     def _noteSelectedExtruder(self) -> None:
         self._previous_extruder = self._selected_extruder
         if self._selected_extruder not in self._selected_extruder_list:
-            self._selected_extruder_list.append(self._selected_extruder) # T 명령어 정보 (0,1,2,3,4,5)
+            self._selected_extruder_list.append(self._selected_extruder) # D6 D1 D2 ..
 
 
     # T 명령어를 통해 선택한 시린지 확인
@@ -425,7 +427,9 @@ class RokitGCodeConverter:
 
         extruder_selecting = "\n;start point\n"
         extruder_selecting += self._TraslateToGcode['MoveToXY'] % (x, start_point.y())
-        extruder_selecting += self._TraslateToGcode["ResetAxis"]
+        # extruder_selecting += self._TraslateToGcode["ResetAxis"]
+        extruder_selecting += self._TraslateToGcode["setZAxisToBed"]
+        extruder_selecting += self._TraslateToGcode["setCAxisToBed"]
 
         if self._selected_extruder_list[0] != "D6": # Right
             extruder_selecting += self._TraslateToGcode["MoveToAF"] % (a_command[self._selected_extruder_list[0]], 600)
@@ -437,7 +441,7 @@ class RokitGCodeConverter:
         extruder_selecting += self._TraslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
         self._replaced_gcode_list[1] += extruder_selecting
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToZ'] % (40.0))
-        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (40.0))
+        self._replaced_gcode_list.insert(-1,self._TraslateToGcode['MoveToC'] % (30.0))
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetZAxisToZeo'])
         self._replaced_gcode_list.insert(-1,self._TraslateToGcode['ResetCAxisToZeo'])
 
