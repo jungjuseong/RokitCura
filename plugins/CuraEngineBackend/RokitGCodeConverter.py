@@ -18,7 +18,6 @@ class RokitGCodeConverter:
         # 외부
         self._application = CuraApplication.getInstance()
         self._global_container_stack = self._application.getMachineManager().activeMachine
-        self._extruder_list = None 
 
         # 필요
         self._gcode_model = RokitGCodeModel()        
@@ -150,17 +149,17 @@ class RokitGCodeConverter:
                         modified_gcode = self._remove_E_Attribute(modified_gcode)                
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
                     if  self._is_shot_moment == True:
-                        modified_gcode = self._GCODE["StartShot"] + gcode
+                        modified_gcode = self._GCODE["StartShot"] + modified_gcode
                         self._is_shot_moment = False
                 else:
                     if self._is_shot_moment == False:
-                        modified_gcode = self._GCODE["StopShot"] + gcode
+                        modified_gcode = self._GCODE["StopShot"] + modified_gcode
                         self._is_shot_moment = True
             elif gcode.startswith("G0") and self._is_shot_moment == False:
-                    modified_gcode = self._GCODE["StopShot"] + gcode
+                    modified_gcode = self._GCODE["StopShot"] + modified_gcode
                     self._is_shot_moment = True
             
-            gcode_list[index] = ";ToBeDeleted" if modified_gcode is None else self._convert_Z_To_C(modified_gcode)
+            gcode_list[index] = ";ToBeDeleted" if modified_gcode is None else self._convert_Z_To_C(gcode, modified_gcode)
             
         return gcode_list
 
@@ -231,7 +230,7 @@ class RokitGCodeConverter:
             if self._previous_extruder != 'D6':
                 extra_code += self._GCODE["G0_B0_F300"] +\
                             self._GCODE["G0_C0"] +\
-                            self._GCODE["G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
+                            self._GCODE["G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
                             self._GCODE["G92_X0_Y0"]
         else:
             # Left --> Right
@@ -258,7 +257,7 @@ class RokitGCodeConverter:
         self._previous_extruder = current_extruder
 
     # Z 좌표 관리
-    def _convert_Z_To_C(self, gcode) -> str:
+    def _convert_Z_To_C(self, gcode, modified_gcode) -> str:
 
         initial_layer0 = self._InitialLayer0_Z if self._current_extruder_index == 0 else self._InitialLayer0_C
         axisName = " Z" if self._current_extruder_index == 0 else "C"
@@ -269,17 +268,17 @@ class RokitGCodeConverter:
             self._current_z_value = float(matched_code.group(2))
 
             if self._current_extruder_index == 0:
-                gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
+                modified_gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
             else:
-                gcode = matched_code.group(1) + "\n" 
-                gcode += "G0 " + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
+                modified_gcode = matched_code.group(1) + "\n" 
+                modified_gcode += "G0 " + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
 
         # elif self._G0_Z_pattern.match(gcode):
         #     matched_code = self._G0_Z_pattern.search(gcode)
         #     self._current_z_value = float(matched_code.group(2))
         #     gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
 
-        return gcode
+        return modified_gcode
 
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
