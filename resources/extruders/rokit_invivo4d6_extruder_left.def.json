@@ -12,10 +12,10 @@
             "default_value": 0
         },
         "machine_extruder_start_code": {
-            "default_value": ";switch to extruder (*** start of start code for Left Extruder = {nozzle_type})"
+            "default_value0": ";;switch to extruder (*** start of start code for Left Extruder = {nozzle_type})"
         },
-        "machine_extruder_end_code": {
-            "default_value": "; (*** end of start code for Left Extruder) "
+        "machine_end_gcode": {
+            "default_value0": "; (*** end of start code for Left Extruder) "
         }
     }
 }

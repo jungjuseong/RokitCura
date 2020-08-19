@@ -13,7 +13,8 @@ class RokitGCodeModel():
         "MoveToZ": "G90 G0 Z%.2f\n",
         "MoveToC": "G90 G0 C%.2f\n",
         "MoveTo": "G90 G0 %c%.2f\n",
-        "ResetAxis": "G90 G0 Z-40.0 C-40.0\n",
+        "Reset_Z_Axis": "G90 G0 Z-40.0\n",
+        "Reset_C_Axis": "G90 G0 C-30.0\n",
 
         "RMoveToXY": "G91 G0 X%.2f Y%.2f\n",
         "RMoveToZ": "G91 G0 Z%.2f\n",
@@ -21,9 +22,9 @@ class RokitGCodeModel():
 
         "SetAxisOrigin": "G92 X0.0 Y0.0\n",
         "SetToNewAxis": "G92 X%.2f Y%.2f\n",
-        "ResetZAxisToZeo": "G92 Z0.0\n",
+        "ResetZAxisToZero": "G92 Z0.0\n",
         "setZAxisToBed": "G92 Z40.0\n",
-        "ResetCAxisToZeo": "G92 C0.0\n",
+        "ResetCAxisToZero": "G92 C0.0\n",
         "setCAxisToBed": "G92 C30.0\n",
 
         "MoveToAF": "G0 A%.2f F%d\n",
