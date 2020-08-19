@@ -152,22 +152,30 @@ class RokitGCodeConverter:
                 #if index == (len(gcode_list) - 1): # 마지막 end 코드는 고려 안함
                 #    break
             elif gcode.startswith("G1"):
-                modified_gcode = self._remove_E_Attribute(gcode)                
+                modified_gcode = gcode
+                if not self._nozzle_type.startswith('FFF'): 
+                    if gcode.find("E") != -1:
+                        modified_gcode = self._remove_E_Attribute(modified_gcode)                
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
                     if  self._is_shot_moment == True:
-                        modified_gcode = self._TranslateToGcode["StartShot"] + gcode
+                        modified_gcode = self._TranslateToGcode["StartShot"] + modified_gcode
                         self._is_shot_moment = False
                 else:
                     if self._is_shot_moment == False:
-                        modified_gcode = self._TranslateToGcode["StopShot"] + gcode
+                        modified_gcode = self._TranslateToGcode["StopShot"] + modified_gcode
                         self._is_shot_moment = True
             elif gcode.startswith("G0") and self._is_shot_moment == False:
-                    modified_gcode = self._TranslateToGcode["StopShot"] + gcode
-                    self._is_shot_moment = True    
+                    modified_gcode = self._TranslateToGcode["StopShot"] + modified_gcode
+                    self._is_shot_moment = True
 
             gcode_list[index] = ";ToBeDeleted" if modified_gcode is None else self._convert_Z_To_C(modified_gcode)
             
         return gcode_list
+
+    # E 커맨드 제거 | E 값 | E 명령어
+    def _remove_E_Attribute(self, gcode) -> str:
+        modified_gcode = gcode[:gcode.find("E")-1]
+        return modified_gcode
 
     def _convertGCode(self) -> None:
         for index, gcodes in enumerate(self._replaced_gcode_list): # line_per_layer
@@ -257,6 +265,7 @@ class RokitGCodeConverter:
 
     # z좌표 관리
     def _convert_Z_To_C(self, gcode) -> str:
+        replaced_gcode = gcode
         if gcode.startswith(('G0','G1')) and gcode.find("Z") != -1:
             try:
                 self._current_z_value = float(gcode[gcode.find("Z") + 1:]) # ***
@@ -271,13 +280,6 @@ class RokitGCodeConverter:
     def _convertFromZToC(self, gcode) -> str:
        return gcode[:gcode.find("Z")] + "\nG0 C" + str(self._current_z_value)
 
-    # E 커맨드 제거
-    def _remove_E_Attribute(self, gcode) -> str:
-        if self._nozzle_type.startswith('FFF'): 
-            return gcode
-        if gcode.find("E") != -1:
-            gcode = gcode[:gcode.find("E")-1]
-        return gcode
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _set_UV_Code(self,index,x_position) -> None:
@@ -294,8 +296,6 @@ class RokitGCodeConverter:
         elif self._uv_type == '405':
             self._uv_on_code = self._TranslateToGcode['UVDisinfectionOn'] # UV type: Disinfect
             self._uv_off_code = self._TranslateToGcode['UVDisinfectionOff'] # UV type: Disinfect
-        
-
 
         self._change_current_position_for_uv = self._TranslateToGcode['SetToNewAxis'] %  (x_position, 0)
         self._move_to_uv_position = self._TranslateToGcode['RMoveToXY'] % (x_position, 0)
