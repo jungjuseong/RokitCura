@@ -156,7 +156,7 @@ Item {
                 height: UM.Theme.getSize("print_setup_big_item").height
 
                 Label {
-                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Gauge"
                     verticalAlignment: Text.AlignVCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")

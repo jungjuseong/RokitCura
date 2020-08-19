@@ -198,10 +198,10 @@ Item {
                 }
             }
 
-            Row { // Nozzle Guage
+            Row { // Nozzle Gauge
                 visible: !Cura.MachineManager.activeMachine.hasMaterials
                 Label {
-                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                    text: (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Gauge"
                     verticalAlignment: Text.AlignVCenter
                     font: base.labelFont
                     color: UM.Theme.getColor("text")

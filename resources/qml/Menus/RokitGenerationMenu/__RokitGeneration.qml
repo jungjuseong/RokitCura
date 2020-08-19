@@ -175,7 +175,7 @@ Item
                 Label   // Title Label
                 {
                     text: {
-                        const guageType = (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Guage"
+                        const guageType = (getActiveExtruderName() === "Left") ? Cura.MachineManager.activeDefinitionVariantsName : "Needle Gauge"
                         return Cura.MachineManager.activeStack.variant.name + " - " + Cura.MachineManager.activeStack.material.name
                     }
 

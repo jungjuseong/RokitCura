@@ -110,13 +110,13 @@ asdf = self._application.getMachineManager()
 
 
 <!-- selected_extruder = "\nD1\n"
-axis_control = command_dic['RMoveToXY'] % (start_point.x(), start_point.y())
+axis_control = command_dic['G91_G0_X_Y'] % (start_point.x(), start_point.y())
 axis_control += command_dic['MechanicallySelectExtruder'] % (0.0, 1500)
 axis_control += command_dic['MoveToAxisOrigin']
 axis_control += command_dic['MoveToAxisOrigin']
 axis_control += "G0 B20.0\n\n"
 
-axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y()) command_dic['RMoveToXY'] % (start_point.x(), start_point.y())
+axis_control = "G0 X" + str(start_point.x())+" Y" + str(start_point.y()) command_dic['G91_G0_X_Y'] % (start_point.x(), start_point.y())
 axis_control += "G92 X0.0 Y0.0\nG0 B20.0\n\n" -->
 
   >>> print("%.2f" % a)
