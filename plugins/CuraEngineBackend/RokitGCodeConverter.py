@@ -143,7 +143,10 @@ class RokitGCodeConverter:
                 #if index == (len(gcode_list) - 1): # 마지막 end 코드는 고려 안함
                 #    break
             elif gcode.startswith("G1"):
-                modified_gcode = self._remove_E_Attribute(gcode)                
+                modified_gcode = gcode
+                if not self._nozzle_type.startswith('FFF'): 
+                    if gcode.find("E") != -1:
+                        modified_gcode = self._remove_E_Attribute(modified_gcode)                
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
                     if  self._is_shot_moment == True:
                         modified_gcode = self._GCODE["StartShot"] + gcode
@@ -159,6 +162,11 @@ class RokitGCodeConverter:
             gcode_list[index] = ";ToBeDeleted" if modified_gcode is None else self._convert_Z_To_C(modified_gcode)
             
         return gcode_list
+
+    # E 커맨드 제거 | E 값 | E 명령어
+    def _remove_E_Attribute(self, gcode) -> str:
+        modified_gcode = gcode[:gcode.find("E")-1]
+        return modified_gcode
 
     def _convertGCode(self) -> None:
         for index, gcodes in enumerate(self._replaced_gcode_list): # line_per_layer
@@ -272,13 +280,6 @@ class RokitGCodeConverter:
 
         return gcode
 
-    # E 커맨드 제거
-    def _remove_E_Attribute(self, gcode) -> str:
-        if self._nozzle_type.startswith('FFF'): 
-            return gcode
-        if gcode.find("E") != -1:
-            gcode = gcode[:gcode.find("E")-1]
-        return gcode
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _set_UV_Code(self,index,x_position) -> None:
