@@ -76,7 +76,7 @@ class RokitGCodeConverter:
         self._G1_F_X_Y_E = re.compile(r'G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
         self._G1_X_Y_E = re.compile(r'G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
 
-        self._MarlinCodePattern = re.compile(r'M(140|190|104|109|141|205|105|107)')
+        self._MarlinCodePattern = re.compile(r'M(140|190|104|109 [TS]|141|205|105|107)')
         self._UnnecessaryCodePattern = re.compile(r'M82 ;absolute extrusion mode|;;}')
         
         self._G1_F_Z_pattern = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
