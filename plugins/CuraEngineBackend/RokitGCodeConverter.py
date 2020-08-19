@@ -81,7 +81,8 @@ class RokitGCodeConverter:
         
         self._G1_F_Z_pattern = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z_pattern = re.compile(r'(G0) Z([0-9.]+)')
-
+        self._G1_F_X_Y_pattern = re.compile(r'G1 F720 X-15.859 Y-.141 E0.00047')
+        
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
         self._LeftExtruder_X_Position = 42.5
