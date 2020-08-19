@@ -96,7 +96,7 @@ class RokitGCodeConverter:
         self._RightExtruderXPosition = -42.5
 
 
-        self._MarlinCodePattern = re.compile("M(140|190|104|109|141|205|105|107)")
+        self._MarlinCodePattern = re.compile("M(140|190|104|109 S|109 T|141|205|105|107)")
         self._UnnecessaryCodePattern = re.compile("M82 ;absolute extrusion mode|;;}")
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
