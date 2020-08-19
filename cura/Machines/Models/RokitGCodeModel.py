@@ -30,8 +30,12 @@ class RokitGCodeModel():
         "MoveToAF": "G0 A%.2f F%d\n",
         "MoveToBF": "G0 B%.2f F%d\n",
         "MoveToB": "G0 B%.2f\n",
+        "MoveZToZero": "G0 Z0.00\n",
+        "MoveCToZero": "G0 C0.00\n",
+        "MoveToLeftStartHeight": "G0 Z-40.0 C0.0\n",
+        "MoveToRightStartHeight": "G0 Z0.0 C-30.0\n",
         "SetNewAxis": "G92 E0\n",
-        "GoToDetectedLimit": "G78 B15.3 F300\n",   
+        "GoToDetectedLimit": "G78 B15. F300\n",   
         
         "UVCuringOn": "M172\n", 
         "UVCuringOff": "M173\n",

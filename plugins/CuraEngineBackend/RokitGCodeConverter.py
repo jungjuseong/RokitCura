@@ -237,24 +237,25 @@ class RokitGCodeConverter:
 
         if current_extruder == 'D6':
             if self._previous_extruder != 'D6':
-                extra_code += self._TranslateToGcode["MoveToXY"] % (85.0, 0.0) +\
-                    self._TranslateToGcode["MoveToBF"] % (0.0, 300) +\
-                    self._TranslateToGcode["Reset_Z_Axis"] +\
-                    self._TranslateToGcode["ResetZAxisToZero"] +\
-                    self._TranslateToGcode["SetAxisOrigin"]
+                extra_code += self._TranslateToGcode["MoveToBF"] % (0.0, 300) +\
+                              self._TranslateToGcode["MoveCToZero"] +\
+                              self._TranslateToGcode["MoveToXY"] % (85.0, 0.0) +\
+                              self._TranslateToGcode["SetAxisOrigin"]
         else:
             # Left --> Right
-            if self._previous_extruder == 'D6':
-                extra_code += self._TranslateToGcode["MoveToXY"] % (-85.0, 0.0) + \
-                    self._TranslateToGcode["MoveToBF"] % (0.0, 300) + \
-                    self._TranslateToGcode["Reset_C_Axis"] + \
-                    self._TranslateToGcode["ResetCAxisToZero"]                     
-                    
             axisCodes = self._TranslateToGcode["A_AxisPosition"]
             current_A_axis_pos = axisCodes[current_extruder]
-            extra_code += self._TranslateToGcode["MoveToAF"] % (current_A_axis_pos, 600) + \
-                        self._TranslateToGcode["GoToDetectedLimit"] + \
-                        self._TranslateToGcode["SetAxisOrigin"]
+            if self._previous_extruder == 'D6':
+                extra_code += self._TranslateToGcode["MoveZToZero"] +\
+                              self._TranslateToGcode["MoveToXY"] % (-85.0, 0.0) +\
+                              self._TranslateToGcode["SetAxisOrigin"]
+
+            extra_code += self._TranslateToGcode["MoveToBF"] % (0.0, 300) +\
+                          self._TranslateToGcode["MoveToAF"] % (current_A_axis_pos, 600) +\
+                          self._TranslateToGcode["GoToDetectedLimit"]
+            # if self._previous_extruder == 'D6':
+            #     extra_code += self._TranslateToGcode["Reset_C_Axis"] +\
+            #                   self._TranslateToGcode["ResetCAxisToZero"] +\
         return extra_code
 
     # 익스트루더 index 기록
@@ -379,22 +380,19 @@ class RokitGCodeConverter:
         else:
             x = -start_point.x()
 
-        select_extruder = "\n;Start point\n" + \
+        select_extruder = "\n;Start point\n" +\
             self._TranslateToGcode['MoveToXY'] % (x, start_point.y())
-
         if self._activated_extruders[0] == "D6": # Left
-            select_extruder += self._TranslateToGcode["Reset_Z_Axis"] + self._TranslateToGcode["ResetZAxisToZero"]
+            select_extruder += self._TranslateToGcode["MoveToLeftStartHeight"]
         else:
-            select_extruder += self._TranslateToGcode["Reset_C_Axis"] + self._TranslateToGcode["ResetCAxisToZero"]
-    
-            select_extruder += self._TranslateToGcode["MoveToAF"] % (axi_code[self._activated_extruders[0]], 600)
-            select_extruder += self._TranslateToGcode["GoToDetectedLimit"] # G78 B50.
-        
+            select_extruder += self._TranslateToGcode["MoveToRightStartHeight"] +\
+                               self._TranslateToGcode["MoveToAF"] % (axi_code[self._activated_extruders[0]], 600) +\
+                               self._TranslateToGcode["GoToDetectedLimit"] # G78 B50.
+        select_extruder += self._TranslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
+        self._replaced_gcode_list[1] += select_extruder        
+
         if (build_plate_type == "Well Plate"):
             self._cloneWellPlate(trip)
-
-        select_extruder += self._TranslateToGcode['SetAxisOrigin'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
-        self._replaced_gcode_list[1] += select_extruder
         self._replaced_gcode_list.insert(-1,self._TranslateToGcode['MoveToZ'] % (40.0))
         self._replaced_gcode_list.insert(-1,self._TranslateToGcode['MoveToC'] % (40.0))
         self._replaced_gcode_list.insert(-1,self._TranslateToGcode['ResetZAxisToZero'])
