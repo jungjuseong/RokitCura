@@ -51,11 +51,11 @@ class RokitGCodeModel():
         "SetPrintTemperature": "M308 %s ; print_temp",
         "SetWaitingTemperature": "M109 ; wait for temperature",
 
-        "SetShotTime": "M303 %s ; shot_time",
-        "SetVacuumTime": "M304 %s ; vac_time",
-        "SetInterval": "M305 %s ; interval",
-        "SetShotPressure": "M306 %s ; shot_time",
-        "SetVacuumPressure": "M307 %s ; vac_time",
+        "SetShotTime": "M303 %s",
+        "SetVacuumTime": "M304 %s",
+        "SetInterval": "M305 %s",
+        "SetShotPressure": "M306 %s",
+        "SetVacuumPressure": "M307 %s",
 
         "StartShot": "M301\n",
         "StopShot": "M330\n"
