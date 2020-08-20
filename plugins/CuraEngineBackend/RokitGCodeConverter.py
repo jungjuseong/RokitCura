@@ -81,7 +81,8 @@ class RokitGCodeConverter:
         self._G1_F_Z_pattern = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z_pattern = re.compile(r'(G0) Z([0-9.]+)')
         self._G1_F_X_Y_pattern = re.compile(r'G1 F720 X-15.859 Y-.141 E0.00047')
-        
+        self._G1_F_G1_F = re.compile(r'\nG1 F[0-9.]+\n(G1 F[0-9.]+\n)')
+
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
         self._LeftExtruder_X_Position = 42.5
@@ -158,7 +159,7 @@ class RokitGCodeConverter:
             elif gcode.startswith("G0") and self._is_shot_moment == False:
                     modified_gcode = self._GCODE["StopShot"] + modified_gcode
                     self._is_shot_moment = True
-            
+
             gcode_list[index] = ";ToBeDeleted" if modified_gcode is None else self._convert_Z_To_C(gcode, modified_gcode)
             
         return gcode_list
@@ -190,6 +191,14 @@ class RokitGCodeConverter:
 
             if index == 1 and self._is_enable_dispensor: # start 코드일때 만 
                 joined_gcode = self._replaceStartDispenserCode(index, joined_gcode) # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
+
+
+            #re.sub(pattern='Gorio', repl='Ryan', count=2, string='Gorio, Gorio, Gorio keep a straight face.')
+            redundency_code = self._G1_F_G1_F.search(joined_gcode)
+            if redundency_code != None:
+                joined_gcode = re.sub(pattern=redundency_code.group(0),\
+                    repl=redundency_code.group(1),\
+                    string=joined_gcode)
 
             self._replaced_gcode_list[index] = joined_gcode
 
