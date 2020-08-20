@@ -41,6 +41,7 @@ class RokitGCodeConverter:
         self._uv_type = []
         self._uv_time = []
         self._uv_dimming = []
+        self._uv_channel = 0
 
         # 외부 dict
         self._dish = {}
@@ -81,11 +82,11 @@ class RokitGCodeConverter:
         
         self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
-        self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+) X([0-9.-]+) Y([0-9.-]+) Z([0-9.-]+)') # G0 F720 X2.13 Y1.057 Z0.3
+        self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+) X([0-9.-]+) Y([0-9.-]+) Z([0-9.-]+)')
         self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
 
         self._is_shot_moment = True
-        self.is_first_selectedExtruder = True
+        self._is_first_selectedExtruder = True
         self._LeftExtruder_X_Position = 42.5
         self._RightExtruder_X_Position = -42.5
         self._LeftExtruder_X_Offset = 85.0
@@ -239,8 +240,8 @@ class RokitGCodeConverter:
     def _addExtraExtruderCode(self) -> str: # FFF 예외처리 필요
         extra_code = " ; Selected Nozzle(%s)\n" % self._nozzle_type
 
-        if self.is_first_selectedExtruder:
-            self.is_first_selectedExtruder = False
+        if self._is_first_selectedExtruder:
+            self._is_first_selectedExtruder = False
             return extra_code
 
         if self._current_extruder_index == 0:
@@ -316,16 +317,10 @@ class RokitGCodeConverter:
         # UV 타입에 따른 UV 명령어 선정        
         if self._uv_type == '365':
             self._uv_channel = 0
-            # self._uv_on_code = self._GCODE['UVCuringOn'] # UV type: Curing
-            # self._uv_off_code = self._GCODE['UVCuringOff'] # UV type: Curing
         elif self._uv_type == '405':
             self._uv_channel = 1
-            # self._uv_on_code = self._GCODE['UVDisinfectionOn'] # UV type: Disinfect
-            # self._uv_off_code = self._GCODE['UVDisinfectionOff'] # UV type: Disinfect
         y_position = -50
         self._change_current_position_for_uv = self._GCODE['G0_X_Y'] %  (x_position, y_position)
-        # self._change_current_position_for_uv = self._GCODE['G92_X_Y'] %  (x_position, 0)
-        # self._move_to_uv_position = self._GCODE['G91_G0_X_Y'] % (x_position, 0)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
@@ -347,14 +342,6 @@ class RokitGCodeConverter:
                 self._GCODE['TimerLED'] + \
                 self._GCODE['UV_A_Off'] + \
                 self._GCODE['G0']
-                # G0 X42.5 Y-50. ; UV-A CURING POSITION
-                # M381 0 ; CHANNEL A선택 0 : 365nm, 1 : 405nm
-                # M385 80.0 ; 80% POWER SETTING
-                # M386 10.0 ; 동작 10초
-                # M172 ;  UV A ON
-                # M384 ; TIMER LED MODE ON/OFF
-                # M173 ; UV A OFF
-                # G0 ; GO BACK TO WORKING POSITION 해당 레이어 작업 위치로 이동
 
         return uv_code
 
