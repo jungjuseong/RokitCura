@@ -78,9 +78,9 @@ class RokitGCodeConverter:
         self._MarlinCodePattern = re.compile(r'M(140|190|104|109 [TS]|141|205|105|107)')
         self._UnnecessaryCodePattern = re.compile(r'M82 ;absolute extrusion mode|;;}')
         
-        self._G1_F_Z_pattern = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
-        self._G0_Z_pattern = re.compile(r'(G0) Z([0-9.]+)')
-        self._G1_F_X_Y_pattern = re.compile(r'G1 F720 X-15.859 Y-.141 E0.00047')
+        self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
+        self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
+        self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+) X([0-9.-]+) Y([0-9.-]+) Z([0-9.-]+)') # G0 F720 X2.13 Y1.057 Z0.3
         
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
@@ -263,8 +263,8 @@ class RokitGCodeConverter:
         axisName = " Z" if self._current_extruder_index == 0 else "C"
 
         matched_code = None
-        if self._G1_F_Z_pattern.match(gcode):
-            matched_code = self._G1_F_Z_pattern.search(gcode)
+        if self._G1_F_Z.match(gcode):
+            matched_code = self._G1_F_Z.search(gcode)
             self._current_z_value = float(matched_code.group(2))
 
             if self._current_extruder_index == 0:
@@ -272,6 +272,20 @@ class RokitGCodeConverter:
             else:
                 modified_gcode = matched_code.group(1) + "\n" 
                 modified_gcode += "G0 " + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
+
+        elif self._G0_F_X_Y_Z.match(gcode):
+            matched_code = self._G0_F_X_Y_Z.search(gcode)
+            self._current_z_value = float(matched_code.group(4))
+            sub_height = self._current_z_value - self._layer_height_0
+
+            if (sub_height == 0):
+                return re.sub(r' Z([0-9.]+)','',gcode)
+            elif self._current_extruder_index == 0:
+                replaced_gcode = re.sub(r'Z([0-9.]+)','Z%.2f',gcode)
+                modified_gcode = replaced_gcode % (sub_height + initial_layer0)
+            else:
+                modified_gcode = re.sub(r' Z([0-9.]+)','\n',gcode)
+                modified_gcode += "G0 " + axisName + str(sub_height + initial_layer0)
 
         # elif self._G0_Z_pattern.match(gcode):
         #     matched_code = self._G0_Z_pattern.search(gcode)
