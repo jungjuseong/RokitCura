@@ -51,10 +51,5 @@ class RokitGCodeModel():
         "SetVacuumPressure": "M307 %s ; vac_time",
 
         "StartShot": "M301\n",
-        "StopShot": "M330\n",
-
-        "A_AxisPosition" : { "D1": 0, "D2": -72, "D3": 72, "D4": 144, "D5": -144, "D6": 0 },       
-        "UVDevicePosition" : {"x" : 0.0,"y" : 62.0,"z" : 40.0 }
+        "StopShot": "M330\n"
     }
-
-    marlin_codes =  ["M140", "M190", "M104", "M109", "M141", "M205"]
