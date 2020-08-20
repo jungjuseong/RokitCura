@@ -48,7 +48,7 @@ class RokitGCodeModel():
         "UVDimming": "M385 %.1f\n",
         "UVTime": "M386 %.1f\n",
 
-        "SetPrintTemperature": "M308 %s ; print_temp",
+        "SetPrintTemperature": "M308 %s",
         "SetWaitingTemperature": "M109 ; wait for temperature",
 
         "SetShotTime": "M303 %s",
