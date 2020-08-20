@@ -54,13 +54,15 @@ class RokitGCodeConverter:
         # 선택한 명령어
         self._current_extruder_index = None  # 0, 1, 2, 3, 4, 5
         self._ExtruderNames = ["D6","D1","D2","D3","D4","D5"]
-        self._activated_extruders = []   # [D6, D1, D2, D3, D4, D5]
+        self._activated_extruders = []   # [0,1,2,3,4,5]
 
         self._previous_extruder_index = -1
         self._nozzle_type = ""
         
         self._layer_no = None
         self._uv_position = None
+
+        self._is_modifiable_layer = None
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
@@ -80,7 +82,7 @@ class RokitGCodeConverter:
         self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
         self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+) X([0-9.-]+) Y([0-9.-]+) Z([0-9.-]+)') # G0 F720 X2.13 Y1.057 Z0.3
-        self._G1_F_G1_F = re.compile(r'\nG1 F[0-9.]+\n(G1 F[0-9.]+\n)')
+        self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
 
         self._is_shot_moment = True
         self.is_first_selectedExtruder = True
@@ -88,7 +90,7 @@ class RokitGCodeConverter:
         self._RightExtruder_X_Position = -42.5
         self._LeftExtruder_X_Offset = 85.0
 
-        self._A_AxisPosition = [0, 0, -72,  72, 144, 216]       
+        self._A_AxisPosition = [0, 0, -72,  72, 144, -144]       
         self._UVDevicePosition = {"x" : 0.0,"y" : 62.0, "z" : 40.0 }
 
 
@@ -117,7 +119,7 @@ class RokitGCodeConverter:
         self._print_temperature = " ".join(map(str, print_temperature_list))
 
         # get UV and dispenser property from global stack
-        self._uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._ExtruderSequence]
+        self._uv_enable_list = self._getGlobalContainerStackProperty("uv_enable")
         self._is_enable_dispensor = self._getGlobalContainerStackProperty("dispensor_enable")
 
         # 기본 변환
@@ -144,8 +146,9 @@ class RokitGCodeConverter:
                 self._set_UV_Code(x_position)
 
                 self._addToActivatedExtruders()
-                #if index == (len(gcode_list) - 1): # 마지막 end 코드는 고려 안함
-                #    break
+            
+            elif self._is_modifiable_layer: # 마지막 end 코드는 고려 안함
+                continue
             elif gcode.startswith("G1"):
                 modified_gcode = gcode
                 if not self._nozzle_type.startswith('FFF'): 
@@ -169,17 +172,20 @@ class RokitGCodeConverter:
 
     # E 커맨드 제거 | E 값 | E 명령어
     def _remove_E_Attribute(self, gcode) -> str:
-        modified_gcode = gcode[:gcode.find("E")-1]
-        return modified_gcode
+        return gcode[:gcode.find("E")-1]
+        # return re.sub(r'E([0-9.-])','',gcode)
 
     def _convertGCode(self) -> None:
         for index, gcodes in enumerate(self._replaced_gcode_list): # line_per_layer
+            is_start_code = True if re.search("start code", gcodes) else False
+            self._is_modifiable_layer = True if re.search("for Dr.Invivo 4D6", gcodes) else False
+
             modified_gcode_list = self._processGCodeToInvivoCode(gcodes)
                     
             joined_gcode = "\n".join(modified_gcode_list)
 
-            if joined_gcode.startswith(";LAYER:"):
-                if self._uv_enable_list[self._current_extruder_index]:
+            if gcodes.startswith(";LAYER:"):
+                if self._uv_enable_list:
                     joined_gcode += self._get_UV_Code(gcodes) # 레이어 주기에 맞춰 커맨드 삽입
             
             joined_gcode = joined_gcode\
@@ -192,7 +198,7 @@ class RokitGCodeConverter:
 
             joined_gcode = self._replaceLayerInfo(joined_gcode)
 
-            if index == 1 and self._is_enable_dispensor: # start 코드일때 만 
+            if is_start_code and self._is_enable_dispensor: # start 코드일때 만 
                 joined_gcode = self._replaceStartDispenserCode(index, joined_gcode) # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
 
             # 중복된 G1 F000 코드 제거
@@ -239,24 +245,24 @@ class RokitGCodeConverter:
 
         if self._current_extruder_index == 0:
             if self._previous_extruder_index != 0:
-                extra_code += self._GCODE["G0_B0_F300"] +\
-                            self._GCODE["G0_C0"] +\
-                            self._GCODE["G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
-                            self._GCODE["G92_X0_Y0"]
+                extra_code += self._GCODE["M29_B"] +\
+                              self._GCODE["G0_C0"] +\
+                              self._GCODE["G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["G92_X0_Y0"]
         else:
             # Left --> Right
             if self._previous_extruder_index == 0:
                 extra_code += self._GCODE["G0_Z0"] +\
-                            self._GCODE["G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
-                            self._GCODE["G92_X0_Y0"] +\
-                            self._GCODE["G0_B0_F300"] +\
-                            self._GCODE["G0_A0_F600"] +\
-                            self._GCODE["G78_B15_F300"]               
+                              self._GCODE["G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["G92_X0_Y0"] +\
+                              self._GCODE["M29_B"] +\
+                              self._GCODE["G0_A0_F600"] +\
+                              self._GCODE["G78_B15_F300"]               
             else:        
                 current_A_axis_pos = self._A_AxisPosition[self._current_extruder_index]
-                extra_code += self._GCODE["G0_B0_F300"] +\
-                            self._GCODE["G0_A_F600"] % current_A_axis_pos + \
-                            self._GCODE["G78_B15_F300"]
+                extra_code += self._GCODE["M29_B"] +\
+                              self._GCODE["G0_A_F600"] % current_A_axis_pos + \
+                              self._GCODE["G78_B15_F300"]
 
         return extra_code
 
@@ -305,18 +311,21 @@ class RokitGCodeConverter:
         self._uv_per_layers = self._getExtrudersProperty(self._current_extruder_index,"uv_per_layers")
         self._uv_type = self._getExtrudersProperty(self._current_extruder_index,"uv_type")
         self._uv_time = self._getExtrudersProperty(self._current_extruder_index,"uv_time")
-        self._uv_dimming = self._getExtrudersProperty(self._current_extruder_index,"uv_dimming") # - 미구현
+        self._uv_dimming = self._getExtrudersProperty(self._current_extruder_index,"uv_dimming")
         
         # UV 타입에 따른 UV 명령어 선정        
         if self._uv_type == '365':
-            self._uv_on_code = self._GCODE['UVCuringOn'] # UV type: Curing
-            self._uv_off_code = self._GCODE['UVCuringOff'] # UV type: Curing
+            self._uv_channel = 0
+            # self._uv_on_code = self._GCODE['UVCuringOn'] # UV type: Curing
+            # self._uv_off_code = self._GCODE['UVCuringOff'] # UV type: Curing
         elif self._uv_type == '405':
-            self._uv_on_code = self._GCODE['UVDisinfectionOn'] # UV type: Disinfect
-            self._uv_off_code = self._GCODE['UVDisinfectionOff'] # UV type: Disinfect
-
-        self._change_current_position_for_uv = self._GCODE['G92_X_Y'] %  (x_position, 0)
-        self._move_to_uv_position = self._GCODE['G91_G0_X_Y'] % (x_position, 0)
+            self._uv_channel = 1
+            # self._uv_on_code = self._GCODE['UVDisinfectionOn'] # UV type: Disinfect
+            # self._uv_off_code = self._GCODE['UVDisinfectionOff'] # UV type: Disinfect
+        y_position = -50
+        self._change_current_position_for_uv = self._GCODE['G0_X_Y'] %  (x_position, y_position)
+        # self._change_current_position_for_uv = self._GCODE['G92_X_Y'] %  (x_position, 0)
+        # self._move_to_uv_position = self._GCODE['G91_G0_X_Y'] % (x_position, 0)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
@@ -326,21 +335,28 @@ class RokitGCodeConverter:
                 self._current_z_value = 0.0
 
         self._layer_no = int(line_per_layer[len(";LAYER:"):line_per_layer.find("\n")])
+        uv_code = ""
         if (self._layer_no % self._uv_per_layers) == 0:
             moveToCode = self._GCODE['G0_Z'] % (0.00) if self._current_extruder_index != 0 else self._GCODE['G0_Z'] % (self._current_z_value)
             uv_code = ";UV\n" + \
-                self._GCODE['G90_G0_XY_ZERO'] + \
                 self._change_current_position_for_uv + \
-                self._GCODE['G91_G0_X_Y'] % (self._uv_position['x'], self._uv_position['y']) + \
-                self._GCODE['G0_Z'] % (self._uv_position['z']) + \
-                self._uv_on_code + \
-                self._GCODE['UVTime'] % (self._uv_time * 1000) + \
-                self._uv_off_code + \
-                moveToCode + \
-                self._move_to_uv_position + \
-                self._GCODE['G92_X_Y'] % (0.00, 0.00)
+                self._GCODE['UVChannel'] % self._uv_channel + \
+                self._GCODE['UVDimming'] % self._uv_dimming + \
+                self._GCODE['UVTime'] % self._uv_time + \
+                self._GCODE['UV_A_On'] + \
+                self._GCODE['TimerLED'] + \
+                self._GCODE['UV_A_Off'] + \
+                self._GCODE['G0']
+                # G0 X42.5 Y-50. ; UV-A CURING POSITION
+                # M381 0 ; CHANNEL A선택 0 : 365nm, 1 : 405nm
+                # M385 80.0 ; 80% POWER SETTING
+                # M386 10.0 ; 동작 10초
+                # M172 ;  UV A ON
+                # M384 ; TIMER LED MODE ON/OFF
+                # M173 ; UV A OFF
+                # G0 ; GO BACK TO WORKING POSITION 해당 레이어 작업 위치로 이동
 
-            return uv_code
+        return uv_code
 
     # Well plate 복제 기능
     def _cloneWellPlate(self, trip):
@@ -396,7 +412,7 @@ class RokitGCodeConverter:
                 break
 
         start_point = trip["start_point"]
-        if self._activated_extruders[0] == 'D6':
+        if self._activated_extruders[0] == 0:
             x = start_point.x()
         else:
             x = -start_point.x()
@@ -404,7 +420,7 @@ class RokitGCodeConverter:
         start_codes = "\n;Start point\n" + \
             self._GCODE['G90_G0_X_Y'] % (x, start_point.y())
 
-        if self._activated_extruders[0] == "D6": # Left
+        if self._activated_extruders[0] == 0: # Left
             start_codes += self._GCODE["G0_Z_RESET"]
         else:
             start_codes += self._GCODE["G90_G0_C_RESET"] +\
@@ -419,7 +435,5 @@ class RokitGCodeConverter:
         start_codes += self._GCODE['G92_X0_Y0'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
 
         self._replaced_gcode_list[1] += start_codes
-        self._replaced_gcode_list.insert(-1,self._GCODE['G0_Z'] % (40.0))
-        self._replaced_gcode_list.insert(-1,self._GCODE['G90_G0_C'] % (40.0))
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0'])
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_C0'])
