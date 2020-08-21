@@ -28,6 +28,7 @@ class RokitGCodeModel():
         "G92_X_Y": "G92 X%.2f Y%.2f\n",
         "G92_Z0": "G92 Z0.0\n",
         "G92_C0": "G92 C0.0\n",
+        "G92_E0": "G92 E0.0\n",
 
         "G0_X_Y": "G0 X%.2f Y%.2f\n",
         "G0_A0_F600": "G0 A0.00 F600\n",
