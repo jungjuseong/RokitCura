@@ -75,14 +75,16 @@ class RokitGCodeConverter:
         self._G1_F_X_Y_E = re.compile(r'G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
         self._G1_X_Y_E = re.compile(r'G1 X[0-9.-]+ Y[0-9.-]+ E[0-9.-]')
 
-        self._MarlinCodePattern = re.compile(r'M(140|190|104 [TS]|109 [TS]|141|205|105|107)')
-        self._UnnecessaryCodePattern = re.compile(r'M82 ;absolute extrusion mode|;;}')
-        
+        self._MarlinCodeForRemove = re.compile(r'M(140|190|104 [TS]|109 [TS]|141|205|105|107)')
+        self._RemovedMark = "; to-be-removed"
+
         self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
         self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+) X([0-9.-]+) Y([0-9.-]+) Z([0-9.-]+)')
         self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
 
+        self._StartGCodeMark = r'Invivo 4D6\)(.*?)\(\*\*\*'
+        
         self._is_shot_moment = True
         self._is_first_selectedExtruder = True
         self._LeftExtruder_X_Position = 42.5
@@ -106,7 +108,9 @@ class RokitGCodeConverter:
         return self._global_container_stack.getProperty(property,"value")
 
     def _getVariantName(self, index):
-        return self._global_container_stack.extruderList[index].variant.getName()
+        if index >= 0 and index < 6:
+            return self._global_container_stack.extruderList[index].variant.getName()
+        return ''
 
     # 시작 (준비 작업)
     def run(self):
@@ -124,43 +128,58 @@ class RokitGCodeConverter:
         # 기본 변환
         self._convertGcodeToInvivoGcode()
 
+    def _getLayerIndex(self, one_layer_gcode) -> int:
+        layer_re = re.compile(r';LAYER:([0-9]+)')
+        return int(layer_re.search(one_layer_gcode).group(1))
+
+    def _setExtruder(self, gcode) -> str:
+        self._current_extruder_index = self._getExtruderIndex(gcode)        
+        return self._getVariantName(self._current_extruder_index)
+
     def _convertGcodeToInvivoGcode(self) -> None:
 
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
 
             modified_gcode = one_layer_gcode
-            if index == 0:
+            if ';FLAVOR:Marlin' in one_layer_gcode:
                 modified_gcode = one_layer_gcode.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
-            elif index == 1: # Marlin code 전체 제거 
-                modified_gcode = '; removed' # to be overwriiten by Start code
             elif '(*** start of start code for Dr.Invivo 4D6)' in one_layer_gcode:
+                self._nozzle_type = self._setExtruder(one_layer_gcode)
+                modified_gcode = self._ExtruderNames[self._current_extruder_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type           
+                start_code = one_layer_gcode[one_layer_gcode.find('; (*** start of start code for Dr.Invivo 4D6)'):] 
+                modified_gcode += self._replaceLayerInfo(start_code)
+
                 if self._is_enable_dispensor: # start 코드일때 만 
-                    modified_gcode = self._replaceDispenserSetupCode(one_layer_gcode)
-                modified_gcode = self._replaceLayerInfo(modified_gcode)
-            elif '(*** start of end code for Dr.Invivo 4D6)' in one_layer_gcode:
-                modified_gcode = one_layer_gcode
-            elif one_layer_gcode.startswith(";LAYER:"):                
-                self._current_layer_index = int(one_layer_gcode[len(";LAYER:"):one_layer_gcode.find("\n")])
+                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
+
+            elif one_layer_gcode.startswith(";LAYER:"):
+                self._current_layer_index = self._getLayerIndex(one_layer_gcode)
+                
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
                 if self._uv_enable_list:
                     modified_gcode += self._get_UV_Code(modified_gcode) # 레이어 주기에 맞춰 gcode 삽입               
 
-                modified_gcode = re.sub('-.', '-0.', modified_gcode) # 정수를 0으로 채우기 함수
                 modified_gcode = self._removeRedundencyGCode(modified_gcode)
+                modified_gcode = re.sub('-\.', '-0.', modified_gcode) # 정수를 0으로 채우기 함수
 
             self._replaced_gcode_list[index] = modified_gcode
         self._setGcodeAfterStartGcode() 
 
+    def _getExtruderIndex(self, gcode) -> int:
+        extruderRe = re.compile(r'T([0-5]+)')
+        return int(extruderRe.search(gcode).group(1))
+
     def _convertOneLayerGCode(self, one_layer_gcode) -> str:        
 
-        gcode_list = []
-        for index, gcode in enumerate(one_layer_gcode.split("\n")):
+        gcode_list = one_layer_gcode.split("\n")
+        for index, gcode in enumerate(gcode_list):
             modified_gcode = gcode                
 
-            if gcode.startswith("T"): # select Extruder
-                self._current_extruder_index = int(gcode[-1])
-                self._nozzle_type = self._getVariantName(self._current_extruder_index)
-                modified_gcode = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
+            if self._MarlinCodeForRemove.match(gcode):
+                gcode_list[index] = self._RemovedMark
+            elif gcode.startswith('T'): # Extruder
+                self._nozzle_type = self._setExtruder(gcode)
+                gcode_list[index] = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
                 
                 self._set_UV_Code()
                 self._addToActivatedExtruders()
@@ -175,17 +194,13 @@ class RokitGCodeConverter:
                     if self._is_shot_moment == False:
                         modified_gcode = self._GCODE["StopShot"] + modified_gcode
                         self._is_shot_moment = True
+                gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
             elif gcode.startswith("G0") and self._is_shot_moment == False:
-                    modified_gcode = self._GCODE["StopShot"] + modified_gcode
-                    self._is_shot_moment = True
-
-            elif self._MarlinCodePattern.match(gcode) or self._UnnecessaryCodePattern.match(gcode):
-                continue
+                modified_gcode = self._GCODE["StopShot"] + modified_gcode
+                self._is_shot_moment = True
+                gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
             elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
-                continue
-
-            modified_gcode = self._convert_Z_To_C(gcode, modified_gcode)                
-            gcode_list.append(modified_gcode)
+                gcode_list[index] = self._RemovedMark 
 
         return "\n".join(gcode_list) 
 
@@ -198,7 +213,10 @@ class RokitGCodeConverter:
         if redundency_match != None:
             modified_code = re.sub(pattern=redundency_match.group(0),\
                 repl=redundency_match.group(1),\
-                string=modified_code)        
+                string=modified_code)
+        
+        modified_code = re.sub(self._RemovedMark + '\n', '', modified_code)
+
         return modified_code
 
     def _replaceLayerInfo(self, replaced) -> str:
@@ -413,6 +431,6 @@ class RokitGCodeConverter:
             start_codes += ";Well Number: 0\n"
             self._cloneWellPlate(trip)
 
-        self._replaced_gcode_list[1] = start_codes
+        self._replaced_gcode_list[1] += start_codes
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0'])
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_C0'])
