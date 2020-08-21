@@ -255,7 +255,7 @@ class RokitGCodeConverter:
             else:        
                 current_A_axis_pos = self._A_AxisPosition[self._current_extruder_index]
                 extra_code += self._GCODE["M29_B"] +\
-                              self._GCODE["G0_A_F600"] % current_A_axis_pos + \
+                              self._GCODE["G0_A_F600"] % current_A_axis_pos +\
                               self._GCODE["G78_B15_F300"]
 
         return extra_code
@@ -326,54 +326,54 @@ class RokitGCodeConverter:
         uv_code = ""
         if (self._current_layer_index % self._uv_per_layers) == 0:
             moveToCode = self._GCODE['G0_Z'] % (0.00) if self._current_extruder_index != 0 else self._GCODE['G0_Z'] % (self._current_z_value)
-            uv_code = ";UV\n" + \
-                self._change_current_position_for_uv + \
-                self._GCODE['UVChannel'] % self._uv_channel + \
-                self._GCODE['UVDimming'] % self._uv_dimming + \
-                self._GCODE['UVTime'] % self._uv_time + \
-                self._GCODE['UV_A_On'] + \
-                self._GCODE['TimerLED'] + \
-                self._GCODE['UV_A_Off'] + \
+            uv_code = ";UV\n" +\
+                self._change_current_position_for_uv +\
+                self._GCODE['UVChannel'] % self._uv_channel +\
+                self._GCODE['UVDimming'] % self._uv_dimming +\
+                self._GCODE['UVTime'] % self._uv_time +\
+                self._GCODE['UV_A_On'] +\
+                self._GCODE['TimerLED'] +\
+                self._GCODE['UV_A_Off'] +\
                 self._GCODE['G0']
 
         return uv_code
 
     # Well plate 복제 기능
     def _cloneWellPlate(self, trip):
-        clone_num = trip["well_number"] -1 # 본코드를 제외판 복제 코드는 전체에서 1개를 빼야함.
+        clone_num = trip["well_number"] # 본코드를 제외한 복제 코드는 전체에서 1개를 빼야함.
         line_seq = trip["line_seq"]
         # z_height = trip["z"]
 
         gcode_clone = self._replaced_gcode_list[2:-1]
         std_str = self._GCODE['G90_G0_XY_ZERO']
-        self._line_controller = 1 # forward
+        travel_forward = True
 
         gcode_body = []
         for i in range(1,clone_num): # Clone number ex) 1 ~ 96
             if i % line_seq == 0:
                 direction = 'X'
                 distance = -trip["spacing"]
-                self._line_controller = abs(self._line_controller - 1) # direction control
+                travel_forward = not travel_forward
             else:
-                if self._line_controller == 1:
+                if travel_forward:
                     direction = 'Y'
                     distance = -trip["spacing"]
-                elif self._line_controller == 0:
+                elif not travel_forward:
                     direction = 'Y'
                     distance = trip["spacing"]
 
             # control spacing about build plate after printing one model
-            gcode_spacing = ";hop_spacing\n"
-            gcode_spacing += "G92 E0\n" 
-            gcode_spacing += self._GCODE['G90_G0_XY_ZERO']
-            gcode_spacing += self._GCODE['G90_G0_C'] % -4.0
+            gcode_spacing = ";hop_spacing\n" +\
+                self._GCODE['G92_E0'] +\
+                self._GCODE['G90_G0_XY_ZERO'] +\
+                self._GCODE['G90_G0_C'] % -4.0
             if direction == 'X':
-                gcode_spacing += self._GCODE['G91_G0_X'] % distance
+                gcode_spacing += self._GCODE['G91_G0_X'] % distance 
             else:
                 gcode_spacing += self._GCODE['G91_G0_Y'] % distance
-
             gcode_spacing += self._GCODE['G90_G0_C'] % self._InitialLayer0_C
             gcode_spacing += self._GCODE['G92_X0_Y0']
+            gcode_spacing += ";Well Number: %d\n" % i
 
             gcode_clone.insert(0,gcode_spacing)
             self._replaced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
@@ -397,7 +397,7 @@ class RokitGCodeConverter:
         else:
             x = -start_point.x()
 
-        start_codes = "\n;Start point\n" + \
+        start_codes = "\n;Start point\n" +\
             self._GCODE['G90_G0_X_Y'] % (x, start_point.y())
 
         if self._activated_extruder_index_list[0] == 0: # Left
@@ -408,11 +408,12 @@ class RokitGCodeConverter:
     
             start_codes += self._GCODE["G0_A_F600"] % (self._A_AxisPosition[self._activated_extruder_index_list[0]])
             start_codes += self._GCODE["G78_B15_F300"] # G78 B15.
-        
-        if (build_plate_type == "Well Plate"):
-            self._cloneWellPlate(trip)
 
         start_codes += self._GCODE['G92_X0_Y0'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
+        
+        if (build_plate_type == "Well Plate"):
+            start_codes += ";Well Number: 0\n"
+            self._cloneWellPlate(trip)
 
         self._replaced_gcode_list[1] += start_codes
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0'])
