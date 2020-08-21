@@ -462,7 +462,6 @@ class CuraApplication(QtApplication):
             #"MonitorStage", #Major part of Cura's functionality.
             "LocalFileOutputDevice", #Major part of Cura's functionality.
             "BluetoothFileOutputDevice", #Minor part of Cura's functionality.
-            "FourDConvertOuputDevice", #Minor part of RokitHealthcare's functionality.
 
             "LocalContainerProvider", #Cura is useless without any profiles or setting definitions.
 

@@ -124,6 +124,33 @@ class RokitGCodeConverter:
         # 기본 변환
         self._convertGcodeToInvivoGcode()
 
+    def _convertGcodeToInvivoGcode(self) -> None:
+
+        for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
+
+            modified_gcode = one_layer_gcode
+            if index == 0:
+                modified_gcode = one_layer_gcode.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
+            elif index == 1: # Marlin code 전체 제거 
+                modified_gcode = '; removed' # to be overwriiten by Start code
+            elif '(*** start of start code for Dr.Invivo 4D6)' in one_layer_gcode:
+                if self._is_enable_dispensor: # start 코드일때 만 
+                    modified_gcode = self._replaceDispenserSetupCode(one_layer_gcode)
+                modified_gcode = self._replaceLayerInfo(modified_gcode)
+            elif '(*** start of end code for Dr.Invivo 4D6)' in one_layer_gcode:
+                modified_gcode = one_layer_gcode
+            elif one_layer_gcode.startswith(";LAYER:"):                
+                self._current_layer_index = int(one_layer_gcode[len(";LAYER:"):one_layer_gcode.find("\n")])
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
+                if self._uv_enable_list:
+                    modified_gcode += self._get_UV_Code(modified_gcode) # 레이어 주기에 맞춰 gcode 삽입               
+
+                modified_gcode = re.sub('-.', '-0.', modified_gcode) # 정수를 0으로 채우기 함수
+                modified_gcode = self._removeRedundencyGCode(modified_gcode)
+
+            self._replaced_gcode_list[index] = modified_gcode
+        self._setGcodeAfterStartGcode() 
+
     def _convertOneLayerGCode(self, one_layer_gcode) -> str:        
 
         gcode_list = []
@@ -167,41 +194,12 @@ class RokitGCodeConverter:
         modified_code = re.sub('G92 E0\nG92 E0', 'G92 E0', one_layer_gcode)
 
         # 중복된 G1 F000 코드 제거
-        redundency_code = self._G1_F_G1_F.search(modified_code)
-        if redundency_code != None:
-            modified_code = re.sub(pattern=redundency_code.group(0),\
-                repl=redundency_code.group(1),\
+        redundency_match = self._G1_F_G1_F.search(modified_code)
+        if redundency_match != None:
+            modified_code = re.sub(pattern=redundency_match.group(0),\
+                repl=redundency_match.group(1),\
                 string=modified_code)        
         return modified_code
-
-    def _convertGcodeToInvivoGcode(self) -> None:
-        for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
-            if index == 0:
-                modified_one_layer_gcode = one_layer_gcode.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
-            elif index == 1: # Marlin code 전체 제거 
-                modified_one_layer_gcode = '; removed'
-
-            elif '\n; (*** start of start code for Dr.Invivo 4D6)' in one_layer_gcode:
-                if self._is_enable_dispensor: # start 코드일때 만 
-                    modified_one_layer_gcode = self._replaceDispenserSetupCode(index, one_layer_gcode) # 조건 처리 필요 (index 1,2에서 다음의 함수가 필요)
-                modified_one_layer_gcode = self._replaceLayerInfo(modified_one_layer_gcode)
-            elif '\n; (*** start of end code for Dr.Invivo 4D6)' in one_layer_gcode:
-                continue
-            elif '(*** end of end code for Dr.Invivo 4D6)' in one_layer_gcode:
-                modified_one_layer_gcode = modified_one_layer_gcode
-                break
-            elif one_layer_gcode.startswith(";LAYER:"):                
-                self._current_layer_index = int(one_layer_gcode[len(";LAYER:"):one_layer_gcode.find("\n")])
-                modified_one_layer_gcode = self._convertOneLayerGCode(one_layer_gcode)
-                if self._uv_enable_list:
-                    modified_one_layer_gcode += self._get_UV_Code(modified_one_layer_gcode) # 레이어 주기에 맞춰 gcode 삽입               
-
-                re.sub('-.', '-0.', modified_one_layer_gcode) # 정수를 0으로 채우기 함수
-                modified_one_layer_gcode = self._removeRedundencyGCode(modified_one_layer_gcode)
-                
-            self._replaced_gcode_list[index] = modified_one_layer_gcode
-
-        self._setGcodeAfterStartGcode() 
 
     def _replaceLayerInfo(self, replaced) -> str:
         layer_height = " ".join(map(str,[self._getExtrudersProperty(index,"layer_height") for index in self._JoinSequence]))
@@ -215,7 +213,7 @@ class RokitGCodeConverter:
             .replace("{infill_sparse_density}", infill_sparse_density)
 
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
-    def _replaceDispenserSetupCode(self, index, replaced) -> str:
+    def _replaceDispenserSetupCode(self, replaced) -> str:
         shot_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
         vac_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]))
         int_time = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_int") for index in self._JoinSequence]))
@@ -415,6 +413,6 @@ class RokitGCodeConverter:
             start_codes += ";Well Number: 0\n"
             self._cloneWellPlate(trip)
 
-        self._replaced_gcode_list[1] += start_codes
+        self._replaced_gcode_list[1] = start_codes
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0'])
         self._replaced_gcode_list.insert(-1,self._GCODE['G92_C0'])
