@@ -86,7 +86,6 @@ class RokitGCodeConverter:
         self._StartGCodeMark = r'Invivo 4D6\)(.*?)\(\*\*\*'
         
         self._is_shot_moment = True
-        self._is_first_selectedExtruder = True
         self._LeftExtruder_X_Position = 42.5
         self._RightExtruder_X_Position = -42.5
         self._LeftExtruder_X_Offset = 85.0
@@ -133,7 +132,9 @@ class RokitGCodeConverter:
         return int(layer_re.search(one_layer_gcode).group(1))
 
     def _setExtruder(self, gcode) -> str:
-        self._current_extruder_index = self._getExtruderIndex(gcode)        
+        self._previous_extruder_index = self._current_extruder_index
+        self._current_extruder_index = self._getExtruderIndex(gcode)
+        self._addToActivatedExtruders(self._current_extruder_index)       
         return self._getVariantName(self._current_extruder_index)
 
     def _convertGcodeToInvivoGcode(self) -> None:
@@ -145,7 +146,7 @@ class RokitGCodeConverter:
                 modified_gcode = one_layer_gcode.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
             elif '(*** start of start code for Dr.Invivo 4D6)' in one_layer_gcode:
                 self._nozzle_type = self._setExtruder(one_layer_gcode)
-                modified_gcode = self._ExtruderNames[self._current_extruder_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type           
+                modified_gcode = self._ExtruderNames[self._current_extruder_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type
                 start_code = one_layer_gcode[one_layer_gcode.find('; (*** start of start code for Dr.Invivo 4D6)'):] 
                 modified_gcode += self._replaceLayerInfo(start_code)
 
@@ -178,11 +179,9 @@ class RokitGCodeConverter:
             if self._MarlinCodeForRemove.match(gcode):
                 gcode_list[index] = self._RemovedMark
             elif gcode.startswith('T'): # Extruder
-                self._nozzle_type = self._setExtruder(gcode)
+                self._nozzle_type = self._setExtruder(gcode) # current set
                 gcode_list[index] = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
-                
                 self._set_UV_Code()
-                self._addToActivatedExtruders()
             elif gcode.startswith("G1"):
                 if self._nozzle_type.startswith('FFF') == False and gcode.find("E") != -1:
                     modified_gcode = modified_gcode[:modified_gcode.find("E")-1] # E 속성 제거           
@@ -195,10 +194,11 @@ class RokitGCodeConverter:
                         modified_gcode = self._GCODE["StopShot"] + modified_gcode
                         self._is_shot_moment = True
                 gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
-            elif gcode.startswith("G0") and self._is_shot_moment == False:
-                modified_gcode = self._GCODE["StopShot"] + modified_gcode
-                self._is_shot_moment = True
+            elif gcode.startswith("G0"):
                 gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
+                if self._is_shot_moment == False:
+                    modified_gcode = self._GCODE["StopShot"] + modified_gcode
+                    self._is_shot_moment = True
             elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
                 gcode_list[index] = self._RemovedMark 
 
@@ -249,10 +249,6 @@ class RokitGCodeConverter:
     def _getExtraExtruderCode(self) -> str: # FFF 예외처리 필요
         extra_code = " ; Selected Nozzle(%s)\n" % self._nozzle_type
 
-        if self._is_first_selectedExtruder:
-            self._is_first_selectedExtruder = False
-            return extra_code
-
         if self._current_extruder_index == 0:
             if self._previous_extruder_index != 0:
                 extra_code += self._GCODE["M29_B"] +\
@@ -277,10 +273,9 @@ class RokitGCodeConverter:
         return extra_code
 
     # 익스트루더 index 기록
-    def _addToActivatedExtruders(self) -> None:
-        if self._current_extruder_index not in self._activated_extruder_index_list:
-            self._activated_extruder_index_list.append(self._current_extruder_index) # T 명령어 정보 (0,1,2,3,4,5)
-        self._previous_extruder_index = self._current_extruder_index
+    def _addToActivatedExtruders(self, current_extruder_index) -> None:
+        if current_extruder_index not in self._activated_extruder_index_list:
+            self._activated_extruder_index_list.append(current_extruder_index) # T 명령어 정보 (0,1,2,3,4,5)
 
     # Z 좌표 관리
     def _convert_Z_To_C(self, gcode, modified_gcode) -> str:

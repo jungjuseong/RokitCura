@@ -50,7 +50,7 @@ class RokitGCodeModel():
         "UVTime": "M386 %.1f\n",
 
         "SetPrintTemperature": "M308 %s",
-        "SetWaitingTemperature": "M109 ; wait for temperature",
+        "SetWaitingTemperature": "M109",
 
         "SetShotTime": "M303 %s",
         "SetVacuumTime": "M304 %s",
