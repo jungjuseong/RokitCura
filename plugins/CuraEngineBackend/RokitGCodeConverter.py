@@ -143,7 +143,15 @@ class RokitGCodeConverter:
         self._current_extruder_index = self._getExtruderIndex(gcode)
         self._addToActivatedExtruders(self._current_extruder_index)       
         return self._getVariantName(self._current_extruder_index)
-#
+
+    def _addFloatingPoint(self, gcode) -> str:
+
+        digitWithoutFloatingPoint = re.compile(r'([XYZ][0-9]+) ') 
+        matched = digitWithoutFloatingPoint.search(gcode)
+        if matched:
+            return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
+        return gcode
+
     def _convertGcodeToInvivoGcode(self) -> None:
 
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
@@ -158,7 +166,7 @@ class RokitGCodeConverter:
                 modified_gcode += self._replaceLayerInfo(start_code)
 
                 if self._is_enable_dispensor: # start 코드일때 만 
-                    modified_gcode = self._StartOfStartCode "\n" +\
+                    modified_gcode = self._StartOfStartCode + "\n" +\
                         self._replaceDispenserSetupCode(modified_gcode) + self._EndOfStartCode + "\n"
 
             elif one_layer_gcode.find("*** start of end code") != -1:
@@ -174,7 +182,8 @@ class RokitGCodeConverter:
                     modified_gcode += self._get_UV_Code(modified_gcode) # 레이어 주기에 맞춰 gcode 삽입               
 
                 modified_gcode = self._removeRedundencyGCode(modified_gcode)
-                modified_gcode = re.sub('-\.', '-0.', modified_gcode) # 정수를 0으로 채우기 함수
+                modified_gcode = re.sub('-\.', '-0.', modified_gcode) # 정수를 0으로 채우기
+
             elif re.match(self._G1_F_E, one_layer_gcode) is not None:
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
 
@@ -189,7 +198,6 @@ class RokitGCodeConverter:
 
         gcode_list = one_layer_gcode.split("\n")
         for index, gcode in enumerate(gcode_list):
-            modified_gcode = gcode                
 
             if self._MarlinCodeForRemove.match(gcode):
                 gcode_list[index] = self._RemovedMark
@@ -198,6 +206,7 @@ class RokitGCodeConverter:
                 gcode_list[index] = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
                 self._set_UV_Code()
             elif gcode.startswith("G1"):
+                modified_gcode = self._addFloatingPoint(gcode) # 정수에 소숫점 채우기
                 if self._nozzle_type.startswith('FFF') == False and gcode.find("E") != -1:
                     modified_gcode = modified_gcode[:modified_gcode.find("E")-1] # E 속성 제거           
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
@@ -210,12 +219,14 @@ class RokitGCodeConverter:
                         self._is_shot_moment = True
                 gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
             elif gcode.startswith("G0"):
-                gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
+                modified_gcode = self._convert_Z_To_C(gcode, gcode)
                 if self._is_shot_moment == False:
                     modified_gcode = self._GCODE["StopShot"] + modified_gcode
                     self._is_shot_moment = True
+                gcode_list[index] = modified_gcode
             elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
                 gcode_list[index] = self._RemovedMark 
+
 
         return "\n".join(gcode_list) 
 
@@ -231,7 +242,6 @@ class RokitGCodeConverter:
                 string=modified_code)
         
         modified_code = re.sub(self._RemovedMark + '\n', '', modified_code)
-
         return modified_code
 
     def _replaceLayerInfo(self, replaced) -> str:
