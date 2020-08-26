@@ -439,8 +439,7 @@ class RokitGCodeConverter:
         if self._activated_extruder_index_list[0] == 0: # Left
             start_codes += self._GCODE["G0_Z_RESET"]
         else:
-            start_codes += self._GCODE["G90_G0_C_RESET"] +\
-                self._GCODE["G92_C0"]
+            start_codes += self._GCODE["G90_G0_C_RESET"]
     
             start_codes += self._GCODE["G0_A_F600"] % (self._A_AxisPosition[self._activated_extruder_index_list[0]])
             start_codes += self._GCODE["G78_B15_F300"] # G78 B15.
