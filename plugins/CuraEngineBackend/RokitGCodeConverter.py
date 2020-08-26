@@ -85,7 +85,7 @@ class RokitGCodeConverter:
         self._MarlinCodeForRemove = re.compile(r'M(140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = "; to-be-removed"
 
-        self._G1_F_E = re.compile(r'(G1 F[0-9.]+) E([0-9.]+)')
+        self._G1_F_E = re.compile(r'(G1 F[0-9.]+) E([0-9.-]+)')
 
         self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
@@ -380,7 +380,7 @@ class RokitGCodeConverter:
         line_seq = trip["line_seq"]
         # z_height = trip["z"]
 
-        gcode_clone = self._replaced_gcode_list[2:-1]
+        gcode_clone = self._replaced_gcode_list[2:-1] # 수정 필요 *** (수로 범위를 설정하면 안됨)
         std_str = self._GCODE['G90_G0_XY_ZERO']
         travel_forward = True
 
