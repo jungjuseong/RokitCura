@@ -68,7 +68,7 @@ class RokitGCodeConverter:
         self._replaced_code = ""
         self._replaced_line = ""
 
-        self._change_current_position_for_uv = None
+        self._to_uv_location = None
         self._move_to_uv_position = None
 
         # startcode / endcode
@@ -158,7 +158,7 @@ class RokitGCodeConverter:
             modified_gcode = one_layer_gcode
             if ';FLAVOR:Marlin' in one_layer_gcode:
                 modified_gcode = one_layer_gcode.replace(";FLAVOR:Marlin", ";F/W : 7.7.1.x")
-            elif one_layer_gcode.find("*** start of start code") != -1:
+            elif "*** start of start code" in one_layer_gcode:
                 start_code = one_layer_gcode[one_layer_gcode.find(self._StartOfStartCode)+len(self._StartOfStartCode):one_layer_gcode.rfind(self._EndOfStartCode)]
 
                 self._nozzle_type = self._setExtruder(one_layer_gcode)
@@ -169,7 +169,7 @@ class RokitGCodeConverter:
                     modified_gcode = self._StartOfStartCode + "\n" +\
                         self._replaceDispenserSetupCode(modified_gcode) + self._EndOfStartCode + "\n"
 
-            elif one_layer_gcode.find("*** start of end code") != -1:
+            elif "*** start of end code" in one_layer_gcode:
                 modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
@@ -207,7 +207,7 @@ class RokitGCodeConverter:
                 self._set_UV_Code()
             elif gcode.startswith("G1"):
                 modified_gcode = self._addFloatingPoint(gcode) # 정수에 소숫점 채우기
-                if self._nozzle_type.startswith('FFF') == False and gcode.find("E") != -1:
+                if self._nozzle_type.startswith('FFF') == False and "E" in gcode:
                     modified_gcode = modified_gcode[:modified_gcode.find("E")-1] # E 속성 제거           
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
                     if  self._is_shot_moment == True:
@@ -350,29 +350,19 @@ class RokitGCodeConverter:
             self._uv_channel = 1
 
         extruder_x_position = self._LeftExtruder_X_Position if (self._current_extruder_index == 0) else self._RightExtruder_X_Position
-        self._change_current_position_for_uv = self._GCODE['G0_X_Y'] % (extruder_x_position, -50)
+        self._to_uv_location = self._GCODE['G0_X_Y'] % (extruder_x_position, -50)
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
     def _get_UV_Code(self, one_layer_gcode) -> str:
-        if self._current_z_value is None: # 예외 처리
-                Logger.log("w","No Current Z Value")
-                self._current_z_value = 0.0
-
-        uv_code = ""
-        if (self._current_layer_index % self._uv_per_layers) == 0:
-            moveToCode = self._GCODE['G0_Z'] % (0.00) if self._current_extruder_index != 0 else self._GCODE['G0_Z'] % (self._current_z_value)
-            uv_code = ";UV\n" +\
-                self._change_current_position_for_uv +\
-                self._GCODE['UVChannel'] % self._uv_channel +\
-                self._GCODE['UVDimming'] % self._uv_dimming +\
-                self._GCODE['UVTime'] % self._uv_time +\
-                self._GCODE['UV_A_On'] +\
-                self._GCODE['TimerLED'] +\
-                self._GCODE['UV_A_Off'] +\
-                self._GCODE['G0']
-
-        return uv_code
+        
+        # https://docs.python.org/ko/3/tutorial/inputoutput.html <= format 함수 정보
+        if self._current_layer_index % self._uv_per_layers == 0:
+            uv_code = "UV\n{change}{UVChannel}{UVDimming}{UVTime}{UV_A_On}{TimerLED}{UV_A_Off}{G0}"\
+                .format(**self._GCODE , change = self._to_uv_location)
+            return uv_code = uv_code.format(uv_ch = self._uv_channel, uv_di = self._uv_dimming, uv_time = self._uv_time)
+        else:
+            return ""
 
     # Well plate 복제 기능
     def _cloneWellPlate(self, trip):
