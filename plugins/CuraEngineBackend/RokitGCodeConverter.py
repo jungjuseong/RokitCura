@@ -36,7 +36,7 @@ class RokitGCodeConverter:
         self._is_enable_dispensor = None
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
-        self._uv_enable_list = []
+        self._uv_enabled_list = []
         self._uv_per_layers = []
         self._uv_type = []
         self._uv_time = []
@@ -128,7 +128,7 @@ class RokitGCodeConverter:
         self._print_temperature = " ".join(map(str, temp_list))
 
         # get UV and dispenser property from global stack
-        self._uv_enable_list = self._getGlobalContainerStackProperty("uv_enable")
+        self._uv_enabled_list = [self._getExtrudersProperty(index,"uv_enabled") for index in self._JoinSequence]
         self._is_enable_dispensor = self._getGlobalContainerStackProperty("dispensor_enable")
 
         # 기본 변환
@@ -177,9 +177,7 @@ class RokitGCodeConverter:
             elif one_layer_gcode.startswith(";LAYER:"):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
                 
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
-                if self._uv_enable_list:
-                    modified_gcode += self._get_UV_Code(modified_gcode) # 레이어 주기에 맞춰 gcode 삽입               
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)          
 
                 modified_gcode = self._removeRedundencyGCode(modified_gcode)
                 modified_gcode = re.sub('-\.', '-0.', modified_gcode) # 정수를 0으로 채우기
@@ -203,8 +201,11 @@ class RokitGCodeConverter:
                 gcode_list[index] = self._RemovedMark
             elif gcode.startswith('T'): # Extruder
                 self._nozzle_type = self._setExtruder(gcode) # current set
-                gcode_list[index] = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
+                modified_gcode = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
                 self._set_UV_Code()
+                if self._uv_enabled_list[self._current_extruder_index]:
+                    modified_gcode += self._get_UV_Code() # 레이어 주기에 맞춰 gcode 삽입    
+                gcode_list[index] = modified_gcode 
             elif gcode.startswith("G1"):
                 modified_gcode = self._addFloatingPoint(gcode) # 정수에 소숫점 채우기
                 if self._nozzle_type.startswith('FFF') == False and "E" in gcode:
@@ -278,22 +279,22 @@ class RokitGCodeConverter:
             if self._previous_extruder_index != 0:
                 extra_code += self._GCODE["M29_B"] +\
                               self._GCODE["G0_C0"] +\
-                              self._GCODE["G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["LEFT_G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
                               self._GCODE["G92_X0_Y0"]
         else:
             # Left --> Right
             if self._previous_extruder_index == 0:
                 extra_code += self._GCODE["G0_Z0"] +\
-                              self._GCODE["G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["RIGHT_G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
                               self._GCODE["G92_X0_Y0"] +\
                               self._GCODE["M29_B"] +\
                               self._GCODE["G0_A0_F600"] +\
-                              self._GCODE["G78_B15_F300"]               
+                              self._GCODE["G0_B15.0_F300"]               
             else:        
                 current_A_axis_pos = self._A_AxisPosition[self._current_extruder_index]
                 extra_code += self._GCODE["M29_B"] +\
                               self._GCODE["G0_A_F600"] % current_A_axis_pos +\
-                              self._GCODE["G78_B15_F300"]
+                              self._GCODE["G0_B15.0_F300"]
 
         return extra_code
 
@@ -354,15 +355,15 @@ class RokitGCodeConverter:
 
     # Layer 주기를 기준으로 UV 명령어 삽입
     # dispenser 설정 명령어 삽입
-    def _get_UV_Code(self, one_layer_gcode) -> str:
+    def _get_UV_Code(self) -> str:
         
-        # https://docs.python.org/ko/3/tutorial/inputoutput.html <= format 함수 정보
-        if self._current_layer_index % self._uv_per_layers == 0:
+        uv_code = ""
+        if (self._current_layer_index % self._uv_per_layers[self._current_extruder_index]) == 0:
             uv_code = "UV\n{change}{UVChannel}{UVDimming}{UVTime}{UV_A_On}{TimerLED}{UV_A_Off}{G0}"\
                 .format(**self._GCODE , change = self._to_uv_location)
-            return uv_code = uv_code.format(uv_ch = self._uv_channel, uv_di = self._uv_dimming, uv_time = self._uv_time)
-        else:
-            return ""
+            uv_code = uv_code.format(uv_ch = self._uv_channel, uv_di = self._uv_dimming, uv_time = self._uv_time)
+        
+        return uv_code
 
     # Well plate 복제 기능
     def _cloneWellPlate(self, trip):
@@ -432,7 +433,7 @@ class RokitGCodeConverter:
             start_codes += self._GCODE["G90_G0_C_RESET"]
     
             start_codes += self._GCODE["G0_A_F600"] % (self._A_AxisPosition[self._activated_extruder_index_list[0]])
-            start_codes += self._GCODE["G78_B15_F300"] # G78 B15.
+            start_codes += self._GCODE["G0_B15.0_F300"] # G78 B15.
 
         start_codes += self._GCODE['G92_X0_Y0'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
         
