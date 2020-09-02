@@ -11,13 +11,12 @@ import Arcus #For typing.
 from cura.CuraApplication import CuraApplication
 from cura.Machines.Models.RokitGCodeModel import RokitGCodeModel
 from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
+from .RokitExtrudersInfo import RokitExtrudersInfo
 
 class RokitGCodeConverter:
     def __init__(self) -> None:    
 
-        # 외부
-        self._application = CuraApplication.getInstance()
-        self._global_container_stack = self._application.getMachineManager().activeMachine
+        self._info = RokitExtrudersInfo()
 
         # 필요
         self._gcode_model = RokitGCodeModel()        
@@ -25,46 +24,9 @@ class RokitGCodeConverter:
 
         self._build_dish_model = RokitBuildDishModel()
 
-        # extruders info
-        self._JoinSequence = [1,2,3,4,5,0] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
-        self._ExtruderSequence = [0,1,2,3,4,5] # - 노즐 순서 : 호출하는 데이터에 사용
-        self._ExtruderNames = ["D6","D1","D2","D3","D4","D5"]
-
-        self._Extruder_X_Position = [42.5, -42.5, -42.5, -42.5, -42.5, -42.5]
-        self._LeftExtruder_X_Offset = 85.0
-        self._A_AxisPosition = [0, 0, -72,  72, 144, -144] 
-
-        # 프린트 온도 설정
-        temperature_list = [self._getExtrudersProperty(index,"material_print_temperature") for index in self._JoinSequence] # - 데이터 조인 순서
-        temperature_list.append(self._getGlobalContainerStackProperty("material_bed_temperature"))
-        self._print_temperature = " ".join(map(str, temperature_list))
-
-        # get UV and dispenser property from global stack
-        self._uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._JoinSequence]
-        self._dispensor_enable = self._getGlobalContainerStackProperty("dispensor_enable")
-
-        # UV 설정 - extruder에서 읽도록 바꿔야 함
-        self._uv_per_layer_list = [0,0,0,0,0,0]
-        self._uv_type_list = ['365','365','365','365','365','365']
-        self._uv_time_list = [5,5,5,5,5,5]
-        self._uv_dimming_list = [80,80,80,80,80,80]
-
-        for index, uv_enable in enumerate(self._uv_enable_list):
-            if uv_enable:
-                self._uv_per_layer_list[index] = self._getExtrudersProperty(index,"uv_per_layers")
-                self._uv_type_list[index] = self._getExtrudersProperty(index,"uv_type")
-                self._uv_time_list[index] = self._getExtrudersProperty(index,"uv_time")
-                self._uv_dimming_list[index] = self._getExtrudersProperty(index,"uv_dimming")
-
         # 외부 dict
         self._dish = {}
-
-        # z좌표 관리
-        self._layer_height_0 = self._getGlobalContainerStackProperty("layer_height_0")
-
         self._current_z_value = None
-        self._InitialLayer0_C = -30
-        self._InitialLayer0_Z = -40
 
         # 선택한 명령어
         self._current_extruder_index = None  
@@ -74,7 +36,6 @@ class RokitGCodeConverter:
         self._nozzle_type = ""
         
         self._current_layer_index = None
-        self._UVPosition = {"x" : 0.0, "y" : 62.0, "z" : 40.0 }
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
@@ -112,20 +73,12 @@ class RokitGCodeConverter:
     def getReplacedlist(self) -> str:
         return self._replaced_gcode_list
     
-    def _getExtrudersProperty(self, index, property):
-        return self._global_container_stack.extruderList[index].getProperty(property,"value")
+    # def _getExtrudersProperty(self, index, property):
+    #     return self._global_container_stack.extruderList[index].getProperty(property,"value")
 
-    def _getGlobalContainerStackProperty(self, property):
-        return self._global_container_stack.getProperty(property,"value")
+    # def getGlobalContainerStackProperty(self, property):
+    #     return self._global_container_stack.getProperty(property,"value")
 
-    def _getVariantName(self, index):
-        if index >= 0 and index < 6:
-            return self._global_container_stack.extruderList[index].variant.getName()
-        return ''
-
-    # 시작 (준비 작업)
-    def run(self):
-        self._convertGcodeToInvivoGcode()
 
     def _getLayerIndex(self, one_layer_gcode) -> int:
         return int(self._LAYER_NO.search(one_layer_gcode).group(1))
@@ -134,7 +87,7 @@ class RokitGCodeConverter:
         self._previous_extruder_index = self._current_extruder_index
         self._current_extruder_index = self._getExtruderIndex(gcode)
         self._addToActivatedExtruders(self._current_extruder_index)       
-        return self._getVariantName(self._current_extruder_index)
+        return self._info.getVariantName(self._current_extruder_index)
 
     def _addFloatingPoint(self, gcode) -> str:         
         matched = self._DigitWithoutFloatingPoint.search(gcode)
@@ -142,8 +95,7 @@ class RokitGCodeConverter:
             return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
         return gcode
 
-    # gcode 한 레이어 단위로 읽기
-    def _convertGcodeToInvivoGcode(self) -> None:
+    def run(self) -> None:
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
             modified_gcode = one_layer_gcode
             if ';FLAVOR:Marlin' in one_layer_gcode:
@@ -152,10 +104,10 @@ class RokitGCodeConverter:
                 start_code = one_layer_gcode[one_layer_gcode.find(self._StartOfStartCode)+len(self._StartOfStartCode):one_layer_gcode.rfind(self._EndOfStartCode)]
 
                 self._nozzle_type = self._setExtruder(one_layer_gcode)
-                modified_gcode = self._ExtruderNames[self._current_extruder_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type
+                modified_gcode = self._info.ExtruderNames[self._current_extruder_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type
                 modified_gcode += self._replaceLayerInfo(start_code)
 
-                if self._dispensor_enable: # start 코드일때 만 
+                if self._info.dispensor_enable: # start 코드일때 만 
                     modified_gcode = self._StartOfStartCode + "\n" +\
                         self._replaceDispenserSetupCode(modified_gcode) + self._EndOfStartCode + "\n"
 
@@ -177,7 +129,7 @@ class RokitGCodeConverter:
 
             self._replaced_gcode_list[index] = modified_gcode
         self._setGcodeAfterStartGcode() 
-    #
+    
     def _getExtruderIndex(self, gcode) -> int:
         extruderRe = re.compile(r'T([0-5]+)')
         return int(extruderRe.search(gcode).group(1))
@@ -209,7 +161,7 @@ class RokitGCodeConverter:
             if gcode.startswith('T'):
                 self._nozzle_type = self._setExtruder(gcode) # set current nozzle
                 uv_code = self._get_UV_Code(self._previous_extruder_index) + '\n'
-                modified_gcode = uv_code + self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode() # D6 selected Nozzle() ...
+                modified_gcode = uv_code + self._info.ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode() # D6 selected Nozzle() ...
 
             elif gcode.startswith('G'):
                 # add floating Point
@@ -248,23 +200,25 @@ class RokitGCodeConverter:
         return modified_code
 
     def _replaceLayerInfo(self, replaced) -> str:
-        layer_height = " ".join(map(str,[self._getExtrudersProperty(index,"layer_height") for index in self._JoinSequence]))
-        wall_thickness = " ".join(map(str,[self._getExtrudersProperty(index,"wall_thickness") for index in self._JoinSequence]))
-        infill_sparse_density = " ".join(map(str,[self._getExtrudersProperty(index,"infill_sparse_density") for index in self._JoinSequence]))
+        print_temp = self._info.print_temperature
+        layer_height_list = self._info.layer_height_list
+        wall_thickness_list = self._info.wall_thickness_list
+        infill_sparse_density_list = self._info.infill_sparse_density_list
 
         return replaced\
-            .replace("{print_temp}", self._GCODE["SetPrintTemperature"] % self._print_temperature)\
-            .replace("{layer_height}", layer_height)\
-            .replace("{wall_thickness}", wall_thickness)\
-            .replace("{infill_sparse_density}", infill_sparse_density)
+            .replace("{print_temp}", self._GCODE["SetPrintTemperature"] % print_temp)\
+            .replace("{layer_height}", layer_height_list)\
+            .replace("{wall_thickness}", wall_thickness_list)\
+            .replace("{infill_sparse_density}", infill_sparse_density_list)
 
     # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
     def _replaceDispenserSetupCode(self, replaced) -> str:
-        shot_time_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
-        vac_time_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]))
-        interval_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_int") for index in self._JoinSequence]))
-        shot_power_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot_power") for index in self._JoinSequence]))
-        vac_power_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac_power") for index in self._JoinSequence]))
+        shot_time_list = self._info.shot_time_list
+        vac_time_list = self._info.vac_time_list
+        interval_list = self._info.interval_list
+        shot_power_list = self._info.shot_power_list
+        vac_power_list = self._info.vac_power_list
+
         return replaced\
             .replace(";{shot_time_list}", self._GCODE['SetShotTime'] % shot_time_list)\
             .replace(";{vac_time_list}", self._GCODE['SetVacuumTime'] % vac_time_list)\
@@ -275,27 +229,26 @@ class RokitGCodeConverter:
 
     # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
     def _getUVLocation(self, index) -> None:
-        extruder_x_position = self._Extruder_X_Position[index]
+        extruder_x_position = self._info.Extruder_X_Position[index]
         return self._GCODE['G0_X_Y'] % (extruder_x_position, -50)
 
     # UV 명령어 삽입
-    # dispenser 설정 명령어 삽입
     def _get_UV_Code(self, index) -> str:
         if index is None:
             return ''
-        if self._uv_enable_list[index] is False:
+        if self._info.uv_enable_list[index] is False:
             return ''
 
         # UV 타입에 따른 UV 명령어 선정    
         uv_code = ''
 
-        uv_per_layer = self._uv_per_layer_list[index]
-        uv_dimming = self._uv_dimming_list[index]
-        uv_time = self._uv_time_list[index]
+        uv_per_layer = self._info.uv_per_layer_list[index]
+        uv_dimming = self._info.uv_dimming_list[index]
+        uv_time = self._info.uv_time_list[index]
         uv_location = self._getUVLocation(index)
 
         uv_channel = 0
-        if self._uv_type_list[index] == '405':
+        if self._info.uv_type_list[index] == '405':
             uv_channel = 1
 
         if (index % uv_per_layer) == 0:
@@ -305,8 +258,8 @@ class RokitGCodeConverter:
         
         return uv_code
 
-    # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
-    def _getExtraExtruderCode(self) -> str: # FFF 예외처리 필요
+    # 익스트루더가 교체될 때마다 추가로 붙는 명령어
+    def _getExtraExtruderCode(self) -> str:
 
         extra_code = " ; Selected Nozzle(%s)\n" % self._nozzle_type
 
@@ -314,26 +267,26 @@ class RokitGCodeConverter:
             if self._previous_extruder_index != 0:
                 extra_code += self._GCODE["M29_B"] +\
                               self._GCODE["G0_C0"] +\
-                              self._GCODE["LEFT_G91_G0_X_Y"] % (self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["LEFT_G91_G0_X_Y"] % (self._info.LeftExtruder_X_Offset, 0.0) +\
                               self._GCODE["G92_X0_Y0"]
         else:
             # Left --> Right
             if self._previous_extruder_index == 0:
                 extra_code += self._GCODE["G0_Z0"] +\
-                              self._GCODE["RIGHT_G91_G0_X_Y"] % (-self._LeftExtruder_X_Offset, 0.0) +\
+                              self._GCODE["RIGHT_G91_G0_X_Y"] % (-self._info.LeftExtruder_X_Offset, 0.0) +\
                               self._GCODE["G92_X0_Y0"] +\
                               self._GCODE["M29_B"] +\
                               self._GCODE["G0_A0_F600"] +\
                               self._GCODE["G0_B15.0_F300"]               
             else:        
-                current_A_axis_pos = self._A_AxisPosition[self._current_extruder_index]
+                current_A_axis_pos = self._info.A_AxisPosition[self._current_extruder_index]
                 extra_code += self._GCODE["M29_B"] +\
                               self._GCODE["G0_A_F600"] % current_A_axis_pos +\
                               self._GCODE["G0_B15.0_F300"]
 
         return extra_code
 
-    # 익스트루더 index 기록
+    # 사용된 익스트루더 index 기록
     def _addToActivatedExtruders(self, current_extruder_index) -> None:
         if current_extruder_index not in self._activated_extruder_index_list:
             self._activated_extruder_index_list.append(current_extruder_index) # T 명령어 정보 (0,1,2,3,4,5)
@@ -341,7 +294,7 @@ class RokitGCodeConverter:
     # Z 좌표 관리
     def _convert_Z_To_C(self, gcode, modified_gcode) -> str:
 
-        initial_layer0 = self._InitialLayer0_Z if self._current_extruder_index == 0 else self._InitialLayer0_C
+        initial_layer0 = self._info.InitialLayer0_Z if self._current_extruder_index == 0 else self._info.InitialLayer0_C
         axisName = " Z" if self._current_extruder_index == 0 else "C"
 
         matched_code = None
@@ -350,15 +303,15 @@ class RokitGCodeConverter:
             self._current_z_value = float(matched_code.group(2))
 
             if self._current_extruder_index == 0:
-                modified_gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
+                modified_gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._info.layer_height_0 + initial_layer0)
             else:
                 modified_gcode = matched_code.group(1) + "\n" 
-                modified_gcode += "G0 " + axisName + str(self._current_z_value - self._layer_height_0 + initial_layer0)
+                modified_gcode += "G0 " + axisName + str(self._current_z_value - self._info.layer_height_0 + initial_layer0)
 
         elif self._G0_F_X_Y_Z.match(gcode):
             matched_code = self._G0_F_X_Y_Z.search(gcode)
             self._current_z_value = float(matched_code.group(4))
-            sub_height = self._current_z_value - self._layer_height_0
+            sub_height = self._current_z_value - self._info.layer_height_0
 
             if (sub_height == 0):
                 return re.sub(r' Z([0-9.]+)','',gcode)
@@ -404,7 +357,7 @@ class RokitGCodeConverter:
                 gcode_spacing += self._GCODE['G91_G0_X'] % distance 
             else:
                 gcode_spacing += self._GCODE['G91_G0_Y'] % distance
-            gcode_spacing += self._GCODE['G90_G0_C'] % self._InitialLayer0_C
+            gcode_spacing += self._GCODE['G90_G0_C'] % self._info.InitialLayer0_C
             gcode_spacing += self._GCODE['G92_X0_Y0']
             gcode_spacing += ";Well Number: %d\n" % i
 
@@ -416,7 +369,7 @@ class RokitGCodeConverter:
     # "trip": {"line_seq":96/8, "spacing":9.0, "z": 10.8, "start_point": QPoint(74,49.5)}})
     def _setGcodeAfterStartGcode(self):
         trip= {}
-        build_plate = self._getGlobalContainerStackProperty("machine_build_dish_type")
+        build_plate = self._info.getGlobalContainerStackProperty("machine_build_dish_type")
         build_plate_type = build_plate[:build_plate.find(':')]
         for index in range(self._build_dish_model.count):
             self._dish = self._build_dish_model.getItem(index)
@@ -438,7 +391,7 @@ class RokitGCodeConverter:
         else:
             start_codes += self._GCODE["G90_G0_C_RESET"]
     
-            start_codes += self._GCODE["G0_A_F600"] % (self._A_AxisPosition[self._activated_extruder_index_list[0]])
+            start_codes += self._GCODE["G0_A_F600"] % (self._info.A_AxisPosition[self._activated_extruder_index_list[0]])
             start_codes += self._GCODE["G0_B15.0_F300"] # G78 B15.
 
         start_codes += self._GCODE['G92_X0_Y0'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
