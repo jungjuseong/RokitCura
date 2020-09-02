@@ -103,7 +103,7 @@ asdf = self._application.getMachineManager()
 4) 
 
 -0702  
-# replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(self._uv_time_list[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"
+# replaced += "G90 G0 X0.0 Y0.0\nG91 G0 X42.5 Y0.0\n"+ uv_command[0]+"; UV ON\nG4 P" + str(self._uv_time_list_list[0]*1000) + "\n" + uv_command[1] + "; UV OFF\nG90 G0 X0.0 Y0.0\n\n"
 
 -0703
 # gcode_spacing += ";dy_spacing\nG92 E0\n"+std_str+"\nG90 G0 C4.0\nG91 G0 "+dire+"\nG90 G0 C-20.0\nG92 "+new_position+"\n\n" 
