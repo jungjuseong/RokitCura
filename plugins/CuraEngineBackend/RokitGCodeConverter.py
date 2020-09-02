@@ -40,7 +40,7 @@ class RokitGCodeConverter:
         self._print_temperature = " ".join(map(str, temperature_list))
 
         # get UV and dispenser property from global stack
-        self._uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._JoinSequence]
+        self._uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._ExtruderSequence]
         self._dispensor_enable = self._getGlobalContainerStackProperty("dispensor_enable")
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
@@ -186,7 +186,7 @@ class RokitGCodeConverter:
     def _remarkGcode(self, gcode) -> str:
         if self._MarlinCodeForRemove.match(gcode):
             return self._RemovedMark
-        elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
+        elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') is False:
             return self._RemovedMark
         else:
             return gcode
@@ -217,17 +217,17 @@ class RokitGCodeConverter:
                 # convert z command
                 modified_gcode = self._convert_Z_To_C(gcode, modified_gcode)
                 # remove E command
-                if gcode.startswith("G1") and self._nozzle_type.startswith('FFF') == False and "E" in gcode:
+                if gcode.startswith("G1") and self._nozzle_type.startswith('FFF') is False and "E" in gcode:
                     modified_gcode = modified_gcode[:modified_gcode.find("E")-1]
                 # control shot command
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
-                    if self._is_shot_moment == True:
+                    if self._is_shot_moment is True:
                         modified_gcode = self._controlShotCode(modified_gcode)
                 elif gcode.startswith("G1"):
-                    if self._is_shot_moment == False:
+                    if self._is_shot_moment is False:
                         modified_gcode = self._controlShotCode(modified_gcode)
                 elif gcode.startswith("G0"):
-                    if self._is_shot_moment == False:
+                    if self._is_shot_moment is False:
                         modified_gcode = self._controlShotCode(modified_gcode)
             
             gcode_list[index] = modified_gcode
@@ -258,7 +258,6 @@ class RokitGCodeConverter:
             .replace("{wall_thickness}", wall_thickness)\
             .replace("{infill_sparse_density}", infill_sparse_density)
 
-    # 디스펜서 설정 - dsp_enable, shot, vac, int, shot.p, vac.p 
     def _replaceDispenserSetupCode(self, replaced) -> str:
         shot_time_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
         vac_time_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_vac") for index in self._JoinSequence]))
@@ -271,12 +270,6 @@ class RokitGCodeConverter:
             .replace(";{interval_list}", self._GCODE['SetInterval'] % interval_list)\
             .replace(";{shot_p_list}", self._GCODE['SetShotPressure'] % shot_power_list)\
             .replace(";{vac_p_list}", self._GCODE['SetVacuumPressure'] % vac_power_list)
-
-
-    # 선택된 실린지에 따라 UV '종류', '주기', '시간', '세기' 가 다름.
-    def _getUVLocation(self, index) -> None:
-        extruder_x_position = self._Extruder_X_Position[index]
-        return self._GCODE['G0_X_Y'] % (extruder_x_position, -50)
 
     # UV 명령어 삽입
     # dispenser 설정 명령어 삽입
@@ -292,18 +285,17 @@ class RokitGCodeConverter:
         uv_per_layer = self._uv_per_layer_list[index]
         uv_dimming = self._uv_dimming_list[index]
         uv_time = self._uv_time_list[index]
-        uv_location = self._getUVLocation(index)
 
         uv_channel = 0
         if self._uv_type_list[index] == '405':
             uv_channel = 1
 
         if (index % uv_per_layer) == 0:
-            uv_code = "UV\n{change}{UVChannel}{UVDimming}{UVTime}{UV_A_On}{TimerLED}{UV_A_Off}{G0}"\
-                .format(**self._GCODE , change = uv_location)
-            uv_code = uv_code.format(uv_ch = uv_channel, uv_di = uv_dimming, uv_time = uv_time)
-        
-        return uv_code
+            uv_code = "UV\n{UV_A_Position}{UV_A_On}{UVChannel}{UVDimming}{UVTime}{TimerLED}{P4_P}{ToWorkingLayer}"\
+                .format(**self._GCODE)
+            return uv_code.format(uv_cha = uv_channel, uv_dim = uv_dimming, uv_tim = uv_time, uv_delay = uv_time *1000)
+        else:
+            return ''
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어 관리
     def _getExtraExtruderCode(self) -> str: # FFF 예외처리 필요
@@ -395,7 +387,6 @@ class RokitGCodeConverter:
                     direction = 'Y'
                     distance = trip["spacing"]
 
-            # control spacing about build plate after printing one model
             gcode_spacing = ";hop_spacing\n" +\
                 self._GCODE['G92_E0'] +\
                 self._GCODE['G90_G0_XY_ZERO'] +\

@@ -43,11 +43,15 @@ class RokitGCodeModel():
         "UV_A_Off": "M173\n",
         "UVDisinfectionOn": "M174\n",
         "UVDisinfectionOff": "M175\n",
+        "UV_A_Position": "G56 X0.0 Y0.0\n",
 
         "UVChannel": "M381 {uv_cha:d}\n",
         "TimerLED": "M384\n",
         "UVDimming": "M385 {uv_dim:.1f}\n",
         "UVTime": "M386 {uv_tim:.1f}\n",
+
+        "P4_P": "P4 P{uv_delay:d}\n",
+        "ToWorkingLayer": "G55 G0 X. Y.\n",
 
         "SetPrintTemperature": "M308 %s",
         "SetWaitingTemperature": "M109",
