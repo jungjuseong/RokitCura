@@ -19,6 +19,8 @@ class RokitExtrudersInfo:
 
         # extruders info
         self._JoinSequence = [1,2,3,4,5,0] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
+        self._ExtruderSequence = [0,1,2,3,4,5] # - 데이터 조인 순서 : 조인만 하는 데이터에 사용
+
         self.ExtruderNames = ["D6","D1","D2","D3","D4","D5"]
 
         self.Extruder_X_Position = [42.5, -42.5, -42.5, -42.5, -42.5, -42.5]
@@ -31,7 +33,7 @@ class RokitExtrudersInfo:
         self.print_temperature = " ".join(map(str, temperature_list))
 
         # get UV and dispenser property from global stack
-        self.uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._JoinSequence]
+        self.uv_enable_list = [self._getExtrudersProperty(index,"uv_enable") for index in self._ExtruderSequence]
         self.dispensor_enable = self.getGlobalContainerStackProperty("dispensor_enable")
 
         self.shot_time_list = " ".join(map(str,[self._getExtrudersProperty(index,"dispensor_shot") for index in self._JoinSequence]))
