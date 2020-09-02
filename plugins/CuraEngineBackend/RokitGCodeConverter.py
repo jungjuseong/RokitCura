@@ -194,41 +194,54 @@ class RokitGCodeConverter:
         extruderRe = re.compile(r'T([0-5]+)')
         return int(extruderRe.search(gcode).group(1))
 
-    def _convertOneLayerGCode(self, one_layer_gcode) -> str:        
+    def _remarkGcode(self, gcode) -> str:
+        # remark <marlin>
+        if self._MarlinCodeForRemove.match(gcode):
+            return self._RemovedMark
+        # remark <G92 E0>
+        elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
+            return self._RemovedMark
+        else:
+            return gcode
+    
+    # shot 커맨드 관리
+    def _controlShotCode(self, modified_gcode):
+        command = "StartShot" if self._is_shot_moment else "StopShot"
+        modified_gcode = self._GCODE[command] + modified_gcode
+        self._is_shot_moment = not self._is_shot_moment
+        return modified_gcode
 
+    def _convertOneLayerGCode(self, one_layer_gcode) -> str:
         gcode_list = one_layer_gcode.split("\n")
         for index, gcode in enumerate(gcode_list):
-
-            if self._MarlinCodeForRemove.match(gcode):
-                gcode_list[index] = self._RemovedMark
-            elif gcode.startswith('T'): # Extruder
-                self._nozzle_type = self._setExtruder(gcode) # current set
-                gcode_list[index] = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode()
+            modified_gcode = gcode
+            modified_gcode = self._remarkGcode(gcode) # remark code
+            
+            if gcode.startswith('T'): # Check T Command
+                self._nozzle_type = self._setExtruder(gcode) # set current nozzle
+                modified_gcode = self._ExtruderNames[self._current_extruder_index] + self._getExtraExtruderCode() # D6 selected Nozzle() ...
                 self._set_UV_Code()
-            elif gcode.startswith("G1"):
-                modified_gcode = self._addFloatingPoint(gcode) # 정수에 소숫점 채우기
-                if self._nozzle_type.startswith('FFF') == False and "E" in gcode:
-                    modified_gcode = modified_gcode[:modified_gcode.find("E")-1] # E 속성 제거           
+
+            elif gcode.startswith('G'):
+                modified_gcode = self._addFloatingPoint(gcode) # add floating Point
+                modified_gcode = self._convert_Z_To_C(gcode, modified_gcode) # convert z command
+
+                if gcode.startswith("G1") and self._nozzle_type.startswith('FFF') == False and "E" in gcode:
+                    modified_gcode = modified_gcode[:modified_gcode.find("E")-1] # remove E command
+
+                # control shot command
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
-                    if  self._is_shot_moment == True:
-                        modified_gcode = self._GCODE["StartShot"] + modified_gcode
-                        self._is_shot_moment = False
-                else:
+                    if self._is_shot_moment == True:
+                        modified_gcode = self._controlShotCode(modified_gcode)
+                elif gcode.startswith("G1"):
                     if self._is_shot_moment == False:
-                        modified_gcode = self._GCODE["StopShot"] + modified_gcode
-                        self._is_shot_moment = True
-                gcode_list[index] = self._convert_Z_To_C(gcode, modified_gcode)
-            elif gcode.startswith("G0"):
-                modified_gcode = self._convert_Z_To_C(gcode, gcode)
-                if self._is_shot_moment == False:
-                    modified_gcode = self._GCODE["StopShot"] + modified_gcode
-                    self._is_shot_moment = True
-                gcode_list[index] = modified_gcode
-            elif gcode == "G92 E0" and self._nozzle_type.startswith('FFF') == False:
-                gcode_list[index] = self._RemovedMark 
-
-
-        return "\n".join(gcode_list) 
+                        modified_gcode = self._controlShotCode(modified_gcode)
+                elif gcode.startswith("G0"):
+                    if self._is_shot_moment == False:
+                        modified_gcode = self._controlShotCode(modified_gcode)
+            
+            gcode_list[index] = modified_gcode
+        return "\n".join(gcode_list)
 
     def _removeRedundencyGCode(self, one_layer_gcode) -> str:
         # 중복 코드 제거
@@ -360,7 +373,7 @@ class RokitGCodeConverter:
         if self._current_layer_index % self._uv_per_layers == 0:
             uv_code = "UV\n{change}{UVChannel}{UVDimming}{UVTime}{UV_A_On}{TimerLED}{UV_A_Off}{G0}"\
                 .format(**self._GCODE , change = self._to_uv_location)
-            return uv_code = uv_code.format(uv_ch = self._uv_channel, uv_di = self._uv_dimming, uv_time = self._uv_time)
+            return uv_code.format(uv_cha = self._uv_channel, uv_dim = self._uv_dimming, uv_tim = self._uv_time)
         else:
             return ""
 
