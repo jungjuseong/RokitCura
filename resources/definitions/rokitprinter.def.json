@@ -7776,7 +7776,7 @@
             "description": "UV",
             "children":
             {
-                "uv_enabled":
+                "uv_enable":
                 {
                     "label": "Enable UV",
                     "description": "Enable UV",
@@ -7794,7 +7794,7 @@
                     "default_value": 3,
                     "minimum_value": "1",
                     "maximum_value_warning": "10",
-                    "enabled": "uv_enabled",
+                    "enabled": "uv_enable",
                     "settable_per_extruder": true
                 },
                 "uv_type":
@@ -7809,7 +7809,7 @@
                         "405": "405 nm"
                     },
                     "default_value": "365",
-                    "enabled": "uv_enabled",
+                    "enabled": "uv_enable",
                     "settable_per_extruder": true
                 },
                 "uv_time":
@@ -7822,7 +7822,7 @@
                     "maximum_value": "60",
                     "maximum_value_warning": "55",
                     "default_value": 5,
-                    "enabled": "uv_enabled",
+                    "enabled": "uv_enable",
                     "settable_per_extruder": true
                 },
                 "uv_dimming":
@@ -7835,7 +7835,7 @@
                     "maximum_value": "100",
                     "maximum_value_warning": "99",
                     "default_value": 80,
-                    "enabled": "uv_enabled",
+                    "enabled": "uv_enable",
                     "settable_per_extruder": true
                 }
             }
