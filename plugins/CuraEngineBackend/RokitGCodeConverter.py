@@ -80,6 +80,11 @@ class RokitGCodeConverter:
         self._current_index = self._getExtruderIndex(gcode)
         self._addToActivatedExtruders(self._current_index)       
         return self._info.getVariantName(self._current_index)
+    
+    # 사용된 익스트루더 index 기록
+    def _addToActivatedExtruders(self, current_index) -> None:
+        if current_index not in self._activated_index_list:
+            self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
     def _addFloatingPoint(self, gcode) -> str:         
         matched = self._DigitWithoutFloatingPoint.search(gcode)
@@ -211,7 +216,7 @@ class RokitGCodeConverter:
 
         # 중복된 G1 F000 코드 제거
         redundency_match = self._G1_F_G1_F.search(modified_code)
-        if redundency_match != None:
+        if redundency_match is not None:
             modified_code = re.sub(pattern=redundency_match.group(0),\
                 repl=redundency_match.group(1),\
                 string=modified_code)
@@ -247,7 +252,6 @@ class RokitGCodeConverter:
 
     # UV 명령어 삽입
     def _get_UV_Code(self, index) -> str:
-
         if index is None or self._info.uv_enable_list[index] is False:
             return ''
 
@@ -323,7 +327,7 @@ class RokitGCodeConverter:
             gcode_spacing += ';Well Number: %d\n' % i
 
             gcode_clone.insert(0,gcode_spacing)
-            self._replaced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
+            self._replaced_gcode_list[-2:-2]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
@@ -347,7 +351,7 @@ class RokitGCodeConverter:
             start_codes += self._G['RIGHT_G91_G0_X0_Y0']
             start_codes += self._G['G90_G0_C_RESET']    
             start_codes += self._G['G0_A_F600'] % (self._info.A_AxisPosition[self._activated_index_list[0]])
-            start_codes += self._G['G0_B15.0_F300'] # G78 B15.
+            start_codes += self._G['G0_B15_F300'] # G78 B15.
         start_codes += self._G['G92_X0_Y0_Z0'] # 'G92 X0.0 Y0.0 Z0.0\n'
         
         if (build_plate_type == 'Well Plate'):
