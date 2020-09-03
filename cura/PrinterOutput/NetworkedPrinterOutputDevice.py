@@ -55,7 +55,7 @@ class NetworkedPrinterOutputDevice(PrinterOutputDevice):
 
         self._sending_gcode = False
         self._compressing_gcode = False
-        self._gcode = []                    # type: List[str]
+        self._G = []                    # type: List[str]
         self._connection_state_before_timeout = None    # type: Optional[ConnectionState]
 
     def requestWrite(self, nodes: List["SceneNode"], file_name: Optional[str] = None, limit_mimetypes: bool = False,
@@ -90,13 +90,13 @@ class NetworkedPrinterOutputDevice(PrinterOutputDevice):
         batched_lines = []
         batched_lines_count = 0
 
-        for line in self._gcode:
+        for line in self._G:
             if not self._compressing_gcode:
                 self._progress_message.hide()
                 # Stop trying to zip / send as abort was called.
                 return None
 
-            # if the gcode was read from a gcode file, self._gcode will be a list of all lines in that file.
+            # if the gcode was read from a gcode file, self._G will be a list of all lines in that file.
             # Compressing line by line in this case is extremely slow, so we need to batch them.
             batched_lines.append(line)
             batched_lines_count += len(line)

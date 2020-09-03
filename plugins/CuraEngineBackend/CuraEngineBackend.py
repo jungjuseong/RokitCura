@@ -80,7 +80,7 @@ class CuraEngineBackend(QObject, Backend):
                     default_engine_location = execpath
                     break
 
-        self._gcode_converter = None
+        self._G_converter = None
 
         self._application = CuraApplication.getInstance() #type: CuraApplication
         self._multi_build_plate_model = None #type: Optional[MultiBuildPlateModel]
@@ -123,7 +123,7 @@ class CuraEngineBackend(QObject, Backend):
         self._message_handlers["cura.proto.PrintTimeMaterialEstimates"] = self._onPrintTimeMaterialEstimates
         self._message_handlers["cura.proto.SlicingFinished"] = self._onSlicingFinishedMessage
 
-        self._gcode_converter = None #type: Optional[RokitGCodeConverter]
+        self._G_converter = None #type: Optional[RokitGCodeConverter]
  
         self._start_slice_job = None #type: Optional[StartSliceJob]
         self._start_slice_job_build_plate = None #type: Optional[int]
@@ -679,10 +679,10 @@ class CuraEngineBackend(QObject, Backend):
 
         replaced_gcode_list = gcode_list
 
-        self._gcode_converter = RokitGCodeConverter()
-        self._gcode_converter.setReplacedlist(replaced_gcode_list)
-        self._gcode_converter.run()
-        gcode_list = self._gcode_converter.getReplacedlist()
+        self._G_converter = RokitGCodeConverter()
+        self._G_converter.setReplacedlist(replaced_gcode_list)
+        self._G_converter.run()
+        gcode_list = self._G_converter.getReplacedlist()
 
         
         self._slicing = False

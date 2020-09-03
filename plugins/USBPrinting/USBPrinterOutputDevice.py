@@ -51,8 +51,8 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
         self._timeout = 3
 
         # List of gcode lines to be printed
-        self._gcode = [] # type: List[str]
-        self._gcode_position = 0
+        self._G = [] # type: List[str]
+        self._G_position = 0
 
         self._use_auto_detect = True
 
@@ -147,14 +147,14 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
     ##  Start a print based on a g-code.
     #   \param gcode The g-code to print.
     def _printGCode(self, gcode: str):
-        self._gcode.clear()
+        self._G.clear()
         self._paused = False
 
-        self._gcode.extend(gcode.split("\n"))
+        self._G.extend(gcode.split("\n"))
 
         # Reset line number. If this is not done, first line is sometimes ignored
-        self._gcode.insert(0, "M110")
-        self._gcode_position = 0
+        self._G.insert(0, "M110")
+        self._G_position = 0
         self._print_start_time = time()
 
         self._print_estimated_time = int(CuraApplication.getInstance().getPrintInformation().currentPrintTime.getDisplayString(DurationFormat.Format.Seconds))
@@ -321,11 +321,11 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
                 elif line.lower().startswith(b"resend") or line.startswith(b"rs"):
                     # A resend can be requested either by Resend, resend or rs.
                     try:
-                        self._gcode_position = int(line.replace(b"N:", b" ").replace(b"N", b" ").replace(b":", b" ").split()[-1])
+                        self._G_position = int(line.replace(b"N:", b" ").replace(b"N", b" ").replace(b":", b" ").split()[-1])
                     except:
                         if line.startswith(b"rs"):
                             # In some cases of the RS command it needs to be handled differently.
-                            self._gcode_position = int(line.split()[1])
+                            self._G_position = int(line.split()[1])
 
     def _setFirmwareName(self, name):
         new_name = re.findall(r"FIRMWARE_NAME:(.*);", str(name))
@@ -347,8 +347,8 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
         self._sendNextGcodeLine() #Send one line of g-code next so that we'll trigger an "ok" response loop even if we're not polling temperatures.
 
     def cancelPrint(self):
-        self._gcode_position = 0
-        self._gcode.clear()
+        self._G_position = 0
+        self._G.clear()
         self._printers[0].updateActivePrintJob(None)
         self._is_printing = False
         self._paused = False
@@ -364,11 +364,11 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
         self._sendCommand("M84")
 
     def _sendNextGcodeLine(self):
-        if self._gcode_position >= len(self._gcode):
+        if self._G_position >= len(self._G):
             self._printers[0].updateActivePrintJob(None)
             self._is_printing = False
             return
-        line = self._gcode[self._gcode_position]
+        line = self._G[self._G_position]
 
         if ";" in line:
             line = line[:line.find(";")]
@@ -380,13 +380,13 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
         if line == "" or line == "M0" or line == "M1":
             line = "M105"
 
-        checksum = functools.reduce(lambda x, y: x ^ y, map(ord, "N%d%s" % (self._gcode_position, line)))
+        checksum = functools.reduce(lambda x, y: x ^ y, map(ord, "N%d%s" % (self._G_position, line)))
 
-        self._sendCommand("N%d%s*%d" % (self._gcode_position, line, checksum))
+        self._sendCommand("N%d%s*%d" % (self._G_position, line, checksum))
 
         print_job = self._printers[0].activePrintJob
         try:
-            progress = self._gcode_position / len(self._gcode)
+            progress = self._G_position / len(self._G)
         except ZeroDivisionError:
             # There is nothing to send!
             if print_job is not None:
@@ -408,4 +408,4 @@ class USBPrinterOutputDevice(PrinterOutputDevice):
             estimated_time = self._print_estimated_time * (1 - progress) + elapsed_time
         print_job.updateTimeTotal(estimated_time)
 
-        self._gcode_position += 1
+        self._G_position += 1
