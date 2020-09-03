@@ -79,6 +79,11 @@ class RokitGCodeConverter:
         self._current_index = self._getExtruderIndex(gcode)
         self._addToActivatedExtruders(self._current_index)       
         return self._info.getVariantName(self._current_index)
+    
+    # 사용된 익스트루더 index 기록
+    def _addToActivatedExtruders(self, current_index) -> None:
+        if current_index not in self._activated_index_list:
+            self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
     def _addFloatingPoint(self, gcode) -> str:         
         matched = self._DigitWithoutFloatingPoint.search(gcode)
@@ -95,12 +100,11 @@ class RokitGCodeConverter:
                 start_code = one_layer_gcode[one_layer_gcode.find(self._StartOfStartCode)+len(self._StartOfStartCode):one_layer_gcode.rfind(self._EndOfStartCode)]
 
                 self._nozzle_type = self._setExtruder(one_layer_gcode)
-                modified_gcode = self._info.ExtruderNames[self._current_index] + " ; Selected Nozzle(%s)\n" % self._nozzle_type
+                modified_gcode = f"{self._info.ExtruderNames[self._current_index]} ; Selected Nozzle({self._nozzle_type})\n"
                 modified_gcode += self._replaceLayerInfo(start_code)
 
                 if self._info.dispensor_enable: # start 코드일때 만 
-                    modified_gcode = self._StartOfStartCode + "\n" +\
-                        self._replaceDispenserSetupCode(modified_gcode) + self._EndOfStartCode + "\n"
+                    modified_gcode = f"{self._StartOfStartCode}\n{self._replaceDispenserSetupCode(modified_gcode)}{self._EndOfStartCode}\n"
 
             elif "*** start of end code" in one_layer_gcode:
                 modified_gcode = self._StartOfEndCode +\
@@ -126,7 +130,7 @@ class RokitGCodeConverter:
         extruderRe = re.compile(r'T([0-5]+)')
         return int(extruderRe.search(gcode).group(1))
 
-    # remark <marlin> <G92 E0>
+    # Remark <marlin> <G92 E0>
     def _remarkGcode(self, gcode) -> str:
         if self._MarlinCodeForRemove.match(gcode):
             return self._RemovedMark
@@ -147,23 +151,23 @@ class RokitGCodeConverter:
         gcode_list = one_layer_gcode.split("\n")
         for index, gcode in enumerate(gcode_list):
             modified_gcode = gcode
-            # remark code
+            # Remark code
             modified_gcode = self._remarkGcode(gcode)
             # Check T Command
             if gcode.startswith('T'):
-                self._nozzle_type = self._setExtruder(gcode) # set current nozzle
+                self._nozzle_type = self._setExtruder(gcode) # Set current nozzle
                 uv_code = self._get_UV_Code(self._previous_index) + '\n'
                 modified_gcode = uv_code + self._info.ExtruderNames[self._current_index] + self._getExtraExtruderCode() # D6 selected Nozzle() ...
 
             elif gcode.startswith('G'):
-                # add floating Point
+                # Add floating Point
                 modified_gcode = self._addFloatingPoint(gcode)
-                # convert z command
+                # Convert Z command
                 modified_gcode = self._convert_Z_To_C(gcode, modified_gcode)
-                # remove E command
+                # Remove E command
                 if gcode.startswith("G1") and self._nozzle_type.startswith('FFF') is False and "E" in gcode:
                     modified_gcode = modified_gcode[:modified_gcode.find("E")-1]
-                # control shot command
+                # Control shot command
                 if self._G1_F_X_Y_E.match(gcode) or self._G1_X_Y_E.match(gcode):
                     if self._is_shot_moment is True:
                         modified_gcode = self._controlShotCode(modified_gcode)
@@ -183,7 +187,7 @@ class RokitGCodeConverter:
 
         # 중복된 G1 F000 코드 제거
         redundency_match = self._G1_F_G1_F.search(modified_code)
-        if redundency_match != None:
+        if redundency_match is not None:
             modified_code = re.sub(pattern=redundency_match.group(0),\
                 repl=redundency_match.group(1),\
                 string=modified_code)
@@ -219,86 +223,66 @@ class RokitGCodeConverter:
 
     # UV 명령어 삽입
     def _get_UV_Code(self, index) -> str:
-
-        if index is None or self._info.uv_enable_list[index] == False:
+        if index is None or self._info.uv_enable_list[index] is False:
             return ''
-
-        # UV 타입에 따른 UV 명령어 선정    
-        uv_code = ''
 
         uv_per_layer = self._info.uv_per_layer_list[index]
         uv_dimming = self._info.uv_dimming_list[index]
         uv_time = self._info.uv_time_list[index]
-
         uv_channel = 0
+        uv_code = ''
+
         if self._info.uv_type_list[index] == '405':
             uv_channel = 1
 
         if (index % uv_per_layer) == 0:
-            uv_code = "UV\n{UV_A_Position}{UV_A_On}{UVChannel}{UVDimming}{UVTime}{TimerLED}{P4_P}{ToWorkingLayer}"\
-                .format(**self._GCODE)
-            return uv_code.format(uv_cha = uv_channel, uv_dim = uv_dimming, uv_tim = uv_time, uv_delay = uv_time *1000)
-        else:
-            return ''
+            uv_code = "UV\n{UV_A_Position}{UV_A_On}{UVChannel}{UVDimming}{UVTime}{TimerLED}{P4_P}{ToWorkingLayer}".format(**self._GCODE)
+            uv_code = uv_code.format(uv_cha = uv_channel, uv_dim = uv_dimming, uv_tim = uv_time, uv_delay = uv_time *1000)
+        return uv_code            
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
     def _getExtraExtruderCode(self) -> str:
-
-        extra_code = " ; Selected Nozzle(%s)\n" % self._nozzle_type
-
-        if self._current_index == 0:
-            if self._previous_index != 0:
-                extra_code += self._GCODE["M29_B"] +\
-                              self._GCODE["G0_C0"] +\
-                              self._GCODE["LEFT_G91_G0_X_Y"] % (self._info.LeftExtruder_X_Offset, 0.0) +\
-                              self._GCODE["G92_X0_Y0"]
-        else:
-            # Left --> Right
-            if self._previous_index == 0:
-                extra_code += self._GCODE["G0_Z0"] +\
-                              self._GCODE["RIGHT_G91_G0_X_Y"] % (-self._info.LeftExtruder_X_Offset, 0.0) +\
-                              self._GCODE["G92_X0_Y0"] +\
-                              self._GCODE["M29_B"] +\
-                              self._GCODE["G0_A0_F600"] +\
-                              self._GCODE["G0_B15.0_F300"]               
-            else:        
-                current_A_axis_pos = self._info.A_AxisPosition[self._current_index]
-                extra_code += self._GCODE["M29_B"] +\
-                              self._GCODE["G0_A_F600"] % current_A_axis_pos +\
-                              self._GCODE["G0_B15.0_F300"]
-
-        return extra_code
-
-    # 사용된 익스트루더 index 기록
-    def _addToActivatedExtruders(self, current_index) -> None:
-        if current_index not in self._activated_index_list:
-            self._activated_index_list.append(current_index) # T 명령어 정보 (0,1,2,3,4,5)
+        extra = ""
+        # Right --> Left
+        if self._current_index == 0 and self._previous_index != 0:
+            extra = "{M29_B}{G0_C0}{LEFT_G91_G0_X_Y}{G92_X0_Y0}".format(**self._GCODE)
+            extra = extra.format(L_x = self._info.LeftExtruder_X_Offset, L_y = 0.0) # LEFT_G91_G0_X_Y
+        # Left --> Right
+        elif self._current_index != 0 and self._previous_index == 0:
+            extra = "{G0_Z0}{RIGHT_G91_G0_X_Y}{G92_X0_Y0}{M29_B}{G0_A0_F600}{G0_B15_F300}".format(**self._GCODE)
+            extra = extra.format(R_x = self._info.LeftExtruder_X_Offset, R_y = 0.0) # RIGHT_G91_G0_X_Y
+        # Right --> Right
+        elif self._current_index != 0 and self._previous_index != 0:
+            extra = "{M29_B}{G0_A_F600}{G0_B15_F300}".format(**self._GCODE)
+            extra = extra.format(a_axis = self._info.A_AxisPosition[self._current_index]) # A axis
+        return f" ; Selected Nozzle({self._nozzle_type})\n{extra}"
 
     # Z 좌표 관리
     def _convert_Z_To_C(self, gcode, modified_gcode) -> str:
-
-        initial_layer0 = self._info.InitialLayer0_Z if self._current_index == 0 else self._info.InitialLayer0_C
-        axisName = " Z" if self._current_index == 0 else "C"
+        initial_layer0 = self._info.InitialLayer0_Z if self._current_index == 0 else self._info.InitialLayer0_C # 밑 바닥 위치
+        axisName = " Z" if self._current_index == 0 else "C" # Left: Z Right: C
 
         matched_code = None
         if self._G1_F_Z.match(gcode):
             matched_code = self._G1_F_Z.search(gcode)
             self._current_z_value = float(matched_code.group(2))
 
-            if self._current_index == 0:
-                modified_gcode = matched_code.group(1) + axisName + str(self._current_z_value - self._info.layer_height_0 + initial_layer0)
+            if self._current_index == 0: # Left
+                modified_gcode = f"{matched_code.group(1)}{axisName}{self._current_z_value - self._info.layer_height_0 + initial_layer0}"
             else:
-                modified_gcode = matched_code.group(1) + "\n" 
-                modified_gcode += "G0 " + axisName + str(self._current_z_value - self._info.layer_height_0 + initial_layer0)
+                modified_gcode = f"{matched_code.group(1)}\nG0 {axisName}{self._current_z_value - self._info.layer_height_0 + initial_layer0}\n"
+                if (self._current_z_value - self._info.layer_height_0) == 0:
+                    modified_gcode += self._GCODE['G92_C0']
+                
 
         elif self._G0_F_X_Y_Z.match(gcode):
             matched_code = self._G0_F_X_Y_Z.search(gcode)
             self._current_z_value = float(matched_code.group(4))
             sub_height = self._current_z_value - self._info.layer_height_0
 
-            if (sub_height == 0):
+            if (sub_height == 0): # 맨 밑바닥에 있을 때는 Z 또는 C 값을 출력 x
                 return re.sub(r' Z([0-9.]+)','',gcode)
-            elif self._current_index == 0:
+            elif self._current_index == 0: # Left
                 replaced_gcode = re.sub(r'Z([0-9.]+)','Z%.2f',gcode)
                 modified_gcode = replaced_gcode % (sub_height + initial_layer0)
             else:
@@ -336,7 +320,7 @@ class RokitGCodeConverter:
                 self._GCODE['G90_G0_XY_ZERO'] +\
                 self._GCODE['G90_G0_C'] % -4.0
             if direction == 'X':
-                gcode_spacing += self._GCODE['G91_G0_X'] % distance 
+                gcode_spacing += self._GCODE['G91_G0_X'] % distance
             else:
                 gcode_spacing += self._GCODE['G91_G0_Y'] % distance
             gcode_spacing += self._GCODE['G90_G0_C'] % self._info.InitialLayer0_C
@@ -344,7 +328,7 @@ class RokitGCodeConverter:
             gcode_spacing += ";Well Number: %d\n" % i
 
             gcode_clone.insert(0,gcode_spacing)
-            self._replaced_gcode_list[-2:-2]= gcode_clone  # put the clones in front of the end-code
+            self._replaced_gcode_list[-2:-2]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
@@ -358,31 +342,22 @@ class RokitGCodeConverter:
             if self._dish['product_id'] == build_plate:
                 trip = self._dish['trip'] # Build plate가 정해짐
                 break
-
         start_point = trip["start_point"]
-        if self._activated_index_list[0] == 0:
-            x = start_point.x()
-        else:
-            x = -start_point.x()
 
-        start_codes = "\n;Start point\n" +\
-            #self._GCODE['G90_G0_X_Y'] % (x, start_point.y())
-            self._GCODE['LEFT_G91_G0_X_Y'] % (0,0) 
-
+        start_codes = "\n;Start point\n"
         if self._activated_index_list[0] == 0: # Left
+            start_codes += self._GCODE['LEFT_G91_G0_X0_Y0']
             start_codes += self._GCODE["G0_Z_RESET"]
         else:
-            start_codes += self._GCODE["G90_G0_C_RESET"]
-    
+            start_codes += self._GCODE['RIGHT_G91_G0_X0_Y0']
+            start_codes += self._GCODE["G90_G0_C_RESET"]    
             start_codes += self._GCODE["G0_A_F600"] % (self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._GCODE["G0_B15.0_F300"] # G78 B15.
-
-        start_codes += self._GCODE['G92_X0_Y0'] # "G92 X0.0 Y0.0 Z0.0 C0.0\n"
+        start_codes += self._GCODE['G92_X0_Y0_Z0'] # "G92 X0.0 Y0.0 Z0.0\n"
         
         if (build_plate_type == "Well Plate"):
             start_codes += ";Well Number: 0\n"
             self._cloneWellPlate(trip)
 
         self._replaced_gcode_list[1] += start_codes
-        self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0'])
-        self._replaced_gcode_list.insert(-1,self._GCODE['G92_C0'])
+        self._replaced_gcode_list.insert(-1,self._GCODE['G92_Z0_G92_C0'])
