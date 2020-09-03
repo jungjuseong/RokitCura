@@ -57,8 +57,8 @@ class RokitExtrudersInfo:
 
         # z좌표 관리
         self.layer_height_0 = self.getGlobalContainerStackProperty('layer_height_0')        
-        self.InitialLayer0_C = -30
-        self.InitialLayer0_Z = -40
+        
+        self.Initial_layer0_list = [-40, -30, -30, -30, -30, -30]
 
         self.layer_height_list = ' '.join(map(str,[self._getExtrudersProperty(index,'layer_height') for index in self._JoinSequence]))
         self.wall_thickness_list = ' '.join(map(str,[self._getExtrudersProperty(index,'wall_thickness') for index in self._JoinSequence]))

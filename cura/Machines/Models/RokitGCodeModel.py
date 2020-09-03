@@ -13,14 +13,17 @@ class RokitGCodeModel():
             'G0_Z_RESET': 'G0 Z-40.0 C0.0\n',
             
             'G91_G0_X_Y': 'G91 G0 X%.2f Y%.2f\n',
-            'LEFT_G91_G0_X_Y': 'G54 X%.2f Y%.2f\n',
-            'RIGHT_G91_G0_X_Y': 'G55 X%.2f Y%.2f\n',
+            'LEFT_G91_G0_X_Y': 'G54 X{left_x:.2f} Y{left_y:.2f}\n',
+            'LEFT_G91_G0_X0_Y0': 'G54 X0.0 Y0.0\n',
+            'RIGHT_G91_G0_X_Y': 'G55 X{right_x:.2f} Y{right_y:.2f}\n',
+            'RIGHT_G91_G0_X0_Y0': 'G55 X0.0 Y0.0\n',
 
+            'G92_X0_Y0_Z0': 'G92 X0.0 Y0.0 Z0.0\n',
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_X_Y': 'G92 X%.2f Y%.2f\n',
-            'G92_Z0': 'G92 Z0.0\n',
-            'G92_C0': 'G92 C0.0\n',
+            'G92_Z0_G92_C0': 'G92 Z0.0\nG92 C0.0\n',
             'G92_E0': 'G92 E0.0\n',
+            'G92_C0': 'G92 C0.0\n',
 
             'G0_X_Y': 'G0 X%.2f Y%.2f\n',
             'G0_A0_F600': 'G0 A0.00 F600\n',
@@ -29,7 +32,7 @@ class RokitGCodeModel():
 
             'M29_B': 'M29 B\n',
 
-            'G0_B15.0_F300': 'G0 B15.0 F300\n',   
+            'G0_B15_F300': 'G0 B15.0 F300\n',   
             
             'UV_A_On': 'M172\n',
             'UV_A_Off': 'M173\n',
