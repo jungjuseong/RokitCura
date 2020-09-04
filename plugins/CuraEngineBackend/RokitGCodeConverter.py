@@ -154,7 +154,7 @@ class RokitGCodeConverter:
             matched = self._G1_F_Z.match(gcode)
             front_code = matched.group(1)
             z_value = float(matched.group(2))
-            new_z_value = z_value - self._info.layer_height_0 + initial_layer0_height            
+            new_z_value = z_value - self._info.layer_height_0 + initial_layer0_height
             z_value_form = ' Z{z_value:.3f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
             modified_gcode = front_code + z_value_form.format(z_value=new_z_value)
 
@@ -166,7 +166,7 @@ class RokitGCodeConverter:
                 z_delta = z_value - self._info.layer_height_0
 
                 if z_delta == 0:
-                    modified_gcode = '{front_code}'.format(front_code=front_code)
+                    modified_gcode = front_code
                 else:
                     new_z_value = z_delta + initial_layer0_height
                     z_value_form = ' Z{z_value:.3f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
@@ -201,7 +201,7 @@ class RokitGCodeConverter:
                     modified_gcode = self._shotControl(modified_gcode)
 
             elif gcode.startswith('G1') or gcode.startswith('G0'):
-                modified_code = self._updateZ(gcode)
+                modified_gcode = self._updateZ(gcode)
                 if self._is_shot_moment is False:
                     modified_gcode = self._shotControl(modified_gcode)
 
