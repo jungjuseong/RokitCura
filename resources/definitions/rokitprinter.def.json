@@ -7846,7 +7846,6 @@
             "type": "category",
             "icon": "category_dispenser",
             "description": "Dispenser Settings",
-            "enabled": "extruder_nr >= 0",
             "children":
             {
                 "dispensor_enable":

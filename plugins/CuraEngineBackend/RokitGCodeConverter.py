@@ -52,7 +52,7 @@ class RokitGCodeConverter:
         self._G1_F_X_Y_E = re.compile(r'^(G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
         self._G1_X_Y_E = re.compile(r'^(G1 X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
 
-        self._MarlinCodeForRemove = re.compile(r'M(140|190|104 [TS]|109 [TS]|141|205|105|107)')
+        self._MarlinCodeForRemove = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
 
         self._G1_F_E = re.compile(r'(G1 F[0-9.]+) E([0-9.-]+)')
@@ -60,11 +60,14 @@ class RokitGCodeConverter:
         self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
         self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
+        self._G0_X_Y_Z = re.compile(r'(G0 X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
+
         self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
 
         self._DigitWithoutFloatingPoint = re.compile(r'([XYZ][0-9]+) ')
 
         self._is_shot_moment = True
+        self._index_of_start_code = -1
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -97,30 +100,29 @@ class RokitGCodeConverter:
             modified_gcode = one_layer_gcode
             if ';FLAVOR:Marlin' in one_layer_gcode:
                 modified_gcode = one_layer_gcode.replace(';FLAVOR:Marlin', ';F/W : 7.7.1.x')
-            elif '*** start of start code' in one_layer_gcode:
-                start_code = one_layer_gcode[one_layer_gcode.find(self._StartOfStartCode)+len(self._StartOfStartCode):one_layer_gcode.rfind(self._EndOfStartCode)]
+            elif self._StartOfStartCode in one_layer_gcode:
+                self._index_of_start_code = index
 
-                self._nozzle_type = self._setExtruder(one_layer_gcode)
-                modified_gcode = self._info.ExtruderNames[self._current_index] + ' ; Selected Nozzle(%s)\n' % self._nozzle_type
-                modified_gcode += self._replaceLayerInfo(start_code)
-
+                modified_gcode = self._convertOneLayerGCode(index, one_layer_gcode)     
+                modified_gcode = self._removeRedundencyGCode(modified_gcode)
+                modified_gcode = self._replaceLayerInfo(modified_gcode)
                 if self._info.dispensor_enable:
-                    modified_gcode = self._StartOfStartCode + '\n' +\
-                        self._replaceDispenserSetupCode(modified_gcode) + self._EndOfStartCode + '\n'
+                   modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
 
-            elif '*** start of end code' in one_layer_gcode:
+            elif self._StartOfEndCode in one_layer_gcode:
                 modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
 
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)     
+
+                modified_gcode = self._convertOneLayerGCode(index, one_layer_gcode)     
                 modified_gcode = self._removeRedundencyGCode(modified_gcode)
                 modified_gcode += self._get_UV_Code(self._current_index) + '\n'
 
             elif re.match(self._G1_F_E, one_layer_gcode) is not None:
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
+                modified_gcode = self._convertOneLayerGCode(index,one_layer_gcode)
 
             self._replaced_gcode_list[index] = modified_gcode
         self._setGcodeAfterStartGcode() 
@@ -155,11 +157,12 @@ class RokitGCodeConverter:
             front_code = matched.group(1)
             z_value = float(matched.group(2))
             new_z_value = z_value - self._info.layer_height_0 + initial_layer0_height
-            z_value_form = ' Z{z_value:.3f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
+            z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
             modified_gcode = front_code + z_value_form.format(z_value=new_z_value)
+        
+        elif self._G0_X_Y_Z.match(gcode):
+            matched = self._G0_X_Y_Z.match(gcode)
 
-        elif self._G0_F_X_Y_Z.match(gcode):
-            matched = self._G0_F_X_Y_Z.match(gcode)
             if matched:
                 front_code = matched.group(1)
                 z_value = float(matched.group(2))
@@ -169,11 +172,27 @@ class RokitGCodeConverter:
                     modified_gcode = front_code
                 else:
                     new_z_value = z_delta + initial_layer0_height
-                    z_value_form = ' Z{z_value:.3f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
+                    z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else ' C{z_value:.2f}'
                     modified_gcode = front_code + z_value_form.format(z_value = new_z_value)
+
+        elif self._G0_F_X_Y_Z.match(gcode):
+            matched = self._G0_F_X_Y_Z.match(gcode)
+
+            if matched:
+                front_code = matched.group(1)
+                z_value = float(matched.group(2))
+                z_delta = z_value - self._info.layer_height_0
+
+                if z_delta == 0:
+                    modified_gcode = front_code
+                else:
+                    new_z_value = z_delta + initial_layer0_height
+                    z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
+                    modified_gcode = front_code + z_value_form.format(z_value = new_z_value)
+        
         return modified_gcode
 
-    def _convertOneLayerGCode(self, one_layer_gcode) -> str:
+    def _convertOneLayerGCode(self, index, one_layer_gcode) -> str:
         gcode_list = one_layer_gcode.split('\n')
         for index, gcode in enumerate(gcode_list):
             modified_gcode = gcode
@@ -184,11 +203,11 @@ class RokitGCodeConverter:
 
             elif gcode.startswith('T'): # Nozzle changed
                 self._nozzle_type = self._setExtruder(gcode)
-                modified_gcode = '{uv_code}\n{extruder_name}{nozzle}{extruder_setup_code}'.format(
-                    uv_code = self._get_UV_Code(self._previous_index),
+                extruder_setup_code = self._getExtraExtruderCode() if index != self._index_of_start_code else ''
+                modified_gcode = '{extruder_name}{nozzle}{extruder_setup_code}'.format(
                     extruder_name = self._info.ExtruderNames[self._current_index],
                     nozzle = ' ; Selected Nozzle(%s)\n' % self._nozzle_type,
-                    extruder_setup_code = self._getExtraExtruderCode())
+                    extruder_setup_code = extruder_setup_code)
 
             elif self._G1_F_X_Y_E.match(gcode):               
                 modified_gcode = self._remove_E_when_Nozzle_is_FFF(self._G1_F_X_Y_E, gcode)
@@ -225,41 +244,36 @@ class RokitGCodeConverter:
         return modified_code
 
     def _replaceLayerInfo(self, start_code) -> str:
-        print_temp = self._info.print_temperature
-        layer_height_list = self._info.layer_height_list
-        wall_thickness_list = self._info.wall_thickness_list
-        infill_sparse_density_list = self._info.infill_sparse_density_list
+        start_code =  start_code\
+            .replace('{home_all_axis}','M29 Z\nM29 C\nM29 B\nG0 B15. F300\nM29 B\nM29 Y\nM29 X\nG79\nM29 A\n')\
+            .replace('{dish_leveling_procedure}','G0 X0. Y0. F300\nG29\nG0 X15. F300\nG29\nG0 X-15. Y15. F300\nG29\nG0 X-30. Y0. F300\nG29\nG0 X0. Y-15. F300\nG29\nM420\nG0 X0. Y0. F300\n')
 
         return start_code\
-            .replace('{print_temp}', self._G['PRINT_TEMP'] % print_temp)\
-            .replace('{layer_height}', layer_height_list)\
-            .replace('{wall_thickness}', wall_thickness_list)\
-            .replace('{infill_sparse_density}', infill_sparse_density_list)
+            .replace('{print_temp}', self._G['PRINT_TEMP'] % self._info.print_temperature)\
+            .replace('{layer_height}', self._info.layer_height_list)\
+            .replace('{wall_thickness}', self._info.wall_thickness_list)\
+            .replace('{infill_sparse_density}', self._info.infill_sparse_density_list)
 
     def _replaceDispenserSetupCode(self, start_code) -> str:
-        shot_time_list = self._info.shot_time_list
-        vac_time_list = self._info.vac_time_list
-        interval_list = self._info.interval_list
-        shot_power_list = self._info.shot_power_list
-        vac_power_list = self._info.vac_power_list
-
         return start_code\
-            .replace(';{shot_time_list}', self._G['SHOT'] % shot_time_list)\
-            .replace(';{vac_time_list}', self._G['VAC'] % vac_time_list)\
-            .replace(';{interval_list}', self._G['INT'] % interval_list)\
-            .replace(';{shot_p_list}', self._G['SET_P'] % shot_power_list)\
-            .replace(';{vac_p_list}', self._G['VAC_P'] % vac_power_list)
+            .replace(';{shot_time_list}', self._G['SHOT'] % self._info.shot_time_list)\
+            .replace(';{vac_time_list}', self._G['VAC'] % self._info.vac_time_list)\
+            .replace(';{interval_list}', self._G['INT'] % self._info.interval_list)\
+            .replace(';{shot_p_list}', self._G['SET_P'] % self._info.shot_power_list)\
+            .replace(';{vac_p_list}', self._G['VAC_P'] % self._info.vac_power_list)
+
 
     # UV 명령어 삽입
     def _get_UV_Code(self, index) -> str:
-        if index is None or self._info.uv_enable_list[index] is False:
+        if self._current_layer_index == 0 or self._info.uv_enable_list[index] is False:
             return ''
 
         uv_per_layer = self._info.uv_per_layer_list[index]
         uv_code = ''
-        if (index % uv_per_layer) == 0:
-            uv_code = 'UV\n{UV_A_Position}{UV_A_On}{UV_Channel}{UV_Dimming}{UV_Time}{TimerLED}{P4_P}{ToWorkingLayer}'.format(**self._G)
-            uv_code = uv_code.format(uv_channel = 0 if self._info.uv_type_list[index] == '405' else 1, 
+        if (self._current_layer_index % uv_per_layer) == 0:
+            uv_code = ';UV\n{M29_B}{UV_A_Curing_Position}{G0_Z40}{UV_A_On}{UV_Channel}{UV_Dimming}{UV_Time}{TimerLED}{P4_P}{G0_B15_F300}'.format(**self._G)
+            uv_code = uv_code.format(
+                uv_channel = 0 if self._info.uv_type_list[index] == '405' else 1, 
                 uv_dimming = self._info.uv_dimming_list[index], 
                 uv_time = self._info.uv_time_list[index], 
                 uv_delay = self._info.uv_time_list[index] * 1000)
@@ -341,22 +355,30 @@ class RokitGCodeConverter:
             if self._dish['product_id'] == build_plate:
                 trip = self._dish['trip'] # Build plate가 정해짐
                 break
+
         start_point = trip['start_point']
 
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
             start_codes += self._G['LEFT_G91_G0_X0_Y0']
             start_codes += self._G['G0_Z_RESET']
+            start_codes += self._G['G92_Z0']
         else:
             start_codes += self._G['RIGHT_G91_G0_X0_Y0']
-            start_codes += self._G['G90_G0_C_RESET']    
+            start_codes += self._G['G90_G0_C_RESET']
+            start_codes += self._G['G92_C0']
+
             start_codes += self._G['G0_A_F600'] % (self._info.A_AxisPosition[self._activated_index_list[0]])
-            start_codes += self._G['G0_B15_F300'] # G78 B15.
-        start_codes += self._G['G92_X0_Y0_Z0'] # 'G92 X0.0 Y0.0 Z0.0\n'
+            start_codes += self._G['G0_B15_F300'] 
+        
         
         if (build_plate_type == 'Well Plate'):
             start_codes += ';Well Number: 0\n'
             self._cloneWellPlate(trip)
 
-        self._replaced_gcode_list[1] += start_codes
-        self._replaced_gcode_list.insert(-1,self._G['G92_Z0_G92_C0'])
+        self._replaced_gcode_list[self._index_of_start_code] += start_codes
+
+        if self._current_index > 0:
+            self._replaced_gcode_list.insert(-1,self._G['G92_C0'])
+        else:
+            self._replaced_gcode_list.insert(-1,self._G['G92_Z0'])

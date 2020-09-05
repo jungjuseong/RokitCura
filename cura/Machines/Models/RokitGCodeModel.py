@@ -10,7 +10,9 @@ class RokitGCodeModel():
             'G0': 'G0\n',
             'G0_Z': 'G0 Z%.2f\n',
             'G0_Z0': 'G0 Z0.00\n',
-            'G0_Z_RESET': 'G0 Z-40.0 C0.0\n',
+            'G0_Z40': 'G0 Z40.0\n',
+
+            'G0_Z_RESET': 'G0 Z-40.0\n',
             
             'G91_G0_X_Y': 'G91 G0 X%.2f Y%.2f\n',
             'LEFT_G91_G0_X_Y': 'G54 X{left_x:.2f} Y{left_y:.2f}\n',
@@ -18,10 +20,9 @@ class RokitGCodeModel():
             'RIGHT_G91_G0_X_Y': 'G55 X{right_x:.2f} Y{right_y:.2f}\n',
             'RIGHT_G91_G0_X0_Y0': 'G55 X0.0 Y0.0\n',
 
-            'G92_X0_Y0_Z0': 'G92 X0.0 Y0.0 Z0.0\n',
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_X_Y': 'G92 X%.2f Y%.2f\n',
-            'G92_Z0_G92_C0': 'G92 Z0.0\nG92 C0.0\n',
+            'G92_Z0': 'G92 Z0.0\n',
             'G92_E0': 'G92 E0.0\n',
             'G92_C0': 'G92 C0.0\n',
 
@@ -30,21 +31,22 @@ class RokitGCodeModel():
             'G0_B0_F300': 'G0 B0.00 F300\n',
             'G0_A_F600': 'G0 A%.2f F600\n',
 
-            'M29_B': 'M29 B\n',
+            'G0_B15_F300': 'G0 B15.0 F300\n',
 
-            'G0_B15_F300': 'G0 B15.0 F300\n',   
-            
+            'M29_B': 'M29 B\n',
+            'UV_A_Curing_Position': 'G59 X0.0 Y0.0\n',
             'UV_A_On': 'M172\n',
+            'UV_Channel': 'M381 {uv_channel:d}\n',
+            'UV_Dimming': 'M385 {uv_dimming:.1f}\n',
+            'UV_Time': 'M386 {uv_time:.1f}\n',
+            'TimerLED': 'M384\n',
+            'P4_P': 'P4 P{uv_delay:d}\n',
+
             'UV_A_Off': 'M173\n',
             'UV_DisinfectionOn': 'M174\n',
             'UV_DisinfectionOff': 'M175\n',
             'UV_A_Position': 'G56 X0.0 Y0.0\n',
-            'UV_Channel': 'M381 {uv_channel:d}\n',
-            'TimerLED': 'M384\n',
-            'UV_Dimming': 'M385 {uv_dimming:.1f}\n',
-            'UV_Time': 'M386 {uv_time:.1f}\n',
-            'P4_P': 'P4 P{uv_delay:d}\n',
-            'ToWorkingLayer': 'G55 G0 X. Y.\n',
+
             'PRINT_TEMP': 'M308 %s',
             'WAIT_TEMP': 'M109',
 
