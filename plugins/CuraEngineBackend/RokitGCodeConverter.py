@@ -16,6 +16,7 @@ from .RokitExtrudersInfo import RokitExtrudersInfo
 class RokitGCodeConverter:
     def __init__(self) -> None:    
 
+        self._pretty_format = True
         self._info = RokitExtrudersInfo()
         self._G_model = RokitGCodeModel()        
         self._G = self._G_model.GCODE
@@ -52,12 +53,12 @@ class RokitGCodeConverter:
         self._G1_F_X_Y_E = re.compile(r'^(G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
         self._G1_X_Y_E = re.compile(r'^(G1 X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
 
-        self._MarlinCodeForRemove = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
+        self._MarlinCodeForRemoval = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
 
-        self._G1_F_E = re.compile(r'(G1 F[0-9.]+) E([0-9.-]+)')
+        self._G1_F_E = re.compile(r'()G1 F[0-9.]+ E[0-9.-]+')
 
-        self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.]+)')
+        self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.-]+)')
         self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
         self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
         self._G0_X_Y_Z = re.compile(r'(G0 X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
@@ -95,16 +96,16 @@ class RokitGCodeConverter:
             return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
         return gcode
 
+
     def run(self) -> None:
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
             modified_gcode = one_layer_gcode
             if ';FLAVOR:Marlin' in one_layer_gcode:
                 modified_gcode = one_layer_gcode.replace(';FLAVOR:Marlin', ';F/W : 7.7.1.x')
+
             elif self._StartOfStartCode in one_layer_gcode:
                 self._index_of_start_code = index
-
-                modified_gcode = self._convertOneLayerGCode(index, one_layer_gcode)     
-                modified_gcode = self._removeRedundencyGCode(modified_gcode)
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode, True)     
                 modified_gcode = self._replaceLayerInfo(modified_gcode)
                 if self._info.dispensor_enable:
                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
@@ -117,116 +118,89 @@ class RokitGCodeConverter:
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
 
-                modified_gcode = self._convertOneLayerGCode(index, one_layer_gcode)     
-                modified_gcode = self._removeRedundencyGCode(modified_gcode)
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)     
                 modified_gcode += self._get_UV_Code(self._current_index) + '\n'
 
-            elif re.match(self._G1_F_E, one_layer_gcode) is not None:
-                modified_gcode = self._convertOneLayerGCode(index,one_layer_gcode)
+            elif self._G1_F_E.match(one_layer_gcode) is not None:
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
 
-            self._replaced_gcode_list[index] = modified_gcode
+            self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
         self._setGcodeAfterStartGcode() 
     
     def _getExtruderIndex(self, gcode) -> int:
         matched = self._Extruder_NO.search(gcode)
         return int(matched.group(1))
 
-    def _shotControl(self, modified_gcode) -> str:
-        if self._is_shot_moment:
-            modified_gcode = self._G['StartShot'] + modified_gcode
-        else:
-            modified_gcode = self._G['StopShot'] + modified_gcode
-
+    def _shotControl(self, gcode) -> str:
+        gcode = self._G['StartShot' if self._is_shot_moment else 'StopShot'] + gcode
         self._is_shot_moment = not self._is_shot_moment
 
-        return modified_gcode
-
-    def _remove_E_when_Nozzle_is_FFF(self, pattern, gcode) -> str:
-        if self._nozzle_type.startswith('FFF') is False: # remove E attribute when FFF
-            matched = pattern.match(gcode)
-            return matched.group(1) # front_code
-        
         return gcode
 
-    def _updateZ(self, gcode) -> str:
-        modified_gcode = gcode
+    def _update_Z_value(self, gcode, matched) -> str:
+        if matched is None:
+            return
+
         initial_layer0_height = self._info.Initial_layer0_list[self._current_index]
+        z_value = float(matched.group(2))
+        z_delta = z_value - self._info.layer_height_0
 
-        if self._G1_F_Z.match(gcode):
-            matched = self._G1_F_Z.match(gcode)
-            front_code = matched.group(1)
-            z_value = float(matched.group(2))
-            new_z_value = z_value - self._info.layer_height_0 + initial_layer0_height
-            z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
-            modified_gcode = front_code + z_value_form.format(z_value=new_z_value)
+        if gcode.startswith('G0') and z_delta == 0:
+            return matched.group(1)
         
-        elif self._G0_X_Y_Z.match(gcode):
-            matched = self._G0_X_Y_Z.match(gcode)
+        new_z_value = z_delta + initial_layer0_height
+        z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
 
+        return matched.group(1) + z_value_form.format(z_value = new_z_value)
+
+    def _getMatched(self, gcode, patterns):
+        for p in patterns:
+            matched = p.match(gcode)
             if matched:
-                front_code = matched.group(1)
-                z_value = float(matched.group(2))
-                z_delta = z_value - self._info.layer_height_0
+                return matched
+        return None
 
-                if z_delta == 0:
-                    modified_gcode = front_code
-                else:
-                    new_z_value = z_delta + initial_layer0_height
-                    z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else ' C{z_value:.2f}'
-                    modified_gcode = front_code + z_value_form.format(z_value = new_z_value)
-
-        elif self._G0_F_X_Y_Z.match(gcode):
-            matched = self._G0_F_X_Y_Z.match(gcode)
-
-            if matched:
-                front_code = matched.group(1)
-                z_value = float(matched.group(2))
-                z_delta = z_value - self._info.layer_height_0
-
-                if z_delta == 0:
-                    modified_gcode = front_code
-                else:
-                    new_z_value = z_delta + initial_layer0_height
-                    z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
-                    modified_gcode = front_code + z_value_form.format(z_value = new_z_value)
-        
-        return modified_gcode
-
-    def _convertOneLayerGCode(self, index, one_layer_gcode) -> str:
+    def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
         gcode_list = one_layer_gcode.split('\n')
         for index, gcode in enumerate(gcode_list):
-            modified_gcode = gcode
 
-            if self._MarlinCodeForRemove.match(gcode) or\
-                self._nozzle_type.startswith('FFF') is False and gcode == 'G92 E0':
-                modified_gcode = self._RemovedMark
+            if self._MarlinCodeForRemoval.match(gcode) or\
+                (self._nozzle_type.startswith('FFF') is False and gcode == 'G92 E0'):
+                gcode_list[index] = self._RemovedMark
 
             elif gcode.startswith('T'): # Nozzle changed
                 self._nozzle_type = self._setExtruder(gcode)
-                extruder_setup_code = self._getExtraExtruderCode() if index != self._index_of_start_code else ''
-                modified_gcode = '{extruder_name}{nozzle}{extruder_setup_code}'.format(
+                extruder_setup_code = '' if isStartCode else self._getExtraExtruderCode()
+                gcode_list[index] = '{extruder_name} ; Selected Nozzle({nozzle_type})\n{extruder_setup_code}'.format(
                     extruder_name = self._info.ExtruderNames[self._current_index],
-                    nozzle = ' ; Selected Nozzle(%s)\n' % self._nozzle_type,
+                    nozzle_type=self._nozzle_type,
                     extruder_setup_code = extruder_setup_code)
 
-            elif self._G1_F_X_Y_E.match(gcode):               
-                modified_gcode = self._remove_E_when_Nozzle_is_FFF(self._G1_F_X_Y_E, gcode)
-                if self._is_shot_moment:
-                    modified_gcode = self._shotControl(modified_gcode)
-
-            elif self._G1_X_Y_E.match(gcode):
-                modified_gcode = self._remove_E_when_Nozzle_is_FFF(self._G1_X_Y_E, gcode)
-                if self._is_shot_moment:
-                    modified_gcode = self._shotControl(modified_gcode)
-
             elif gcode.startswith('G1') or gcode.startswith('G0'):
-                modified_gcode = self._updateZ(gcode)
-                if self._is_shot_moment is False:
-                    modified_gcode = self._shotControl(modified_gcode)
+                gcode = self._addFloatingPoint(gcode)
+                gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
 
-            modified_gcode = self._addFloatingPoint(modified_gcode)
-            modified_gcode = re.sub('-\.', '-0.', modified_gcode) # 정수를 0으로 채우기
-            gcode_list[index] = modified_gcode
+                matched = self._getMatched(gcode, [self._G1_F_E])
+                if matched:
+                    if self._nozzle_type.startswith('Dispenser'):
+                        gcode_list[index] = self._RemovedMark
+                        continue
+
+                # update Z value
+                matched = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G1_F_Z, self._G0_X_Y_Z])
+                if matched is not None:
+                    gcode_list[index] = self._update_Z_value(gcode, matched)
+                else:
+                    # add Start Shot/ Stop shot code
+                    matched = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
+                    if matched is not None:
+                        if self._nozzle_type.startswith('Dispenser') or self._nozzle_type.startswith('Hot Melt'):
+                            gcode = matched.group(1) # remove E value              
+                        gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
+                    else:
+                        if self._is_shot_moment is False:
+                            gcode_list[index] = self._shotControl(gcode)
+
         return '\n'.join(gcode_list)
 
     def _removeRedundencyGCode(self, one_layer_gcode) -> str:
