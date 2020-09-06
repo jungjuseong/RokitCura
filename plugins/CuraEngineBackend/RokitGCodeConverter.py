@@ -180,6 +180,7 @@ class RokitGCodeConverter:
                 gcode = self._addFloatingPoint(gcode)
                 gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
 
+                # remove retraction when Dispensor
                 matched = self._getMatched(gcode, [self._G1_F_E])
                 if matched:
                     if self._nozzle_type.startswith('Dispenser'):
@@ -190,16 +191,17 @@ class RokitGCodeConverter:
                 matched = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G1_F_Z, self._G0_X_Y_Z])
                 if matched is not None:
                     gcode_list[index] = self._update_Z_value(gcode, matched)
+                    continue
+               
+                # add Start Shot/ Stop shot code
+                matched = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
+                if matched is not None:
+                    if self._nozzle_type.startswith('Dispenser') or self._nozzle_type.startswith('Hot Melt'):
+                        gcode = matched.group(1) # remove E value              
+                    gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
                 else:
-                    # add Start Shot/ Stop shot code
-                    matched = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
-                    if matched is not None:
-                        if self._nozzle_type.startswith('Dispenser') or self._nozzle_type.startswith('Hot Melt'):
-                            gcode = matched.group(1) # remove E value              
-                        gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
-                    else:
-                        if self._is_shot_moment is False:
-                            gcode_list[index] = self._shotControl(gcode)
+                    if self._is_shot_moment is False:
+                        gcode_list[index] = self._shotControl(gcode)
 
         return '\n'.join(gcode_list)
 
