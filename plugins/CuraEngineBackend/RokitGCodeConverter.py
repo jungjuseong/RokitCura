@@ -52,8 +52,8 @@ class RokitGCodeConverter:
         _FP = r'[+-]?[0-9]*[.]?[0-9]+'
 
         self._G0_or_G1 = re.compile(r'^G[0-1] ')
-        self._G1_F_X_Y_E = re.compile(r'^(G1 F{f} X{x} Y{y}) E{e}'.format(f=_FP,x=_FP,y=_FP,e=_FP))
-        self._G1_X_Y_E = re.compile(r'^(G1 X{x} Y{y}) E{e}'.format(x=_FP,y=_FP,e=_FP))
+        self._G1_F_X_Y_E = re.compile(r'^(G1 F{f}) X({x}) Y({y}) E({e})'.format(f=_FP,x=_FP,y=_FP,e=_FP))
+        self._G1_X_Y_E = re.compile(r'^(G1) X({x}) Y({y}) E({e})'.format(x=_FP,y=_FP,e=_FP))
 
         self._MarlinCodeForRemoval = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
@@ -62,8 +62,10 @@ class RokitGCodeConverter:
 
         self._G1_F_Z = re.compile(r'^(G1 F{f}) Z({z})'.format(f=_FP,z=_FP))
         self._G0_Z = re.compile(r'^(G0) Z({z})'.format(z=_FP))
-        self._G0_F_X_Y_Z = re.compile(r'^(G0 F{f} X{x} Y{y}) Z({z})'.format(f=_FP,x=_FP,y=_FP,z=_FP))
-        self._G0_X_Y_Z = re.compile(r'^(G0 X{x} Y{y}) Z({z})'.format(x=_FP,y=_FP,z=_FP))
+        self._G0_F_X_Y_Z = re.compile(r'^(G0 F{f}) X({x}) Y({y}) Z({z})'.format(f=_FP,x=_FP,y=_FP,z=_FP))
+        self._G0_X_Y_Z = re.compile(r'^(G0) X({x}) Y({y}) Z({z})'.format(x=_FP,y=_FP,z=_FP))
+
+        self._G01_X_Y = re.compile(r'^(G0|G1) X({x}) Y({y})'.format(x=_FP,y=_FP))
 
         self._G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
 
@@ -91,15 +93,6 @@ class RokitGCodeConverter:
     def _addToActivatedExtruders(self, current_index) -> None:
         if current_index not in self._activated_index_list:
             self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
-
-    def _addFloatingPoint(self, gcode) -> str:   
-        gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
-
-        matched = self._OnlyInteger.search(gcode)
-        if matched:
-            return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
-        return gcode
-
 
     def run(self) -> None:
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
@@ -146,8 +139,14 @@ class RokitGCodeConverter:
             return
 
         initial_layer0_height = self._info.Initial_layer0_list[self._current_index]
-        front_code = matched.group(1)
-        z_value = float(matched.group(2))
+        
+        if len(matched.groups()) > 3:
+            front_code = '{head} X{x:<.2f} Y{y:.2f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+            z_value = float(matched.group(4))
+        else:
+            front_code = matched.group(1)
+            z_value = float(matched.group(2))        
+        
         z_delta = z_value - self._info.layer_height_0
 
         if gcode.startswith('G0') and z_delta == 0:
@@ -156,9 +155,9 @@ class RokitGCodeConverter:
         new_z_value = z_delta + initial_layer0_height
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{new_z_value:.2f}'.format(new_z_value=new_z_value)
+            z_value_form = '\nG0 C{new_z_value:<.2f}'.format(new_z_value=new_z_value)
         else:
-            z_value_form = ' Z{new_z_value:.2f}'.format(new_z_value=new_z_value)
+            z_value_form = ' Z{new_z_value:<.2f}'.format(new_z_value=new_z_value)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -186,29 +185,36 @@ class RokitGCodeConverter:
                     extruder_setup_code = extruder_setup_code)
 
             elif gcode.startswith('G1') or gcode.startswith('G0'):
-                
+
                 # remove retraction when Dispensor
-                matched = self._getMatched(gcode, [self._G1_F_E])
-                if matched:
+                m = self._getMatched(gcode, [self._G1_F_E])
+                if m:
                     if self._nozzle_type.startswith('Dispenser'):
                         gcode_list[index] = self._RemovedMark
                     continue
 
                 # update Z value
-                matched = self._getMatched(gcode, [self._G0_X_Y_Z, self._G0_F_X_Y_Z, self._G1_F_Z])
-                if matched:
-                    gcode_list[index] = self._update_Z_value(gcode, matched)
+                m = self._getMatched(gcode, [self._G0_X_Y_Z, self._G0_F_X_Y_Z, self._G1_F_Z])
+                if m:
+                    gcode_list[index] = self._update_Z_value(gcode, m)
                     continue
                
                 # add Start Shot/ Stop shot code
-                matched = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
-                if matched:
-                    if self._nozzle_type.startswith('Dispenser') or self._nozzle_type.startswith('Hot Melt'):
-                        gcode = matched.group(1) # remove E value              
+                m = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
+                if m:
+                    gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
+                    if self._nozzle_type.startswith('FFF'):
+                        gcode += ' E{e}'.format(e=m.group(4))
+
                     gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
-                else:
-                    if self._is_shot_moment is False:
-                        gcode_list[index] = self._shotControl(gcode)
+                    continue
+
+                # pretty format
+                m = self._getMatched(gcode, [self._G01_X_Y])
+                if m:
+                    gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
+                   
+                gcode_list[index] = gcode if self._is_shot_moment else self._shotControl(gcode)
 
         return '\n'.join(gcode_list)
 
