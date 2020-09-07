@@ -157,9 +157,9 @@ class RokitGCodeConverter:
         new_z_value = z_delta + initial_layer0_height
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{new_z_value:<.2f} ; {comment}'.format(new_z_value=new_z_value, comment=gcode)
+            z_value_form = '\nG0 C{new_z_value:<.2f}'.format(new_z_value=new_z_value)
         else:
-            z_value_form = ' Z{new_z_value:<.2f} ; {comment}'.format(new_z_value=new_z_value, comment=gcode)
+            z_value_form = ' Z{new_z_value:<.2f}'.format(new_z_value=new_z_value)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -206,7 +206,7 @@ class RokitGCodeConverter:
                 if m:
                     gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
                     if self._nozzle_type.startswith('FFF'):
-                        gcode += ' E{e} ; {comment}'.format(e=m.group(4), comment=gcode_list[index]) 
+                        gcode += ' E{e}'.format(e=m.group(4))
 
                     gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
                     continue
@@ -366,7 +366,7 @@ class RokitGCodeConverter:
             start_codes += self._G['G90_G0_C_RESET']
             start_codes += self._G['G92_C0']
 
-            start_codes += self._G['G0_A_F600'] % (self._info.A_AxisPosition[self._activated_index_list[0]])
+            start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
         
         if (build_plate_type == 'Well Plate'):
