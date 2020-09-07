@@ -65,7 +65,7 @@ class RokitGCodeConverter:
 
         self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
 
-        self._DigitWithoutFloatingPoint = re.compile(r'([XYZ][0-9]+) ')
+        self._DigitWithoutFloatingPoint = re.compile(r'([XYZ][-0-9]+) ')
 
         self._is_shot_moment = True
         self._index_of_start_code = -1

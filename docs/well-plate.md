@@ -1,0 +1,104 @@
+### 96WELL-R1-UV365nm
+
+[Start Point]
+
+G55 X0.0 Y0.0
+G90 G0 X-31.5 Y49.5 / X-32.25 Y45.15 / X-28.95 Y48.25 / X-26.0 Y39.0 / X-19.5 Y39.0 
+G90 G0 C-30
+G92 C0.0
+G0 A0.00 F600
+G0 B15.0 F300 
+G92 X0.0 Y0.0
+
+[Hop Spacing]
+
+G92 E0.0
+G0 X0.0 Y0.0
+G0 C30.0
+G0 X9.0 Y0.0 / X0.0 Y-39.0 / X0.0 Y-39.0 / / / / / 
+G0 C0
+G92 X0.0 Y0.0
+
+### 48WELL-R1-UV365nm
+
+[Start Point]
+
+G55 X0.0 Y0.0
+G90 G0 X-32.25 Y45.15
+G90 G0 C-30
+G92 C0.0
+G0 A0.00 F600
+G0 B15.0 F300 
+G92 X0.0 Y0.0
+
+[Hop Spacing]
+
+G92 E0.0
+G0 X0.0 Y0.0 
+G0 C30.0
+G0 X0.0 Y-39.0 ; (이동 경로)
+G0 C0 
+G92 X0.0 Y0.0
+
+## 24WELL-R1-UV365nm
+
+[Start Point]
+
+G55 X0.0 Y0.0
+G90 G0 X-28.95 Y48.25
+G90 G0 C-30
+G92 C0.0
+G0 A0.00 F600
+G0 B15.0 F300 
+G92 X0.0 Y0.0
+	
+[Hop Spacing]
+
+G92 E0.0
+G0 X0.0 Y0.0 
+G0 C30.0
+G0 X0.0 Y-39.0 ; (이동 경로)
+G0 C0 
+G92 X0.0 Y0.0
+
+### 12WELL-R1-UV365nm
+
+[Start Point]
+
+G55 X0.0 Y0.0 
+G90 G0 X-26.0 Y39.0 
+G90 G0 C-30 
+G92 C0.0
+G0 A0.00 F600
+G0 B15.0 F300 
+G92 X0.0 Y0.0
+
+[Hop Spacing]
+
+G92 E0.0
+G0 X0.0 Y0.0 
+G0 C30.0
+G0 X0.0 Y-39.0 ; (이동 경로)
+G0 C0 
+G92 X0.0 Y0.0
+
+### 6WELL-R1-UV365nm
+
+[Start Point]
+
+G55 X0.0 Y0.0 
+G90 G0 X-19.5 Y39.0 
+G90 G0 C-30.0 
+G92 C0.0 
+G0 A0.00 F600
+G0 B15.0 F300 
+G92 X0.0 Y0.0
+
+[Hop Spacing]
+
+G92 E0.0
+G0 X0.0 Y0.0 
+G0 C30.0
+G0 X0.0 Y-39.0 ; (6Well 피치)
+G0 C0 
+G92 X0.0 Y0.0
