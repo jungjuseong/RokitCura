@@ -284,15 +284,14 @@ class RokitGCodeConverter:
     def _cloneWellPlate(self, trip):
         clone_num = trip['well_number'] # 본코드를 제외한 복제 코드는 전체에서 1개를 빼야함.
         line_seq = trip['line_seq']
-        # z_height = trip['z']
+        hop_height = trip['z']
 
         gcode_clone = self._replaced_gcode_list[2:-1] # 수정 필요 *** (수로 범위를 설정하면 안됨)
-        std_str = self._G['G90_G0_XY_ZERO']
         travel_forward = True
 
         gcode_body = []
-        for i in range(1,clone_num): # Clone number ex) 1 ~ 96
-            if i % line_seq == 0:
+        for well_num in range(1,clone_num): # Clone number ex) 1 ~ 96
+            if well_num % line_seq == 0:
                 direction = 'X'
                 distance = -trip['spacing']
                 travel_forward = not travel_forward
@@ -306,15 +305,15 @@ class RokitGCodeConverter:
 
             gcode_spacing = ';hop_spacing\n' +\
                 self._G['G92_E0'] +\
-                self._G['G90_G0_XY_ZERO'] +\
-                self._G['G90_G0_C'].format(-4.0)
+                self._G['G0_XY_ZERO'] +\
+                self._G['G0_C'].format(hop_height)
             if direction == 'X':
-                gcode_spacing += self._G['G91_G0_X'] % distance 
+                gcode_spacing += self._G['G0_X_Y'] % (distance, 0.0)
             else:
-                gcode_spacing += self._G['G91_G0_Y'] % distance
-            gcode_spacing += self._G['G90_G0_C'].format(self._info.InitialLayer0_C)
+                gcode_spacing += self._G['G0_X_Y'] % (0.0, distance)
+            gcode_spacing += self._G['G0_C'].format(self._info.Initial_layer0_list[self._current_index])
             gcode_spacing += self._G['G92_X0_Y0']
-            gcode_spacing += ';Well Number: %d\n' % i
+            gcode_spacing += ';Well Number: %d\n' % well_num
 
             gcode_clone.insert(0,gcode_spacing)
             self._replaced_gcode_list[-2:-2]= gcode_clone # put the clones in front of the end-code
@@ -339,8 +338,10 @@ class RokitGCodeConverter:
             start_codes += self._G['LEFT_G91_G0_X0_Y0']
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
-        else:
+        else: # Right
             start_codes += self._G['RIGHT_G91_G0_X0_Y0']
+            if (build_plate_type == 'Well Plate'):
+                start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G90_G0_C_RESET']
             start_codes += self._G['G92_C0']
 
@@ -349,6 +350,7 @@ class RokitGCodeConverter:
         
         
         if (build_plate_type == 'Well Plate'):
+            start_codes += self._G['G92_X0_Y0']
             start_codes += ';Well Number: 0\n'
             self._cloneWellPlate(trip)
 
