@@ -360,7 +360,7 @@ class RokitGCodeConverter:
             start_codes += self._G['G90_G0_C_RESET']
             start_codes += self._G['G92_C0']
 
-            start_codes += self._G['G0_A_F600'] % (self._info.A_AxisPosition[self._activated_index_list[0]])
+            start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
         
         if (build_plate_type == 'Well Plate'):
