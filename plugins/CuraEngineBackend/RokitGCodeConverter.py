@@ -49,7 +49,7 @@ class RokitGCodeConverter:
         self._Extruder_NO = re.compile(r'^T([0-9]+)')
         self._LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
 
-        _FP = r'[+-]?[0-9]*[.]?[0-9]+'
+        _FP = r'[+-]?\d*[.]?\d+'
 
         self._G0_or_G1 = re.compile(r'^G[0-1] ')
         self._G1_F_X_Y_E = re.compile(r'^(G1 F{f}) X({x}) Y({y}) E({e})'.format(f=_FP,x=_FP,y=_FP,e=_FP))
@@ -155,9 +155,9 @@ class RokitGCodeConverter:
         new_z_value = z_delta + initial_layer0_height
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{new_z_value:<.2f}'.format(new_z_value=new_z_value)
+            z_value_form = '\nG0 C{new_z_value:<.2f} ; {comment}'.format(new_z_value=new_z_value, comment=gcode)
         else:
-            z_value_form = ' Z{new_z_value:<.2f}'.format(new_z_value=new_z_value)
+            z_value_form = ' Z{new_z_value:<.2f} ; {comment}'.format(new_z_value=new_z_value, comment=gcode)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -204,7 +204,7 @@ class RokitGCodeConverter:
                 if m:
                     gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
                     if self._nozzle_type.startswith('FFF'):
-                        gcode += ' E{e}'.format(e=m.group(4))
+                        gcode += ' E{e} ; {comment}'.format(e=m.group(4), comment=gcode_list[index]) 
 
                     gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
                     continue
@@ -250,7 +250,6 @@ class RokitGCodeConverter:
             .replace(';{interval_list}', self._G['INT'] % self._info.interval_list)\
             .replace(';{shot_p_list}', self._G['SET_P'] % self._info.shot_power_list)\
             .replace(';{vac_p_list}', self._G['VAC_P'] % self._info.vac_power_list)
-
 
     # UV 명령어 삽입
     def _get_UV_Code(self, index) -> str:
