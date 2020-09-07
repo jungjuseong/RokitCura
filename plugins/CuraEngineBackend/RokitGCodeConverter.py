@@ -52,8 +52,8 @@ class RokitGCodeConverter:
         _FP = r'[+-]?[0-9]*[.]?[0-9]+'
 
         self._G0_or_G1 = re.compile(r'^G[0-1] ')
-        self._G1_F_X_Y_E = re.compile('^(G1 F{f} X{x} Y{y}) E{e}'.format(f=_FP,x=_FP,y=_FP,e=_FP))
-        self._G1_X_Y_E = re.compile('^(G1 X{x} Y{y}) E{e}'.format(x=_FP,y=_FP,e=_FP))
+        self._G1_F_X_Y_E = re.compile(r'^(G1 F{f} X{x} Y{y}) E{e}'.format(f=_FP,x=_FP,y=_FP,e=_FP))
+        self._G1_X_Y_E = re.compile(r'^(G1 X{x} Y{y}) E{e}'.format(x=_FP,y=_FP,e=_FP))
 
         self._MarlinCodeForRemoval = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
@@ -67,7 +67,7 @@ class RokitGCodeConverter:
 
         self._G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
 
-        self._OnlyInteger = re.compile(r'([XYZ][-+]?\d+) ')
+        self._OnlyInteger = re.compile(r'([XYZ][-+]?\d+)')
 
         self._is_shot_moment = True
         self._index_of_start_code = -1
@@ -93,7 +93,8 @@ class RokitGCodeConverter:
             self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
     def _addFloatingPoint(self, gcode) -> str:   
-        gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기      
+        gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
+
         matched = self._OnlyInteger.search(gcode)
         if matched:
             return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
@@ -185,8 +186,7 @@ class RokitGCodeConverter:
                     extruder_setup_code = extruder_setup_code)
 
             elif gcode.startswith('G1') or gcode.startswith('G0'):
-                #gcode = self._addFloatingPoint(gcode)
-
+                
                 # remove retraction when Dispensor
                 matched = self._getMatched(gcode, [self._G1_F_E])
                 if matched:
