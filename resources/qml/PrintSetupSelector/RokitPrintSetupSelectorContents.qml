@@ -96,8 +96,8 @@ Item {
             rightPadding: UM.Theme.getSize("default_margin").width
             text: catalog.i18nc("@button", "Recommended")
             iconSource: UM.Theme.getIcon("arrow_left")
-            onClicked: {         
-                settingVisibilityPresetsModel.setActivePreset("Recommended")
+            onClicked: {
+                settingVisibilityPresetsModel.setActivePreset("recommended")
             }
         }
         // Cura.SecondaryButton {

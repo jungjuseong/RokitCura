@@ -17,10 +17,8 @@ class RokitGCodeModel():
             'G0_X_Y': 'G0 X%.2f Y%.2f\n',
             
             'G91_G0_X_Y': 'G91 G0 X%.2f Y%.2f\n',
-            'LEFT_G91_G0_X_Y': 'G54 X{left_x:.2f} Y{left_y:.2f}\n',
-            'LEFT_G91_G0_X0_Y0': 'G54 X0.0 Y0.0\n',
-            'RIGHT_G91_G0_X_Y': 'G55 X{right_x:.2f} Y{right_y:.2f}\n',
-            'RIGHT_G91_G0_X0_Y0': 'G55 X0.0 Y0.0\n',
+            'LEFT_G91_G0_X_Y': 'G55 X{left_x:.2f} Y{left_y:.2f}\n',
+            'RIGHT_G91_G0_X_Y': 'G54 X{right_x:.2f} Y{right_y:.2f}\n',
 
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_X_Y': 'G92 X%.2f Y%.2f\n',
@@ -31,7 +29,7 @@ class RokitGCodeModel():
             'G0_X_Y': 'G0 X%.2f Y%.2f\n',
             'G0_A0_F600': 'G0 A0.00 F600\n',
             'G0_B0_F300': 'G0 B0.00 F300\n',
-            'G0_A_F600': 'G0 A%.2f F600\n',
+            'G0_A_F600': 'G0 A{a_axis:.2f} F600\n',
 
             'G0_B15_F300': 'G0 B15.0 F300\n',
 
