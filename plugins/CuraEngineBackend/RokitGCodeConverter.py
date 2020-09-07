@@ -46,26 +46,28 @@ class RokitGCodeConverter:
         self._EndOfEndCode = '\n; (*** end of end code for Dr.Invivo 4D6)'
 
         # match patterns
-        self._Extruder_NO = re.compile(r'T([0-9]+)')
-        self._LAYER_NO = re.compile(r';LAYER:([0-9]+)')
+        self._Extruder_NO = re.compile(r'^T([0-9]+)')
+        self._LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
+
+        _FP = r'[+-]?[0-9]*[.]?[0-9]+'
 
         self._G0_or_G1 = re.compile(r'^G[0-1] ')
-        self._G1_F_X_Y_E = re.compile(r'^(G1 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
-        self._G1_X_Y_E = re.compile(r'^(G1 X[0-9.-]+ Y[0-9.-]+) E[0-9.-]')
+        self._G1_F_X_Y_E = re.compile(r'^(G1 F{f} X{x} Y{y}) E{e}'.format(f=_FP,x=_FP,y=_FP,e=_FP))
+        self._G1_X_Y_E = re.compile(r'^(G1 X{x} Y{y}) E{e}'.format(x=_FP,y=_FP,e=_FP))
 
         self._MarlinCodeForRemoval = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
 
-        self._G1_F_E = re.compile(r'()G1 F[0-9.]+ E[0-9.-]+')
+        self._G1_F_E = re.compile(r'^()G1 F{f} E{e}'.format(f=_FP,e=_FP))
 
-        self._G1_F_Z = re.compile(r'(G1 F[0-9.]+) Z([0-9.-]+)')
-        self._G0_Z = re.compile(r'(G0) Z([0-9.]+)')
-        self._G0_F_X_Y_Z = re.compile(r'(G0 F[0-9.]+ X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
-        self._G0_X_Y_Z = re.compile(r'(G0 X[0-9.-]+ Y[0-9.-]+) Z([0-9.-]+)')
+        self._G1_F_Z = re.compile(r'^(G1 F{f}) Z({z})'.format(f=_FP,z=_FP))
+        self._G0_Z = re.compile(r'^(G0) Z({z})'.format(z=_FP))
+        self._G0_F_X_Y_Z = re.compile(r'^(G0 F{f} X{x} Y{y}) Z({z})'.format(f=_FP,x=_FP,y=_FP,z=_FP))
+        self._G0_X_Y_Z = re.compile(r'^(G0 X{x} Y{y}) Z({z})'.format(x=_FP,y=_FP,z=_FP))
 
-        self._G1_F_G1_F = re.compile(r'G1 F[0-9.]+\n(G1 F[0-9.]+\n)')
+        self._G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
 
-        self._DigitWithoutFloatingPoint = re.compile(r'([XYZ][-0-9]+) ')
+        self._OnlyInteger = re.compile(r'([XYZ][-+]?\d+)')
 
         self._is_shot_moment = True
         self._index_of_start_code = -1
@@ -90,8 +92,10 @@ class RokitGCodeConverter:
         if current_index not in self._activated_index_list:
             self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
-    def _addFloatingPoint(self, gcode) -> str:         
-        matched = self._DigitWithoutFloatingPoint.search(gcode)
+    def _addFloatingPoint(self, gcode) -> str:   
+        gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
+
+        matched = self._OnlyInteger.search(gcode)
         if matched:
             return gcode.replace(matched.group(1), matched.group(1) + '.0 ')
         return gcode
@@ -142,16 +146,21 @@ class RokitGCodeConverter:
             return
 
         initial_layer0_height = self._info.Initial_layer0_list[self._current_index]
+        front_code = matched.group(1)
         z_value = float(matched.group(2))
         z_delta = z_value - self._info.layer_height_0
 
         if gcode.startswith('G0') and z_delta == 0:
-            return matched.group(1)
+            return front_code
         
         new_z_value = z_delta + initial_layer0_height
-        z_value_form = ' Z{z_value:.2f}' if self._current_index == 0 else '\nG0 C{z_value:.2f}'
 
-        return matched.group(1) + z_value_form.format(z_value = new_z_value)
+        if self._nozzle_type.startswith('Dispenser'):
+            z_value_form = '\nG0 C{new_z_value:.2f}'.format(new_z_value=new_z_value)
+        else:
+            z_value_form = ' Z{new_z_value:.2f}'.format(new_z_value=new_z_value)
+
+        return front_code + z_value_form # ';' + str(matched.group(2))
 
     def _getMatched(self, gcode, patterns):
         for p in patterns:
@@ -177,25 +186,23 @@ class RokitGCodeConverter:
                     extruder_setup_code = extruder_setup_code)
 
             elif gcode.startswith('G1') or gcode.startswith('G0'):
-                gcode = self._addFloatingPoint(gcode)
-                gcode = re.sub('-\.', '-0.', gcode) # 정수를 0으로 채우기
-
+                
                 # remove retraction when Dispensor
                 matched = self._getMatched(gcode, [self._G1_F_E])
                 if matched:
                     if self._nozzle_type.startswith('Dispenser'):
                         gcode_list[index] = self._RemovedMark
-                        continue
+                    continue
 
                 # update Z value
-                matched = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G1_F_Z, self._G0_X_Y_Z])
-                if matched is not None:
+                matched = self._getMatched(gcode, [self._G0_X_Y_Z, self._G0_F_X_Y_Z, self._G1_F_Z])
+                if matched:
                     gcode_list[index] = self._update_Z_value(gcode, matched)
                     continue
                
                 # add Start Shot/ Stop shot code
                 matched = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
-                if matched is not None:
+                if matched:
                     if self._nozzle_type.startswith('Dispenser') or self._nozzle_type.startswith('Hot Melt'):
                         gcode = matched.group(1) # remove E value              
                     gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
