@@ -33,6 +33,8 @@ class RokitGCodeConverter:
         self._previous_index = -1
         self._nozzle_type = ''
         
+        self._is_first_c = True
+        
         self._current_layer_index = None
 
         # *** G-code Line(command) 관리 변수
@@ -274,13 +276,17 @@ class RokitGCodeConverter:
         extra_code = ''
         # Right --> Left
         if self._current_index == 0 and self._previous_index != 0:
-            extra_code = '{M29_B}{G0_C0}{LEFT_G91_G0_X_Y}{G92_X0_Y0}'.format(**self._G)
+            extra_code = '{M29_B}{G0_C40}{LEFT_G91_G0_X_Y}{G92_X0_Y0}'.format(**self._G)
             extra_code = extra_code.format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0) # LEFT_G91_G0_X_Y
         # Left --> Right
         elif self._current_index != 0 and self._previous_index == 0:
-            extra_code = '{G0_Z0}{RIGHT_G91_G0_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'.format(**self._G)
-            extra_code = extra_code.format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0 ,\
-                            a_axis = self._info.A_AxisPosition[self._current_index]) # RIGHT_G91_G0_X_Y
+            extra_code = '{G0_Z40}{initial_c}{RIGHT_G91_G0_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
+                .format(**self._G, initial_c = "{G90_G0_C_RESET}{G92_C0}" if self._is_first_c and self._activated_index_list[0] == 0 else '')
+            extra_code = extra_code.format(
+                right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0 ,
+                a_axis = self._info.A_AxisPosition[self._current_index],
+                **self._G) # RIGHT_G91_G0_X_Y
+            self._is_first_c = False
         # Right --> Right
         elif self._current_index != 0 and self._previous_index != 0:
             extra_code = '{M29_B}{G0_A_F600}{G0_B15_F300}'.format(**self._G)
