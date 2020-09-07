@@ -348,13 +348,13 @@ class RokitGCodeConverter:
 
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
-            start_codes += self._G['LEFT_G91_G0_X_Y'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0)
+            start_codes += self._G['LEFT_G91_G0_X0_Y0'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0)
             if (build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
         else: # Right
-            start_codes += self._G['RIGHT_G91_G0_X_Y'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
+            start_codes += self._G['RIGHT_G91_G0_X0_Y0'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
             if (build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G90_G0_C_RESET']
