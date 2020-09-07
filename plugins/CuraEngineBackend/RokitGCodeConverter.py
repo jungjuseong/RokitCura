@@ -289,7 +289,7 @@ class RokitGCodeConverter:
 
     # Well plate 복제 기능
     def _cloneWellPlate(self, trip):
-        clone_num = trip['well_number'] # 본코드를 제외한 복제 코드는 전체에서 1개를 빼야함.
+        clone_num = trip['well_number']
         line_seq = trip['line_seq']
         hop_height = trip['z']
 
@@ -297,7 +297,7 @@ class RokitGCodeConverter:
         travel_forward = True
 
         gcode_body = []
-        for well_num in range(1,clone_num): # Clone number ex) 1 ~ 96
+        for well_num in range(1,clone_num): # Clone number ex) 1 ~ 95
             if well_num % line_seq == 0:
                 direction = 'X'
                 distance = -trip['spacing']
@@ -343,6 +343,8 @@ class RokitGCodeConverter:
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
             start_codes += self._G['LEFT_G91_G0_X0_Y0']
+            if (build_plate_type == 'Well Plate'):
+                start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
         else: # Right
@@ -353,8 +355,7 @@ class RokitGCodeConverter:
             start_codes += self._G['G92_C0']
 
             start_codes += self._G['G0_A_F600'] % (self._info.A_AxisPosition[self._activated_index_list[0]])
-            start_codes += self._G['G0_B15_F300'] 
-        
+            start_codes += self._G['G0_B15_F300']
         
         if (build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
