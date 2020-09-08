@@ -26,6 +26,16 @@ class RokitGCodeConverter:
         # 외부 dict
         self._dish = {}
 
+        self._trip= {}
+        build_plate = self._info.getGlobalContainerStackProperty('machine_build_dish_type')
+        self._build_plate_type = build_plate[:build_plate.find(':')]
+        for index in range(self._build_dish_model.count):
+            self._dish = self._build_dish_model.getItem(index)
+            if self._dish['product_id'] == build_plate:
+                self._trip = self._dish['trip'] # Build plate가 정해짐
+                break
+
+
         # 선택한 명령어
         self._current_index = None  
         self._activated_index_list = [] 
@@ -300,10 +310,10 @@ class RokitGCodeConverter:
             self._activated_index_list.append(current_index) # T 명령어 정보 (0,1,2,3,4,5)
 
     # Well plate 복제 기능
-    def _cloneWellPlate(self, trip):
-        clone_num = trip['well_number']
-        line_seq = trip['line_seq']
-        hop_height = trip['z']
+    def _cloneWellPlate(self):
+        clone_num = self._trip['well_number']
+        line_seq = self._trip['line_seq']
+        hop_height = self._trip['z']
 
         gcode_clone = self._replaced_gcode_list[2:-1] # 수정 필요 *** (수로 범위를 설정하면 안됨)
         travel_forward = True
@@ -312,15 +322,15 @@ class RokitGCodeConverter:
         for well_num in range(1,clone_num): # Clone number ex) 1 ~ 95
             if well_num % line_seq == 0:
                 direction = 'X'
-                distance = -trip['spacing']
+                distance = -self._trip['spacing']
                 travel_forward = not travel_forward
             else:
                 if travel_forward:
                     direction = 'Y'
-                    distance = -trip['spacing']
+                    distance = -self._trip['spacing']
                 elif not travel_forward:
                     direction = 'Y'
-                    distance = trip['spacing']
+                    distance = self._trip['spacing']
 
             gcode_spacing = ';hop_spacing\n' +\
                 self._G['G92_E0'] +\
@@ -339,29 +349,19 @@ class RokitGCodeConverter:
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
-    # 'trip': {'line_seq':96/8, 'spacing':9.0, 'z': 10.8, 'start_point': QPoint(74,49.5)}})
     def _setGcodeAfterStartGcode(self):
-        trip= {}
-        build_plate = self._info.getGlobalContainerStackProperty('machine_build_dish_type')
-        build_plate_type = build_plate[:build_plate.find(':')]
-        for index in range(self._build_dish_model.count):
-            self._dish = self._build_dish_model.getItem(index)
-            if self._dish['product_id'] == build_plate:
-                trip = self._dish['trip'] # Build plate가 정해짐
-                break
-
-        start_point = trip['start_point']
+        start_point = self._trip['start_point']
 
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
             start_codes += self._G['LEFT_G91_G0_X0_Y0'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0)
-            if (build_plate_type == 'Well Plate'):
+            if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
         else: # Right
             start_codes += self._G['RIGHT_G91_G0_X0_Y0'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
-            if (build_plate_type == 'Well Plate'):
+            if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G90_G0_C_RESET']
             start_codes += self._G['G92_C0']
@@ -369,10 +369,10 @@ class RokitGCodeConverter:
             start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
         
-        if (build_plate_type == 'Well Plate'):
+        if (self._build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
             start_codes += ';Well Number: 0\n'
-            self._cloneWellPlate(trip)
+            self._cloneWellPlate()
 
         self._replaced_gcode_list[self._index_of_start_code] += start_codes
 
