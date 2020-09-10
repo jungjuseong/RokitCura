@@ -4,6 +4,8 @@ class RokitGCodeModel():
         self.GCODE = {
             'G90_G0_X_Y': 'G90 G0 X%.2f Y%.2f\n',
             'G90_G0_C_RESET': 'G90 G0 C-30.0\n',
+            'G90_G0_C': 'G90 G0 C{0: <10.2f}\n',
+            'G90_G0_X_Y': 'G90 G0 X%.2f Y%.2f\n',
 
             'G0': 'G0\n',
             'G0_Z': 'G0 Z%.2f\n',

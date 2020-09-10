@@ -27,11 +27,11 @@ class RokitBuildDishModel(ListModel):
         Logger.log("d", "initialize {model_class_name}.".format(model_class_name = self.__class__.__name__))
 
         item_list = []
-        item_list.append({"product_id": "Well Plate:96", "shape": "elliptic", "volume": QVector3D(6.92, 6.92, 8.0), "trip": {"line_seq":96/8, "spacing":9.0, "z": 30.0, "start_point": QPointF(-31.5,49.5), "well_number": 96}})
-        item_list.append({"product_id": "Well Plate:48", "shape": "elliptic", "volume": QVector3D(9.75, 9.75, 8.0), "trip": {"line_seq":48/6, "spacing":14.43, "z": 30.0, "start_point": QPointF(-32.25,45.15), "well_number": 48}})
-        item_list.append({"product_id": "Well Plate:24", "shape": "elliptic", "volume": QVector3D(15.5, 15.5, 8.0), "trip": {"line_seq":24/4, "spacing":19.5, "z": 30.0, "start_point": QPointF(-28.95,48.25), "well_number": 24}})
-        item_list.append({"product_id": "Well Plate:12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 8.0), "trip": {"line_seq":12/3, "spacing":28.87, "z": 30.0, "start_point": QPointF(-26.0,39.0), "well_number": 12}})
-        item_list.append({"product_id": "Well Plate:6", "shape": "elliptic", "volume": QVector3D(35.0, 35.0, 8.0), "trip": {"line_seq":6/2, "spacing":39.0, "z": 30.0, "start_point": QPointF(-19.5,39.0), "well_number": 6}})
+        item_list.append({"product_id": "Well Plate:96", "shape": "elliptic", "volume": QVector3D(6.92, 6.92, 8.0), "trip": {"line_seq":96/8, "spacing":9.00, "z": 30.0, "start_point": QPointF(-31.5,49.5), "well_number": 96}})
+        item_list.append({"product_id": "Well Plate:48", "shape": "elliptic", "volume": QVector3D(9.75, 9.75, 8.0), "trip": {"line_seq":48/6, "spacing":12.90, "z": 30.0, "start_point": QPointF(-32.25,45.15), "well_number": 48}})
+        item_list.append({"product_id": "Well Plate:24", "shape": "elliptic", "volume": QVector3D(15.5, 15.5, 8.0), "trip": {"line_seq":24/4, "spacing":19.30, "z": 30.0, "start_point": QPointF(-28.95,48.25), "well_number": 24}})
+        item_list.append({"product_id": "Well Plate:12", "shape": "elliptic", "volume": QVector3D(21.9, 21.9, 8.0), "trip": {"line_seq":12/3, "spacing":26.00, "z": 30.0, "start_point": QPointF(-26.0,39.0), "well_number": 12}})
+        item_list.append({"product_id": "Well Plate:6", "shape": "elliptic", "volume": QVector3D(35.0, 35.0, 8.0), "trip": {"line_seq":6/2, "spacing":39.00, "z": 30.0, "start_point": QPointF(-19.5,39.0), "well_number": 6}})
 
         item_list.append({"product_id": "Culture Dish:11060", "shape": "elliptic", "volume": QVector3D(52.8,52.8,8.0), "trip": {"start_point": QPointF(42.5,0.0)}})
         item_list.append({"product_id": "Culture Dish:11090", "shape": "elliptic", "volume": QVector3D(80,80,8.0), "trip": {"start_point": QPointF(42.5,0.0)}})

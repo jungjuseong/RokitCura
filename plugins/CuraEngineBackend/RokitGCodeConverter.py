@@ -35,7 +35,6 @@ class RokitGCodeConverter:
                 self._trip = self._dish['trip'] # Build plate가 정해짐
                 break
 
-
         # 선택한 명령어
         self._current_index = None  
         self._activated_index_list = [] 
@@ -293,7 +292,7 @@ class RokitGCodeConverter:
             extra_code = '{G0_Z40}{initial_c}{RIGHT_G91_G0_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
                 .format(**self._G, initial_c = "{G90_G0_C_RESET}{G92_C0}" if self._is_first_c and self._activated_index_list[0] == 0 else '')
             extra_code = extra_code.format(
-                right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0 ,
+                right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0,
                 a_axis = self._info.A_AxisPosition[self._current_index],
                 **self._G) # RIGHT_G91_G0_X_Y
             self._is_first_c = False
@@ -322,7 +321,7 @@ class RokitGCodeConverter:
         for well_num in range(1,clone_num): # Clone number ex) 1 ~ 95
             if well_num % line_seq == 0:
                 direction = 'X'
-                distance = -self._trip['spacing']
+                distance = self._trip['spacing']
                 travel_forward = not travel_forward
             else:
                 if travel_forward:
@@ -334,13 +333,12 @@ class RokitGCodeConverter:
 
             gcode_spacing = ';hop_spacing\n' +\
                 self._G['G92_E0'] +\
-                self._G['G0_XY_ZERO'] +\
-                self._G['G0_C'].format(hop_height)
+                self._G['G90_G0_C'].format(hop_height)
             if direction == 'X':
-                gcode_spacing += self._G['G0_X_Y'] % (distance, 0.0)
+                gcode_spacing += self._G['G90_G0_X_Y'] % (distance, 0.0)
             else:
-                gcode_spacing += self._G['G0_X_Y'] % (0.0, distance)
-            gcode_spacing += self._G['G0_C'].format(self._info.Initial_layer0_list[self._current_index])
+                gcode_spacing += self._G['G90_G0_X_Y'] % (0.0, distance)
+            gcode_spacing += self._G['G90_G0_C'].format(self._info.Initial_layer0_list[self._current_index])
             gcode_spacing += self._G['G92_X0_Y0']
             gcode_spacing += ';Well Number: %d\n' % well_num
 
@@ -363,11 +361,10 @@ class RokitGCodeConverter:
             start_codes += self._G['RIGHT_G91_G0_X0_Y0'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-            start_codes += self._G['G90_G0_C_RESET']
-            start_codes += self._G['G92_C0']
-
             start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
+            start_codes += self._G['G90_G0_C_RESET']
+            start_codes += self._G['G92_C0']
         
         if (self._build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
