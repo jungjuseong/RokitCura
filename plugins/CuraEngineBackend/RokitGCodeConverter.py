@@ -84,6 +84,7 @@ class RokitGCodeConverter:
 
         self._is_shot_moment = True
         self._index_of_start_code = -1
+        self._rear_index = None
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -119,6 +120,7 @@ class RokitGCodeConverter:
                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
 
             elif self._StartOfEndCode in one_layer_gcode:
+                self._rear_index = index if self._rear_index is None else self._rear_index
                 modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
@@ -130,6 +132,7 @@ class RokitGCodeConverter:
                 modified_gcode += self._get_UV_Code(self._current_index) + '\n'
 
             elif self._G1_F_E.match(one_layer_gcode) is not None:
+                self._rear_index = index
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
@@ -314,7 +317,8 @@ class RokitGCodeConverter:
         line_seq = self._trip['line_seq']
         hop_height = self._trip['z']
 
-        gcode_clone = self._replaced_gcode_list[2:-1] # 수정 필요 *** (수로 범위를 설정하면 안됨)
+        self._rear_index -= len(self._replaced_gcode_list)
+        gcode_clone = self._replaced_gcode_list[self._index_of_start_code + 1 : self._rear_index] # 수정 필요 *** (수로 범위를 설정하면 안됨)
         travel_forward = True
 
         gcode_body = []
@@ -343,7 +347,7 @@ class RokitGCodeConverter:
             gcode_spacing += ';Well Number: %d\n' % well_num
 
             gcode_clone.insert(0,gcode_spacing)
-            self._replaced_gcode_list[-2:-2]= gcode_clone # put the clones in front of the end-code
+            self._replaced_gcode_list[self._rear_index:self._rear_index]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
