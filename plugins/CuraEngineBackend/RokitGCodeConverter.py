@@ -26,6 +26,15 @@ class RokitGCodeConverter:
         # 외부 dict
         self._dish = {}
 
+        self._travel= {}
+        build_plate = self._info.getGlobalContainerStackProperty('machine_build_dish_type')
+        self._build_plate_type = build_plate[:build_plate.find(':')]
+        for index in range(self._build_dish_model.count):
+            self._dish = self._build_dish_model.getItem(index)
+            if self._dish['product_id'] == build_plate:
+                self._travel = self._dish['travel'] # Build plate가 정해짐
+                break
+
         # 선택한 명령어
         self._current_index = None  
         self._activated_index_list = [] 
@@ -74,7 +83,8 @@ class RokitGCodeConverter:
         self._OnlyInteger = re.compile(r'([XYZ][-+]?\d+)')
 
         self._is_shot_moment = True
-        self._index_of_start_code = -1
+        self._index_of_StartOfStartCode = -1
+        self._index_of_EndOfStartCode = None
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -103,13 +113,14 @@ class RokitGCodeConverter:
                 modified_gcode = one_layer_gcode.replace(';FLAVOR:Marlin', ';F/W : 7.7.1.x')
 
             elif self._StartOfStartCode in one_layer_gcode:
-                self._index_of_start_code = index
+                self._index_of_StartOfStartCode = index
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode, True)     
                 modified_gcode = self._replaceLayerInfo(modified_gcode)
                 if self._info.dispensor_enable:
                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
 
             elif self._StartOfEndCode in one_layer_gcode:
+                self._index_of_EndOfStartCode = index if self._index_of_EndOfStartCode is None else self._index_of_EndOfStartCode
                 modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
@@ -121,6 +132,7 @@ class RokitGCodeConverter:
                 modified_gcode += self._get_UV_Code(self._current_index) + '\n'
 
             elif self._G1_F_E.match(one_layer_gcode) is not None:
+                self._index_of_EndOfStartCode = index
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
@@ -283,7 +295,7 @@ class RokitGCodeConverter:
             extra_code = '{G0_Z40}{initial_c}{RIGHT_G91_G0_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
                 .format(**self._G, initial_c = "{G90_G0_C_RESET}{G92_C0}" if self._is_first_c and self._activated_index_list[0] == 0 else '')
             extra_code = extra_code.format(
-                right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0 ,
+                right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0,
                 a_axis = self._info.A_AxisPosition[self._current_index],
                 **self._G) # RIGHT_G91_G0_X_Y
             self._is_first_c = False
@@ -300,81 +312,69 @@ class RokitGCodeConverter:
             self._activated_index_list.append(current_index) # T 명령어 정보 (0,1,2,3,4,5)
 
     # Well plate 복제 기능
-    def _cloneWellPlate(self, trip):
-        clone_num = trip['well_number']
-        line_seq = trip['line_seq']
-        hop_height = trip['z']
+    def _cloneWellPlate(self):
 
-        gcode_clone = self._replaced_gcode_list[2:-1] # 수정 필요 *** (수로 범위를 설정하면 안됨)
+        NumberOfWalls = self._travel['number_of_walls']
+        NumberORows = self._travel['number_of_rows']
+        HopHeight = self._travel['hop_height']
+        ForwardSpaceing = self._travel['spacing']
+        BackwardSpacing = -self._travel['spacing']
+
+        self._index_of_EndOfStartCode -= len(self._replaced_gcode_list)
+        
+        from_index = self._index_of_StartOfStartCode + 1
+        to_index = self._index_of_EndOfStartCode
+
+        gcode_clone = self._replaced_gcode_list[from_index+1 : to_index]
         travel_forward = True
 
         gcode_body = []
-        for well_num in range(1,clone_num): # Clone number ex) 1 ~ 95
-            if well_num % line_seq == 0:
+        for well_num in range(1, NumberOfWalls): # Clone number ex) 1 ~ 95
+            if well_num % NumberORows == 0:
                 direction = 'X'
-                distance = -trip['spacing']
+                distance = ForwardSpaceing
                 travel_forward = not travel_forward
             else:
-                if travel_forward:
-                    direction = 'Y'
-                    distance = -trip['spacing']
-                elif not travel_forward:
-                    direction = 'Y'
-                    distance = trip['spacing']
+                direction = 'Y'
+                distance = BackwardSpacing if travel_forward else ForwardSpaceing
 
-            gcode_spacing = ';hop_spacing\n' +\
-                self._G['G92_E0'] +\
-                self._G['G0_XY_ZERO'] +\
-                self._G['G0_C'].format(hop_height)
-            if direction == 'X':
-                gcode_spacing += self._G['G0_X_Y'] % (distance, 0.0)
-            else:
-                gcode_spacing += self._G['G0_X_Y'] % (0.0, distance)
-            gcode_spacing += self._G['G0_C'].format(self._info.Initial_layer0_list[self._current_index])
+            (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
+            gcode_spacing = ';hop_spacing\n' + self._G['G92_E0'] + self._G['G90_G0_C'].format(HopHeight)            
+            gcode_spacing += self._G['G90_G0_X_Y'] % (x,y)
+            gcode_spacing += self._G['G90_G0_C'].format(self._info.Initial_layer0_list[self._current_index])
             gcode_spacing += self._G['G92_X0_Y0']
             gcode_spacing += ';Well Number: %d\n' % well_num
 
-            gcode_clone.insert(0,gcode_spacing)
-            self._replaced_gcode_list[-2:-2]= gcode_clone # put the clones in front of the end-code
+            gcode_clone.insert(0, gcode_spacing)
+            self._replaced_gcode_list[self._index_of_EndOfStartCode:self._index_of_EndOfStartCode]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
 
     # start 코드 다음으로 붙는 준비 명령어
-    # 'trip': {'line_seq':96/8, 'spacing':9.0, 'z': 10.8, 'start_point': QPoint(74,49.5)}})
     def _setGcodeAfterStartGcode(self):
-        trip= {}
-        build_plate = self._info.getGlobalContainerStackProperty('machine_build_dish_type')
-        build_plate_type = build_plate[:build_plate.find(':')]
-        for index in range(self._build_dish_model.count):
-            self._dish = self._build_dish_model.getItem(index)
-            if self._dish['product_id'] == build_plate:
-                trip = self._dish['trip'] # Build plate가 정해짐
-                break
-
-        start_point = trip['start_point']
+        start_point = self._travel['start_point']
 
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
             start_codes += self._G['LEFT_G91_G0_X0_Y0'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0)
-            if (build_plate_type == 'Well Plate'):
+            if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
         else: # Right
             start_codes += self._G['RIGHT_G91_G0_X0_Y0'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
-            if (build_plate_type == 'Well Plate'):
+            if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-            start_codes += self._G['G90_G0_C_RESET']
-            start_codes += self._G['G92_C0']
-
             start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
+            start_codes += self._G['G90_G0_C_RESET']
+            start_codes += self._G['G92_C0']
         
-        if (build_plate_type == 'Well Plate'):
+        if (self._build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
             start_codes += ';Well Number: 0\n'
-            self._cloneWellPlate(trip)
+            self._cloneWellPlate()
 
-        self._replaced_gcode_list[self._index_of_start_code] += start_codes
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += start_codes
 
         if self._current_index > 0:
             self._replaced_gcode_list.insert(-1,self._G['G92_C0'])
