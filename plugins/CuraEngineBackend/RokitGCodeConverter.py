@@ -325,7 +325,7 @@ class RokitGCodeConverter:
         from_index = self._index_of_StartOfStartCode + 1
         to_index = self._index_of_EndOfStartCode
 
-        gcode_clone = self._replaced_gcode_list[from_index+1 : to_index]
+        gcode_clone = self._replaced_gcode_list[from_index : to_index]
         travel_forward = True
 
         gcode_body = []
