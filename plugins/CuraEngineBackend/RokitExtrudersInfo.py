@@ -26,6 +26,9 @@ class RokitExtrudersInfo:
         self.LeftExtruder_X_Offset = 85.0
         self.A_AxisPosition = [0, 0, -72,  72, 144, -144] 
 
+        # Cooling Fan 
+        self._cool_fan_enabled = self.getGlobalContainerStackProperty('cool_fan_enabled')
+
         # 프린트 온도 설정
         temperature_list = [self._getExtrudersProperty(index,'material_print_temperature') for index in self._JoinSequence] # - 데이터 조인 순서
         temperature_list.append(self.getGlobalContainerStackProperty('material_bed_temperature'))

@@ -162,7 +162,7 @@ class RokitGCodeConverter:
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
 
-                modified_gcode = modified_gcode.repalce('{end_code}', self._END_CODE)
+                modified_gcode = modified_gcode.replace('{end_code}', self._END_CODE)
 
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
