@@ -10,7 +10,7 @@ class RokitGCodeModel():
             'G0_Z': 'G0 Z%.2f\n',
             'G0_C0': 'G0 C0.00\n',
             'G0_C': 'G0 C{0: <10.2f}\n',
-            'G0_C40': 'G0 C40.0\n',
+            'G0_C30': 'G0 C30.0\n',
             'G0_Z0': 'G0 Z0.00\n',
             'G0_Z40': 'G0 Z40.0\n',
             'G0_XY_ZERO': 'G0 X0.0 Y0.0\n',
@@ -19,10 +19,10 @@ class RokitGCodeModel():
             'G0_X_Y': 'G0 X%.2f Y%.2f\n',
             
             'G91_G0_X_Y': 'G91 G0 X%.2f Y%.2f\n',
-            'LEFT_G91_G0_X_Y': 'G54 X{left_x:.2f} Y{left_y:.2f}\n',
-            'LEFT_G91_G0_X0_Y0': 'G54 X0.0 Y0.0\n',
-            'RIGHT_G91_G0_X_Y': 'G55 X{right_x:.2f} Y{right_y:.2f}\n',
-            'RIGHT_G91_G0_X0_Y0': 'G55 X0.0 Y0.0\n',
+            'LEFT_G91_G0_X_Y': 'G54 G0 X{left_x:.2f} Y{left_y:.2f}\n',
+            'LEFT_G91_G0_X0_Y0': 'G54 G0 X0.0 Y0.0\n',
+            'RIGHT_G91_G0_X_Y': 'G55 G0 X{right_x:.2f} Y{right_y:.2f}\n',
+            'RIGHT_G91_G0_X0_Y0': 'G55 G0 X0.0 Y0.0\n',
 
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_X_Y': 'G92 X%.2f Y%.2f\n',
@@ -38,7 +38,7 @@ class RokitGCodeModel():
             'G0_B15_F300': 'G0 B15.0 F300\n',
 
             'M29_B': 'M29 B\n',
-            'UV_A_Curing_Position': 'G59 X0.0 Y0.0\n',
+            'UV_A_Curing_Position': 'G59 G0 X0.0 Y0.0\n',
             'UV_A_On': 'M172\n',
             'UV_Channel': 'M381 {uv_channel:d}\n',
             'UV_Dimming': 'M385 {uv_dimming:.1f}\n',
@@ -49,7 +49,7 @@ class RokitGCodeModel():
             'UV_A_Off': 'M173\n',
             'UV_DisinfectionOn': 'M174\n',
             'UV_DisinfectionOff': 'M175\n',
-            'UV_A_Position': 'G56 X0.0 Y0.0\n',
+            'UV_A_Position': 'G56 G0 X0.0 Y0.0\n',
 
             'PRINT_TEMP': 'M308 %s',
             'WAIT_TEMP': 'M109',
