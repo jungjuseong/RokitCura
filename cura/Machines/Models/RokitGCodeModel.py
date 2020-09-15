@@ -10,7 +10,7 @@ class RokitGCodeModel():
             'G0_Z': 'G0 Z%.2f\n',
             'G0_C0': 'G0 C0.00\n',
             'G0_C': 'G0 C{0: <10.2f}\n',
-            'G0_C40': 'G0 C40.0\n',
+            'G0_C30': 'G0 C30.0\n',
             'G0_Z0': 'G0 Z0.00\n',
             'G0_Z40': 'G0 Z40.0\n',
             'G0_XY_ZERO': 'G0 X0.0 Y0.0\n',

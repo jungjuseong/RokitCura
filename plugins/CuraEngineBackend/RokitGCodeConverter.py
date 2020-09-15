@@ -45,6 +45,7 @@ class RokitGCodeConverter:
         self._is_first_c = True
         
         self._current_layer_index = None
+        self._current_layer_height = None
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
@@ -167,7 +168,7 @@ class RokitGCodeConverter:
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
 
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)     
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode)
                 modified_gcode += self._get_UV_Code(self._current_index) + '\n'
 
             elif self._G1_F_E.match(one_layer_gcode) is not None:
@@ -201,11 +202,11 @@ class RokitGCodeConverter:
             z_value = float(matched.group(2))        
         
         z_delta = z_value - self._info.layer_height_0
+        new_z_value = z_delta + initial_layer0_height
+        self._current_layer_height = z_delta + initial_layer0_height
 
         if gcode.startswith('G0') and z_delta == 0:
             return front_code
-        
-        new_z_value = z_delta + initial_layer0_height
 
         if self._nozzle_type.startswith('Dispenser'):
             z_value_form = '\nG0 C{new_z_value:<.2f}'.format(new_z_value=new_z_value)
@@ -328,21 +329,32 @@ class RokitGCodeConverter:
         extra_code = ''
         # Right --> Left
         if self._current_index == 0 and self._previous_index != 0:
-            extra_code = '{M29_B}{G0_C40}{G54_X_Y}{G92_X0_Y0}'.format(**self._G)
-            extra_code = extra_code.format(x = self._info.LeftExtruder_X_Offset, y = 0.0) # G54_X_Y
+            extra_code = self._G['M29_B'] +\
+                self._G['G0_C30'] +\
+                self._G['G54_X_Y'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0) +\
+                self._G['G92_X0_Y0']
+                
         # Left --> Right
         elif self._current_index != 0 and self._previous_index == 0:
-            extra_code = '{G0_Z40}{initial_c}{G55_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
-                .format(**self._G, initial_c = "{G90_G0_C_RESET}{G92_C0}" if self._is_first_c and self._activated_index_list[0] == 0 else '')
-            extra_code = extra_code.format(
-                x = self._info.LeftExtruder_X_Offset, y = 0.0,
-                a_axis = self._info.A_AxisPosition[self._current_index],
-                **self._G) # G55_X_Y
+            extra_code = self._G['G0_Z40'] +\
+                self._G['G0_C30'] +\
+                self._G['M29_B'] +\
+                self._get_UV_Code(self._current_index) +\
+                self._G['G0_A_F600'].format(a_axis = self._info.A_AxisPosition[self._current_index]) +\
+                self._G['G55_G0_X0_Y0'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0) if self._previous_index == 0 else ''+\
+                self._G['G0_B15_F300'] +\
+                self._G['G0_C'].format(self._current_layer_height) if self._current_layer_height is not None and self._current_layer_index == 0 else ''
             self._is_first_c = False
+
         # Right --> Right
         elif self._current_index != 0 and self._previous_index != 0:
-            extra_code = '{M29_B}{G0_A_F600}{G0_B15_F300}'.format(**self._G)
-            extra_code = extra_code.format(a_axis = self._info.A_AxisPosition[self._current_index]) # A axis
+            extra_code = self._G['G0_Z40'] +\
+                self._G['G0_C30'] +\
+                self._G['M29_B'] +\
+                self._get_UV_Code(self._current_index) +\
+                self._G['G0_A_F600'].format(a_axis = self._info.A_AxisPosition[self._current_index]) +\
+                self._G['G0_B15_F300'] +\
+                self._G['G0_C'].format(self._current_layer_height) if self._current_layer_height is not None and self._current_layer_index == 0 else ''
 
         return extra_code
 
