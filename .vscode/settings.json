@@ -1,3 +1,5 @@
 {
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "C:\\Program Files\\Python35\\python.exe",
+    "cmake.configureOnOpen": false
 }
