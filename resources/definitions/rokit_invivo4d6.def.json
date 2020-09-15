@@ -93,11 +93,14 @@
         "infill_before_walls": {
             "value": false
         },
+        "adhesion_type": {
+            "default_value": "skirt"
+        },
         "machine_start_gcode": {
-            "default_value":"\n; (*** start of start code for Dr.Invivo 4D6)\n;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {infill_sparse_density}\n;Print time: {print_time}\nM74 ; enable IO\nM72 ; motor drive enable\nM78 ; light ON\nM176 ; embed compressor ON\nG21 ; metric values\nG92 E0 ; reset FFF extruder\n; Home all axis\n{home_all_axis}\n; Dish leveling procedure\n{dish_leveling_procedure}\n;{shot_time_list} ; shot time\n;{vac_time_list} ; vac_time\n;{interval_list} ; interval\n;{shot_p_list}\n;{vac_p_list} ; vac_pressure\n{print_temp} ; print temperature\nM109 ; wait for temperature\nG90 ; absolute positioning\n; (*** end of start code for Dr.Invivo 4D6)\n"
+            "default_value":"\n; (*** start of start code for Dr.Invivo 4D6)\n;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {infill_sparse_density}\n;Print time: {print_time}\nM74 ; enable IO\nM72 ; motor drive enable\nM78 ; light ON\nM176 ; embed compressor ON\nG21 ; metric values\nG92 E0 ; reset FFF extruder\n{home_all_axis}\n{dish_leveling_procedure}\n;{shot_time_list} ; shot time\n;{vac_time_list} ; vac_time\n;{interval_list} ; interval\n;{shot_p_list}\n;{vac_p_list} ; vac_pressure\n{print_temp} ; print temperature\nM109 ; wait for temperature\nG90 ; absolute positioning\nG92 Z40.0 C30.0 E0.0\n;(*** end of start code for Dr.Invivo 4D6)\n"
         },
         "machine_end_gcode": {
-            "default_value": "\n; (*** start of end code for Dr.Invivo 4D6)\nM330\nM29 B\nG0 A0.\nG0 Z40.0 C30.0\nG56 X0.0 Y0.0\nG1 E-1 F300 ; retract the FFF extruder for release some of the pressure\nG90 ; absolute positioning\nM308 0 0 0 0 0 0 27 ; set temperature\nM109; wait for temperatur\nM73 ; motor drive off\nM176 ; embed compressor OFF\n; (*** end of end code for Dr.Invivo 4D6)\n"
+            "default_value": "\n; (*** start of end code for Dr.Invivo 4D6)\n{end_code}(*** end of end code for Dr.Invivo 4D6)\n"
         },
         "machine_extruder_count": { 
             "default_value": 6 

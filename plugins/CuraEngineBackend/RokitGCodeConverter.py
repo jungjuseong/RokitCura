@@ -57,6 +57,43 @@ class RokitGCodeConverter:
         self._StartOfEndCode = '\n; (*** start of end code for Dr.Invivo 4D6)'
         self._EndOfEndCode = '\n; (*** end of end code for Dr.Invivo 4D6)'
 
+        self._END_CODE = 'M330\n' +\
+                    'M29 B\n' +\
+                    'G0 Z40.0 C30.0\n' +\
+                    'G0 A0.\n' +\
+                    'G56 G0 X0.0 Y0.0\n' +\
+                    'G1 E-1 F300 ; retract the FFF extruder for release some of the pressure\n' +\
+                    'G90 ; absolute positioning\n' +\
+                    'M308 0 0 0 0 0 0 27 ; set temperature\n' +\
+                    'M109; wait for temperatur\n' +\
+                    'M73 ; motor drive off\n' +\
+                    'M176 ; embed compressor OFF\n;'
+
+        self._HOME_ALL_AXIS = '; Home all axis\n' +\
+                    'M29 Z\n' +\
+                    'M29 C\n' +\
+                    'M29 B\n' +\
+                    'G0 B15. F300\n' +\
+                    'M29 B\n' +\
+                    'M29 A\n' +\
+                    'M29 Y\n' +\
+                    'M29 X\n' +\
+                    'G79\n'
+
+        self._DISH_LEVELING_PROCEDURE = '; Dish leveling procedure\n' +\
+                    'G0 X0. Y0. F300\n' +\
+                    'G29\n' +\
+                    'G0 X15. F300\n' +\
+                    'G29\n' +\
+                    'G0 X0. Y15. F300 \n' +\
+                    'G29\n' +\
+                    'G0 X-15. Y0. F300\n' +\
+                    'G29\n' +\
+                    'G0 X0. Y-15. F300' +\
+                    'G29\n' +\
+                    'M420\n' +\
+                    'G0 X0. Y0. F300'
+
         # match patterns
         self._Extruder_NO = re.compile(r'^T([0-9]+)')
         self._LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
@@ -125,6 +162,8 @@ class RokitGCodeConverter:
                 modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
+
+                modified_gcode = modified_gcode.replace('{end_code}', self._END_CODE)
 
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
@@ -248,9 +287,10 @@ class RokitGCodeConverter:
         return modified_code
 
     def _replaceLayerInfo(self, start_code) -> str:
+
         start_code =  start_code\
-            .replace('{home_all_axis}','M29 Z\nM29 C\nM29 B\nG0 B15. F300\nM29 B\nM29 Y\nM29 X\nG79\nM29 A\n')\
-            .replace('{dish_leveling_procedure}','G0 X0. Y0. F300\nG29\nG0 X15. F300\nG29\nG0 X-15. Y15. F300\nG29\nG0 X-30. Y0. F300\nG29\nG0 X0. Y-15. F300\nG29\nM420\nG0 X0. Y0. F300\n')
+            .replace('{home_all_axis}',self._HOME_ALL_AXIS)\
+            .replace('{dish_leveling_procedure}',self._DISH_LEVELING_PROCEDURE)
 
         return start_code\
             .replace('{print_temp}', self._G['PRINT_TEMP'] % self._info.print_temperature)\
@@ -272,16 +312,16 @@ class RokitGCodeConverter:
             return ''
 
         uv_per_layer = self._info.uv_per_layer_list[index]
-        uv_code = ''
+        code = ''
         if (self._current_layer_index % uv_per_layer) == 0:
-            uv_code = ';UV\n{M29_B}{UV_A_Curing_Position}{G0_Z40}{UV_A_On}{UV_Channel}{UV_Dimming}{UV_Time}{TimerLED}{P4_P}{G0_B15_F300}'.format(**self._G)
-            uv_code = uv_code.format(
-                uv_channel = 0 if self._info.uv_type_list[index] == '405' else 1, 
-                uv_dimming = self._info.uv_dimming_list[index], 
-                uv_time = self._info.uv_time_list[index], 
-                uv_delay = self._info.uv_time_list[index] * 1000)
+            code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+            code = code.format(
+                channel = 0 if self._info.uv_type_list[index] == '365' else 1, 
+                dimming = self._info.uv_dimming_list[index], 
+                time = self._info.uv_time_list[index], 
+                duration = self._info.uv_time_list[index] * 1000)
 
-        return uv_code
+        return code
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
     def _getExtraExtruderCode(self) -> str:
@@ -290,9 +330,8 @@ class RokitGCodeConverter:
         # Right --> Left
         if self._current_index == 0 and self._previous_index != 0:
             extra_code = self._G['M29_B'] +\
-                self._G['M29_B'] +\
                 self._G['G0_C30'] +\
-                self._G['LEFT_G91_G0_X_Y'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0) +\
+                self._G['G54_X_Y'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0) +\
                 self._G['G92_X0_Y0']
                 
         # Left --> Right
@@ -302,7 +341,7 @@ class RokitGCodeConverter:
                 self._G['M29_B'] +\
                 self._get_UV_Code(self._current_index) +\
                 self._G['G0_A_F600'].format(a_axis = self._info.A_AxisPosition[self._current_index]) +\
-                self._G['RIGHT_G91_G0_X_Y'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0) if self._previous_index == 0 else ''+\
+                self._G['G55_G0_X0_Y0'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0) if self._previous_index == 0 else ''+\
                 self._G['G0_B15_F300'] +\
                 self._G['G0_C'].format(self._current_layer_height) if self._current_layer_height is not None and self._current_layer_index == 0 else ''
             self._is_first_c = False
@@ -368,13 +407,13 @@ class RokitGCodeConverter:
 
         start_codes = '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
-            start_codes += self._G['LEFT_G91_G0_X0_Y0'].format(left_x = self._info.LeftExtruder_X_Offset, left_y = 0.0)
+            start_codes += self._G['G54_G0_X0_Y0'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0)
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_Z_RESET']
             start_codes += self._G['G92_Z0']
         else: # Right
-            start_codes += self._G['RIGHT_G91_G0_X0_Y0'].format(right_x = self._info.LeftExtruder_X_Offset, right_y = 0.0)
+            start_codes += self._G['G55_G0_X0_Y0'].format(x = self._info.LeftExtruder_X_Offset, y = 0.0)
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_A_F600'].format(a_axis=self._info.A_AxisPosition[self._activated_index_list[0]])
