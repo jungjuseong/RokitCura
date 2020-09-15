@@ -11,7 +11,7 @@ import Arcus #For typing.
 from cura.CuraApplication import CuraApplication
 from cura.Machines.Models.RokitBuildDishModel import RokitBuildDishModel
 
-class RokitExtrudersInfo:
+class RokitPrintQuality:
     def __init__(self) -> None:    
 
         self._application = CuraApplication.getInstance()
@@ -25,9 +25,6 @@ class RokitExtrudersInfo:
         self.Extruder_X_Position = [42.5, -42.5, -42.5, -42.5, -42.5, -42.5]
         self.LeftExtruder_X_Offset = 85.0
         self.A_AxisPosition = [0, 0, -72,  72, 144, -144] 
-
-        # Cooling Fan 
-        self._cool_fan_enabled = self.getGlobalContainerStackProperty('cool_fan_enabled')
 
         # 프린트 온도 설정
         temperature_list = [self._getExtrudersProperty(index,'material_print_temperature') for index in self._JoinSequence] # - 데이터 조인 순서
@@ -59,11 +56,11 @@ class RokitExtrudersInfo:
                 self.uv_dimming_list[index] = self._getExtrudersProperty(index,'uv_dimming')
 
         # 쿨링
-        self.cooling_enable_list = [self._getExtrudersProperty(index,'cool_fan_enabled') for index in range(6)]
-        # 리트렉션
-        self.retraction_amount = [self._getExtrudersProperty(index,'retraction_amount') for index in range(6)]
-        self.retraction_speed = [self._getExtrudersProperty(index,'retraction_speed') for index in range(6)]
+        self.cool_fan_enabled_list = [self._getExtrudersProperty(index,'cool_fan_enabled') for index in range(6)]
 
+        # 리트렉션
+        self.retraction_amount_list = [self._getExtrudersProperty(index,'retraction_amount') for index in range(6)]
+        self.retraction_speed_list = [self._getExtrudersProperty(index,'retraction_speed') for index in range(6)]
 
         # z좌표 관리
         self.layer_height_0 = self.getGlobalContainerStackProperty('layer_height_0')

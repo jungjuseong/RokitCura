@@ -3950,7 +3950,7 @@
                     "type": "bool",
                     "default_value": false,
                     "settable_per_mesh": false,
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "cool_fan_speed":
                 {

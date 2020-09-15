@@ -90,6 +90,10 @@
         "retraction_speed": { 
             "default_value": 20
         },
+        "cool_fan_enabled":
+        {
+            "settable_per_extruder": true
+        },
         "infill_before_walls": {
             "value": false
         },
