@@ -332,12 +332,12 @@ class RokitGCodeConverter:
             extra_code = extra_code.format(x = self._info.LeftExtruder_X_Offset, y = 0.0) # G54_X_Y
         # Left --> Right
         elif self._current_index != 0 and self._previous_index == 0:
-            extra_code = '{G0_Z40}{initial_c}{G55_X0_Y0}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
+            extra_code = '{G0_Z40}{initial_c}{G55_X_Y}{G92_X0_Y0}{M29_B}{G0_A_F600}{G0_B15_F300}'\
                 .format(**self._G, initial_c = "{G90_G0_C_RESET}{G92_C0}" if self._is_first_c and self._activated_index_list[0] == 0 else '')
             extra_code = extra_code.format(
                 x = self._info.LeftExtruder_X_Offset, y = 0.0,
                 a_axis = self._info.A_AxisPosition[self._current_index],
-                **self._G) # G55_X0_Y0
+                **self._G) # G55_X_Y
             self._is_first_c = False
         # Right --> Right
         elif self._current_index != 0 and self._previous_index != 0:

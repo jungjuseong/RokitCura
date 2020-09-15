@@ -21,7 +21,7 @@ class RokitGCodeModel():
             'G91_G0_X_Y': 'G91 G0 X%.2f Y%.2f\n',
             'G54_X_Y': 'G54 X{x:.2f} Y{y:.2f}\n',
             'G54_G0_X0_Y0': 'G54 G0 X0.0 Y0.0\n',
-            'G55_X0_Y0': 'G55 X{x:.2f} Y{y:.2f}\n',
+            'G55_X_Y': 'G55 X{x:.2f} Y{y:.2f}\n',
             'G55_G0_X0_Y0': 'G55 G0 X0.0 Y0.0\n',
 
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
