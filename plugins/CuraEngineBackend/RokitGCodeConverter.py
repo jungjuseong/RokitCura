@@ -223,6 +223,17 @@ class RokitGCodeConverter:
     def _prettyFormat(self, match) -> str:
         return '{head} X{x:<.2f} Y{y:<.2f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
 
+    def _pretty_XYE_Format(self, match) -> str:
+        return '{head} X{x:<.2f} Y{y:<.2f} E{e:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3),e=float(match.group(4))))
+
+    def _getShotCode(self) -> str:        
+        if self._hasShot is False:
+            self._hasShot = True
+            return self._G['M301']
+        else:
+            self._hasShot = False
+            return self._G['M330']
+
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
         gcode_list = one_layer_gcode.split('\n')
         for index, gcode in enumerate(gcode_list):
@@ -247,7 +258,7 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('Dispenser'):
                     gcode = self._RemovedMark
                 else: # FFF or Hot Melt
-                    gcode = '{head} E{e:<.3f}\n'.format(head=match.group(1),e=float(match.group(2)))
+                    gcode = '{head} E{e:<.3f} ;(Retraction)\n'.format(head=match.group(1),e=float(match.group(2)))
                     if self._nozzle_type.startswith('FFF') and self._hasShot == False:
                         self._hasShot = True
                         gcode += self._G['M301']
@@ -286,7 +297,7 @@ class RokitGCodeConverter:
             # add M301
             match = self._getMatched(gcode, [self._G1_F_X_Y_E])
             if match:
-                gcode = self._prettyFormat(match)
+                gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
                     gcode += ' E{e:<.3f}'.format(e=float(match.group(4)))
                     if self._hasShot is False:
@@ -302,9 +313,10 @@ class RokitGCodeConverter:
             # E 제거
             match = self._getMatched(gcode, [self._G1_X_Y_E])
             if match:
-                gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF'):
-                    gcode += ' E{e:<.3f}'.format(e=float(match.group(4)))
+                    gcode = self._pretty_XYE_Format(match)
+                else:
+                    gcode = self._prettyFormat(match)
                 gcode_list[index] = gcode
                 continue
 
