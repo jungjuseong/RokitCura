@@ -128,6 +128,7 @@ class RokitGCodeConverter:
         self._index_of_EndOfStartCode = None
 
         self._hasShot = False
+        self._startExtruder = None # 처음 나오는 extruder
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -207,9 +208,9 @@ class RokitGCodeConverter:
             return front_code
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{new_z:<.2f}'.format(new_z=new_z)
+            z_value_form = '\nG0 C{:<.2f}'.format(new_z)
         else:
-            z_value_form = ' Z{new_z:<.2f}'.format(new_z=new_z)
+            z_value_form = ' Z{:<.2f}'.format(new_z)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -243,11 +244,17 @@ class RokitGCodeConverter:
                 gcode_list[index] = self._RemovedMark
                 continue
 
+            if gcode.startswith(';'): # comment
+                gcode_list[index] = gcode
+                continue
+
             if gcode.startswith('T'): # Nozzle changed
                 self._hasShot = False
                 self._nozzle_type = self._setExtruder(gcode)
+
                 if isStartCode:
-                    gcode_list[index] = self._getRokitExtruderName(self._current_index)
+                    gcode_list[index] = ''
+                    self._startExtruder = self._getRokitExtruderName(self._current_index)
                 else:
                     gcode_list[index] = self._getExtruderSetupCode()
                 continue
@@ -268,15 +275,15 @@ class RokitGCodeConverter:
                 continue
 
             # update Z value
-            match = self._getMatched(gcode, [self._G0_F_X_Y_Z,self._G0_X_Y_Z, self._G1_F_Z])
+            match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_X_Y_Z, self._G1_F_Z])
             if match:
                 gcode = self._update_Z_value(gcode, match)
 
             # stop shot
             match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_F_X_Y, self._G0_X_Y])
             if match:
-                if len(match.groups()) == 3:
-                    gcode = self._prettyFormat(match)
+                #if len(match.groups()) == 3:
+                #    gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
                     gcode = self._G['M330'] + gcode
                     self._hasShot = False
@@ -517,21 +524,21 @@ class RokitGCodeConverter:
     def _setGcodeAfterStartGcode(self):
         start_point = self._travel['start_point']
 
-        start_codes = '\n;Start point\n'
+        start_codes = '\n' + self._startExtruder + '\n;Start point\n'
         if self._activated_index_list[0] == 0: # Left
             start_codes += self._G['G54_G0_X0_Y0'].format(x = self._quality.LeftExtruder_X_Offset, y = 0.0)
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-            start_codes += self._G['G0_Z_RESET']
-            start_codes += self._G['G92_Z0']
+            #start_codes += self._G['G0_Z_RESET']
+            #start_codes += self._G['G92_Z0']
         else: # Right
             start_codes += self._G['G55_G0_X0_Y0'].format(x = self._quality.LeftExtruder_X_Offset, y = 0.0)
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_A_F600'].format(a_axis=self._quality.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
-            start_codes += self._G['G90_G0_C_RESET']
-            start_codes += self._G['G92_C0']
+            #start_codes += self._G['G90_G0_C_RESET']
+            #start_codes += self._G['G92_C0']
         
         if (self._build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
