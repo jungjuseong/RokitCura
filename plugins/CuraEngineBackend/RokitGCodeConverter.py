@@ -371,6 +371,7 @@ class RokitGCodeConverter:
         g0z40c40f420 = self._G['G0_Z40_C40_F420']
         m29b = self._G['M29_B']
         stopshot = self._G['M330']
+        startshot = self._G['M301']
         g54g0x0y0= self._G['G54_G0_X0_Y0']
         g55g0x0y0= self._G['G55_G0_X0_Y0']
         g92e0 = self._G['G92_E0']
@@ -391,15 +392,16 @@ class RokitGCodeConverter:
             code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '; ==== setup end' 
         # 4. D1~5에서 D6(Extruder)로 변경된 경우
         elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g54g0x0y0}{g92e0}{startshot}'.format(
                     stopshot = stopshot,
                     g0z40c40f420 = g0z40c40f420,
                     m29b = m29b,
                     uvcode = uvcode,
                     extruder = extruder,
-                    g0af600 = g0af600,
-                    g55g0x0y0 = g54g0x0y0,
-                    g0b15f300 = g0b15f300
+                    g54g0x0y0 = g54g0x0y0,
+                    g92e0 = g92e0,
+                    g0b15f300 = g0b15f300,
+                    startshot = startshot
                 )
             code = '; <==== setup start when D1~5에서 D6(Extruder)\n' + code + '; ==== setup end' 
 
@@ -413,7 +415,7 @@ class RokitGCodeConverter:
                     extruder = extruder,
                     g0af600 = g0af600,
                     g55g0x0y0 = g55g0x0y0,
-                    g0b15f300 = g0b15f300
+                    g0b15f300 = g0b15f300,
                 )
             code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '; ==== setup end' 
 
