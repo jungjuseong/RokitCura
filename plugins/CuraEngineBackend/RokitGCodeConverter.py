@@ -201,15 +201,15 @@ class RokitGCodeConverter:
             z_value = float(matched.group(2))        
         
         z_delta = z_value - self._quality.layer_height_0
-        new_z_value = z_delta + initial_layer0_height
+        new_z = z_delta + initial_layer0_height
 
         if gcode.startswith('G0') and z_delta == 0:
             return front_code
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{new_z_value:<.2f}'.format(new_z_value=new_z_value)
+            z_value_form = '\nG0 C{new_z:<.2f}'.format(new_z=new_z)
         else:
-            z_value_form = ' Z{new_z_value:<.2f}'.format(new_z_value=new_z_value)
+            z_value_form = ' Z{new_z:<.2f}'.format(new_z=new_z)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -252,30 +252,29 @@ class RokitGCodeConverter:
                 self._last_extrusion_amount = float(match.group(2))
                 continue
 
-            # update Z value and stop shot
-            match = self._getMatched(gcode, [self._G0_F_X_Y_Z])
+            # update Z value
+            match = self._getMatched(gcode, [self._G0_F_X_Y_Z,self._G0_X_Y_Z, self._G1_F_Z])
             if match:
                 gcode = self._update_Z_value(gcode, match)
-                gcode_list[index] = gcode + '\n' + self._G['M330']
-                continue 
+
             # stop shot
-            match = self._getMatched(gcode, [self._G0_F_X_Y])
+            match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_F_X_Y, self._G0_X_Y])
             if match:
-                gcode = self._prettyFormat(match)
-                if self._nozzle_type.startswith('FFF') is False:             
-                    gcode = self._G['M330'] + gcode
+                #gcode = self._prettyFormat(match)
+                if self._nozzle_type.startswith('FFF') is False: 
+                    gcode = gcode + '\n' + self._G['M330']
                 gcode_list[index] = gcode
                 continue
-            # update Z and shot stop
-            match = self._getMatched(gcode, [self._G0_X_Y_Z, self._G1_F_Z])
+
+            # add M330 
+            match = self._getMatched(gcode, [self._G0_X_Y_Z])
             if match:
-                gcode = self._update_Z_value(gcode, match)
-                if self._nozzle_type.startswith('FFF'):             
+                if self._nozzle_type.startswith('FFF') is False:             
                     gcode = self._G['M330'] + gcode
                 gcode_list[index] = gcode
                 continue 
 
-            # add M301 code
+            # add M301
             match = self._getMatched(gcode, [self._G1_F_X_Y_E])
             if match:
                 gcode = self._prettyFormat(match)
