@@ -266,7 +266,7 @@ class RokitGCodeConverter:
             if match:
                 #gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
-                    gcode = gcode + '\n' + self._G['M330']
+                    gcode = self._G['M330'] + gcode
                     self._hasShot = False
 
                 gcode_list[index] = gcode
