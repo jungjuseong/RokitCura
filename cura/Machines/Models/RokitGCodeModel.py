@@ -12,6 +12,7 @@ class RokitGCodeModel():
             'G0_C30': 'G0 C30.0\n',
             'G0_Z0': 'G0 Z0.00\n',
             'G0_Z40': 'G0 Z40.0\n',
+            'G0_Z40_C40_F420': 'G0 Z40.0 C40.0 F420\n',
 
             'G0_Z_RESET': 'G0 Z-40.0\n',
             

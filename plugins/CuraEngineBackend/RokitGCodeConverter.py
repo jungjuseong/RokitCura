@@ -256,19 +256,20 @@ class RokitGCodeConverter:
                 m = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
                 if m:
                     gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
+                    # control E value
                     if self._nozzle_type.startswith('FFF'):
                         gcode += ' E{e}'.format(e=m.group(4))
                         self._last_extrusion_amount = float(m.group(4))
-
-                    gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
+                    else:
+                        gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
                     continue
 
                 # pretty format
                 m = self._getMatched(gcode, [self._G01_X_Y])
                 if m:
                     gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
-                   
-                gcode_list[index] = gcode if self._is_shot_moment else self._shotControl(gcode)
+                if self._nozzle_type.startswith(('Dispenser','Hot Melt')):
+                    gcode_list[index] = gcode if self._is_shot_moment else self._shotControl(gcode)
 
         return '\n'.join(gcode_list)
 
@@ -334,22 +335,26 @@ class RokitGCodeConverter:
         code = ''
         # D6
         if self._current_index == 0:
-            code = '{stopshot}\n{extruder}{startshot}{g1fe}{g0z40}{g0c30}{m29b}'.format(
+            code = '{stopshot}{g0z40c40}{m29b}\n{extruder}{g54g0x0y0}{g92e0}{g1fe}{startshot}'.format(
                     stopshot = self._G['StopShot'] if self._previous_index > 0 else '', # Right --> D6
                     extruder = self._getRokitExtruderName(),
                     startshot = self._G['StartShot'] if self._quality.cool_fan_enabled_list[self._current_index] else '',
                     g1fe= self._G['G1_F_E'].format(
-                            f=self._quality.retraction_speed_list[self._current_index],
+                            f=self._quality.retraction_speed_list[self._current_index] * 60,
                             e=self._last_extrusion_amount),
                     g0z40=self._G['G0_Z40'],
                     g0c30=self._G['G0_C30'],
-                    m29b=self._G['M29_B'])
+                    m29b=self._G['M29_B'],
+                    g0z40c40= self._G['G0_Z40_C40_F420'],
+                    g92e0= self._G['G92_E0'],
+                    g54g0x0y0 = self._G['G54_G0_X0_Y0']
+                )
                 
-       
+        # D(1,2,3,4,5)
         elif self._current_index > 0:
-            code = '{g1fe}{stopshot}\n{extruder}{g0z40}{g0c30}{uvcode}{g0af}{g55g0x0y0}{g0b15f300}{g0c}'.format(
+            code = '{g1fe}{stopshot}\n{extruder}{uvcode}{g0af}{g55g0x0y0}{g0b15f300}{g0c}'.format(
                     g1fe = self._G['G1_F_E'].format(
-                            f = self._quality.retraction_speed_list[self._current_index],
+                            f = self._quality.retraction_speed_list[self._current_index] * 60,
                             e = self._last_extrusion_amount - self._quality.retraction_amount_list[self._current_index]),
                     stopshot = self._G['StopShot'],
                     extruder = self._getRokitExtruderName(),
