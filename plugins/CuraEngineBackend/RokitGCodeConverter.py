@@ -67,7 +67,7 @@ class RokitGCodeConverter:
                     'M308 0 0 0 0 0 0 27 ; set temperature\n' +\
                     'M109; wait for temperatur\n' +\
                     'M73 ; motor drive off\n' +\
-                    'M176 ; embed compressor OFF\n;'
+                    'M176 ; embed compressor OFF'
 
         self._HOME_ALL_AXIS = '; Home all axis\n' +\
                     'M29 Z\n' +\
