@@ -278,7 +278,7 @@ class RokitGCodeConverter:
                 if len(match.groups()) == 3:
                     gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
-                    gcode = gcode + '\n' + self._G['M330']
+                    gcode = self._G['M330'] + gcode
                     self._hasShot = False
 
                 gcode_list[index] = gcode
@@ -416,7 +416,7 @@ class RokitGCodeConverter:
             code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '; ==== setup end' 
         # 4. D1~5에서 D6(Extruder)로 변경된 경우
         elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g54g0x0y0}{g92e0}{startshot}'.format(
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g54g0x0y0}{g92e0}'.format(
                     stopshot = stopshot,
                     g0z40c40f420 = g0z40c40f420,
                     m29b = m29b,
@@ -424,8 +424,7 @@ class RokitGCodeConverter:
                     extruder = extruder,
                     g54g0x0y0 = g54g0x0y0,
                     g92e0 = g92e0,
-                    g0b15f300 = g0b15f300,
-                    startshot = startshot
+                    g0b15f300 = g0b15f300
                 )
             code = '; <==== setup start when D1~5에서 D6(Extruder)\n' + code + '; ==== setup end' 
 
