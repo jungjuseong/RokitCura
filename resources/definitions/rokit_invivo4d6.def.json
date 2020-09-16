@@ -92,6 +92,22 @@
             "default_value": 1
         },
         "retraction_speed": { 
+            "default_value": 15
+        },
+        "retraction_extrusion_window":
+        {
+            "default_value": 1
+        },
+        "retraction_min_travel":
+        {
+            "default_value": 0.82
+        },
+        "switch_extruder_retraction_amount":
+        {
+            "default_value": 16
+        },
+        "switch_extruder_retraction_speeds":
+        {
             "default_value": 20
         },
         "cool_fan_enabled":

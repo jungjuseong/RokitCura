@@ -199,7 +199,7 @@
 ### Travel
 -------
 - retraction_enable: 노즐이 비프린트 영역으로 이동시 필라멘트를 흡입
-- retract_at_layer_change: 노즐이 다음 레이어로 이동시 필라멘트를 흡입
+- retract_at_layer_change: 노즐이 다음 레이어로 이동시 필라멘트를 흡입하도록 함
 - retraction_amount: 이동시 흡입되는 재료의 길이
 - retraction_speed: 이동시 필라멘트가 흡입되고 프라임되는 속도.
 - retraction_extra_prime_amount: Some material can ooze away during a travel move, which can be compensated for here.

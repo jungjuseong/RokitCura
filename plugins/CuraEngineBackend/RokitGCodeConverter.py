@@ -297,16 +297,17 @@ class RokitGCodeConverter:
             # add M301
             match = self._getMatched(gcode, [self._G1_F_X_Y_E])
             if match:
-                gcode = self._pretty_XYE_Format(match)
+                # gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
-                    gcode += ' E{e:<.3f}'.format(e=float(match.group(4)))
+                    gcode = self._pretty_XYE_Format(match)
                     if self._hasShot is False:
                         gcode = self._G['M301'] + gcode
                         self._hasShot = True
                     self._last_extrusion_amount = float(match.group(4))
                 else:
-                    self._hasShot = True
+                    gcode = self._prettyFormat(match)                    
                     gcode = self._G['M301'] + gcode
+                    self._hasShot = True
                 gcode_list[index] = gcode
                 continue
 
