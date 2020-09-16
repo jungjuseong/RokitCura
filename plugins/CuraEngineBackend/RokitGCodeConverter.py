@@ -44,7 +44,6 @@ class RokitGCodeConverter:
         self._nozzle_type = ''
                 
         self._current_layer_index = None
-        self._current_layer_height = None
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
@@ -204,7 +203,6 @@ class RokitGCodeConverter:
         
         z_delta = z_value - self._quality.layer_height_0
         new_z_value = z_delta + initial_layer0_height
-        self._current_layer_height = z_delta + initial_layer0_height
 
         if gcode.startswith('G0') and z_delta == 0:
             return front_code
@@ -333,9 +331,9 @@ class RokitGCodeConverter:
     def _getExtruderSetupCode(self) -> str:
 
         code = ''
-        # D6
+        # D6 - Left
         if self._current_index == 0:
-            code = '{stopshot}{g0z40c40}{m29b}\n{extruder}{g54g0x0y0}{g92e0}{g1fe}{startshot}'.format(
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g54g0x0y0}{g92e0}{g1fe}{startshot}'.format(
                     stopshot = self._G['StopShot'] if self._previous_index > 0 else '', # Right --> D6
                     extruder = self._getRokitExtruderName(),
                     startshot = self._G['StartShot'] if self._quality.cool_fan_enabled_list[self._current_index] else '',
@@ -345,27 +343,27 @@ class RokitGCodeConverter:
                     g0z40=self._G['G0_Z40'],
                     g0c30=self._G['G0_C30'],
                     m29b=self._G['M29_B'],
-                    g0z40c40= self._G['G0_Z40_C40_F420'],
+                    uvcode = self._get_UV_Code(),
+                    g0z40c40f420= self._G['G0_Z40_C40_F420'],
                     g92e0= self._G['G92_E0'],
                     g54g0x0y0 = self._G['G54_G0_X0_Y0']
                 )
                 
-        # D(1,2,3,4,5)
+        # D(1,2,3,4,5) - Right
         elif self._current_index > 0:
-            code = '{g1fe}{stopshot}\n{extruder}{uvcode}{g0af}{g55g0x0y0}{g0b15f300}{g0c}'.format(
+            code = '{g1fe}{g92e0}{g0z40c40f420}{m29b}{stopshot}{uvcode}\n{extruder}{g0af}{g55g0x0y0}{g0b15f300}'.format(
                     g1fe = self._G['G1_F_E'].format(
                             f = self._quality.retraction_speed_list[self._current_index] * 60,
                             e = self._last_extrusion_amount - self._quality.retraction_amount_list[self._current_index]),
+                    g92e0 = self._G['G92_E0'],
+                    g0z40c40f420= self._G['G0_Z40_C40_F420'],
+                    m29b = self._G['M29_B'],
                     stopshot = self._G['StopShot'],
                     extruder = self._getRokitExtruderName(),
-                    g0z40 = self._G['G0_Z40'],
-                    g0c30 = self._G['G0_C30'],
-                    m29b = self._G['M29_B'],
                     uvcode = self._get_UV_Code(),
                     g0af= self._G['G0_A_F600'].format(a_axis = self._quality.A_AxisPosition[self._current_index]),
                     g55g0x0y0 = self._G['G55_G0_X0_Y0'] if self._previous_index == 0 else '', # Left --> Right
                     g0b15f300 = self._G['G0_B15_F300'],
-                    g0c = self._G['G0_C'].format(self._current_layer_height) if self._current_layer_height is not None and self._current_layer_index == 0 else ''
                 ) 
 
         return code
