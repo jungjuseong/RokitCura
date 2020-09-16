@@ -264,7 +264,8 @@ class RokitGCodeConverter:
             # stop shot
             match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_F_X_Y, self._G0_X_Y])
             if match:
-                #gcode = self._prettyFormat(match)
+                if len(match.groups()) == 3:
+                    gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
                     gcode = gcode + '\n' + self._G['M330']
                     self._hasShot = False
