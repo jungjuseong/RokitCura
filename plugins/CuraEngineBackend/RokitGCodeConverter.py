@@ -224,7 +224,7 @@ class RokitGCodeConverter:
         return '{head} X{x:<.2f} Y{y:<.2f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
 
     def _pretty_XYE_Format(self, match) -> str:
-        return '{head} X{x:<.2f} Y{y:<.2f} E{e:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3),e=float(match.group(4))))
+        return '{head} X{x:<.2f} Y{y:<.2f} E{e:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)),e=float(match.group(4)))
 
     def _getShotCode(self) -> str:        
         if self._hasShot is False:
