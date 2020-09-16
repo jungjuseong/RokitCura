@@ -245,10 +245,14 @@ class RokitGCodeConverter:
             match = self._getMatched(gcode, [self._G1_F_E])
             if match:
                 if self._nozzle_type.startswith('Dispenser'):
-                    gcode_list[index] = self._RemovedMark
-                else:
-                    gcode_list[index] = '{head} E{e:<.3f}\n'.format(head=match.group(1),e=float(match.group(2)))
-
+                    gcode = self._RemovedMark
+                else: # FFF or Hot Melt
+                    gcode = '{head} E{e:<.3f}\n'.format(head=match.group(1),e=float(match.group(2)))
+                    if self._nozzle_type.startswith('FFF') and self._hasShot == False:
+                        self._hasShot = True
+                        gcode += self._G['M301']
+                
+                gcode_list[index] = gcode
                 self._last_extrusion_amount = float(match.group(2))
                 continue
 
@@ -261,16 +265,20 @@ class RokitGCodeConverter:
             match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_F_X_Y, self._G0_X_Y])
             if match:
                 #gcode = self._prettyFormat(match)
-                if self._nozzle_type.startswith('FFF') is False: 
+                if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
                     gcode = gcode + '\n' + self._G['M330']
+                    self._hasShot = False
+
                 gcode_list[index] = gcode
                 continue
 
             # add M330 
             match = self._getMatched(gcode, [self._G0_X_Y_Z])
             if match:
-                if self._nozzle_type.startswith('FFF') is False:             
+                if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._G['M330'] + gcode
+                    self._hasShot = False        
+
                 gcode_list[index] = gcode
                 continue 
 
@@ -285,10 +293,12 @@ class RokitGCodeConverter:
                         self._hasShot = True
                     self._last_extrusion_amount = float(match.group(4))
                 else:
+                    self._hasShot = True
                     gcode = self._G['M301'] + gcode
                 gcode_list[index] = gcode
                 continue
 
+            # E 제거
             match = self._getMatched(gcode, [self._G1_X_Y_E])
             if match:
                 gcode = self._prettyFormat(match)
@@ -297,6 +307,7 @@ class RokitGCodeConverter:
                 gcode_list[index] = gcode
                 continue
 
+            # 수소점 자리 정리
             match = self._getMatched(gcode, [self._G1_X_Y, self._G0_X_Y])
             if match:
                 gcode_list[index] = self._prettyFormat(match)  
