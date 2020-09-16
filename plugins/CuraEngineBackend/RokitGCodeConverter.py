@@ -44,7 +44,6 @@ class RokitGCodeConverter:
         self._nozzle_type = ''
                 
         self._current_layer_index = None
-        self._current_layer_height = None
 
         # *** G-code Line(command) 관리 변수
         self._replaced_gcode_list = []        
@@ -203,7 +202,6 @@ class RokitGCodeConverter:
         
         z_delta = z_value - self._quality.layer_height_0
         new_z_value = z_delta + initial_layer0_height
-        self._current_layer_height = z_delta + initial_layer0_height
 
         if gcode.startswith('G0') and z_delta == 0:
             return front_code
