@@ -150,7 +150,7 @@ M109		 -->
 
       self._selected_extruder = replaced_command              # D 명령어 정보 (D1,D2,D3,D4,D5,D6 )
       self._setNozzleType()
-      if self._nozzle_type != "FFF":
+      if self._nozzle_type != "G1_F_E":
           replaced_command = self._addExtruderSelectCommand(replaced_command)
       self._replaced_code = replaced_command -->
 

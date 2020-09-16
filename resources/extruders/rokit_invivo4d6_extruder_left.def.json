@@ -12,10 +12,10 @@
             "default_value": 0
         },
         "machine_extruder_start_code": {
-            "default_value": "; (*** start of start code for D6)\n;{extruder_setup_code}\n"
+            "default_value0": "; (*** start of start code for D6)\n;{extruder_setup_code}\n"
         },
         "machine_extruder_end_code": {
-            "default_value": "; (*** end of start code for D6)\n"
+            "default_value0": "; (*** end of start code for D6)\n"
         }
     }
 }

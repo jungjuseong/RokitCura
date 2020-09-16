@@ -63,7 +63,7 @@ class RokitGCodeConverter:
                     'G0 Z40.0 C30.0\n' +\
                     'G0 A0.\n' +\
                     'G56 G0 X0.0 Y0.0\n' +\
-                    'G1 E-1 F300 ; retract the FFF extruder for release some of the pressure\n' +\
+                    'G1 E-1 F300 ; retract the Extruder for release some of the pressure\n' +\
                     'G90 ; absolute positioning\n' +\
                     'M308 0 0 0 0 0 0 27 ; set temperature\n' +\
                     'M109; wait for temperatur\n' +\
@@ -90,10 +90,10 @@ class RokitGCodeConverter:
                     'G29\n' +\
                     'G0 X-15. Y0. F300\n' +\
                     'G29\n' +\
-                    'G0 X0. Y-15. F300' +\
+                    'G0 X0. Y-15. F300\n' +\
                     'G29\n' +\
                     'M420\n' +\
-                    'G0 X0. Y0. F300'
+                    'G0 X0. Y0. F300\n'
 
         # match patterns
         self._Extruder_NO = re.compile(r'^T([0-9]+)')
@@ -102,20 +102,23 @@ class RokitGCodeConverter:
         _FP = r'[+-]?\d*[.]?\d+'
 
         self._G0_or_G1 = re.compile(r'^G[0-1] ')
-        self._G1_F_X_Y_E = re.compile(r'^(G1 F{f}) X({x}) Y({y}) E({e})'.format(f=_FP,x=_FP,y=_FP,e=_FP))
-        self._G1_X_Y_E = re.compile(r'^(G1) X({x}) Y({y}) E({e})'.format(x=_FP,y=_FP,e=_FP))
+        self._G1_F_X_Y_E = re.compile(r'(G1 F{f}) X({x}) Y({y}) E({e})'.format(f=_FP,x=_FP,y=_FP,e=_FP))
+        self._G1_X_Y_E = re.compile(r'(G1) X({x}) Y({y}) E({e})'.format(x=_FP,y=_FP,e=_FP))
 
         self._MarlinCodeForRemoval = re.compile(r'M(82|140|190|104 [TS]|109 [TS]|141|205|105|107)')
         self._RemovedMark = '; to-be-removed'
 
-        self._G1_F_E = re.compile(r'^()G1 F{f} E({e})'.format(f=_FP,e=_FP))
+        self._G1_F_E = re.compile(r'^(G1 F{f}) E({e})'.format(f=_FP,e=_FP))
 
         self._G1_F_Z = re.compile(r'^(G1 F{f}) Z({z})'.format(f=_FP,z=_FP))
         self._G0_Z = re.compile(r'^(G0) Z({z})'.format(z=_FP))
         self._G0_F_X_Y_Z = re.compile(r'^(G0 F{f}) X({x}) Y({y}) Z({z})'.format(f=_FP,x=_FP,y=_FP,z=_FP))
+        self._G0_F_X_Y = re.compile(r'^(G0 F{f}) X({x}) Y({y})'.format(f=_FP,x=_FP,y=_FP))
+
         self._G0_X_Y_Z = re.compile(r'^(G0) X({x}) Y({y}) Z({z})'.format(x=_FP,y=_FP,z=_FP))
 
-        self._G01_X_Y = re.compile(r'^(G0|G1) X({x}) Y({y})'.format(x=_FP,y=_FP))
+        self._G0_X_Y = re.compile(r'^(G0) X({x}) Y({y})'.format(x=_FP,y=_FP))
+        self._G1_X_Y = re.compile(r'^(G1) X({x}) Y({y})'.format(x=_FP,y=_FP))
 
         self._G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
 
@@ -124,6 +127,8 @@ class RokitGCodeConverter:
         self._is_shot_moment = True
         self._index_of_StartOfStartCode = -1
         self._index_of_EndOfStartCode = None
+
+        self._hasShot = False
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -170,8 +175,7 @@ class RokitGCodeConverter:
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
 
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode, False)     
-                modified_gcode += self._get_UV_Code() + '\n'
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode, False)
 
             elif self._G1_F_E.match(one_layer_gcode) is not None:
                 self._index_of_EndOfStartCode = index
@@ -184,12 +188,6 @@ class RokitGCodeConverter:
         matched = self._Extruder_NO.search(gcode)
         return int(matched.group(1))
 
-    def _shotControl(self, gcode) -> str:
-        gcode = self._G['StartShot' if self._is_shot_moment else 'StopShot'] + gcode
-        self._is_shot_moment = not self._is_shot_moment
-
-        return gcode
-
     def _update_Z_value(self, gcode, matched) -> str:
         if matched is None:
             return
@@ -197,7 +195,7 @@ class RokitGCodeConverter:
         initial_layer0_height = self._quality.Initial_layer0_list[self._current_index]
         
         if len(matched.groups()) > 3:
-            front_code = '{head} X{x:<.2f} Y{y:.2f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+            front_code = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
             z_value = float(matched.group(4))
         else:
             front_code = matched.group(1)
@@ -224,6 +222,9 @@ class RokitGCodeConverter:
                 return matched
         return None
 
+    def _prettyFormat(self, match) -> str:
+        return '{head} X{x:<.2f} Y{y:<.2f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
+
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
         gcode_list = one_layer_gcode.split('\n')
         for index, gcode in enumerate(gcode_list):
@@ -231,45 +232,78 @@ class RokitGCodeConverter:
             if self._MarlinCodeForRemoval.match(gcode) or\
                 (self._nozzle_type.startswith('FFF') is False and gcode == 'G92 E0'):
                 gcode_list[index] = self._RemovedMark
+                continue
 
-            elif gcode.startswith('T'): # Nozzle changed
+            if gcode.startswith('T'): # Nozzle changed
+                self._hasShot = False
                 self._nozzle_type = self._setExtruder(gcode)
-                gcode_list[index] = self._getRokitExtruderName() if isStartCode else self._getExtruderSetupCode()
+                if isStartCode:
+                    gcode_list[index] = self._getRokitExtruderName(self._current_index)
+                else:
+                    gcode_list[index] = self._getExtruderSetupCode()
+                continue
 
-            elif gcode.startswith('G1') or gcode.startswith('G0'):
+            # remove E when Dispensor
+            match = self._getMatched(gcode, [self._G1_F_E])
+            if match:
+                if self._nozzle_type.startswith('Dispenser'):
+                    gcode_list[index] = self._RemovedMark
+                else:
+                    gcode_list[index] = '{head} E{e:<.3f}\n'.format(head=match.group(1),e=float(match.group(2)))
 
-                # remove retraction when Dispensor
-                m = self._getMatched(gcode, [self._G1_F_E])
-                if m:
-                    if self._nozzle_type.startswith('Dispenser'):
-                        gcode_list[index] = self._RemovedMark
-                    else:
-                        self._last_extrusion_amount = float(m.group(2))
-                    continue
+                self._last_extrusion_amount = float(match.group(2))
+                continue
 
-                # update Z value
-                m = self._getMatched(gcode, [self._G0_X_Y_Z, self._G0_F_X_Y_Z, self._G1_F_Z])
-                if m:
-                    gcode_list[index] = self._update_Z_value(gcode, m)
-                    continue
-               
-                # add Start Shot/ Stop shot code
-                m = self._getMatched(gcode, [self._G1_F_X_Y_E, self._G1_X_Y_E])
-                if m:
-                    gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
-                    if self._nozzle_type.startswith('FFF'):
-                        gcode += ' E{e}'.format(e=m.group(4))
-                        self._last_extrusion_amount = float(m.group(4))
+            # update Z value and stop shot
+            match = self._getMatched(gcode, [self._G0_F_X_Y_Z])
+            if match:
+                gcode = self._update_Z_value(gcode, match)
+                gcode_list[index] = gcode + '\n' + self._G['M330']
+                continue 
+            # stop shot
+            match = self._getMatched(gcode, [self._G0_F_X_Y])
+            if match:
+                gcode = self._prettyFormat(match)
+                if self._nozzle_type.startswith('FFF') is False:             
+                    gcode = self._G['M330'] + gcode
+                gcode_list[index] = gcode
+                continue
+            # update Z and shot stop
+            match = self._getMatched(gcode, [self._G0_X_Y_Z, self._G1_F_Z])
+            if match:
+                gcode = self._update_Z_value(gcode, match)
+                if self._nozzle_type.startswith('FFF'):             
+                    gcode = self._G['M330'] + gcode
+                gcode_list[index] = gcode
+                continue 
 
-                    gcode_list[index] = self._shotControl(gcode) if self._is_shot_moment else gcode
-                    continue
+            # add M301 code
+            match = self._getMatched(gcode, [self._G1_F_X_Y_E])
+            if match:
+                gcode = self._prettyFormat(match)
+                if self._nozzle_type.startswith('FFF'):
+                    gcode += ' E{e:<.3f}'.format(e=float(match.group(4)))
+                    if self._hasShot is False:
+                        gcode = self._G['M301'] + gcode
+                        self._hasShot = True
+                    self._last_extrusion_amount = float(match.group(4))
+                else:
+                    gcode = self._G['M301'] + gcode
+                gcode_list[index] = gcode
+                continue
 
-                # pretty format
-                m = self._getMatched(gcode, [self._G01_X_Y])
-                if m:
-                    gcode = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=m.group(1), x=float(m.group(2)), y=float(m.group(3)))
-                   
-                gcode_list[index] = gcode if self._is_shot_moment else self._shotControl(gcode)
+            match = self._getMatched(gcode, [self._G1_X_Y_E])
+            if match:
+                gcode = self._prettyFormat(match)
+                if self._nozzle_type.startswith('FFF'):
+                    gcode += ' E{e:<.3f}'.format(e=float(match.group(4)))
+                gcode_list[index] = gcode
+                continue
+
+            match = self._getMatched(gcode, [self._G1_X_Y, self._G0_X_Y])
+            if match:
+                gcode_list[index] = self._prettyFormat(match)  
+                continue
 
         return '\n'.join(gcode_list)
 
@@ -308,62 +342,109 @@ class RokitGCodeConverter:
             .replace(';{vac_p_list}', self._G['VAC_P'] % self._quality.vac_power_list)
 
     # UV 명령어 삽입
-    def _get_UV_Code(self) -> str:
-        if self._current_layer_index == 0 or self._quality.uv_enable_list[self._current_index] is False:
+    def _get_UV_Code(self, index) -> str:
+        if self._quality.uv_enable_list[index] is False:
             return ''
 
-        uv_per_layer = self._quality.uv_per_layer_list[self._current_index]
+        uv_per_layer = self._quality.uv_per_layer_list[index]
         code = ''
         if (self._current_layer_index % uv_per_layer) == 0:
             code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
             code = code.format(
-                channel = 0 if self._quality.uv_type_list[self._current_index] == '365' else 1, 
-                dimming = self._quality.uv_dimming_list[self._current_index], 
-                time = self._quality.uv_time_list[self._current_index], 
-                duration = self._quality.uv_time_list[self._current_index] * 1000)
+                channel = 0 if self._quality.uv_type_list[index] == '365' else 1, 
+                dimming = self._quality.uv_dimming_list[index], 
+                time = self._quality.uv_time_list[index], 
+                duration = self._quality.uv_time_list[index] * 1000)
 
         return code
 
-    def _getRokitExtruderName(self) -> str:
+    def _getRokitExtruderName(self, index) -> str:
         return '{extruder_name} ; Selected Nozzle({nozzle_type})\n'.format(
-            extruder_name=self._quality.ExtruderNames[self._current_index], 
-            nozzle_type=self._nozzle_type)
+            extruder_name = self._quality.ExtruderNames[index], 
+            nozzle_type = self._quality.getVariantName(index))
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
     def _getExtruderSetupCode(self) -> str:
 
-        code = ''
-        # D6
-        if self._current_index == 0:
-            code = '{stopshot}\n{extruder}{startshot}{g1fe}{g0z40}{g0c30}{m29b}'.format(
-                    stopshot = self._G['StopShot'] if self._previous_index > 0 else '', # Right --> D6
-                    extruder = self._getRokitExtruderName(),
-                    startshot = self._G['StartShot'] if self._quality.cool_fan_enabled_list[self._current_index] else '',
-                    g1fe= self._G['G1_F_E'].format(
-                            f=self._quality.retraction_speed_list[self._current_index],
-                            e=self._last_extrusion_amount),
-                    g0z40=self._G['G0_Z40'],
-                    g0c30=self._G['G0_C30'],
-                    m29b=self._G['M29_B'])
-                
-       
-        elif self._current_index > 0:
-            code = '{g1fe}{stopshot}\n{extruder}{g0z40}{g0c30}{uvcode}{g0af}{g55g0x0y0}{g0b15f300}{g0c}'.format(
-                    g1fe = self._G['G1_F_E'].format(
-                            f = self._quality.retraction_speed_list[self._current_index],
-                            e = self._last_extrusion_amount - self._quality.retraction_amount_list[self._current_index]),
-                    stopshot = self._G['StopShot'],
-                    extruder = self._getRokitExtruderName(),
-                    g0z40 = self._G['G0_Z40'],
-                    g0c30 = self._G['G0_C30'],
-                    m29b = self._G['M29_B'],
-                    uvcode = self._get_UV_Code(),
-                    g0af= self._G['G0_A_F600'].format(a_axis = self._quality.A_AxisPosition[self._current_index]),
-                    g55g0x0y0 = self._G['G55_G0_X0_Y0'] if self._previous_index == 0 else '', # Left --> Right
-                    g0b15f300 = self._G['G0_B15_F300'],
-                    g0c = self._G['G0_C'].format(self._current_layer_height) if self._current_layer_height is not None and self._current_layer_index == 0 else ''
-                ) 
+        previous_nozzle_type = self._quality.getVariantName(self._previous_index)
+        g0af600 = self._G['G0_A_F600'].format(a_axis = self._quality.A_AxisPosition[self._current_index])
+        g0b15f300 = self._G['G0_B15_F300']
+        extruder = self._getRokitExtruderName(self._current_index)
+        uvcode = self._get_UV_Code(self._previous_index)
+        g0z40c40f420 = self._G['G0_Z40_C40_F420']
+        m29b = self._G['M29_B']
+        stopshot = self._G['M330']
+        g54g0x0y0= self._G['G54_G0_X0_Y0']
+        g55g0x0y0= self._G['G55_G0_X0_Y0']
+        g92e0 = self._G['G92_E0']
 
+        code = ';{}'
+        # 3. D6(Extruder)에서 D1~5로 변경된 경우
+        if previous_nozzle_type.startswith('FFF') and self._current_index > 0:
+            code = '{g0z40c40f420}{m29b}{uvcode}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
+                        g0z40c40f420 = g0z40c40f420,
+                        m29b = m29b,
+                        uvcode = uvcode,
+                        stopshot = stopshot,
+                        extruder = extruder,
+                        g0af600 = g0af600,
+                        g55g0x0y0 = g55g0x0y0,
+                        g0b15f300 = g0b15f300
+                )
+            code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '; ==== setup end' 
+        # 4. D1~5에서 D6(Extruder)로 변경된 경우
+        elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
+                    stopshot = stopshot,
+                    g0z40c40f420 = g0z40c40f420,
+                    m29b = m29b,
+                    uvcode = uvcode,
+                    extruder = extruder,
+                    g0af600 = g0af600,
+                    g55g0x0y0 = g54g0x0y0,
+                    g0b15f300 = g0b15f300
+                )
+            code = '; <==== setup start when D1~5에서 D6(Extruder)\n' + code + '; ==== setup end' 
+
+        # 5. D6(Hot Melt)에서 D1~5로 변경된 경우
+        elif previous_nozzle_type.startswith('Hot Melt') and self._current_index > 0:
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
+                    stopshot = stopshot,
+                    g0z40c40f420 = g0z40c40f420,
+                    m29b = m29b,
+                    uvcode = uvcode,
+                    extruder = extruder,
+                    g0af600 = g0af600,
+                    g55g0x0y0 = g55g0x0y0,
+                    g0b15f300 = g0b15f300
+                )
+            code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '; ==== setup end' 
+
+        # 6. D1~D5에서 D6(Hot Melt)로 변경된 경우
+        elif self._previous_index > 0 and self._nozzle_type.startswith('Hot Melt'):
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g54g0x0y0}{g92e0}'.format(
+                    stopshot = stopshot,
+                    g0z40c40f420 = g0z40c40f420,
+                    m29b = m29b,
+                    uvcode = uvcode,
+                    extruder = extruder,
+                    g54g0x0y0 = g54g0x0y0,
+                    g92e0 = g92e0
+                )
+            code = '; <==== setup start when D1~D5에서 D6(Hot Melt)\n' + code + '; ==== setup end' 
+
+        # 7. D1~D5에서 D1~D5으로 변경된 경우
+        elif self._previous_index > 0 and self._current_index > 0:
+            code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}\n{extruder}{g0af600}{g0b15f300}'.format(
+                    stopshot = stopshot,
+                    g0z40c40f420 = g0z40c40f420,
+                    m29b = m29b,
+                    uvcode = uvcode,
+                    extruder = extruder,
+                    g0af600 = g0af600,
+                    g0b15f300 = g0b15f300
+                )
+            code = '; <==== setup start when D1~D5에서 D1~D5\n' + code + '; ==== setup end'    
         return code
 
     # 사용된 익스트루더 index 기록
