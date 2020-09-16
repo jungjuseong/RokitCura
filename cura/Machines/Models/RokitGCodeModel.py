@@ -13,10 +13,6 @@ class RokitGCodeModel():
             'G0_Z0': 'G0 Z0.00\n',
             'G0_Z40': 'G0 Z40.0\n',
             'G0_Z40_C40_F420': 'G0 Z40.0 C40.0 F420\n',
-<<<<<<< HEAD
-=======
-
->>>>>>> a2d36068c5a9ee5138699959821ca19ba9b37a02
             'G0_Z_RESET': 'G0 Z-40.0\n',
             
             'G1_F_E':'G1 F{f:d} E{e:<.3f} ;(Back Retraction)\n',
