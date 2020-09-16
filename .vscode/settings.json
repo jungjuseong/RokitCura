@@ -1,5 +1,4 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.pythonPath": "C:\\Users\\clbee-design\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
     "cmake.configureOnOpen": false
 }
