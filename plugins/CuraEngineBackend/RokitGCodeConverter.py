@@ -151,7 +151,15 @@ class RokitGCodeConverter:
         if current_index not in self._activated_index_list:
             self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
+    def _write_original_gcode(self, file_name):
+        f = open(file_name, mode='wt', encoding='utf-8')
+        f.writelines(self._replaced_gcode_list)
+        f.close()
+
     def run(self) -> None:
+
+        #self._write_original_gcode('original.gcode')
+
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
             modified_gcode = one_layer_gcode
             if ';FLAVOR:Marlin' in one_layer_gcode:
@@ -327,6 +335,7 @@ class RokitGCodeConverter:
                     gcode = self._getPressureOn(gcode, reverse=True)
                     self._last_extrusion_amount = float(match.group(4))
                 else:
+                    gcode = self._prettyFormat(match)
                     gcode = self._getPressureOn(gcode, reverse=True)
                     #gcode = self._G['M301'] + gcode
                     #self._hasShot = True
