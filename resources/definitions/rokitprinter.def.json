@@ -5067,7 +5067,7 @@
                     "default_value": "skirt",
                     "resolve": "extruderValue(adhesion_extruder_nr, 'adhesion_type')",
                     "settable_per_mesh": false,
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "adhesion_extruder_nr":
                 {
@@ -5076,9 +5076,9 @@
                     "type": "extruder",
                     "default_value": "0",
                     "value": "int(defaultExtruderPosition())",
-                    "enabled": "extruders_enabled_count > 1 and (resolveOrValue('adhesion_type') != 'none' or resolveOrValue('prime_tower_brim_enable'))",
+                    "enabled": "extruders_enabled_count > 1",
                     "settable_per_mesh": false,
-                    "settable_per_extruder": false
+                    "settable_per_extruder": true
                 },
                 "skirt_line_count":
                 {
@@ -7785,14 +7785,28 @@
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
+                "uv_start_layer":
+                {
+                    "label": "Start Layer",
+                    "description": "UV Start Layer",
+                    "type": "int",
+                    "unit": "layer",
+                    "default_value": 1,
+                    "minimum_value": "1",
+                    "maximum_value": "100",
+                    "maximum_value_warning": "60",
+                    "enabled": "uv_enable",
+                    "settable_per_extruder": true
+                },
                 "uv_per_layers":
                 {
-                    "label": "Layers",
+                    "label": "Per Layers",
                     "description": "UV per layers",
                     "type": "int",
                     "unit": "layers",
-                    "default_value": 3,
+                    "default_value": 1,
                     "minimum_value": "1",
+                    "maximum_value": "100",
                     "maximum_value_warning": "10",
                     "enabled": "uv_enable",
                     "settable_per_extruder": true

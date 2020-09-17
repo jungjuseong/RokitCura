@@ -42,6 +42,8 @@ class RokitPrintQuality:
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
         self.uv_per_layer_list = [0,0,0,0,0,0]
+        self.uv_start_layer_list = [1,1,1,1,1,1]
+
         self.uv_type_list = ['365','365','365','365','365','365']
         self.uv_time_list = [5,5,5,5,5,5]
         self.uv_dimming_list = [80,80,80,80,80,80]
@@ -51,6 +53,7 @@ class RokitPrintQuality:
         for index, uv_enable in enumerate(self.uv_enable_list):
             if uv_enable:
                 self.uv_per_layer_list[index] = self._getExtrudersProperty(index,'uv_per_layers')
+                self.uv_start_layer_list[index] = self._getExtrudersProperty(index,'uv_start_layer')
                 self.uv_type_list[index] = self._getExtrudersProperty(index,'uv_type')
                 self.uv_time_list[index] = self._getExtrudersProperty(index,'uv_time')
                 self.uv_dimming_list[index] = self._getExtrudersProperty(index,'uv_dimming')
