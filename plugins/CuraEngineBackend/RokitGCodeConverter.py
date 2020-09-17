@@ -167,7 +167,7 @@ class RokitGCodeConverter:
 
             elif self._StartOfStartCode in one_layer_gcode:
                 self._index_of_StartOfStartCode = index
-                modified_gcode = one_layer_gcode.replace('Cura_SteamEngine', 'Organ Regenerator')
+                modified_gcode = one_layer_gcode.replace('Cura_SteamEngine', 'OrganRegenerator_Engine')
                 modified_gcode = self._convertOneLayerGCode(modified_gcode, True)     
                 modified_gcode = self._replaceLayerInfo(modified_gcode)
                 if self._quality.dispensor_enable:
