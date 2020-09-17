@@ -46,6 +46,7 @@ class RokitGCodeConverter:
 
         self._accummulated_distance = 0
         self._is_retraction_moment = False
+        self._retraction_speed = self._quality.retraction_speed_list[0] * 60
 
         self._last_E = 0.0
         self._retraction_index = -1
@@ -263,13 +264,13 @@ class RokitGCodeConverter:
         return next_pos
 
     def _getRetractionCode(self) -> str:
-
-        retraction_speed = self._quality.retraction_speed_list[0] * 60
         last_retraction_amount = self._last_E - self._quality.retraction_amount_list[0]
-
-        return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
-            f = retraction_speed, 
+        return 'G1 F{f} E{e:<.5f} ;(retraction)\n'.format(
+            f = self._retraction_speed, 
             e = last_retraction_amount)
+
+    def _getBackRetractionCode(self) -> str:
+        return 'G1 F{f} E{e:<.5f} ;(back retraction)\n'.format(f= self._retraction_speed, e= self._last_E)
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
 
@@ -380,7 +381,7 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         if self._is_retraction_moment:
-                            gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + pressure_code
+                            gcode = self._getBackRetractionCode() + pressure_code
                             gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
                             self._is_retraction_moment = False
 
@@ -404,7 +405,7 @@ class RokitGCodeConverter:
                     # <<< retraction 추가
                     if self._retraction_index > 0 and self._retraction_index < index:
                         if self._is_retraction_moment:
-                            gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
+                            gcode = self._getBackRetractionCode() + gcode
                             gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
                             self._is_retraction_moment = False
 
