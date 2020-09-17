@@ -44,11 +44,11 @@ class RokitGCodeConverter:
         self._previous_index = -1
         self._nozzle_type = ''
 
-        self._previous_x, self._previous_y = None, None
-        self._amount = 0
+        self._accummulated_distance = 0
         self._is_retraction_moment = False
+
         self._last_E = 0.0
-        self._G1_to_G0_index = -1
+        self._retraction_index = -1
                 
         self._current_layer_index = None
 
@@ -251,10 +251,32 @@ class RokitGCodeConverter:
             self._hasShot = False
         return gcode
 
+
+    # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
+    def _getNextPosition(self, current_pos, next_pos):
+        if current_pos is not None:
+            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
+
+        if self._accummulated_distance > self._quality.retraction_min_travel[0]:
+            self._is_retraction_moment = True # 리트렉션 코드가 삽입되는 트리거
+            self._accummulated_distance = 0        
+        return next_pos
+
+    def _getRetractionCode(self) -> str:
+
+        retraction_speed = self._quality.retraction_speed_list[0] * 60
+        last_retraction_amount = self._last_E - self._quality.retraction_amount_list[0]
+
+        return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
+            f = retraction_speed, 
+            e = last_retraction_amount)
+
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
+
+        current_position = None
+
         gcode_list = one_layer_gcode.split('\n')
         for index, gcode in enumerate(gcode_list):
-            previous_gcode = gcode_list[index - 1] if index > 1 else None # <<< 추가
 
             if self._MarlinCodeForRemoval.match(gcode) or\
                 (self._nozzle_type.startswith('FFF') is False and gcode == 'G92 E0'):
@@ -306,7 +328,12 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)
                 else:
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    next_position = [float(match.group(2)), float(match.group(3))]
+                    if gcode.startswith('G0'):
+                        current_position = self._getNextPosition(current_position, next_position)
+                    else:
+                        current_position = next_position
+                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
 
                 gcode_list[index] = gcode
                 continue
@@ -318,8 +345,11 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)
                 else:
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
-                    self._G1_to_G0_index = index if previous_gcode.startswith('G1') else self._G1_to_G0_index
+                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    next_position = [float(match.group(2)), float(match.group(3))]
+                    current_position = self._getNextPosition(current_position, next_position)
+                    if gcode_list[index-1].startswith('G1'):
+                        self._retraction_index = index
 
                 gcode_list[index] = gcode
                 continue
@@ -331,8 +361,11 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)  
                 else:
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
-                    self._G1_to_G0_index = index if previous_gcode.startswith('G1') else self._G1_to_G0_index
+                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    next_position = [float(match.group(2)), float(match.group(3))]
+                    current_position = self._getNextPosition(current_position, next_position)
+                    if gcode_list[index-1].startswith('G1'):
+                        self._retraction_index = index
                 gcode_list[index] = gcode
                 continue 
 
@@ -341,22 +374,22 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
-                    gcode = self._getPressureOn(gcode, reverse=True)
+                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    current_position = [float(match.group(2)), float(match.group(3))]
+                    pressure_code = self._getPressureOn(gcode, reverse=True)
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
-                    if self._is_retraction_moment:
-                        gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
-                        gcode_list[self._G1_to_G0_index] = 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
-                            f= self._quality.retraction_speed_list[0] * 60, e= self._last_E - self._quality.retraction_amount_list[0]) +\
-                                 gcode_list[self._G1_to_G0_index]
-                        self._is_retraction_moment = False
+                    if self._retraction_index > 0 and self._retraction_index < index:
+                        if self._is_retraction_moment:
+                            gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + pressure_code
+                            gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
+                            self._is_retraction_moment = False
+
                     self._last_extrusion_amount = float(match.group(4))
                     self._last_E = float(match.group(4)) # <<<
                 else:
                     gcode = self._prettyFormat(match)
                     gcode = self._getPressureOn(gcode, reverse=True)
-                    #gcode = self._G['M301'] + gcode
-                    #self._hasShot = True
+
                 gcode_list[index] = gcode
                 continue
 
@@ -366,15 +399,15 @@ class RokitGCodeConverter:
                 self._back_retraction = False
                 
                 if self._nozzle_type.startswith('FFF'):
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    current_position = [float(match.group(2)), float(match.group(3))]
                     gcode = self._pretty_XYE_Format(match)
                     # <<< retraction 추가
-                    if self._is_retraction_moment:
-                        gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
-                        gcode_list[self._G1_to_G0_index] = 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
-                            f= self._quality.retraction_speed_list[0] * 60, e= self._last_E - self._quality.retraction_amount_list[0]) +\
-                                 gcode_list[self._G1_to_G0_index]
-                        self._is_retraction_moment = False
+                    if self._retraction_index > 0 and self._retraction_index < index:
+                        if self._is_retraction_moment:
+                            gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
+                            gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
+                            self._is_retraction_moment = False
+
                     self._last_E = float(match.group(4))
                 else:
                     gcode = self._prettyFormat(match)
@@ -389,29 +422,21 @@ class RokitGCodeConverter:
             match = self._getMatched(gcode, [self._G0_X_Y])
             if match:
                 if self._nozzle_type.startswith('FFF'):
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
-                    self._G1_to_G0_index = index if previous_gcode.startswith('G1') else self._G1_to_G0_index
+                    current_position = self._getNextPosition(current_position, [float(match.group(2)), float(match.group(3))])
+                    if gcode_list[index-1].startswith('G1'):
+                        self._retraction_index = index
+
                 self._back_retraction = True
                 gcode_list[index] = self._prettyFormat(match)
             
             match = self._getMatched(gcode, [self._G1_X_Y])
             if match:
                 if self._nozzle_type.startswith('FFF'):
-                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
+                    current_position = [float(match.group(2)), float(match.group(3))]
                 self._back_retraction = False
                 gcode_list[index] = self._prettyFormat(match)  
                 continue
         return '\n'.join(gcode_list)
-    
-    # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
-    def _calculateLocation(self, gcode, x, y):
-        if gcode.startswith('G0'): # G0일 때만 travel 거리 계산을 함. G1일 때는 previous 좌표만 설정.
-            if self._previous_x is not None and self._previous_y is not None:
-                self._amount += distance.euclidean([self._previous_x, self._previous_y], [x, y])
-            if self._amount > self._quality.retraction_min_travel[0]:
-                self._is_retraction_moment = True # 리트렉션 코드가 삽입되는 트리거
-                self._amount = 0
-        self._previous_x, self._previous_y = x, y 
 
     def _removeRedundencyGCode(self, one_layer_gcode) -> str:
         # 중복 코드 제거
@@ -488,6 +513,11 @@ class RokitGCodeConverter:
         code = ';{}'
         # 3. D6(Extruder)에서 D1~5로 변경된 경우
         if previous_nozzle_type.startswith('FFF') and self._current_index > 0:
+
+            if self._initial_extruder_did_something is False:
+                uvcode = ''
+                self._initial_extruder_did_something = True
+                
             code = '{g0z40c40f420}{m29b}{uvcode}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
@@ -622,8 +652,3 @@ class RokitGCodeConverter:
             self._cloneWellPlate()
 
         self._replaced_gcode_list[self._index_of_StartOfStartCode] += start_codes
-
-        if self._current_index > 0:
-            self._replaced_gcode_list.insert(-1,self._G['G92_C0'])
-        else:
-            self._replaced_gcode_list.insert(-1,self._G['G92_Z0'])
