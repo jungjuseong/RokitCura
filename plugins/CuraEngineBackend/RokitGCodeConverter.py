@@ -129,6 +129,7 @@ class RokitGCodeConverter:
 
         self._hasShot = False
         self._startExtruder = None # 처음 나오는 extruder
+        self._back_retraction = False
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -195,22 +196,22 @@ class RokitGCodeConverter:
         initial_layer0_height = self._quality.Initial_layer0_list[self._current_index]
         
         if len(matched.groups()) > 3:
-            front_code = '{head} X{x:<.2f} Y{y:<.2f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+            front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
             z_value = float(matched.group(4))
         else:
             front_code = matched.group(1)
             z_value = float(matched.group(2))        
         
-        z_delta = z_value - self._quality.layer_height_0
+        z_delta = z_value # - self._quality.layer_height_0
         new_z = z_delta + initial_layer0_height
 
-        if gcode.startswith('G0') and z_delta == 0:
-            return front_code
+        #if gcode.startswith('G0') and z_delta == 0:
+        #    return front_code
 
         if self._nozzle_type.startswith('Dispenser'):
-            z_value_form = '\nG0 C{:<.2f}'.format(new_z)
+            z_value_form = '\nG0 C{:<.3f}'.format(new_z)
         else:
-            z_value_form = ' Z{:<.2f}'.format(new_z)
+            z_value_form = ' Z{:<.3f}'.format(new_z)
 
         return front_code + z_value_form # ';' + str(matched.group(2))
 
@@ -222,18 +223,25 @@ class RokitGCodeConverter:
         return None
 
     def _prettyFormat(self, match) -> str:
-        return '{head} X{x:<.2f} Y{y:<.2f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
+        return '{head} X{x:<.3f} Y{y:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
 
     def _pretty_XYE_Format(self, match) -> str:
-        return '{head} X{x:<.2f} Y{y:<.2f} E{e:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)),e=float(match.group(4)))
-
-    def _getShotCode(self) -> str:        
-        if self._hasShot is False:
+        return '{head} X{x:<.3f} Y{y:<.3f} E{e:<.5f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)),e=float(match.group(4)))
+        
+    def _getPressureOn(self, gcode, reverse=False) -> str:
+        if self._hasShot == False:
             self._hasShot = True
-            return self._G['M301']
-        else:
+            if reverse:
+                gcode = self._G['M301'] + gcode
+            else:
+                gcode += self._G['M301']
+        return gcode
+
+    def _getPressureOff(self, gcode) -> str:
+        if self._hasShot:
+            gcode = self._G['M330'] + gcode
             self._hasShot = False
-            return self._G['M330']
+        return gcode
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
         gcode_list = one_layer_gcode.split('\n')
@@ -249,7 +257,7 @@ class RokitGCodeConverter:
                 continue
 
             if gcode.startswith('T'): # Nozzle changed
-                self._hasShot = False
+                self._hasShot = False # reset shot-mode
                 self._nozzle_type = self._setExtruder(gcode)
 
                 if isStartCode:
@@ -258,35 +266,45 @@ class RokitGCodeConverter:
                 else:
                     gcode_list[index] = self._getExtruderSetupCode()
                 continue
-
-            # remove E when Dispensor
+            
             match = self._getMatched(gcode, [self._G1_F_E])
             if match:
+                # remove Retraction when Dispensor
                 if self._nozzle_type.startswith('Dispenser'):
-                    gcode = self._RemovedMark
-                else: # FFF or Hot Melt
-                    gcode = '{head} E{e:<.3f} ;(Retraction)\n'.format(head=match.group(1),e=float(match.group(2)))
-                    if self._nozzle_type.startswith('FFF') and self._hasShot == False:
-                        self._hasShot = True
-                        gcode += self._G['M301']
+                    gcode_list[index] = self._RemovedMark
+                    continue
+
+                # when FFF or Hot Melt
+                gcode = '{head} E{e:<.5f} ;({comment}Retraction)\n'.format(
+                    head = match.group(1),
+                    e = float(match.group(2)),
+                    comment = 'Back-' if self._back_retraction else ''
+                )
+
+                # add M301 when FFF and this is first M301
+                if self._nozzle_type.startswith('FFF'):
+                    gcode = self._getPressureOn(gcode)
                 
                 gcode_list[index] = gcode
                 self._last_extrusion_amount = float(match.group(2))
                 continue
 
-            # update Z value
-            match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_X_Y_Z, self._G1_F_Z])
+            # Z 값 갱신하고 FFF가 아닐때 M330 추가
+            match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G1_F_Z])
             if match:
                 gcode = self._update_Z_value(gcode, match)
+                if self._nozzle_type.startswith('FFF') is False:
+                    gcode = self._getPressureOff(gcode)
 
-            # stop shot
-            match = self._getMatched(gcode, [self._G0_F_X_Y_Z, self._G0_F_X_Y, self._G0_X_Y])
+                gcode_list[index] = gcode
+                continue
+
+             # Z 값 갱신하고 FFF가 아닐때 M330 추가
+            match = self._getMatched(gcode, [self._G0_F_X_Y])
             if match:
-                #if len(match.groups()) == 3:
-                #    gcode = self._prettyFormat(match)
-                if self._nozzle_type.startswith('FFF') is False and self._hasShot: 
-                    gcode = self._G['M330'] + gcode
-                    self._hasShot = False
+                gcode = self._prettyFormat(match)
+                if self._nozzle_type.startswith('FFF') is False:
+                    gcode = self._getPressureOff(gcode)
 
                 gcode_list[index] = gcode
                 continue
@@ -294,9 +312,9 @@ class RokitGCodeConverter:
             # add M330 
             match = self._getMatched(gcode, [self._G0_X_Y_Z])
             if match:
+                gcode = self._update_Z_value(gcode, match)
                 if self._nozzle_type.startswith('FFF') is False:
-                    gcode = self._G['M330'] + gcode
-                    self._hasShot = False        
+                    gcode = self._getPressureOff(gcode)        
 
                 gcode_list[index] = gcode
                 continue 
@@ -304,23 +322,21 @@ class RokitGCodeConverter:
             # add M301
             match = self._getMatched(gcode, [self._G1_F_X_Y_E])
             if match:
-                # gcode = self._pretty_XYE_Format(match)
+                gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
-                    gcode = self._pretty_XYE_Format(match)
-                    if self._hasShot is False:
-                        gcode = self._G['M301'] + gcode
-                        self._hasShot = True
+                    gcode = self._getPressureOn(gcode, reverse=True)
                     self._last_extrusion_amount = float(match.group(4))
                 else:
-                    gcode = self._prettyFormat(match)                    
-                    gcode = self._G['M301'] + gcode
-                    self._hasShot = True
+                    gcode = self._getPressureOn(gcode, reverse=True)
+                    #gcode = self._G['M301'] + gcode
+                    #self._hasShot = True
                 gcode_list[index] = gcode
                 continue
 
             # E 제거
             match = self._getMatched(gcode, [self._G1_X_Y_E])
             if match:
+                self._back_retraction = False
                 if self._nozzle_type.startswith('FFF'):
                     gcode = self._pretty_XYE_Format(match)
                 else:
@@ -329,8 +345,14 @@ class RokitGCodeConverter:
                 continue
 
             # 수소점 자리 정리
-            match = self._getMatched(gcode, [self._G1_X_Y, self._G0_X_Y])
+            match = self._getMatched(gcode, [self._G0_X_Y])
             if match:
+                self._back_retraction = True
+                gcode_list[index] = self._prettyFormat(match)
+            
+            match = self._getMatched(gcode, [self._G1_X_Y])
+            if match:
+                self._back_retraction = False
                 gcode_list[index] = self._prettyFormat(match)  
                 continue
 
