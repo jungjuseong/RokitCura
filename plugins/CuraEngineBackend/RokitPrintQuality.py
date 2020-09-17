@@ -41,7 +41,7 @@ class RokitPrintQuality:
         self.vac_power_list = ' '.join(map(str,[self._getExtrudersProperty(index,'dispensor_vac_power') for index in self._JoinSequence]))
 
         # UV 설정 - extruder에서 읽도록 바꿔야 함
-        self.uv_per_layer_list = [0,0,0,0,0,0]
+        self.uv_per_layer_list = [1,1,1,1,1,1]
         self.uv_start_layer_list = [1,1,1,1,1,1]
 
         self.uv_type_list = ['365','365','365','365','365','365']

@@ -175,9 +175,10 @@ class RokitGCodeConverter:
                 if self._quality.dispensor_enable:
                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
 
-            elif self._StartOfEndCode in one_layer_gcode:
+            elif self._StartOfEndCode in one_layer_gcode: # 
+                modified_code = self._add_UV_Code(self._current_index)
                 self._index_of_EndOfStartCode = index if self._index_of_EndOfStartCode is None else self._index_of_EndOfStartCode
-                modified_gcode = self._StartOfEndCode +\
+                modified_gcode += self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
 
@@ -317,7 +318,7 @@ class RokitGCodeConverter:
                 )
 
                 # add M301 when FFF and this is first M301
-                if self._nozzle_type.startswith('FFF'):
+                if self._nozzle_type.startswith('FFF') and isStartCode == False:
                     gcode = self._getPressureOn(gcode)
                 
                 gcode_list[index] = gcode
@@ -489,7 +490,11 @@ class RokitGCodeConverter:
         if self._quality.uv_enable_list[extruder_index] is False:
             return ''
 
-        code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        if extruder_index > 0:
+            code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        else:
+            code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+
         return code.format(
             channel = 0 if self._quality.uv_type_list[extruder_index] == '365' else 1, 
             dimming = self._quality.uv_dimming_list[extruder_index], 
