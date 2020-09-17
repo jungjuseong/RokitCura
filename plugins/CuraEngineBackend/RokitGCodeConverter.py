@@ -136,6 +136,7 @@ class RokitGCodeConverter:
         self._hasShot = False
         self._startExtruder = None # 처음 나오는 extruder
         self._back_retraction = False
+        self._initial_extruder_did_something = False # 처음의 D6와 D1~D5 사이에 G1 x y e 코드가 없는 경우
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -157,14 +158,7 @@ class RokitGCodeConverter:
         if current_index not in self._activated_index_list:
             self._activated_index_list.append(current_index) # [0,1,2,3,4,5]
 
-    def _write_original_gcode(self, file_name):
-        f = open(file_name, mode='wt', encoding='utf-8')
-        f.writelines(self._replaced_gcode_list)
-        f.close()
-
     def run(self) -> None:
-
-        #self._write_original_gcode('original.gcode')
 
         for index, one_layer_gcode in enumerate(self._replaced_gcode_list):
             modified_gcode = one_layer_gcode
@@ -197,6 +191,7 @@ class RokitGCodeConverter:
                 modified_gcode = self._convertOneLayerGCode(one_layer_gcode, False)
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
+
         self._setGcodeAfterStartGcode() 
     
     def _getExtruderIndex(self, gcode) -> int:
@@ -204,8 +199,6 @@ class RokitGCodeConverter:
         return int(matched.group(1))
 
     def _update_Z_value(self, gcode, matched) -> str:
-        if matched is None:
-            return
 
         initial_layer0_height = self._quality.Initial_layer0_list[self._current_index]
         
@@ -279,6 +272,7 @@ class RokitGCodeConverter:
                     self._startExtruder = self._getRokitExtruderName(self._current_index)
                 else:
                     gcode_list[index] = self._getExtruderSetupCode()
+
                 continue
             
             match = self._getMatched(gcode, [self._G1_F_E])
@@ -363,6 +357,7 @@ class RokitGCodeConverter:
             match = self._getMatched(gcode, [self._G1_X_Y_E])
             if match:
                 self._back_retraction = False
+                
                 if self._nozzle_type.startswith('FFF'):
                     self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
                     gcode = self._pretty_XYE_Format(match)
@@ -374,6 +369,10 @@ class RokitGCodeConverter:
                 else:
                     gcode = self._prettyFormat(match)
                 gcode_list[index] = gcode
+                
+                if isStartCode:
+                    self._initial_extruder_did_something = True
+
                 continue
 
             # 수소점 자리 정리
@@ -590,23 +589,22 @@ class RokitGCodeConverter:
 
     # start 코드 다음으로 붙는 준비 명령어
     def _setGcodeAfterStartGcode(self):
-        start_point = self._travel['start_point']
 
         start_codes = '\n' + self._startExtruder + '\n;Start point\n'
+
+        start_point = self._travel['start_point']
         if self._activated_index_list[0] == 0: # Left
-            start_codes += self._G['G54_G0_X0_Y0'].format(x = self._quality.LeftExtruder_X_Offset, y = 0.0)
+            if self._initial_extruder_did_something:
+                start_codes += self._G['G54_G0_X0_Y0']
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-            #start_codes += self._G['G0_Z_RESET']
-            #start_codes += self._G['G92_Z0']
+
         else: # Right
-            start_codes += self._G['G55_G0_X0_Y0'].format(x = self._quality.LeftExtruder_X_Offset, y = 0.0)
+            start_codes += self._G['G55_G0_X0_Y0']
             if (self._build_plate_type == 'Well Plate'):
                 start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
             start_codes += self._G['G0_A_F600'].format(a_axis=self._quality.A_AxisPosition[self._activated_index_list[0]])
             start_codes += self._G['G0_B15_F300']
-            #start_codes += self._G['G90_G0_C_RESET']
-            #start_codes += self._G['G92_C0']
         
         if (self._build_plate_type == 'Well Plate'):
             start_codes += self._G['G92_X0_Y0']
