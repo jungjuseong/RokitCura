@@ -7,6 +7,7 @@ from UM.Logger import Logger
 from typing import Any, cast, Dict, List, Optional, Set
 import re
 import Arcus #For typing.
+from scipy.spatial import distance
 
 from cura.CuraApplication import CuraApplication
 from cura.Machines.Models.RokitGCodeModel import RokitGCodeModel
@@ -42,6 +43,11 @@ class RokitGCodeConverter:
 
         self._previous_index = -1
         self._nozzle_type = ''
+
+        self._previous_x, self._previous_y = None, None
+        self._amount = 0
+        self._is_retraction_moment = False
+        self._last_E = 0.0
                 
         self._current_layer_index = None
 
@@ -295,6 +301,8 @@ class RokitGCodeConverter:
                 gcode = self._update_Z_value(gcode, match)
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)
+                else:
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
 
                 gcode_list[index] = gcode
                 continue
@@ -305,6 +313,8 @@ class RokitGCodeConverter:
                 gcode = self._prettyFormat(match)
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)
+                else:
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
 
                 gcode_list[index] = gcode
                 continue
@@ -314,8 +324,9 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._update_Z_value(gcode, match)
                 if self._nozzle_type.startswith('FFF') is False:
-                    gcode = self._getPressureOff(gcode)        
-
+                    gcode = self._getPressureOff(gcode)  
+                else:
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
                 gcode_list[index] = gcode
                 continue 
 
@@ -324,8 +335,14 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
                     gcode = self._getPressureOn(gcode, reverse=True)
+                    # retraction 추가
+                    if self._is_retraction_moment:
+                        gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
+                        self._is_retraction_moment = False
                     self._last_extrusion_amount = float(match.group(4))
+                    self._last_E = float(match.group(4))
                 else:
                     gcode = self._getPressureOn(gcode, reverse=True)
                     #gcode = self._G['M301'] + gcode
@@ -338,7 +355,13 @@ class RokitGCodeConverter:
             if match:
                 self._back_retraction = False
                 if self._nozzle_type.startswith('FFF'):
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
                     gcode = self._pretty_XYE_Format(match)
+                    # retraction 추가
+                    if self._is_retraction_moment:
+                        gcode = 'G1 F{f} E{e:<.5f} ;(Retraction_b)\n'.format(f= self._quality.retraction_speed_list[0] * 60, e= self._last_E) + gcode
+                        self._is_retraction_moment = False
+                    self._last_E = float(match.group(4))
                 else:
                     gcode = self._prettyFormat(match)
                 gcode_list[index] = gcode
@@ -347,16 +370,29 @@ class RokitGCodeConverter:
             # 수소점 자리 정리
             match = self._getMatched(gcode, [self._G0_X_Y])
             if match:
+                if self._nozzle_type.startswith('FFF'):
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
                 self._back_retraction = True
                 gcode_list[index] = self._prettyFormat(match)
             
             match = self._getMatched(gcode, [self._G1_X_Y])
             if match:
+                if self._nozzle_type.startswith('FFF'):
+                    self._calculateLocation(gcode, float(match.group(2)), float(match.group(3)))
                 self._back_retraction = False
                 gcode_list[index] = self._prettyFormat(match)  
                 continue
 
         return '\n'.join(gcode_list)
+    
+    def _calculateLocation(self, gcode, x, y):
+        if gcode.startswith('G0'):
+            if self._previous_x is not None and self._previous_y is not None:
+                self._amount += distance.euclidean([self._previous_x, self._previous_y], [x, y])
+            if self._amount > self._quality.retraction_min_travel[0]:
+                self._is_retraction_moment = True
+                self._amount = 0
+        self._previous_x, self._previous_y = x, y 
 
     def _removeRedundencyGCode(self, one_layer_gcode) -> str:
         # 중복 코드 제거
