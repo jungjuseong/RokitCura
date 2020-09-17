@@ -138,7 +138,6 @@ class RokitGCodeConverter:
         self._hasShot = False
         self._startExtruderSetupCode = '' # 처음 나오는 extruder
         self._back_retraction = False
-        #self._initial_extruder_did_something = False # 처음의 D6와 D1~D5 사이에 G1 x y e 코드가 없는 경우
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -176,19 +175,17 @@ class RokitGCodeConverter:
                    modified_gcode = self._replaceDispenserSetupCode(modified_gcode)
 
             elif self._StartOfEndCode in one_layer_gcode: # 
-                modified_code = self._add_UV_Code(self._current_index)
+                
                 self._index_of_EndOfStartCode = index if self._index_of_EndOfStartCode is None else self._index_of_EndOfStartCode
-                modified_gcode += self._StartOfEndCode +\
+                modified_gcode = self._StartOfEndCode +\
                     one_layer_gcode[one_layer_gcode.find(self._StartOfEndCode)+len(self._StartOfEndCode):one_layer_gcode.rfind(self._EndOfEndCode)] +\
                     self._EndOfEndCode + '\n'
 
-                modified_gcode = modified_gcode.replace('{end_code}', self._END_CODE)
+                modified_gcode = self._add_UV_Code(self._current_index) + '\n' + modified_gcode.replace('{end_code}', self._END_CODE)
 
             elif one_layer_gcode.startswith(';LAYER:'):
                 self._current_layer_index = self._getLayerIndex(one_layer_gcode)
-                modified_gcode = self._convertOneLayerGCode(one_layer_gcode, False)
-                if self._current_layer_index > 0:
-                    modified_gcode += self._add_UV_Code(self._current_index)                
+                modified_gcode = self._convertOneLayerGCode(one_layer_gcode, False)            
 
             elif self._G1_F_E.match(one_layer_gcode) is not None:
                 self._index_of_EndOfStartCode = index
@@ -196,7 +193,7 @@ class RokitGCodeConverter:
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
 
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + self._startExtruderSetupCode + '\n'
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] = '\n;Start point\n' + self._startExtruderSetupCode + '\n'
         #self._setStartExtruderGcodeAfterStartGcode() 
     
     def _getExtruderIndex(self, gcode) -> int:
@@ -216,9 +213,6 @@ class RokitGCodeConverter:
         
         z_delta = z_value # - self._quality.layer_height_0
         new_z = z_delta + initial_layer0_height
-
-        #if gcode.startswith('G0') and z_delta == 0:
-        #    return front_code
 
         if self._nozzle_type.startswith('Dispenser'):
             z_value_form = '\nG0 C{:<.3f}'.format(new_z)
@@ -437,6 +431,7 @@ class RokitGCodeConverter:
                 self._back_retraction = False
                 gcode_list[index] = self._prettyFormat(match)  
                 continue
+
         return '\n'.join(gcode_list)
 
     def _removeRedundencyGCode(self, one_layer_gcode) -> str:
@@ -568,11 +563,10 @@ class RokitGCodeConverter:
                 code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '; ==== setup end' 
             # 4. D1~5에서 D6(Extruder)로 변경된 경우
             elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-                code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
+                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,
-                        uvcode = uvcode,
+                        m29b = m29b,                        
                         next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
                         extruder = extruder,
                         g54g0x0y0 = g54g0x0y0,
