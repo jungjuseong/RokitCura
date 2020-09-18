@@ -72,8 +72,6 @@ class RokitGCodeConverter:
     def getReplacedlist(self) -> str:
         return self._replaced_gcode_list
 
-
-
     def _setExtruder(self, gcode) -> str:
         self._previous_index = self._current_index
         self._current_index = self._P.getExtruderIndex(gcode)
@@ -153,12 +151,12 @@ class RokitGCodeConverter:
 
     def _getRetractionCode(self) -> str:
         last_retraction_amount = self._last_E - self._Q.retraction_amount_list[0]
-        return 'G1 F{f} E{e:<.5f} ;(Retraction)\n'.format(
+        return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
             f = self._retraction_speed, 
             e = last_retraction_amount)
 
     def _getBackRetractionCode(self) -> str:
-        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction)\n'.format(f= self._retraction_speed, e= self._last_E)
+        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction_a)\n'.format(f= self._retraction_speed, e= self._last_E)
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
 
@@ -205,6 +203,7 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         self._is_retraction_moment = False
+                        self._accummulated_distance = 0
 
                 gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
@@ -405,7 +404,7 @@ class RokitGCodeConverter:
         else:
             # 3. D6(Extruder)에서 D1~5로 변경된 경우
             if previous_nozzle_type.startswith('FFF') and self._current_index > 0:              
-                code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g54g0x0y0}{g0b15f300}'.format(
+                code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
@@ -413,19 +412,18 @@ class RokitGCodeConverter:
                         stopshot = stopshot,
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g54g0x0y0 = g54g0x0y0,
+                        g55g0x0y0 = g55g0x0y0 if uvcode == '' else '',
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '\n' 
             # 4. D1~5에서 D6(Extruder)로 변경된 경우
             elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
+                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g92e0}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,                        
                         next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
                         g92e0 = g92e0,
                         g0b15f300 = g0b15f300
                     )
