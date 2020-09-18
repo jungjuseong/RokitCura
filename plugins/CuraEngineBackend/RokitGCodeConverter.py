@@ -343,10 +343,10 @@ class RokitGCodeConverter:
 
     # UV code
     def _get_UV_Code(self, extruder_index) -> str:
-        if extruder_index > 0:
-            code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
-        else:
-            code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        #if extruder_index > 0:
+        code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        #else:
+        #code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
 
         return code.format(
             channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
