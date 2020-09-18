@@ -144,12 +144,13 @@ class RokitGCodeConverter:
 
     # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
     def _getNextPosition(self, current_pos, next_pos):
-        if current_pos is not None:
-            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
 
         if self._accummulated_distance > self._Q.retraction_min_travel[0]:
             self._is_retraction_moment = True # 리트렉션 코드가 삽입되는 트리거
-            self._accummulated_distance = 0        
+            self._accummulated_distance = 0
+
+        if current_pos is not None:
+            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
         return next_pos
 
     def _getRetractionCode(self) -> str:
@@ -296,7 +297,7 @@ class RokitGCodeConverter:
             # E 제거
             match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
             if match:
-                
+                self._accummulated_distance = 0
                 if self._nozzle_type.startswith('FFF'):
                     current_position = [float(match.group(2)), float(match.group(3))]
                     gcode = self._P.pretty_XYE_Format(match)
