@@ -367,8 +367,8 @@ class RokitGCodeConverter:
         m29b = self._G['M29_B']
         stopshot = self._G['M330']
         startshot = self._G['M301']
-        g54g0x0y0= self._G['G54_G0_X0_Y0']
-        g55g0x0y0= self._G['G55_G0_X0_Y0']
+        G64G0X0Y0= self._G['G54_G0_X0_Y0']
+        G55G0X0Y0= self._G['G55_G0_X0_Y0']
         g92e0 = self._G['G92_E0']
 
         code = ';{}'
@@ -379,7 +379,7 @@ class RokitGCodeConverter:
                 code = '{extruder}{g0af600}{g54g0x0y0}{g0b15f300}'.format(
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D1~5\n' + code + '\n'
@@ -387,7 +387,7 @@ class RokitGCodeConverter:
             elif self._nozzle_type.startswith('FFF'):
                 code = '{extruder}{g54g0x0y0}'.format(
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,                        
+                        g54g0x0y0 = G64G0X0Y0,                        
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D6(Extruder)\n' + code + '\n'
@@ -395,7 +395,7 @@ class RokitGCodeConverter:
             elif self._nozzle_type.startswith('Hot Melt'):
                 code = '{extruder}{g54g0x0y0}{g92e0}'.format(
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g92e0 = g92e0
                     )
                 code = '; <==== setup start when D6(Hot Melt)\n' + code + '\n' 
@@ -406,11 +406,11 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         stopshot = stopshot,
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g55g0x0y0 = g55g0x0y0 if uvcode == '' else '',
+                        g55g0x0y0 = G55G0X0Y0 if uvcode == '' else '',
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '\n' 
@@ -420,7 +420,7 @@ class RokitGCodeConverter:
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,                        
-                        next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
                         g92e0 = g92e0,
                         g0b15f300 = g0b15f300
@@ -434,10 +434,10 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g55g0x0y0 = g55g0x0y0,
+                        g55g0x0y0 = G55G0X0Y0,
                         g0b15f300 = g0b15f300,
                     )
                 code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '\n' 
@@ -449,9 +449,9 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g92e0 = g92e0
                     )
                 code = '; <==== setup start when D1~D5에서 D6(Hot Melt)\n' + code + '\n'
@@ -463,7 +463,7 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
                         g0af600 = g0af600,
                         g0b15f300 = g0b15f300
