@@ -122,7 +122,7 @@ class RokitGCodeConverter:
 
         startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
         self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + startSetupCode + '; ==== setup end\n\n'
-        #self._setStartExtruderGcodeAfterStartGcode() 
+        self._setGcodeAfterStartGcode() 
     
 
     def _getPressureOn(self, gcode, reverse=False) -> str:
@@ -205,6 +205,7 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         self._is_retraction_moment = False
+                        self._accummulated_distance = 0 
 
                 gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
