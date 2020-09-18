@@ -122,6 +122,7 @@ class RokitGCodeConverter:
         self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n{start_setup}; ==== setup end\n\n{well_num}'.format(
             start_setup = startSetupCode,
             well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
+            
         if self._build_plate_type == 'Well Plate':
             self._cloneWellPlate()
 

@@ -119,13 +119,13 @@ class RokitPattern:
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
     def getExtruderSetupCode(self, previous_index, current_index) -> str:
 
-        current_nozzle_type = self._Q.getVariantName(current_index)
-        previous_nozzle_type = self._Q.getVariantName(previous_index)
-        
+        current_nozzle = self._Q.getVariantName(current_index)
+        previous_nozzle = self._Q.getVariantName(previous_index)
+
         g0af600 = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[current_index])
         g0b15f300 = self._G['G0_B15_F300']
-        extruder = self._P.getRokitExtruderName(current_index)
-        uvcode = self._get_UV_Code(previous_index)
+        extruder = self.getRokitExtruderName(current_index)
+        uvcode = self.get_UV_Code(previous_index)
         g0z40c40f420 = self._G['G0_Z40_C40_F420']
         m29b = self._G['M29_B']
         stopshot = self._G['M330']
@@ -147,7 +147,7 @@ class RokitPattern:
                     )
                 code = '; <==== setup start when D1~5\n' + code + '\n'
             # D6 - FFF
-            elif nozzle_type.startswith('FFF'):
+            elif current_nozzle.startswith('FFF'):
                 code = '{extruder}{g54g0x0y0}'.format(
                         extruder = extruder,
                         g54g0x0y0 = G64G0X0Y0,                        
@@ -155,7 +155,7 @@ class RokitPattern:
                     )
                 code = '; <==== setup start when D6(Extruder)\n' + code + '\n'
             # D6 - Hot Melt
-            elif nozzle_type.startswith('Hot Melt'):
+            elif current_nozzle.startswith('Hot Melt'):
                 code = '{extruder}{g54g0x0y0}{g92e0}'.format(
                         extruder = extruder,
                         g54g0x0y0 = G64G0X0Y0,
@@ -164,7 +164,7 @@ class RokitPattern:
                 code = '; <==== setup start when D6(Hot Melt)\n' + code + '\n' 
         else:
             # 3. D6(Extruder)에서 D1~5로 변경된 경우
-            if previous_nozzle_type.startswith('FFF') and self._current_index > 0:              
+            if previous_nozzle.startswith('FFF') and current_index > 0:              
                 code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
@@ -178,7 +178,7 @@ class RokitPattern:
                     )
                 code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '\n' 
             # 4. D1~5에서 D6(Extruder)로 변경된 경우
-            elif previous_index > 0 and nozzle_type.startswith('FFF'):                
+            elif previous_index > 0 and current_nozzle.startswith('FFF'):                
                 code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g92e0}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
@@ -191,7 +191,7 @@ class RokitPattern:
                 code = '; <==== setup start when D1~5에서 D6(Extruder)\n' + code + '\n'
 
             # 5. D6(Hot Melt)에서 D1~5로 변경된 경우
-            elif previous_nozzle_type.startswith('Hot Melt') and self._current_index > 0:
+            elif previous_nozzle.startswith('Hot Melt') and current_index > 0:
                 code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
@@ -206,7 +206,7 @@ class RokitPattern:
                 code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '\n' 
 
             # 6. 처음 또는 D1~D5에서 D6(Hot Melt)로 변경된 경우
-            elif previous_index > 0 and nozzle_type.startswith('Hot Melt'):
+            elif previous_index > 0 and current_nozzle.startswith('Hot Melt'):
                 code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
@@ -220,7 +220,7 @@ class RokitPattern:
                 code = '; <==== setup start when D1~D5에서 D6(Hot Melt)\n' + code + '\n'
 
             # 7. 처음 또는 D1~D5에서 D1~D5으로 변경된 경우
-            elif previous_index > 0 and self._current_index > 0:
+            elif previous_index > 0 and current_index > 0:
                 code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g0af600}{g0b15f300}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
