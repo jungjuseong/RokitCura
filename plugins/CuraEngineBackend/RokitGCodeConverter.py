@@ -120,7 +120,7 @@ class RokitGCodeConverter:
 
         startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
         self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + startSetupCode + '; ==== setup end\n\n'
-        #self._setStartExtruderGcodeAfterStartGcode() 
+        self._setGcodeAfterStartGcode() 
     
 
     def _getPressureOn(self, gcode, reverse=False) -> str:
