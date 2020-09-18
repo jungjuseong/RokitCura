@@ -201,6 +201,10 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('Dispenser'):
                     gcode_list[index] = self._P.RemovedMark
                     continue
+                elif self._nozzle_type.startswith('FFF'):
+                    # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
+                    if self._retraction_index > 0 and self._retraction_index < index:
+                        self._is_retraction_moment = False
 
                 gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
@@ -259,7 +263,7 @@ class RokitGCodeConverter:
                 else:
                     next_position = [float(match.group(2)), float(match.group(3))]
                     current_position = self._getNextPosition(current_position, next_position)
-                    if gcode_list[index-1].startswith('G1'):
+                    if not gcode_list[index-1].startswith('G0'):
                         self._retraction_index = index
                 gcode_list[index] = gcode
                 continue 
@@ -313,7 +317,7 @@ class RokitGCodeConverter:
             if match:
                 if self._nozzle_type.startswith('FFF'):
                     current_position = self._getNextPosition(current_position, [float(match.group(2)), float(match.group(3))])
-                    if gcode_list[index-1].startswith('G1'):
+                    if not gcode_list[index-1].startswith('G0'):
                         self._retraction_index = index
 
                 gcode_list[index] = self._P.prettyFormat(match)
@@ -470,11 +474,6 @@ class RokitGCodeConverter:
                     )
                 code = '; <==== setup start when D1~D5에서 D1~D5\n' + code + '\n'
         return code
-
-    # 사용된 익스트루더 index 기록
-    def _addToActivatedExtruders(self, current_index) -> None:
-        if current_index not in self._activated_index_list:
-            self._activated_index_list.append(current_index) # T 명령어 정보 (0,1,2,3,4,5)
 
     # Well plate 복제 기능
     def _cloneWellPlate(self):
