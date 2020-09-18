@@ -178,9 +178,9 @@ class RokitGCodeConverter:
 
                 if isStartCode:
                     gcode_list[index] = ''
-                    self._startExtruderSetupCode = self._getExtruderSetupCode()
+                    self._startExtruderSetupCode = self._P.getExtruderSetupCode(self._previous_index, self._current_index)
                 else:
-                    gcode_list[index] = self._getExtruderSetupCode()
+                    gcode_list[index] = self._P.getExtruderSetupCode(self._previous_index, self._current_index)
 
                 continue
             
@@ -337,139 +337,9 @@ class RokitGCodeConverter:
             layer = self._current_layer_index - start_layer + 1
 
             if layer >= 0 and (layer % uv_per_layer) == 0:
-                return self._get_UV_Code(extruder_index)
+                return self._P.get_UV_Code(extruder_index)
 
         return ''
-
-    # UV code
-    def _get_UV_Code(self, extruder_index) -> str:
-        #if extruder_index > 0:
-        code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
-        #else:
-        #code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
-
-        return code.format(
-            channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
-            dimming = self._Q.uv_dimming_list[extruder_index], 
-            time = self._Q.uv_time_list[extruder_index], 
-            duration = self._Q.uv_time_list[extruder_index] * 1000)
-
-
-    # 익스트루더가 교체될 때마다 추가로 붙는 명령어
-    def _getExtruderSetupCode(self) -> str:
-
-        previous_nozzle_type = self._Q.getVariantName(self._previous_index)
-        g0af600 = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[self._current_index])
-        g0b15f300 = self._G['G0_B15_F300']
-        extruder = self._P.getRokitExtruderName(self._current_index)
-        uvcode = self._get_UV_Code(self._previous_index)
-        g0z40c40f420 = self._G['G0_Z40_C40_F420']
-        m29b = self._G['M29_B']
-        stopshot = self._G['M330']
-        startshot = self._G['M301']
-        G64G0X0Y0= self._G['G54_G0_X0_Y0']
-        G55G0X0Y0= self._G['G55_G0_X0_Y0']
-        g92e0 = self._G['G92_E0']
-
-        code = ';{}'
-
-        if self._previous_index == -1: # 처음나온 Nozzle
-            # D1~D5
-            if self._current_index > 0:
-                code = '{extruder}{g0af600}{g54g0x0y0}{g0b15f300}'.format(
-                        extruder = extruder,
-                        g0af600 = g0af600,
-                        g54g0x0y0 = G64G0X0Y0,
-                        g0b15f300 = g0b15f300
-                    )
-                code = '; <==== setup start when D1~5\n' + code + '\n'
-            # D6 - FFF
-            elif self._nozzle_type.startswith('FFF'):
-                code = '{extruder}{g54g0x0y0}'.format(
-                        extruder = extruder,
-                        g54g0x0y0 = G64G0X0Y0,                        
-                        g0b15f300 = g0b15f300
-                    )
-                code = '; <==== setup start when D6(Extruder)\n' + code + '\n'
-            # D6 - Hot Melt
-            elif self._nozzle_type.startswith('Hot Melt'):
-                code = '{extruder}{g54g0x0y0}{g92e0}'.format(
-                        extruder = extruder,
-                        g54g0x0y0 = G64G0X0Y0,
-                        g92e0 = g92e0
-                    )
-                code = '; <==== setup start when D6(Hot Melt)\n' + code + '\n' 
-        else:
-            # 3. D6(Extruder)에서 D1~5로 변경된 경우
-            if previous_nozzle_type.startswith('FFF') and self._current_index > 0:              
-                code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
-                        g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,
-                        uvcode = uvcode,
-                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
-                        stopshot = stopshot,
-                        extruder = extruder,
-                        g0af600 = g0af600,
-                        g55g0x0y0 = G55G0X0Y0 if uvcode == '' else '',
-                        g0b15f300 = g0b15f300
-                    )
-                code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '\n' 
-            # 4. D1~5에서 D6(Extruder)로 변경된 경우
-            elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g92e0}'.format(
-                        stopshot = stopshot,
-                        g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,                        
-                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
-                        extruder = extruder,
-                        g92e0 = g92e0,
-                        g0b15f300 = g0b15f300
-                    )
-                code = '; <==== setup start when D1~5에서 D6(Extruder)\n' + code + '\n'
-
-            # 5. D6(Hot Melt)에서 D1~5로 변경된 경우
-            elif previous_nozzle_type.startswith('Hot Melt') and self._current_index > 0:
-                code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
-                        stopshot = stopshot,
-                        g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,
-                        uvcode = uvcode,
-                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
-                        extruder = extruder,
-                        g0af600 = g0af600,
-                        g55g0x0y0 = G55G0X0Y0,
-                        g0b15f300 = g0b15f300,
-                    )
-                code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '\n' 
-
-            # 6. 처음 또는 D1~D5에서 D6(Hot Melt)로 변경된 경우
-            elif self._previous_index > 0 and self._nozzle_type.startswith('Hot Melt'):
-                code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
-                        stopshot = stopshot,
-                        g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,
-                        uvcode = uvcode,
-                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
-                        extruder = extruder,
-                        g54g0x0y0 = G64G0X0Y0,
-                        g92e0 = g92e0
-                    )
-                code = '; <==== setup start when D1~D5에서 D6(Hot Melt)\n' + code + '\n'
-
-            # 7. 처음 또는 D1~D5에서 D1~D5으로 변경된 경우
-            elif self._previous_index > 0 and self._current_index > 0:
-                code = '{stopshot}{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}\n{extruder}{g0af600}{g0b15f300}'.format(
-                        stopshot = stopshot,
-                        g0z40c40f420 = g0z40c40f420,
-                        m29b = m29b,
-                        uvcode = uvcode,
-                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
-                        extruder = extruder,
-                        g0af600 = g0af600,
-                        g0b15f300 = g0b15f300
-                    )
-                code = '; <==== setup start when D1~D5에서 D1~D5\n' + code + '\n'
-        return code
 
     # Well plate 복제 기능
     def _cloneWellPlate(self):
