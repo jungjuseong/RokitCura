@@ -62,6 +62,7 @@ class RokitPrintQuality:
         self.cool_fan_enabled_list = [self._getExtrudersProperty(index,'cool_fan_enabled') for index in range(6)]
 
         # 리트렉션
+        self.retraction_enable_list = [self._getExtrudersProperty(index,'retraction_enable') for index in range(6)]
         self.retraction_amount_list = [self._getExtrudersProperty(index,'retraction_amount') for index in range(6)]
         self.retraction_speed_list = [self._getExtrudersProperty(index,'retraction_speed') for index in range(6)]
         self.retraction_min_travel = [self._getExtrudersProperty(index,'retraction_min_travel') for index in range(6)]

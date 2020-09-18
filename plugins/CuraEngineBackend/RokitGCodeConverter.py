@@ -47,7 +47,6 @@ class RokitGCodeConverter:
 
         self._accummulated_distance = 0
         self._is_retraction_moment = False
-        self._retraction_speed = self._Q.retraction_speed_list[0] * 60
 
         self._last_E = 0.0
         self._retraction_index = -1
@@ -122,7 +121,7 @@ class RokitGCodeConverter:
         self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n{start_setup}; ==== setup end\n\n{well_num}'.format(
             start_setup = startSetupCode,
             well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
-            
+
         if self._build_plate_type == 'Well Plate':
             self._cloneWellPlate()
 
@@ -151,15 +150,6 @@ class RokitGCodeConverter:
             self._is_retraction_moment = True # 리트렉션 코드가 삽입되는 트리거
             self._accummulated_distance = 0        
         return next_pos
-
-    def _getRetractionCode(self) -> str:
-        last_retraction_amount = self._last_E - self._Q.retraction_amount_list[0]
-        return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
-            f = self._retraction_speed, 
-            e = last_retraction_amount)
-
-    def _getBackRetractionCode(self) -> str:
-        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction_a)\n'.format(f= self._retraction_speed, e= self._last_E)
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
 
@@ -280,8 +270,8 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         if self._is_retraction_moment:
-                            gcode = self._getBackRetractionCode() + pressure_code
-                            gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
+                            gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + pressure_code
+                            gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
                             self._is_retraction_moment = False
 
                     self._last_extrusion_amount = float(match.group(4))

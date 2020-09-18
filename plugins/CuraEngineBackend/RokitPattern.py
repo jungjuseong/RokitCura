@@ -107,6 +107,20 @@ class RokitPattern:
             extruder_name = self._Q.ExtruderNames[index], 
             nozzle_type = self._Q.getVariantName(index))
 
+    def getRetractionCode(self, extruder_index, last_e) -> str:
+        if self._Q.retraction_enable_list[extruder_index]:
+            return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
+                f = self._Q.retraction_speed_list[extruder_index] * 60, 
+                e = last_e - self._Q.retraction_amount_list[extruder_index])
+        return ''
+
+    def getBackRetractionCode(self,extruder_index,last_e) -> str:
+        if self._Q.retraction_enable_list[extruder_index]:
+            return 'G1 F{f} E{e:<.5f} ;(Back-Retraction_a)\n'.format(
+                f = self._Q.retraction_speed_list[extruder_index] * 60, 
+                e = last_e)
+        return ''
+
     # UV code
     def get_UV_Code(self, extruder_index) -> str:
         code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
