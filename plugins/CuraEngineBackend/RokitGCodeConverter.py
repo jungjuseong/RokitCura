@@ -193,7 +193,7 @@ class RokitGCodeConverter:
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
 
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] = '\n;Start point\n' + self._startExtruderSetupCode + '\n'
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + self._startExtruderSetupCode + '\n'
         #self._setStartExtruderGcodeAfterStartGcode() 
     
     def _getExtruderIndex(self, gcode) -> int:
@@ -290,7 +290,7 @@ class RokitGCodeConverter:
                 self._nozzle_type = self._setExtruder(gcode)
 
                 if isStartCode:
-                    # gcode_list[index] = ''
+                    gcode_list[index] = ''
                     self._startExtruderSetupCode = self._getExtruderSetupCode()
                 else:
                     gcode_list[index] = self._getExtruderSetupCode()
