@@ -72,8 +72,6 @@ class RokitGCodeConverter:
     def getReplacedlist(self) -> str:
         return self._replaced_gcode_list
 
-
-
     def _setExtruder(self, gcode) -> str:
         self._previous_index = self._current_index
         self._current_index = self._P.getExtruderIndex(gcode)
@@ -155,12 +153,12 @@ class RokitGCodeConverter:
 
     def _getRetractionCode(self) -> str:
         last_retraction_amount = self._last_E - self._Q.retraction_amount_list[0]
-        return 'G1 F{f} E{e:<.5f} ;(Retraction)\n'.format(
+        return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
             f = self._retraction_speed, 
             e = last_retraction_amount)
 
     def _getBackRetractionCode(self) -> str:
-        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction)\n'.format(f= self._retraction_speed, e= self._last_E)
+        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction_a)\n'.format(f= self._retraction_speed, e= self._last_E)
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
 
@@ -207,7 +205,7 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         self._is_retraction_moment = False
-                        self._accummulated_distance = 0 
+                        self._accummulated_distance = 0
 
                 gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
@@ -349,10 +347,10 @@ class RokitGCodeConverter:
 
     # UV code
     def _get_UV_Code(self, extruder_index) -> str:
-        if extruder_index > 0:
-            code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
-        else:
-            code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        #if extruder_index > 0:
+        code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        #else:
+        #code = ';UV\n{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
 
         return code.format(
             channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
@@ -373,8 +371,8 @@ class RokitGCodeConverter:
         m29b = self._G['M29_B']
         stopshot = self._G['M330']
         startshot = self._G['M301']
-        g54g0x0y0= self._G['G54_G0_X0_Y0']
-        g55g0x0y0= self._G['G55_G0_X0_Y0']
+        G64G0X0Y0= self._G['G54_G0_X0_Y0']
+        G55G0X0Y0= self._G['G55_G0_X0_Y0']
         g92e0 = self._G['G92_E0']
 
         code = ';{}'
@@ -385,7 +383,7 @@ class RokitGCodeConverter:
                 code = '{extruder}{g0af600}{g54g0x0y0}{g0b15f300}'.format(
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D1~5\n' + code + '\n'
@@ -393,7 +391,7 @@ class RokitGCodeConverter:
             elif self._nozzle_type.startswith('FFF'):
                 code = '{extruder}{g54g0x0y0}'.format(
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,                        
+                        g54g0x0y0 = G64G0X0Y0,                        
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D6(Extruder)\n' + code + '\n'
@@ -401,34 +399,33 @@ class RokitGCodeConverter:
             elif self._nozzle_type.startswith('Hot Melt'):
                 code = '{extruder}{g54g0x0y0}{g92e0}'.format(
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g92e0 = g92e0
                     )
                 code = '; <==== setup start when D6(Hot Melt)\n' + code + '\n' 
         else:
             # 3. D6(Extruder)에서 D1~5로 변경된 경우
             if previous_nozzle_type.startswith('FFF') and self._current_index > 0:              
-                code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g54g0x0y0}{g0b15f300}'.format(
+                code = '{g0z40c40f420}{m29b}{uvcode}{next_nozzle_pos}{stopshot}\n{extruder}{g0af600}{g55g0x0y0}{g0b15f300}'.format(
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         stopshot = stopshot,
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g54g0x0y0 = g54g0x0y0,
+                        g55g0x0y0 = G55G0X0Y0 if uvcode == '' else '',
                         g0b15f300 = g0b15f300
                     )
                 code = '; <==== setup start when D6(Extruder)에서 D1~5\n' + code + '\n' 
             # 4. D1~5에서 D6(Extruder)로 변경된 경우
             elif self._previous_index > 0 and self._nozzle_type.startswith('FFF'):                
-                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g54g0x0y0}{g92e0}'.format(
+                code = '{stopshot}{g0z40c40f420}{m29b}{next_nozzle_pos}\n{extruder}{g92e0}'.format(
                         stopshot = stopshot,
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,                        
-                        next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
                         g92e0 = g92e0,
                         g0b15f300 = g0b15f300
                     )
@@ -441,10 +438,10 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
                         g0af600 = g0af600,
-                        g55g0x0y0 = g55g0x0y0,
+                        g55g0x0y0 = G55G0X0Y0,
                         g0b15f300 = g0b15f300,
                     )
                 code = '; <==== setup start when D6(Hot Melt)에서 D1~5\n' + code + '\n' 
@@ -456,9 +453,9 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g54g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G64G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
-                        g54g0x0y0 = g54g0x0y0,
+                        g54g0x0y0 = G64G0X0Y0,
                         g92e0 = g92e0
                     )
                 code = '; <==== setup start when D1~D5에서 D6(Hot Melt)\n' + code + '\n'
@@ -470,7 +467,7 @@ class RokitGCodeConverter:
                         g0z40c40f420 = g0z40c40f420,
                         m29b = m29b,
                         uvcode = uvcode,
-                        next_nozzle_pos = g55g0x0y0 if uvcode != '' else '',
+                        next_nozzle_pos = G55G0X0Y0 if uvcode != '' else '',
                         extruder = extruder,
                         g0af600 = g0af600,
                         g0b15f300 = g0b15f300
@@ -515,30 +512,3 @@ class RokitGCodeConverter:
             gcode_clone.insert(0, gcode_spacing)
             self._replaced_gcode_list[self._index_of_EndOfStartCode:self._index_of_EndOfStartCode]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
-
-
-    # # start 코드 다음으로 붙는 준비 명령어
-    # def _setGcodeAfterStartGcode(self):
-
-    #     start_codes = '\n' + self._startExtruderSetupCode + '\n;Start point\n'
-
-    #     start_point = self._travel['start_point']
-    #     if self._activated_index_list[0] == 0: # Left
-    #         #if self._initial_extruder_did_something:
-    #         start_codes += self._G['G54_G0_X0_Y0']
-    #         if (self._build_plate_type == 'Well Plate'):
-    #             start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-
-    #     else: # Right
-    #         start_codes += self._G['G55_G0_X0_Y0']
-    #         if (self._build_plate_type == 'Well Plate'):
-    #             start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-    #         start_codes += self._G['G0_A_F600'].format(a_axis=self._Q.A_AxisPosition[self._activated_index_list[0]])
-    #         start_codes += self._G['G0_B15_F300']
-        
-    #     if (self._build_plate_type == 'Well Plate'):
-    #         start_codes += self._G['G92_X0_Y0']
-    #         start_codes += ';Well Number: 0\n'
-    #         self._cloneWellPlate()
-
-    #     self._replaced_gcode_list[self._index_of_StartOfStartCode] += start_codes
