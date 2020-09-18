@@ -119,7 +119,11 @@ class RokitGCodeConverter:
             self._replaced_gcode_list[index] = self._P.removeRedundencyGCode(modified_gcode)
 
         startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + startSetupCode + '; ==== setup end\n\n'    
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n{start_setup}; ==== setup end\n\n{well_num}'.format(
+            start_setup = startSetupCode,
+            well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
+        if self._build_plate_type == 'Well Plate':
+            self._cloneWellPlate()
 
     def _getPressureOn(self, gcode, reverse=False) -> str:
         if self._hasAirCompressorOn == False:
@@ -378,30 +382,3 @@ class RokitGCodeConverter:
             gcode_clone.insert(0, gcode_spacing)
             self._replaced_gcode_list[self._index_of_EndOfStartCode:self._index_of_EndOfStartCode]= gcode_clone # put the clones in front of the end-code
             gcode_clone.remove(gcode_spacing)
-
-
-    # start 코드 다음으로 붙는 준비 명령어
-    def _setGcodeAfterStartGcode(self):
-
-        start_codes = '\n' + self._startExtruderSetupCode + '\n;Start point\n'
-
-        start_point = self._travel['start_point']
-        if self._activated_index_list[0] == 0: # Left
-            #if self._initial_extruder_did_something:
-            start_codes += self._G['G54_G0_X0_Y0']
-            if (self._build_plate_type == 'Well Plate'):
-                start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-
-        else: # Right
-            start_codes += self._G['G55_G0_X0_Y0']
-            if (self._build_plate_type == 'Well Plate'):
-                start_codes += self._G['G90_G0_X_Y'] % (start_point.x(), start_point.y())
-            start_codes += self._G['G0_A_F600'].format(a_axis=self._Q.A_AxisPosition[self._activated_index_list[0]])
-            start_codes += self._G['G0_B15_F300']
-        
-        if (self._build_plate_type == 'Well Plate'):
-            start_codes += self._G['G92_X0_Y0']
-            start_codes += ';Well Number: 0\n'
-            self._cloneWellPlate()
-
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] += start_codes
