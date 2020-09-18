@@ -119,9 +119,7 @@ class RokitGCodeConverter:
             self._replaced_gcode_list[index] = self._P.removeRedundencyGCode(modified_gcode)
 
         startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + startSetupCode + '; ==== setup end\n\n'
-        self._setGcodeAfterStartGcode() 
-    
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + startSetupCode + '; ==== setup end\n\n'    
 
     def _getPressureOn(self, gcode, reverse=False) -> str:
         if self._hasAirCompressorOn == False:
