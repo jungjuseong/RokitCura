@@ -119,10 +119,10 @@ class RokitGCodeConverter:
             self._replaced_gcode_list[index] = self._P.removeRedundencyGCode(modified_gcode)
 
         startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n{startSetupCode}; ==== setup end\n\n{well_num}'.format(
-            startSetupCode = startSetupCode,
-            well_num = ";Well Number: 0\n" if (self._build_plate_type == 'Well Plate') else "")
-        if (self._build_plate_type == 'Well Plate'):
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n{start_setup}; ==== setup end\n\n{well_num}'.format(
+            start_setup = startSetupCode,
+            well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
+        if self._build_plate_type == 'Well Plate':
             self._cloneWellPlate()
 
     def _getPressureOn(self, gcode, reverse=False) -> str:
