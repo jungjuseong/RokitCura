@@ -135,9 +135,9 @@ class RokitGCodeConverter:
         self._index_of_StartOfStartCode = -1
         self._index_of_EndOfStartCode = None
 
-        self._hasShot = False
+        self._hasAirCompressorOn = False
         self._startExtruderSetupCode = '' # 처음 나오는 extruder
-        self._back_retraction = False
+        #self._back_retraction = False
 
     def setReplacedlist(self, replaced_gcode_list) -> None:
         self._replaced_gcode_list = replaced_gcode_list
@@ -193,7 +193,7 @@ class RokitGCodeConverter:
 
             self._replaced_gcode_list[index] = self._removeRedundencyGCode(modified_gcode)
 
-        self._replaced_gcode_list[self._index_of_StartOfStartCode] = '\n;Start point\n' + self._startExtruderSetupCode + '\n'
+        self._replaced_gcode_list[self._index_of_StartOfStartCode] += '\n;Start point\n' + self._startExtruderSetupCode + '\n'
         #self._setStartExtruderGcodeAfterStartGcode() 
     
     def _getExtruderIndex(self, gcode) -> int:
@@ -235,8 +235,8 @@ class RokitGCodeConverter:
         return '{head} X{x:<.3f} Y{y:<.3f} E{e:<.5f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)),e=float(match.group(4)))
         
     def _getPressureOn(self, gcode, reverse=False) -> str:
-        if self._hasShot == False:
-            self._hasShot = True
+        if self._hasAirCompressorOn == False:
+            self._hasAirCompressorOn = True
             if reverse:
                 gcode = self._G['M301'] + gcode
             else:
@@ -244,9 +244,9 @@ class RokitGCodeConverter:
         return gcode
 
     def _getPressureOff(self, gcode) -> str:
-        if self._hasShot:
+        if self._hasAirCompressorOn:
             gcode = self._G['M330'] + gcode
-            self._hasShot = False
+            self._hasAirCompressorOn = False
         return gcode
 
 
@@ -262,12 +262,12 @@ class RokitGCodeConverter:
 
     def _getRetractionCode(self) -> str:
         last_retraction_amount = self._last_E - self._quality.retraction_amount_list[0]
-        return 'G1 F{f} E{e:<.5f} ;(retraction)\n'.format(
+        return 'G1 F{f} E{e:<.5f} ;(Retraction)\n'.format(
             f = self._retraction_speed, 
             e = last_retraction_amount)
 
     def _getBackRetractionCode(self) -> str:
-        return 'G1 F{f} E{e:<.5f} ;(back retraction)\n'.format(f= self._retraction_speed, e= self._last_E)
+        return 'G1 F{f} E{e:<.5f} ;(Back-Retraction)\n'.format(f= self._retraction_speed, e= self._last_E)
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
 
@@ -286,11 +286,11 @@ class RokitGCodeConverter:
                 continue
 
             if gcode.startswith('T'): # Nozzle changed
-                self._hasShot = False # reset shot-mode
+                self._hasAirCompressorOn = False # reset shot-mode
                 self._nozzle_type = self._setExtruder(gcode)
 
                 if isStartCode:
-                    # gcode_list[index] = ''
+                    gcode_list[index] = ''
                     self._startExtruderSetupCode = self._getExtruderSetupCode()
                 else:
                     gcode_list[index] = self._getExtruderSetupCode()
@@ -299,7 +299,7 @@ class RokitGCodeConverter:
             
             match = self._getMatched(gcode, [self._G1_F_E])
             if match:
-                # remove Retraction when Dispensor
+                # remove Retraction code itself when Dispensor
                 if self._nozzle_type.startswith('Dispenser'):
                     gcode_list[index] = self._RemovedMark
                     continue
@@ -308,11 +308,9 @@ class RokitGCodeConverter:
                     if self._retraction_index > 0 and self._retraction_index < index:
                         self._is_retraction_moment = False
 
-                # when FFF or Hot Melt
-                gcode = '{head} E{e:<.5f} ;({comment}Retraction)\n'.format(
+                gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
-                    e = float(match.group(2)),
-                    comment = 'Back-' if self._back_retraction else ''
+                    e = float(match.group(2))
                 )
 
                 # add M301 when FFF and this is first M301
@@ -335,7 +333,6 @@ class RokitGCodeConverter:
                         current_position = self._getNextPosition(current_position, next_position)
                     else:
                         current_position = next_position
-                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
 
                 gcode_list[index] = gcode
                 continue
@@ -347,7 +344,6 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)
                 else:
-                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
                     next_position = [float(match.group(2)), float(match.group(3))]
                     current_position = self._getNextPosition(current_position, next_position)
                     if not gcode_list[index-1].startswith('G0'):
@@ -363,7 +359,6 @@ class RokitGCodeConverter:
                 if self._nozzle_type.startswith('FFF') is False:
                     gcode = self._getPressureOff(gcode)  
                 else:
-                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
                     next_position = [float(match.group(2)), float(match.group(3))]
                     current_position = self._getNextPosition(current_position, next_position)
                     if not gcode_list[index-1].startswith('G0'):
@@ -376,7 +371,6 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._pretty_XYE_Format(match)
                 if self._nozzle_type.startswith('FFF'):
-                    #self._calculateLocation(gcode, float(match.group(2)), float(match.group(3))) # <<<
                     current_position = [float(match.group(2)), float(match.group(3))]
                     pressure_code = self._getPressureOn(gcode, reverse=True)
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
@@ -425,14 +419,14 @@ class RokitGCodeConverter:
                     if not gcode_list[index-1].startswith('G0'):
                         self._retraction_index = index
 
-                self._back_retraction = True
+                #self._back_retraction = True
                 gcode_list[index] = self._prettyFormat(match)
             
             match = self._getMatched(gcode, [self._G1_X_Y])
             if match:
                 if self._nozzle_type.startswith('FFF'):
                     current_position = [float(match.group(2)), float(match.group(3))]
-                self._back_retraction = False
+                #self._back_retraction = False
                 gcode_list[index] = self._prettyFormat(match)  
                 continue
 
@@ -475,20 +469,18 @@ class RokitGCodeConverter:
     # UV 명령어 삽입
     def _add_UV_Code(self, extruder_index) -> str:
 
-        uv_per_layer = self._quality.uv_per_layer_list[extruder_index]
-        start_layer = self._quality.uv_start_layer_list[extruder_index]
-        layer = self._current_layer_index - start_layer + 1
+        if self._quality.uv_enable_list[extruder_index] == True:
+            uv_per_layer = self._quality.uv_per_layer_list[extruder_index]
+            start_layer = self._quality.uv_start_layer_list[extruder_index]
+            layer = self._current_layer_index - start_layer + 1
 
-        if layer >= 0 and (layer % uv_per_layer) == 0:
-            return self._get_UV_Code(extruder_index)
+            if layer >= 0 and (layer % uv_per_layer) == 0:
+                return self._get_UV_Code(extruder_index)
 
         return ''
 
     # UV code
     def _get_UV_Code(self, extruder_index) -> str:
-        if self._quality.uv_enable_list[extruder_index] is False:
-            return ''
-
         if extruder_index > 0:
             code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
         else:
