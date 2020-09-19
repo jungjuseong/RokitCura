@@ -301,7 +301,7 @@ class RokitGCodeConverter:
                 
                 continue
 
-            # 수소점 자리 정리
+            # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
                 if self._current_nozzle.startswith('FFF'):
