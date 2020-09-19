@@ -210,7 +210,7 @@ class RokitGCodeConverter:
             if gcode.startswith(';'): # comment
                 if self._current_nozzle.startswith('FFF'):
                     if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment:
-                        gcode = self._retract(gcode)
+                        gcode = self._insertBackRetraction(gcode) # Back-Retraction
                         gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
                         self._accummulated_distance = 0
                 gcode_list[index] = gcode
@@ -308,7 +308,7 @@ class RokitGCodeConverter:
                     pressure_code = self._getPressureOn(gcode, reverse=True)
                     current_position = self._getNextLocation(match)
                     if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment:
-                        gcode = self._retract(pressure_code)
+                        gcode = self._insertBackRetraction(pressure_code) # Back-Retraction
                         gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
                     self._accummulated_distance = 0
                     self._last_E = float(match.group(4))
@@ -351,11 +351,11 @@ class RokitGCodeConverter:
             gcode_list[0] = before_layer_uvcode + gcode_list[0]
 
         return '\n'.join(gcode_list)
-    # ------------------------------------------------------------------------    
+        
     def _getNextLocation(self, match):
         return [float(match.group(2)), float(match.group(3))]
 
-    def _retract(self, rear_code):
+    def _insertBackRetraction(self, rear_code):
         self._is_retraction_moment = False
         return self._P.getBackRetractionCode(self._current_index, self._last_E) + rear_code
 
