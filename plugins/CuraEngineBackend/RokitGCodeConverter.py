@@ -187,7 +187,7 @@ class RokitGCodeConverter:
 
         current_position = None
         before_layer_uvcode = ''
-        uvcode =''
+        uvcode = ''
         have_first_extruder = False
 
         gcode_list = gcodes.split('\n')
