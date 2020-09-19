@@ -144,12 +144,13 @@ class RokitGCodeConverter:
     # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
     def _getTravelDistance(self, current_pos, next_pos):
 
+        if current_pos is not None:
+            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
+
         if self._accummulated_distance > self._Q.retraction_min_travel[0]:
             self._is_retraction_moment = True # 리트렉션 코드가 삽입되는 트리거
             self._accummulated_distance = 0
 
-        if current_pos is not None:
-            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
         return next_pos
 
     def _convertOneLayerGCode(self, one_layer_gcode, isStartCode=False) -> str:
@@ -165,6 +166,12 @@ class RokitGCodeConverter:
                 continue
 
             if gcode.startswith(';'): # comment
+                if self._retraction_index > 0 and self._retraction_index < index and self._current_nozzle.startswith('FFF'):
+                    if self._is_retraction_moment:
+                        gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+                        gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+                        self._is_retraction_moment = False
+                        self._accummulated_distance = 0
                 gcode_list[index] = gcode
                 continue
 
@@ -197,7 +204,6 @@ class RokitGCodeConverter:
                     # <<< retraction 추가 - G0에서 G1로 바뀌는 시점
                     if self._retraction_index > 0 and self._retraction_index < index:
                         self._is_retraction_moment = False
-                        self._accummulated_distance = 0
 
                 gcode = '{head} E{e:<.5f}\n'.format(
                     head = match.group(1),
@@ -270,7 +276,7 @@ class RokitGCodeConverter:
                             gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + pressure_code
                             gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
                             self._is_retraction_moment = False
-
+                    self._accummulated_distance = 0
                     self._last_extrusion_amount = float(match.group(4))
                     self._last_E = float(match.group(4)) # <<<
                 else:
@@ -283,7 +289,6 @@ class RokitGCodeConverter:
             # E 제거
             match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
             if match:
-                self._accummulated_distance = 0
                 if self._current_nozzle.startswith('FFF'):
                     current_position = [float(match.group(2)), float(match.group(3))]
                     gcode = self._P.pretty_XYE_Format(match)
@@ -293,7 +298,7 @@ class RokitGCodeConverter:
                             gcode = self._getBackRetractionCode() + gcode
                             gcode_list[self._retraction_index] = self._getRetractionCode() + gcode_list[self._retraction_index]
                             self._is_retraction_moment = False
-
+                    self._accummulated_distance = 0
                     self._last_E = float(match.group(4))
                 else:
                     gcode = self._P.prettyFormat(match)
@@ -304,16 +309,17 @@ class RokitGCodeConverter:
             # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
+                if 'X9.4' in gcode:
+                    a = 0
                 if self._current_nozzle.startswith('FFF'):
+                    # ** (x, y)좌표 저장
                     current_position = self._getTravelDistance(current_position, [float(match.group(2)), float(match.group(3))])
-                    if not gcode_list[index-1].startswith('G0'):
-                       self._retraction_index = index
                 gcode_list[index] = self._P.prettyFormat(match)
             
             match = self._P.getMatched(gcode, [self._P.G1_X_Y])
             if match:
                 if self._current_nozzle.startswith('FFF'):
-                   current_position = [float(match.group(2)), float(match.group(3))]
+                    current_position = [float(match.group(2)), float(match.group(3))]
                 gcode_list[index] = self._P.prettyFormat(match)  
                 continue
 
