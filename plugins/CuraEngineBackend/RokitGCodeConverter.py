@@ -240,7 +240,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G1_F_E])
             if match:
                 # remove itself when Dispensor
-                if self._current_nozzle.startswith('Dispenser'):
+                if self._current_nozzle.startswith('Dispenser') or isStartCode:
                     gcode_list[index] = self._P.RemovedMark
                     continue
                 elif self._current_nozzle.startswith('FFF'):
