@@ -29,6 +29,7 @@ class RokitPattern:
                     'M29 B\n' +\
                     'G0 B15. F300\n' +\
                     'M29 B\n' +\
+                    'G79\n' +\
                     'M29 A\n' +\
                     'M29 Y\n' +\
                     'M29 X\n' +\
@@ -111,18 +112,20 @@ class RokitPattern:
             time = self._Q.uv_time_list[extruder_index], 
             duration = self._Q.uv_time_list[extruder_index] * 1000)
 
-    def getWrappedUVCode(self, uvcode, extruder_index) -> str:
+    def getWrappedUVCode(self, uvcode, extruder_index, layer_height) -> str:
         reset_height = self._G['G0_Z40_C40_F420']
         m29b = self._G['M29_B']
         left_bed= self._G['G54_G0_X0_Y0']
         right_bed= self._G['G55_G0_X0_Y0']
-        bed_pos = right_bed if extruder_index > 0 else left_bed
+        bed_pos = left_bed if extruder_index == 0 else right_bed
+        move_z = self._G['G0_C'] if extruder_index == 0 else self._G['G0_Z'] % layer_height 
 
-        return '{reset_height}{m29b}{uvcode}{bed_pos}'.format(
+        return '{reset_height}{m29b}{uvcode}{bed_pos}{move_z}'.format(
             reset_height = reset_height,
             m29b = m29b,
             uvcode = uvcode,
-            bed_pos = bed_pos)
+            bed_pos = bed_pos,
+            move_z = move_z)
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
     def getExtruderSetupCode(self, previous_index, current_index, uvcode) -> str:
@@ -148,7 +151,7 @@ class RokitPattern:
                 bed_pos = right_bed if previous_index == -1 else '',
                 g0b15f300 = g0b15f300
         )
-        DISPENSER_END = '{airoff}{reset_height}{m29b}{bed_pos}'.format(
+        DISPENSER_END = '{airoff}{reset_height}{m29b}{uvcode}{bed_pos}'.format(
                 airoff = airoff,
                 reset_height = reset_height,
                 m29b = m29b,
@@ -156,10 +159,10 @@ class RokitPattern:
                 bed_pos = left_bed if current_index == 0 else right_bed if uvcode != '' else ''
         )
 
-        EXTRUDER_START = '{extruder}{bed_pos}{g0b15f300}'.format(
+        EXTRUDER_START = '{extruder}{bed_pos}'.format(
                 extruder = extruder,
                 bed_pos = left_bed if previous_index != 0 else '',  
-                g0b15f300 = g0b15f300
+                
         )
         EXTRUDER_END = '{reset_height}{m29b}{uvcode}{bed_pos}{airoff}'.format(
                 reset_height = reset_height,
@@ -198,10 +201,10 @@ class RokitPattern:
         else:            
             MESSAGE = '; <==== setup start from {pr} to {cu}\n'.format(pr=previous_nozzle,cu=current_nozzle)
 
-            # 3. D6(Extruder)에서 D1~5로 변경된 경우
+            # 3. D6(FFF)에서 D1~5로 변경된 경우
             if previous_nozzle.startswith('FFF') and current_index > 0:              
                 code = MESSAGE + '{end}\n{start}'.format(end=EXTRUDER_END, start=DISPENSER_START)
-            # 4. D1~5에서 D6(Extruder)로 변경된 경우
+            # 4. D1~5에서 D6(FFF)로 변경된 경우
             elif previous_index > 0 and current_nozzle.startswith('FFF'):
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=EXTRUDER_START)            
 
@@ -266,21 +269,3 @@ class RokitPattern:
             .replace(';{shot_p_list}', self._G['SET_P'] % self._Q.shot_power_list)\
             .replace(';{vac_p_list}', self._G['VAC_P'] % self._Q.vac_power_list)
 
-    def update_Z_value(self, gcode, extruder_index, initial_layer0_height, matched) -> str:
-        
-        if len(matched.groups()) > 3:
-            front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
-            z_value = float(matched.group(4))
-        else:
-            front_code = matched.group(1)
-            z_value = float(matched.group(2))        
-        
-        z_delta = z_value
-        new_z = z_delta + initial_layer0_height
-
-        if extruder_index > 0:
-            z_value_form = '\nG0 C{:<.3f}'.format(new_z)
-        else:
-            z_value_form = '\nG0 Z{:<.3f}'.format(new_z)
-
-        return front_code + z_value_form # ';' + str(matched.group(2))

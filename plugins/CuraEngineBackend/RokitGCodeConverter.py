@@ -49,10 +49,11 @@ class RokitGCodeConverter:
                     'M29 B\n' +\
                     'G0 Z40.0 C30.0\n' +\
                     'G0 A0.\n' +\
-                    'G56 G0 X0.0 Y0.0\n' +\
+                    'G56 G92.1\n' +\
+                    'G0 X0.0 Y0.0' +\
                     'G1 E-1 F300 ; retract the Extruder for release some of the pressure\n' +\
                     'G90 ; absolute positioning\n' +\
-                    'M308 0 0 0 0 0 0 27 ; set temperature\n' +\
+                    'M308 27 27 27 27 27 27 27 ; set temperature\n' +\
                     'M109; wait for temperatur\n' +\
                     'M73 ; motor drive off\n' +\
                     'M176 ; embed compressor OFF'
@@ -70,12 +71,11 @@ class RokitGCodeConverter:
         self._last_E = 0.0
         self._retraction_index = -1
                 
-        self._current_layer = -1
+        self._current_layer = 0
 
         # *** G-code Line(command) 관리 변수
         self._gcode_list = []        
         self._last_extrusion_amount = 0
-
 
         self._is_shot_moment = True
         self._StartOfStartCodeIndex = -1
@@ -83,6 +83,9 @@ class RokitGCodeConverter:
 
         self._hasAirCompressorOn = False
         self._extruderSetupCode = '' # 처음 나오는 extruder
+
+        self._initial_layer0_list = [0, 0, 0, 0, 0, 0]
+        self._current_layer_height = 0
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -124,7 +127,7 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self.getUVCode(self._current_index, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self._getUVCode(self._current_index, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
             elif gcodes.startswith(';LAYER:'):    
                 modified_gcodes = self._convertOneLayerGCode(gcodes)
@@ -159,19 +162,21 @@ class RokitGCodeConverter:
         return gcode
 
     # UV 명령어 삽입
-    def getUVCode(self, extruder_index, layer_index) -> str:
+    def _getUVCode(self, extruder_index, layer_index) -> str:
 
-        if self._Q.uv_enable_list[extruder_index] == True:
-            per_layer = self._Q.uv_per_layer_list[extruder_index]
-            start_layer = self._Q.uv_start_layer_list[extruder_index]
+        per_layer = self._Q.uv_per_layer_list[extruder_index]
+        start_layer = self._Q.uv_start_layer_list[extruder_index]
+
+        if self._Q.uv_enable_list[extruder_index] == True and layer_index >= 0:
             layer = layer_index - start_layer + 1
 
             if layer >= 0 and (layer % per_layer) == 0:
                 return ';UV - Layer:{layer}, start:{start_layer}, per:{per_layer}\n{uvcode}'.format(
                     layer=layer_index, 
-                    start_layer=start_layer, 
-                    per_layer=per_layer, 
-                    uvcode=self._P.UV_Code(extruder_index))
+                    start_layer = start_layer, 
+                    per_layer = per_layer, 
+                    uvcode = self._P.UV_Code(extruder_index))
+
         return ''
 
     # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
@@ -183,28 +188,42 @@ class RokitGCodeConverter:
             self._accummulated_distance = 0
         return next_pos
 
+    def _update_Z_value(self, gcode, matched) -> str:
+        
+        if len(matched.groups()) > 3:
+            front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+            z_value = float(matched.group(4))
+        else:
+            front_code = matched.group(1)
+            z_value = float(matched.group(2))        
+        
+        self._current_layer_height = z_value + self._initial_layer0_list[self._current_index]
+
+        z_value_form = '\nG0 {c}{height:<.3f}'.format(c='C' if self._current_index > 0 else 'Z', height=self._current_layer_height)
+
+        return front_code + z_value_form
+
     def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
 
         current_position = None
         before_layer_uvcode = ''
-        uvcode = ''
         have_first_extruder = False
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
 
+            if gcode.startswith(';LAYER:'):
+                self._current_layer = self._P.getLayerIndex(gcodes)
+                if self._current_layer > 0:
+                    uvcode = self._getUVCode(self._current_index, self._current_layer - 1)                    
+                    if uvcode != '':
+                        before_layer_uvcode = self._P.getWrappedUVCode(uvcode, self._current_index, self._current_layer_height)
+                        have_just_next_extruder = gcode_list[index+3].startswith('T') # danger op because we expect gcode list ;LAYER ...T0 
+                continue
+
             if self._P.MarlinCodeForRemoval.match(gcode) or\
                 (self._current_nozzle.startswith('FFF') is False and gcode == 'G92 E0'):
                 gcode_list[index] = self._P.RemovedMark
-                continue
-
-            if gcode.startswith(';LAYER:'):
-                self._current_layer = self._P.getLayerIndex(gcodes)                
-                if self._current_layer > 0:
-                    uvcode = self.getUVCode(self._current_index, self._current_layer - 1)                    
-                    if len(uvcode) > 1:
-                        before_layer_uvcode = self._P.getWrappedUVCode(uvcode, self._current_index)
-                        have_first_extruder = gcode_list[index+3].startswith('T') # danger op because we expect gcode list ;LAYER ...T0 
                 continue
 
             if gcode.startswith(';'): # comment
@@ -220,6 +239,11 @@ class RokitGCodeConverter:
                 
                 self._hasAirCompressorOn = False # reset shot-mode
                 self._current_nozzle = self._setExtruder(gcode)
+
+                if self._previous_index != -1:
+                    uvcode = self._getUVCode(self._previous_index, self._current_layer - 1)
+                else:
+                    uvcode = ''  
 
                 extruder_setup_code = self._P.getExtruderSetupCode(self._previous_index, self._current_index, uvcode)
                 if isStartCode:
@@ -265,7 +289,7 @@ class RokitGCodeConverter:
             # Z 값 갱신하고 FFF가 아닐때 M330 추가
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z, self._P.G1_F_Z])
             if match:
-                gcode = self._P.update_Z_value(gcode, self._current_index, self._Q.Initial_layer0_list[self._current_index], match)
+                gcode = self._update_Z_value(gcode, match)
                 if self._current_nozzle.startswith('FFF'):
                     if gcode.startswith('G0'):
                         current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
@@ -294,7 +318,7 @@ class RokitGCodeConverter:
             # add M330 
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
-                gcode = self._P.update_Z_value(gcode, self._current_index, self._Q.Initial_layer0_list[self._current_index], match)                    
+                gcode = self._update_Z_value(gcode, match)                    
                 if self._current_nozzle.startswith('FFF') is False:                    
                     gcode = self._getPressureOff(gcode) 
                 gcode_list[index] = gcode
@@ -347,7 +371,7 @@ class RokitGCodeConverter:
                 gcode_list[index] = self._P.prettyFormat(match)  
                 continue
 
-        if uvcode != '' and have_first_extruder == False:
+        if before_layer_uvcode != '' and have_just_next_extruder == False:
             gcode_list[0] = before_layer_uvcode + gcode_list[0]
 
         return '\n'.join(gcode_list)
@@ -390,7 +414,7 @@ class RokitGCodeConverter:
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
             gcode_spacing = ';hop_spacing\n' + self._G['G92_E0'] + self._G['G90_G0_C'].format(HopHeight)            
             gcode_spacing += self._G['G90_G0_X_Y'] % (x,y)
-            gcode_spacing += self._G['G90_G0_C'].format(self._Q.Initial_layer0_list[self._current_index])
+            gcode_spacing += self._G['G90_G0_C'].format(self._initial_layer0_list[self._current_index])
             gcode_spacing += self._G['G92_X0_Y0']
             gcode_spacing += ';Well Number: %d\n' % well_num
 

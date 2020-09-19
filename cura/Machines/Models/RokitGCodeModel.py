@@ -1,14 +1,14 @@
 class RokitGCodeModel():
     def __init__(self) -> None:
         self.GCODE = {
-            'G90_G0_X_Y': 'G90 G0 X%.2f Y%.2f\n',
+            'G90_G0_X_Y': 'G90 G0 X%.3f Y%.3f\n',
             'G90_G0_C_RESET': 'G90 G0 C-30.0\n',
-            'G90_G0_C': 'G90 G0 C{0: <.2f}\n',
+            'G90_G0_C': 'G90 G0 C{0: <.3f}\n',
 
             'G0': 'G0\n',
-            'G0_Z': 'G0 Z%.2f\n',
+            'G0_Z': 'G0 Z%.3f\n',
             'G0_C0': 'G0 C0.00\n',
-            'G0_C': 'G0 C{0: <.2f}\n',
+            'G0_C': 'G0 C{0: <.3f}\n',
             'G0_C30': 'G0 C30.0\n',
             'G0_Z0': 'G0 Z0.00\n',
             'G0_Z40': 'G0 Z40.0\n',
@@ -17,11 +17,16 @@ class RokitGCodeModel():
             
             'G1_F_E':'G1 F{f:d} E{e:<.3f} ;(Back Retraction)\n',
 
-            'G54_X_Y': 'G54 X{x:<.2f} Y{y:<.2f} ;(HOTMELT/EXTRUDER)\n',
-            'G54_G0_X0_Y0': 'G54 G0 X0.0 Y0.0 ;(HOTMELT/EXTRUDER)\n',
-            'G55_X_Y': 'G55 X{x:<.2f} Y{y:<.2f} ;(ROTARY)\n',
-            'G55_G0_X0_Y0': 'G55 G0 X0.0 Y0.0 ;(ROTARY)\n',
-            'G59_G0_X0_Y0': 'G59 G0 X0.0 Y0.0 ;(UV-A)\n',
+            'G54_X_Y': 'G54 X{x:<.3f} Y{y:<.3f} ;(HOTMELT/EXTRUDER)\n',
+            'G55_X_Y': 'G55 X{x:<.3f} Y{y:<.3f} ;(ROTARY)\n',
+
+            'G54_G0_X0_Y0': 'G54 G82 1 ;(HOTMELT/EXTRUDER)\nG0 X0.0 Y0.0\n',
+            'G55_G0_X0_Y0': 'G55 G92 1 ;(ROTARY)\nG0 X0.0 Y0.0\n',
+            'G56_G0_X0_Y0': 'G56 G92 1 ;(LOADING/UNLOADING, MICROSCOPE)\nG0 X0.0 Y0.0\n',
+            'G57_G0_X0_Y0': 'G57 G92 1 ;(FORK SENSOR)\nG0 X0.0 Y0.0\n',
+
+            'G55_G0_X0_Y0': 'G55 G92 1 ;(ORIGIN)\nG0 X0.0 Y0.0\n',
+            'G59_G0_X0_Y0': 'G59 G92 1 ;(UV-A)\nG0 X0.0 Y0.0\n',
 
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_Z0': 'G92 Z0.0\n',
@@ -30,7 +35,7 @@ class RokitGCodeModel():
 
             'G0_A0_F600': 'G0 A0.00 F600\n',
             'G0_B0_F300': 'G0 B0.00 F300\n',
-            'G0_A_F600': 'G0 A{a_axis:<.2f} F600\n',
+            'G0_A_F600': 'G0 A{a_axis:<.3f} F600\n',
 
             'G0_B15_F300': 'G0 B15.0 F300\n',
 
