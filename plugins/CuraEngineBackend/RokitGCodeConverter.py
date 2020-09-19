@@ -128,7 +128,13 @@ class RokitGCodeConverter:
 
             elif gcodes.startswith(';LAYER:'):
                 self._current_layer_index = self._P.getLayerIndex(gcodes)
-                modified_gcodes = self._convertOneLayerGCode(gcodes, False)
+
+                if self._current_layer_index > 0:
+                    modified_gcodes = self._P.getUVCode(self._current_index, self._current_layer_index-1)
+                else:
+                    modified_gcodes = ''
+    
+                modified_gcodes += self._convertOneLayerGCode(gcodes, False)
 
             elif self._P.G1_F_E.match(gcodes) is not None:
                 self._EndOfStartCodeIndex = index

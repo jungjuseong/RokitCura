@@ -104,7 +104,7 @@ class RokitPattern:
 
     # UV code
     def _UV_Code(self, extruder_index) -> str:
-        code = ';UV\n{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
         return code.format(
             channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
             dimming = self._Q.uv_dimming_list[extruder_index], 
@@ -115,13 +115,16 @@ class RokitPattern:
     def getUVCode(self, extruder_index, current_layer_index) -> str:
 
         if self._Q.uv_enable_list[extruder_index] == True:
-            uv_per_layer = self._Q.uv_per_layer_list[extruder_index]
+            per_layer = self._Q.uv_per_layer_list[extruder_index]
             start_layer = self._Q.uv_start_layer_list[extruder_index]
             layer = current_layer_index - start_layer + 1
 
-            if layer >= 0 and (layer % uv_per_layer) == 0:
-                return self._UV_Code(extruder_index)
-
+            if layer >= 0 and (layer % per_layer) == 0:
+                return ';UV - Layer:{layer}, start:{start_layer}, per:{per_layer}\n{uvcode}\n'.format(
+                    layer=current_layer_index, 
+                    start_layer=start_layer, 
+                    per_layer=per_layer, 
+                    uvcode=self._UV_Code(extruder_index))
         return ''
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
@@ -202,7 +205,7 @@ class RokitPattern:
 
             # 3. D6(Extruder)에서 D1~5로 변경된 경우
             if previous_nozzle.startswith('FFF') and current_index > 0:              
-                code = MESSAGE + '{end}\n{start}'.format(end_setup=EXTRUDER_END, startp=DISPENSER_START)
+                code = MESSAGE + '{end}\n{start}'.format(end=EXTRUDER_END, start=DISPENSER_START)
             # 4. D1~5에서 D6(Extruder)로 변경된 경우
             elif previous_index > 0 and current_nozzle.startswith('FFF'):
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=EXTRUDER_START)            
