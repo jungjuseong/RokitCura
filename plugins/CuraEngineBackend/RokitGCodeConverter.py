@@ -70,7 +70,7 @@ class RokitGCodeConverter:
         self._last_E = 0.0
         self._retraction_index = -1
                 
-        self._current_layer_index = None
+        self._current_layer = -1
 
         # *** G-code Line(command) 관리 변수
         self._gcode_list = []        
@@ -82,7 +82,7 @@ class RokitGCodeConverter:
         self._EndOfStartCodeIndex = None
 
         self._hasAirCompressorOn = False
-        self._startExtruderSetupCode = '' # 처음 나오는 extruder
+        self._extruderSetupCode = '' # 처음 나오는 extruder
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -112,7 +112,7 @@ class RokitGCodeConverter:
             elif self.StartOfStartCode in gcodes:
                 self._StartOfStartCodeIndex = index
                 modified_gcodes = gcodes.replace('Cura_SteamEngine', 'OrganRegenerator_Engine')
-                modified_gcodes = self._convertOneLayerGCode(modified_gcodes, True)     
+                modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
                 modified_gcodes = self._P.replaceLayerInfo(modified_gcodes)
                 if self._Q.dispensor_enable:
                    modified_gcodes = self._P.replaceDispenserSetupCode(modified_gcodes)
@@ -124,25 +124,18 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self._P.getUVCode(self._current_index, self._current_layer_index) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self.getUVCode(self._current_index, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
-            elif gcodes.startswith(';LAYER:'):
-                self._current_layer_index = self._P.getLayerIndex(gcodes)
-
-                if self._current_layer_index > 0:
-                    modified_gcodes = self._P.getUVCode(self._current_index, self._current_layer_index-1)
-                else:
-                    modified_gcodes = ''
-    
-                modified_gcodes += self._convertOneLayerGCode(gcodes, False)
+            elif gcodes.startswith(';LAYER:'):    
+                modified_gcodes = self._convertOneLayerGCode(gcodes)
 
             elif self._P.G1_F_E.match(gcodes) is not None:
                 self._EndOfStartCodeIndex = index
-                modified_gcodes = self._convertOneLayerGCode(gcodes, False)
+                modified_gcodes = self._convertOneLayerGCode(gcodes)
 
             self._gcode_list[index] = self._P.removeRedundencyGCode(modified_gcodes)
 
-        startSetupCode = self._P.removeRedundencyGCode(self._startExtruderSetupCode)
+        startSetupCode = self._P.removeRedundencyGCode(self._extruderSetupCode)
         self._gcode_list[self._StartOfStartCodeIndex] += '\n;Start point\n{start_setup}; ==== setup end\n\n{well_num}'.format(
             start_setup = startSetupCode,
             well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
@@ -165,6 +158,21 @@ class RokitGCodeConverter:
             self._hasAirCompressorOn = False
         return gcode
 
+    # UV 명령어 삽입
+    def getUVCode(self, extruder_index, layer_index) -> str:
+
+        if self._Q.uv_enable_list[extruder_index] == True:
+            per_layer = self._Q.uv_per_layer_list[extruder_index]
+            start_layer = self._Q.uv_start_layer_list[extruder_index]
+            layer = layer_index - start_layer + 1
+
+            if layer >= 0 and (layer % per_layer) == 0:
+                return ';UV - Layer:{layer}, start:{start_layer}, per:{per_layer}\n{uvcode}'.format(
+                    layer=layer_index, 
+                    start_layer=start_layer, 
+                    per_layer=per_layer, 
+                    uvcode=self._P.UV_Code(extruder_index))
+        return ''
 
     # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
     def _getTravelDistance(self, current_pos, next_pos):
@@ -175,9 +183,12 @@ class RokitGCodeConverter:
             self._accummulated_distance = 0
         return next_pos
 
-    def _convertOneLayerGCode(self, gcodes, isStartCode=False) -> str:
+    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
 
         current_position = None
+        before_layer_uvcode = ''
+        uvcode =''
+        have_first_extruder = False
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
@@ -185,6 +196,15 @@ class RokitGCodeConverter:
             if self._P.MarlinCodeForRemoval.match(gcode) or\
                 (self._current_nozzle.startswith('FFF') is False and gcode == 'G92 E0'):
                 gcode_list[index] = self._P.RemovedMark
+                continue
+
+            if gcode.startswith(';LAYER:'):
+                self._current_layer = self._P.getLayerIndex(gcodes)                
+                if self._current_layer > 0:
+                    uvcode = self.getUVCode(self._current_index, self._current_layer - 1)                    
+                    if len(uvcode) > 1:
+                        before_layer_uvcode = self._P.getWrappedUVCode(uvcode, self._current_index)
+                        have_first_extruder = gcode_list[index+3].startswith('T') # danger op because we expect gcode list ;LAYER ...T0 
                 continue
 
             if gcode.startswith(';'): # comment
@@ -197,14 +217,16 @@ class RokitGCodeConverter:
                 continue
 
             if gcode.startswith('T'): # Nozzle changed
+                
                 self._hasAirCompressorOn = False # reset shot-mode
                 self._current_nozzle = self._setExtruder(gcode)
 
+                extruder_setup_code = self._P.getExtruderSetupCode(self._previous_index, self._current_index, uvcode)
                 if isStartCode:
+                    self._extruderSetupCode = extruder_setup_code
                     gcode_list[index] = ''
-                    self._startExtruderSetupCode = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._current_layer_index)
                 else:
-                    gcode_list[index] = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._current_layer_index)
+                    gcode_list[index] = extruder_setup_code
 
                 continue
             
@@ -212,7 +234,7 @@ class RokitGCodeConverter:
                 match = self._P.getMatched(gcode, [self._P.G92_E0])
                 if match:
                     gcode_list[index] = self._P.RemovedMark
-                    self._startExtruderSetupCode += match.group(1) + '\n'
+                    self._extruderSetupCode += match.group(1) + '\n'
                     continue
 
             match = self._P.getMatched(gcode, [self._P.G1_F_E])
@@ -235,7 +257,7 @@ class RokitGCodeConverter:
                 
                 if isStartCode:
                     gcode_list[index] = self._P.RemovedMark
-                    self._startExtruderSetupCode += gcode + '\n'
+                    self._extruderSetupCode += gcode + '\n'
                 else:
                     gcode_list[index] = gcode
                 continue
@@ -324,6 +346,9 @@ class RokitGCodeConverter:
                     current_position = self._getNextLocation(match) # retract
                 gcode_list[index] = self._P.prettyFormat(match)  
                 continue
+
+        if uvcode != '' and have_first_extruder == False:
+            gcode_list[0] = before_layer_uvcode + gcode_list[0]
 
         return '\n'.join(gcode_list)
     # ------------------------------------------------------------------------    

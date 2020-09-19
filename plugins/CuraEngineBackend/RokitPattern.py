@@ -103,7 +103,7 @@ class RokitPattern:
         return ''
 
     # UV code
-    def _UV_Code(self, extruder_index) -> str:
+    def UV_Code(self, extruder_index) -> str:
         code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
         return code.format(
             channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
@@ -111,24 +111,21 @@ class RokitPattern:
             time = self._Q.uv_time_list[extruder_index], 
             duration = self._Q.uv_time_list[extruder_index] * 1000)
 
-    # UV 명령어 삽입
-    def getUVCode(self, extruder_index, current_layer_index) -> str:
+    def getWrappedUVCode(self, uvcode, extruder_index) -> str:
+        reset_height = self._G['G0_Z40_C40_F420']
+        m29b = self._G['M29_B']
+        left_bed= self._G['G54_G0_X0_Y0']
+        right_bed= self._G['G55_G0_X0_Y0']
+        bed_pos = right_bed if extruder_index > 0 else left_bed
 
-        if self._Q.uv_enable_list[extruder_index] == True:
-            per_layer = self._Q.uv_per_layer_list[extruder_index]
-            start_layer = self._Q.uv_start_layer_list[extruder_index]
-            layer = current_layer_index - start_layer + 1
-
-            if layer >= 0 and (layer % per_layer) == 0:
-                return ';UV - Layer:{layer}, start:{start_layer}, per:{per_layer}\n{uvcode}\n'.format(
-                    layer=current_layer_index, 
-                    start_layer=start_layer, 
-                    per_layer=per_layer, 
-                    uvcode=self._UV_Code(extruder_index))
-        return ''
+        return '{reset_height}{m29b}{uvcode}{bed_pos}'.format(
+            reset_height = reset_height,
+            m29b = m29b,
+            uvcode = uvcode,
+            bed_pos = bed_pos)
 
     # 익스트루더가 교체될 때마다 추가로 붙는 명령어
-    def getExtruderSetupCode(self, previous_index, current_index, current_layer_index) -> str:
+    def getExtruderSetupCode(self, previous_index, current_index, uvcode) -> str:
 
         current_nozzle = self._Q.getVariantName(current_index)
         previous_nozzle = self._Q.getVariantName(previous_index)
@@ -144,14 +141,11 @@ class RokitPattern:
         g92e0 = self._G['G92_E0']
 
         extruder = self.getRokitExtruderName(current_index)
-        uvcode = self.getUVCode(previous_index, current_layer_index)
-
-        code = ';{}'
 
         DISPENSER_START = '{extruder}{aaxis}{bed_pos}{g0b15f300}'.format(
                 extruder = extruder,
                 aaxis = aaxis,
-                bed_pos = '' if previous_index == 0 else right_bed,
+                bed_pos = right_bed if previous_index == -1 else '',
                 g0b15f300 = g0b15f300
         )
         DISPENSER_END = '{airoff}{reset_height}{m29b}{bed_pos}'.format(
@@ -164,7 +158,7 @@ class RokitPattern:
 
         EXTRUDER_START = '{extruder}{bed_pos}{g0b15f300}'.format(
                 extruder = extruder,
-                bed_pos = left_bed,                        
+                bed_pos = left_bed if previous_index != 0 else '',  
                 g0b15f300 = g0b15f300
         )
         EXTRUDER_END = '{reset_height}{m29b}{uvcode}{bed_pos}{airoff}'.format(
@@ -177,7 +171,7 @@ class RokitPattern:
 
         HOtMELT_START = '{extruder}{bed_pos}'.format(
                 extruder = extruder,
-                bed_pos = left_bed        
+                bed_pos = left_bed if previous_index != 0 else ''       
         )
         HOTMELT_END = '{airoff}{reset_height}{m29b}{uvcode}{bed_pos}'.format(
                 airoff = airoff,
@@ -187,6 +181,7 @@ class RokitPattern:
                 bed_pos = right_bed if current_index > 0 else left_bed if uvcode != '' else ''
         )
 
+        code = ';{}'
         if previous_index == -1: # 처음 나온 Nozzle
 
             MESSAGE = '; <==== setup start from {p}\n'.format(p=current_nozzle)
