@@ -32,8 +32,7 @@ class RokitPattern:
                     'G79\n' +\
                     'M29 A\n' +\
                     'M29 Y\n' +\
-                    'M29 X\n' +\
-                    'G79\n'
+                    'M29 X\n'
 
         self.DISH_LEVELING_PROCEDURE = '; Dish leveling procedure\n' +\
                     'G0 X0. Y0. F300\n' +\
