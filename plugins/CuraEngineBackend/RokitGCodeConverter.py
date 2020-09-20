@@ -47,16 +47,16 @@ class RokitGCodeConverter:
 
         self.END_CODE = 'M330\n' +\
                     'M29 B\n' +\
-                    'G0 Z40.0 C30.0\n' +\
+                    'G0 Z40.0 C30.0 F460\n' +\
                     'G0 A0.\n' +\
                     'G56 G92.1\n' +\
-                    'G0 X0.0 Y0.0' +\
+                    'G0 X0.0 Y0.0\n' +\
                     'G1 E-1 F300 ; retract the Extruder for release some of the pressure\n' +\
                     'G90 ; absolute positioning\n' +\
-                    'M308 27 27 27 27 27 27 27 ; set temperature\n' +\
-                    'M109; wait for temperatur\n' +\
-                    'M73 ; motor drive off\n' +\
-                    'M176 ; embed compressor OFF'
+                    'M308 27 27 27 27 27 27 27 ; set temperature'
+        # 'M109; wait for temperatur\n' +\
+        # 'M73 ; motor drive off\n' +\
+        # 'M176 ; embed compressor OFF'
 
         # 선택한 명령어
         self._current_index = -1  
