@@ -216,7 +216,7 @@ class RokitPattern:
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=HOtMELT_START)            
 
             # 7. D1~D5에서 D1~D5으로 변경된 경우
-            elif previous_index > 0 and current_nozzle.startswith('Dispenser'):
+            elif previous_index > 0 and previous_index > 0:
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=DISPENSER_START)            
 
         return code
