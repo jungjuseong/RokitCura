@@ -112,7 +112,7 @@ class RokitPattern:
             duration = self._Q.uv_time_list[extruder_index] * 1000)
 
     def getWrappedUVCode(self, uvcode, extruder_index, layer_height) -> str:
-        reset_height = self._G['G0_Z40_C40_F420']
+        reset_height = self._G['G0_Z40_C30_F420']
         m29b = self._G['M29_B']
         left_bed= self._G['G54_G0_X0_Y0']
         right_bed= self._G['G55_G0_X0_Y0']
@@ -134,7 +134,7 @@ class RokitPattern:
 
         aaxis = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[current_index])
         g0b15f300 = self._G['G0_B15_F300']
-        reset_height = self._G['G0_Z40_C40_F420']
+        reset_height = self._G['G0_Z40_C30_F420']
         m29b = self._G['M29_B']
         airoff = self._G['M330']
         airon = self._G['M301']
