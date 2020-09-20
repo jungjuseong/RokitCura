@@ -41,7 +41,7 @@
 
 2. Tool이 D6로 변경된 경우 수정사항
 
-	D6 ; Selected Nozzle(FFF 0.4mm Nozzle)
+	D6 ; Selected Nozzle(Extruder 0.4mm Nozzle)
 	M29 B
 	G0 C40.0
 	G54 X85.00 Y0.00
@@ -53,7 +53,7 @@
 	=>
 	
 	M330 	;;;D1~5->D6인 경우 추가
-	D6	;;;{;Selected Nozzle(FFF 0.4mm Nozzle)}
+	D6	;;;{;Selected Nozzle(Extruder 0.4mm Nozzle)}
 	M301	;;;Printing Object Cooling Fan On, EXTRUDER인 경우만 추가
 	G1 F1200 E16.18083  ;;;{(Back Retraction)}, F값은 Retraction 속도값, E는 기존 D6마지막 E값(m_OldExtrution), Extruder에서 다른 Tool로 Change인 경우 Retraction 거리 만큼 기존 E값에서 뺌
 	G0 Z40.0	;;;Z UP

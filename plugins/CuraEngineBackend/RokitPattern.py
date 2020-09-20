@@ -193,7 +193,7 @@ class RokitPattern:
             if current_index > 0:
                 code = MESSAGE + '{start}\n'.format(start=DISPENSER_START)
             # D6 - FFF
-            elif current_nozzle.startswith('FFF'):
+            elif current_nozzle.startswith('Extruder'):
                 code = MESSAGE + '{start}\n'.format(start=EXTRUDER_START)
             # D6 - Hot Melt
             elif current_nozzle.startswith('Hot Melt'):
@@ -202,10 +202,10 @@ class RokitPattern:
             MESSAGE = '; <==== setup start from {pr} to {cu}\n'.format(pr=previous_nozzle,cu=current_nozzle)
 
             # 3. D6(FFF)에서 D1~5로 변경된 경우
-            if previous_nozzle.startswith('FFF') and current_index > 0:              
+            if previous_nozzle.startswith('Extruder') and current_index > 0:              
                 code = MESSAGE + '{end}\n{start}'.format(end=EXTRUDER_END, start=DISPENSER_START)
             # 4. D1~5에서 D6(FFF)로 변경된 경우
-            elif previous_index > 0 and current_nozzle.startswith('FFF'):
+            elif previous_index > 0 and current_nozzle.startswith('Extruder'):
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=EXTRUDER_START)            
 
             # 5. D6(Hot Melt)에서 D1~5로 변경된 경우

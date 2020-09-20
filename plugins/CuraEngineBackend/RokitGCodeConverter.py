@@ -222,12 +222,12 @@ class RokitGCodeConverter:
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
-                (self._current_nozzle.startswith('FFF') is False and gcode == 'G92 E0'):
+                (self._current_nozzle.startswith('Extruder') is False and gcode == 'G92 E0'):
                 gcode_list[index] = self._P.RemovedMark
                 continue
 
             if gcode.startswith(';'): # comment
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
                         gcode = self._insertBackRetraction(gcode) # Back-Retraction
                         gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
@@ -267,7 +267,7 @@ class RokitGCodeConverter:
                 if self._current_nozzle.startswith('Dispenser') or isStartCode:
                     gcode_list[index] = self._P.RemovedMark
                     continue
-                elif self._current_nozzle.startswith('FFF'):
+                elif self._current_nozzle.startswith('Extruder'):
                     self._is_retraction_moment = False
 
                 gcode = '{head} E{e:<.5f}\n'.format(
@@ -275,8 +275,8 @@ class RokitGCodeConverter:
                     e = float(match.group(2))
                 )
 
-                # add M301 when FFF and this is first M301
-                if self._current_nozzle.startswith('FFF') and isStartCode == False:
+                # add M301 when Extruder and this is first M301
+                if self._current_nozzle.startswith('Extruder') and isStartCode == False:
                     gcode = self._getPressureOn(gcode)
                 
                 if isStartCode:
@@ -286,11 +286,11 @@ class RokitGCodeConverter:
                     gcode_list[index] = gcode
                 continue
 
-            # Z 값 갱신하고 FFF가 아닐때 M330 추가
+            # Z 값 갱신하고 Extruder가 아닐때 M330 추가
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z, self._P.G1_F_Z])
             if match:
                 gcode = self._update_Z_value(gcode, match)
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     if gcode.startswith('G0'):
                         current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
                     else:
@@ -305,7 +305,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y])
             if match:
                 gcode = self._P.prettyFormat(match)
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
                     if not gcode_list[index-1].startswith('G0'):
                         self._retraction_index = index
@@ -319,7 +319,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
                 gcode = self._update_Z_value(gcode, match)                    
-                if self._current_nozzle.startswith('FFF') is False:                    
+                if self._current_nozzle.startswith('Extruder') is False:                    
                     gcode = self._getPressureOff(gcode) 
                 gcode_list[index] = gcode
                 continue 
@@ -328,7 +328,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G1_F_X_Y_E])
             if match:
                 gcode = self._P.pretty_XYE_Format(match)
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     pressure_code = self._getPressureOn(gcode, reverse=True)
                     current_position = self._getNextLocation(match)
                     if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
@@ -346,7 +346,7 @@ class RokitGCodeConverter:
             # E 제거
             match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
             if match:
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     gcode = self._P.pretty_XYE_Format(match)
                     current_position = self._getNextLocation(match)
                     self._accummulated_distance = 0
@@ -359,14 +359,14 @@ class RokitGCodeConverter:
             # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
                 gcode_list[index] = self._P.prettyFormat(match)
 
             # 수소점 자리 정리 -1
             match = self._P.getMatched(gcode, [self._P.G1_X_Y])
             if match:
-                if self._current_nozzle.startswith('FFF'):
+                if self._current_nozzle.startswith('Extruder'):
                     current_position = self._getNextLocation(match) # retract
                 gcode_list[index] = self._P.prettyFormat(match)  
                 continue
