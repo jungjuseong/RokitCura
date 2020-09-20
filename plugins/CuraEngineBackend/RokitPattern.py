@@ -116,7 +116,7 @@ class RokitPattern:
         reset_height = self._G['G0_Z40_C40_F420']
         m29b = self._G['M29_B']
         left_bed= self._G['G54_G0_X0_Y0']
-        right_bed= self._G['G55_G0_X0_Y0']
+        right_bed= self._G['G55_G0_X0_Y0_ROTARY']
         bed_pos = left_bed if extruder_index == 0 else right_bed
         move_z = self._G['G0_C'] if extruder_index == 0 else self._G['G0_Z'] % layer_height 
 

@@ -21,7 +21,7 @@ class RokitGCodeModel():
             'G55_X_Y': 'G55 X{x:<.3f} Y{y:<.3f} ;(ROTARY)\n',
 
             'G54_G0_X0_Y0': 'G54 G82 1 ;(HOTMELT/EXTRUDER)\nG0 X0.0 Y0.0\n',
-            'G55_G0_X0_Y0': 'G55 G92 1 ;(ROTARY)\nG0 X0.0 Y0.0\n',
+            'G55_G0_X0_Y0_ROTARY': 'G55 G92 1 ;(ROTARY)\nG0 X0.0 Y0.0\n',
             'G56_G0_X0_Y0': 'G56 G92 1 ;(LOADING/UNLOADING, MICROSCOPE)\nG0 X0.0 Y0.0\n',
             'G57_G0_X0_Y0': 'G57 G92 1 ;(FORK SENSOR)\nG0 X0.0 Y0.0\n',
 
