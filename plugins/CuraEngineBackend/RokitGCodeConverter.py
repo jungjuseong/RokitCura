@@ -221,6 +221,7 @@ class RokitGCodeConverter:
                         for j in range(1,5):
                             if gcode_list[j].startswith('T'):
                                 have_just_next_extruder = True # danger op because we expect gcode list ;LAYER ...T0 
+                                continue
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
