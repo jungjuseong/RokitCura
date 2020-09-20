@@ -218,7 +218,7 @@ class RokitGCodeConverter:
                     uvcode = self._getUVCode(self._current_index, self._current_layer - 1)                    
                     if uvcode != '':
                         before_layer_uvcode = self._P.getWrappedUVCode(uvcode, self._current_index, self._current_layer_height)
-                        have_just_next_extruder = gcode_list[index+3].startswith('T') # danger op because we expect gcode list ;LAYER ...T0 
+                        have_just_next_extruder = True if (True in [True if gcode.startswith('T') else '' for gcode in gcode_list[0:5]]) else False
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
