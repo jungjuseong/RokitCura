@@ -214,15 +214,15 @@ class RokitGCodeConverter:
                     self._extruderSetupCode += match.group(1) + '\n'
                     continue
                 
-            #if gcode.startswith(';') is False: # comment
-            #    if self._current_nozzle.startswith('FFF'):
-            #        if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
-            #            self._is_retraction_moment = False
-            #            gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
-            #            gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
-            #            self._accummulated_distance = 0
-            #    gcode_list[index] = gcode 
-            #    continue
+            if gcode.startswith(';'): # comment
+                if self._current_nozzle.startswith('FFF'):
+                    if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
+                        self._is_retraction_moment = False
+                        gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+                        gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+                        self._accummulated_distance = 0
+                gcode_list[index] = gcode 
+                continue
 
             # add M301
             match = self._P.getMatched(gcode, [self._P.G1_F_X_Y_E])
