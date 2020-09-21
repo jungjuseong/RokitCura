@@ -95,37 +95,27 @@ class RokitPattern:
 
     # UV 명령어 삽입
     def getUVCode(self, extruder_index, layer_no) -> str:
-
         if self._Q.uv_enable_list[extruder_index] == False:
-            return ''
+            return ''     
 
         per_layer = self._Q.uv_per_layer_list[extruder_index]
         start_layer = self._Q.uv_start_layer_list[extruder_index]
         layer = layer_no - start_layer + 1
 
         if layer >= 0 and (layer % per_layer) == 0:
-            return ';UV-Start - Layer:{layer_no} for {extruder}. ({start_layer}, {per_layer})\n{uvcode};UV-End\n'.format(
-                extruder = 'D6' if extruder_index == 0 else 'D{index:<d}'.format(index=extruder_index),
-                layer_no=layer_no, 
-                start_layer = start_layer, 
-                per_layer = per_layer, 
-                uvcode = self.UV_Code(extruder_index))
+            comment = ';UV - Layer:{layer_no} for {extruder}. ({start_layer},{per_layer})\n'.format(
+                    layer_no = layer_no, 
+                    extruder = 'D6' if extruder_index == 0 else 'D{index:<d}'.format(index=extruder_index),
+                    start_layer = start_layer, 
+                    per_layer = per_layer
+            )   
+            bed_pos = self._G['G54_G0_X0_Y0'] if extruder_index == 0 else self._G['G55_G0_X0_Y0']
 
-        return ''
-
-    def getWrappedUVCode(self, extruder_index, layer_no) -> str:
-        reset_height = self._G['G0_Z40_C30_F420']
-        m29b = self._G['M29_B']
-        left_bed= self._G['G54_G0_X0_Y0']
-        right_bed= self._G['G55_G0_X0_Y0']
-        bed_pos = left_bed if extruder_index == 0 else right_bed
-        uvcode = self.getUVCode(extruder_index,layer_no)
-
-        if uvcode != '':
-            return ';UV before layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before layer end\n'.format(
-                reset_height = reset_height,
-                m29b = m29b,
-                uvcode = uvcode,
+            return '{comment}{reset_height}{m29b}{uvcode}{bed_pos};end'.format(
+                comment = comment,
+                reset_height = self._G['G0_Z40_C30_F420'],
+                m29b = self._G['M29_B'],
+                uvcode = self.UV_Code(extruder_index),
                 bed_pos = bed_pos)
         return ''
 

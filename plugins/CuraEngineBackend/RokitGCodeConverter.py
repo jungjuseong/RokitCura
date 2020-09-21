@@ -85,8 +85,6 @@ class RokitGCodeConverter:
 
         self._initial_layer0_list = [0, 0, 0, 0, 0, 0]
 
-        self._extruder_height_count = 0
-
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
 
@@ -176,13 +174,12 @@ class RokitGCodeConverter:
         front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
         z_value = float(matched.group(4))
         
-        if self._layer_no >= 0 and self._extruder_height_count > 0:
-           before_layer_uvcode = self._P.getWrappedUVCode(self._current_index, self._layer_no)
+        if self._layer_no >= 0:
+           before_layer_uvcode = self._P.getUVCode(self._current_index, self._layer_no)
 
         if before_layer_uvcode != '':
            before_layer_uvcode = '\n' + before_layer_uvcode
 
-        self._extruder_height_count += 1
         return self._getZform(front_code +  before_layer_uvcode, z_value, self._current_index)
 
     def _update_Z3(self, gcode, matched) -> str:        
@@ -358,7 +355,6 @@ class RokitGCodeConverter:
             if match: # Nozzle changed
                 self._current_index = int(match.group(1))
                 self._hasAirCompressorOn = False
-                self._extruder_height_count = 0
 
                 extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no)
                 if isStartCode:
