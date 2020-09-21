@@ -133,7 +133,7 @@ class RokitGCodeConverter:
             self._gcode_list[index] = self._P.removeRedundencyGCode(modified_gcodes)
 
         startSetupCode = self._P.removeRedundencyGCode(self._extruderSetupCode)
-        self._gcode_list[self._StartOfStartCodeIndex] += '\n;Start Point\n{start_setup}; Start Point end\n\n{well_num}'.format(
+        self._gcode_list[self._StartOfStartCodeIndex] += '\n;Start Point\n{start_setup};Start Point end\n\n{well_num}'.format(
             start_setup = startSetupCode,
             well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
 
@@ -213,13 +213,13 @@ class RokitGCodeConverter:
                     gcode_list[index] = self._P.RemovedMark
                     self._extruderSetupCode += match.group(1) + '\n'
                     continue
-
-            #if gcode.startswith(';TIME_ELAPED'): # comment
+                
+            #if gcode.startswith(';') is False: # comment
             #    if self._current_nozzle.startswith('FFF'):
             #        if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
             #            self._is_retraction_moment = False
-            #            gcode = self._P.RemovedMark if self._UV_TEST else self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
-            #            gcode_list[self._retraction_index] = self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+            #            gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+            #            gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
             #            self._accummulated_distance = 0
             #    gcode_list[index] = gcode 
             #    continue

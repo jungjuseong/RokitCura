@@ -104,7 +104,8 @@ class RokitPattern:
         layer = layer_no - start_layer + 1
 
         if layer >= 0 and (layer % per_layer) == 0:
-            return ';UV-Start - Layer:{layer_no}, start:{start_layer}, per:{per_layer}\n{uvcode};UV-End\n'.format(
+            return ';UV-Start - Layer:{layer_no} for {extruder}. ({start_layer}, {per_layer})\n{uvcode};UV-End\n'.format(
+                extruder = 'D6' if extruder_index == 0 else 'D'+extruder_index,
                 layer_no=layer_no, 
                 start_layer = start_layer, 
                 per_layer = per_layer, 
@@ -121,7 +122,7 @@ class RokitPattern:
         uvcode = self.getUVCode(extruder_index,layer_no)
 
         if uvcode != '':
-            return ';UV before Layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before Layer end\n'.format(
+            return ';UV before layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before layer end\n'.format(
                 reset_height = reset_height,
                 m29b = m29b,
                 uvcode = uvcode,
