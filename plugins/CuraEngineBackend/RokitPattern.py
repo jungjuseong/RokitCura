@@ -120,11 +120,13 @@ class RokitPattern:
         bed_pos = left_bed if extruder_index == 0 else right_bed
         uvcode = self.getUVCode(extruder_index,layer_no)
 
-        return ';UV before Layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before Layer end\n'.format(
-            reset_height = reset_height,
-            m29b = m29b,
-            uvcode = uvcode,
-            bed_pos = bed_pos)
+        if uvcode != '':
+            return ';UV before Layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before Layer end\n'.format(
+                reset_height = reset_height,
+                m29b = m29b,
+                uvcode = uvcode,
+                bed_pos = bed_pos)
+        return ''
 
     # 익스트루더가 교체
     def getExtruderSetupCode(self,previous_index,current_index,layer_no) -> str:

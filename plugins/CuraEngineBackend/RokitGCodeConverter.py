@@ -196,8 +196,10 @@ class RokitGCodeConverter:
             if gcode.startswith(';LAYER:'):
                 self._layer_no = self._P.getLayerIndex(gcodes)
                 if self._layer_no > 0:
-                    if self._haveToolOnJustNext(gcode_list) == False:
+                    if self._haveToolOnJustNext(gcode_list):
                         before_layer_uvcode = self._P.getWrappedUVCode(self._current_index, self._layer_no - 1)
+                    else:
+                        gcode_list[index] = self._P.getWrappedUVCode(self._current_index, self._layer_no - 1) + gcode_list[index]
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
