@@ -85,7 +85,7 @@ class RokitGCodeConverter:
 
         self._initial_layer0_list = [0, 0, 0, 0, 0, 0]
 
-        self._last_used_uv_enabled_extruder = -1
+        self._extruder_height_count = 0
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -164,20 +164,36 @@ class RokitGCodeConverter:
             self._accummulated_distance = 0
         return next_pos
 
-    def _update_Z_value(self, gcode, matched) -> str:
-        
-        if len(matched.groups()) > 3:
-            front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
-            z_value = float(matched.group(4))
-        else:
-            front_code = matched.group(1)
-            z_value = float(matched.group(2))        
-        
-        layer_height = z_value + self._initial_layer0_list[self._current_index]
+    def _getZform(self, front_code, z_value, extruder_index) -> str:
+        return '{front_code}\nG0 {axis_name}{height:<.3f}'.format(
+            front_code = front_code,
+            axis_name = 'C' if extruder_index > 0 else 'Z', 
+            height = z_value + self._initial_layer0_list[extruder_index])
 
-        z_value_form = '\nG0 {c}{height:<.3f}'.format(c='C' if self._current_index > 0 else 'Z', height=layer_height)
+    def _update_Z(self, gcode, matched) -> str:
+        
+        before_layer_uvcode = ''
+        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+        z_value = float(matched.group(4))
+        
+        if self._layer_no >= 0 and self._extruder_height_count > 0:
+           before_layer_uvcode = self._P.getWrappedUVCode(self._current_index, self._layer_no)
 
-        return front_code + z_value_form
+        if before_layer_uvcode != '':
+           before_layer_uvcode = '\n' + before_layer_uvcode
+
+        self._extruder_height_count += 1
+        return self._getZform(front_code +  before_layer_uvcode, z_value, self._current_index)
+
+    def _update_Z3(self, gcode, matched) -> str:        
+        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+        z_value = float(matched.group(4))
+        return self._getZform(front_code, z_value, self._current_index)
+
+    def _update_Z2(self, gcode, matched) -> str:        
+        front_code = matched.group(1)
+        z_value = float(matched.group(2))
+        return self._getZform(front_code, z_value, self._current_index)
 
     def _haveToolOnJustNext(self, gcode_list) -> bool:
         for j in range(1,5):
@@ -195,11 +211,7 @@ class RokitGCodeConverter:
 
             if gcode.startswith(';LAYER:'):
                 self._layer_no = self._P.getLayerIndex(gcodes)
-                if self._layer_no > 0:
-                    if self._haveToolOnJustNext(gcode_list):
-                        before_layer_uvcode = self._P.getWrappedUVCode(self._current_index, self._layer_no - 1)
-                    else:
-                        gcode_list[index] = self._P.getWrappedUVCode(self._current_index, self._layer_no - 1) + gcode_list[index]
+
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
@@ -267,14 +279,23 @@ class RokitGCodeConverter:
                 continue
 
             # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z, self._P.G1_F_Z])
+            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
             if match:
-                gcode = self._update_Z_value(gcode, match)
+                gcode = self._update_Z(gcode, match)
                 if self._current_nozzle.startswith('FFF'):
-                    if gcode.startswith('G0'):
-                        current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                    else:
-                        current_position = self._getNextLocation(match)
+                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
+                else:
+                    gcode = self._getPressureOff(gcode)
+                
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
+                continue
+
+            # Z 값 갱신하고 FFF가 아닐때 M330 추가
+            match = self._P.getMatched(gcode, [self._P.G1_F_Z])
+            if match:
+                gcode = self._update_Z2(gcode, match)
+                if self._current_nozzle.startswith('FFF'):
+                    current_position = self._getNextLocation(match)
                 else:
                     gcode = self._getPressureOff(gcode)
                 
@@ -298,7 +319,7 @@ class RokitGCodeConverter:
             # add M330 
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
-                gcode = self._update_Z_value(gcode, match)                    
+                gcode = self._update_Z3(gcode, match)                    
                 if self._current_nozzle.startswith('FFF') is False:                    
                     gcode = self._getPressureOff(gcode) 
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
@@ -337,6 +358,7 @@ class RokitGCodeConverter:
             if match: # Nozzle changed
                 self._current_index = int(match.group(1))
                 self._hasAirCompressorOn = False
+                self._extruder_height_count = 0
 
                 extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no)
                 if isStartCode:

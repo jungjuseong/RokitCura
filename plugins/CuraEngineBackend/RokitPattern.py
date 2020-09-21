@@ -144,7 +144,6 @@ class RokitPattern:
         left_bed= self._G['G54_G0_X0_Y0']
         right_bed= self._G['G55_G0_X0_Y0']
         g92e0 = self._G['G92_E0']
-        uvcode = self.getUVCode(previous_index, layer_no)
         extruder = self.getRokitExtruderName(current_index)
 
         DISPENSER_START = '{extruder}{aaxis}{bed_pos}{g0b15f300}'.format(
@@ -153,12 +152,11 @@ class RokitPattern:
                 bed_pos = right_bed if previous_index == -1 else '',
                 g0b15f300 = g0b15f300
         )
-        DISPENSER_END = '{airoff}{reset_height}{m29b}{uvcode}{bed_pos}'.format(
+        DISPENSER_END = '{airoff}{reset_height}{m29b}{bed_pos}'.format(
                 airoff = airoff,
                 reset_height = reset_height,
                 m29b = m29b,
-                uvcode = uvcode,
-                bed_pos = left_bed if current_index == 0 else right_bed if uvcode != '' else ''
+                bed_pos = left_bed if current_index == 0 else right_bed
         )
 
         EXTRUDER_START = '{extruder}{bed_pos}'.format(
@@ -166,11 +164,10 @@ class RokitPattern:
                 bed_pos = left_bed if previous_index != 0 else '',  
                 
         )
-        EXTRUDER_END = '{reset_height}{m29b}{uvcode}{bed_pos}{airoff}'.format(
+        EXTRUDER_END = '{reset_height}{m29b}{bed_pos}{airoff}'.format(
                 reset_height = reset_height,
                 m29b = m29b,
-                uvcode = uvcode,
-                bed_pos = right_bed if current_index > 0 else left_bed if uvcode != '' else '',
+                bed_pos = right_bed if current_index > 0 else left_bed,
                 airoff = airoff
         )
 
@@ -178,12 +175,11 @@ class RokitPattern:
                 extruder = extruder,
                 bed_pos = left_bed if previous_index != 0 else ''       
         )
-        HOTMELT_END = '{airoff}{reset_height}{m29b}{uvcode}{bed_pos}'.format(
+        HOTMELT_END = '{airoff}{reset_height}{m29b}{bed_pos}'.format(
                 airoff = airoff,
                 reset_height = reset_height,
                 m29b = m29b,
-                uvcode = uvcode,
-                bed_pos = right_bed if current_index > 0 else left_bed if uvcode != '' else ''
+                bed_pos = right_bed if current_index > 0 else left_bed
         )
 
         code = ''
