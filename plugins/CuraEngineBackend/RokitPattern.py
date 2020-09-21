@@ -105,7 +105,7 @@ class RokitPattern:
 
         if layer >= 0 and (layer % per_layer) == 0:
             return ';UV-Start - Layer:{layer_no} for {extruder}. ({start_layer}, {per_layer})\n{uvcode};UV-End\n'.format(
-                extruder = 'D6' if extruder_index == 0 else 'D'+extruder_index,
+                extruder = 'D6' if extruder_index == 0 else 'D{}'.format(extruder_index),
                 layer_no=layer_no, 
                 start_layer = start_layer, 
                 per_layer = per_layer, 
