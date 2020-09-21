@@ -20,13 +20,13 @@ class RokitGCodeModel():
             'G54_X_Y': 'G54 X{x:<.3f} Y{y:<.3f} ;(HOTMELT/EXTRUDER)\n',
             'G55_X_Y': 'G55 X{x:<.3f} Y{y:<.3f} ;(ROTARY)\n',
 
-            'G54_G0_X0_Y0': 'G54 G92 X0.0 Y0.0 ;(HOTMELT/EXTRUDER)\n',
-            'G55_G0_X0_Y0': 'G55 G92 X0.0 Y0.0 ;(ROTARY)\n',
-            'G56_G0_X0_Y0': 'G56 G92 X0.0 Y0.0 ;(LOADING/UNLOADING, MICROSCOPE)\n',
-            'G57_G0_X0_Y0': 'G57 G92 X0.0 Y0.0 ;(FORK SENSOR)\n',
+            'G54_G0_X0_Y0': 'G54 G0 X0.0 Y0.0 ;(HOTMELT/EXTRUDER)\n',
+            'G55_G0_X0_Y0': 'G55 G0 X0.0 Y0.0 ;(ROTARY)\n',
+            'G56_G0_X0_Y0': 'G56 G0 X0.0 Y0.0 ;(LOADING/UNLOADING, MICROSCOPE)\n',
+            'G57_G0_X0_Y0': 'G57 G0 X0.0 Y0.0 ;(FORK SENSOR)\n',
 
-            'G58_G0_X0_Y0': 'G55 G92 X0.0 Y0.0 ;(ORIGIN)\n',
-            'G59_G0_X0_Y0': 'G59 G92 X0.0 Y0.0 ;(UV-A)\n',
+            'G58_G0_X0_Y0': 'G55 G0 X0.0 Y0.0 ;(ORIGIN)\n',
+            'G59_G0_X0_Y0': 'G59 G0 X0.0 Y0.0 ;(UV-A)\n',
 
             'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
             'G92_Z0': 'G92 Z0.0\n',
