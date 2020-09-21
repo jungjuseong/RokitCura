@@ -18,7 +18,7 @@ from .RokitPattern import RokitPattern
 class RokitGCodeConverter:
     def __init__(self) -> None:    
       
-        self._UV_TEST = True
+        self._UV_TEST = False
 
         self._Q= RokitPrintQuality()
         self._P = RokitPattern()
