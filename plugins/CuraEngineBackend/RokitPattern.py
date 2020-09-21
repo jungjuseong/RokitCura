@@ -34,22 +34,8 @@ class RokitPattern:
                     'M29 Y\n' +\
                     'M29 X\n'
 
-        self.DISH_LEVELING_PROCEDURE = '; Dish leveling procedure\n' +\
-                    'G0 X0. Y0. F300\n' +\
-                    'G29\n' +\
-                    'G0 X15. F300\n' +\
-                    'G29\n' +\
-                    'G0 X0. Y15. F300 \n' +\
-                    'G29\n' +\
-                    'G0 X-15. Y0. F300\n' +\
-                    'G29\n' +\
-                    'G0 X0. Y-15. F300\n' +\
-                    'G29\n' +\
-                    'M420\n' +\
-                    'G0 X0. Y0. F300\n'
-
         # match patterns
-        self.Extruder_NO = re.compile(r'^T([0-9]+)')
+        self.T = re.compile(r'^T([0-9]+)')
         self.LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
 
         _FP = r'[+-]?\d*[.]?\d+'
@@ -79,12 +65,8 @@ class RokitPattern:
     def getLayerIndex(self, one_layer_gcode) -> int:
         return int(self.LAYER_NO.search(one_layer_gcode).group(1))
 
-    def getExtruderIndex(self, gcode) -> int:
-        matched = self.Extruder_NO.search(gcode)
-        return int(matched.group(1))
-
     def getRokitExtruderName(self, index) -> str:
-        return '{extruder_name} ; Selected Nozzle({nozzle_type})\n'.format(
+        return '{extruder_name} ;Nozzle({nozzle_type})\n'.format(
             extruder_name = self._Q.ExtruderNames[index], 
             nozzle_type = self._Q.getVariantName(index))
 
@@ -111,23 +93,41 @@ class RokitPattern:
             time = self._Q.uv_time_list[extruder_index], 
             duration = self._Q.uv_time_list[extruder_index] * 1000)
 
-    def getWrappedUVCode(self, uvcode, extruder_index, layer_height) -> str:
+    # UV 명령어 삽입
+    def getUVCode(self, extruder_index, layer_no) -> str:
+
+        if self._Q.uv_enable_list[extruder_index] == False:
+            return ''
+
+        per_layer = self._Q.uv_per_layer_list[extruder_index]
+        start_layer = self._Q.uv_start_layer_list[extruder_index]
+        layer = layer_no - start_layer + 1
+
+        if layer >= 0 and (layer % per_layer) == 0:
+            return ';UV-Start - Layer:{layer_no}, start:{start_layer}, per:{per_layer}\n{uvcode};UV-End\n'.format(
+                layer_no=layer_no, 
+                start_layer = start_layer, 
+                per_layer = per_layer, 
+                uvcode = self.UV_Code(extruder_index))
+
+        return ''
+
+    def getWrappedUVCode(self, extruder_index, layer_no) -> str:
         reset_height = self._G['G0_Z40_C30_F420']
         m29b = self._G['M29_B']
         left_bed= self._G['G54_G0_X0_Y0']
         right_bed= self._G['G55_G0_X0_Y0']
         bed_pos = left_bed if extruder_index == 0 else right_bed
-        move_z = self._G['G0_C'].format(layer_height) if extruder_index == 0 else self._G['G0_Z'] % layer_height 
+        uvcode = self.getUVCode(extruder_index,layer_no)
 
-        return '{reset_height}{m29b}{uvcode}{bed_pos}{move_z}'.format(
+        return ';UV before Layer\n{reset_height}{m29b}{uvcode}{bed_pos};UV before Layer end\n'.format(
             reset_height = reset_height,
             m29b = m29b,
             uvcode = uvcode,
-            bed_pos = bed_pos,
-            move_z = move_z)
+            bed_pos = bed_pos)
 
-    # 익스트루더가 교체될 때마다 추가로 붙는 명령어
-    def getExtruderSetupCode(self, previous_index, current_index, uvcode) -> str:
+    # 익스트루더가 교체
+    def getExtruderSetupCode(self,previous_index,current_index,layer_no) -> str:
 
         current_nozzle = self._Q.getVariantName(current_index)
         previous_nozzle = self._Q.getVariantName(previous_index)
@@ -141,7 +141,7 @@ class RokitPattern:
         left_bed= self._G['G54_G0_X0_Y0']
         right_bed= self._G['G55_G0_X0_Y0']
         g92e0 = self._G['G92_E0']
-
+        uvcode = self.getUVCode(previous_index, layer_no)
         extruder = self.getRokitExtruderName(current_index)
 
         DISPENSER_START = '{extruder}{aaxis}{bed_pos}{g0b15f300}'.format(
@@ -183,22 +183,22 @@ class RokitPattern:
                 bed_pos = right_bed if current_index > 0 else left_bed if uvcode != '' else ''
         )
 
-        code = ';{}'
-        if previous_index == -1: # 처음 나온 Nozzle
-
-            MESSAGE = '; <==== setup start from {p}\n'.format(p=current_nozzle)
+        code = ''
+        if previous_index == -1: # Nozzle이 처음 나왔을때
+            MESSAGE = ';Tool Setup - start {p}\n'.format(p=current_nozzle)
 
             # D1~D5
             if current_index > 0:
-                code = MESSAGE + '{start}\n'.format(start=DISPENSER_START)
+                code = MESSAGE + '{start}'.format(start=DISPENSER_START)
             # D6 - FFF
             elif current_nozzle.startswith('FFF'):
-                code = MESSAGE + '{start}\n'.format(start=EXTRUDER_START)
+                code = MESSAGE + '{start}'.format(start=EXTRUDER_START)
             # D6 - Hot Melt
             elif current_nozzle.startswith('Hot Melt'):
-                code = MESSAGE + '{start}\n'.format(start=HOtMELT_START)
+                code = MESSAGE + '{start}'.format(start=HOtMELT_START)
+
         else:            
-            MESSAGE = '; <==== setup start from {pr} to {cu}\n'.format(pr=previous_nozzle,cu=current_nozzle)
+            MESSAGE = ';Tool Setup - changes from {pr} to {cu}\n'.format(pr=previous_nozzle,cu=current_nozzle)
 
             # 3. D6(FFF)에서 D1~5로 변경된 경우
             if previous_nozzle.startswith('FFF') and current_index > 0:              
@@ -219,7 +219,7 @@ class RokitPattern:
             elif previous_index > 0 and previous_index > 0:
                 code = MESSAGE + '{end}\n{start}'.format(end=DISPENSER_END, start=DISPENSER_START)            
 
-        return code
+        return code + ';Setup End\n'
 
     def getMatched(self, gcode, patterns):
         for p in patterns:
@@ -251,8 +251,7 @@ class RokitPattern:
     def replaceLayerInfo(self, start_code) -> str:
 
         start_code =  start_code\
-            .replace('{home_all_axis}',self.HOME_ALL_AXIS)\
-            .replace('{dish_leveling_procedure}',self.DISH_LEVELING_PROCEDURE)
+            .replace('{home_all_axis}',self.HOME_ALL_AXIS)
 
         return start_code\
             .replace('{print_temp}', self._G['PRINT_TEMP'] % self._Q.print_temperature)\
