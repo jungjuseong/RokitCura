@@ -165,22 +165,23 @@ class RokitGCodeConverter:
     def _getZform(self, front_code, z_value, extruder_index) -> str:
         return '{front_code}\nG0 {axis_name}{height:<.3f}'.format(
             front_code = front_code,
-            axis_name = 'C' if extruder_index > 0 else 'Z', 
-            height = z_value + self._initial_layer0_list[extruder_index])
+            axis_name = 'C' if extruder_index > 0 else 'Z',
+            height = z_value - self._Q.layer_height_0
+        )
 
     def _update_Z(self, gcode, matched) -> str:
         
-        before_layer_uvcode = ''
+        layer_uvcode = ''
         front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
         z_value = float(matched.group(4))
         
         if self._layer_no >= 0:
-           before_layer_uvcode = self._P.getUVCode(self._current_index, self._layer_no)
+           layer_uvcode = self._P.getUVCode(self._current_index, self._layer_no)
 
-        if before_layer_uvcode != '':
-           before_layer_uvcode = '\n' + before_layer_uvcode
+        if layer_uvcode != '':
+           layer_uvcode = '\n' + layer_uvcode
 
-        return self._getZform(front_code +  before_layer_uvcode, z_value, self._current_index)
+        return self._getZform(front_code +  layer_uvcode, z_value, self._current_index)
 
     def _update_Z3(self, gcode, matched) -> str:        
         front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
