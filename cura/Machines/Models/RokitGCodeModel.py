@@ -4,6 +4,7 @@ class RokitGCodeModel():
             'G90_G0_X_Y': 'G90 G0 X%.3f Y%.3f\n',
             'G90_G0_C_RESET': 'G90 G0 C-30.0\n',
             'G90_G0_C': 'G90 G0 C{0: <.3f}\n',
+            'G90_G0_C0': 'G90 G0 C0\n',
 
             'G0': 'G0\n',
             'G0_Z': 'G0 Z%.3f\n',

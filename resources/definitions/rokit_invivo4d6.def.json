@@ -121,7 +121,7 @@
             "default_value": "skirt"
         },
         "machine_start_gcode": {
-            "default_value":"; (*** start of start code for Dr.Invivo 4D6)\n;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {infill_sparse_density}\n;Print time: {print_time}\nM74 ; enable IO\nM72 ; motor drive enable\nM78 ; light ON\nM176 ; embed compressor ON\nG21 ; metric values\nG92 E0 ; reset Extruder\n{home_all_axis}\n;{shot_time_list} ; shot time\n;{vac_time_list} ; vac_time\n;{interval_list} ; interval\n;{shot_p_list}\n;{vac_p_list} ; vac_pressure\n{print_temp} ; print temperature\nM109 ; wait for temperature\nG90 ; absolute positioning\nG92 Z40.0 C30.0 E0.0\n;(*** end of start code for Dr.Invivo 4D6)\n"
+            "default_value":"; (*** start of start code for Dr.Invivo 4D6)\n;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {infill_sparse_density}\n;Print time: {print_time}\nM74 ; enable IO\nM72 ; motor drive enable\nM78 ; light ON\nM176 ; embed compressor ON\nG21 ; metric values\nG92 E0 ; reset Extruder\n{home_all_axis}\n;{shot_time_list} ; shot time\n;{vac_time_list} ; vac_time\n;{interval_list} ; interval\n;{shot_p_list}\n;{vac_p_list} ; vac_pressure\n{print_temp} ; print temperature\nG90 ; absolute positioning\nG92 Z40.0 C30.0 E0.0\n;(*** end of start code for Dr.Invivo 4D6)\n"
         },
         "machine_end_gcode": {
             "default_value": "\n; (*** start of end code for Dr.Invivo 4D6)\n{end_code}\n; (*** end of end code for Dr.Invivo 4D6)\n"

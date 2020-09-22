@@ -83,8 +83,6 @@ class RokitGCodeConverter:
         self._hasAirCompressorOn = False
         self._extruderSetupCode = ''
 
-        self._initial_layer0_list = [0, 0, 0, 0, 0, 0]
-
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
 
@@ -119,7 +117,7 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self._P.getUVCode(self._current_index, self._layer_no) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self._P.getUVCode(self._current_index, -1, self._layer_no) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
             elif gcodes.startswith(';LAYER:'):    
                 modified_gcodes = self._convertOneLayerGCode(gcodes)
@@ -162,31 +160,33 @@ class RokitGCodeConverter:
             self._accummulated_distance = 0
         return next_pos
 
-    def _getZform(self, front_code, z_value, extruder_index) -> str:
-        return '{front_code}\nG0 {axis_name}{height:<.3f}'.format(
+    def _getZform(self, front_code, z_value, extruder_index, uvcode='') -> str:
+        return '{front_code}\n{uvcode}G0 {axis_name}{height:<.3f}'.format(
             front_code = front_code,
+            uvcode = uvcode,
             axis_name = 'C' if extruder_index > 0 else 'Z',
-            height = z_value - self._Q.layer_height_0
+            height = z_value
         )
 
-    def _update_Z(self, gcode, matched) -> str:
-        
-        layer_uvcode = ''
-        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
-        z_value = float(matched.group(4))
-        
-        if self._layer_no >= 0:
-           layer_uvcode = self._P.getUVCode(self._current_index, self._layer_no)
-
-        if layer_uvcode != '':
-           layer_uvcode = '\n' + layer_uvcode
-
-        return self._getZform(front_code +  layer_uvcode, z_value, self._current_index)
-
-    def _update_Z3(self, gcode, matched) -> str:        
+    def _update_XYZ(self, gcode, matched) -> int:        
         front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
         z_value = float(matched.group(4))
         return self._getZform(front_code, z_value, self._current_index)
+
+    def _getLayerNo(self, z_value, extruder_index) -> int:
+        return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[extruder_index]))
+
+    def _update_Z_UV(self, gcode, matched) -> str:     
+        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
+        z_value = float(matched.group(4))
+        new_layer_no = self._getLayerNo(z_value, self._current_index)
+        
+        uvcode = ''
+        if new_layer_no > self._layer_no:
+            uvcode = self._P.getUVCode(self._current_index, -1, new_layer_no)        
+            self._layer_no = new_layer_no
+
+        return self._getZform(front_code, z_value, self._current_index, uvcode)
 
     def _update_Z2(self, gcode, matched) -> str:        
         front_code = matched.group(1)
@@ -208,8 +208,7 @@ class RokitGCodeConverter:
         for index, gcode in enumerate(gcode_list):
 
             if gcode.startswith(';LAYER:'):
-                self._layer_no = self._P.getLayerIndex(gcodes)
-
+                #self._layer_no = self._P.getLayerIndex(gcodes)
                 continue
 
             if self._P.MarlinCodeForRemoval.match(gcode) or\
@@ -279,7 +278,7 @@ class RokitGCodeConverter:
             # Z 값 갱신하고 FFF가 아닐때 M330 추가
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
             if match:
-                gcode = self._update_Z(gcode, match)
+                gcode = self._update_Z_UV(gcode, match)
                 if self._current_nozzle.startswith('FFF'):
                     current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
                 else:
@@ -317,7 +316,7 @@ class RokitGCodeConverter:
             # add M330 
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
-                gcode = self._update_Z3(gcode, match)                    
+                gcode = self._update_XYZ(gcode, match)                    
                 if self._current_nozzle.startswith('FFF') is False:                    
                     gcode = self._getPressureOff(gcode) 
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
@@ -357,7 +356,7 @@ class RokitGCodeConverter:
                 self._current_index = int(match.group(1))
                 self._hasAirCompressorOn = False
 
-                extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no)
+                extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no, isStartCode)
                 if isStartCode:
                     self._extruderSetupCode = extruder_setup
                     gcode_list[index] = ''
@@ -412,7 +411,7 @@ class RokitGCodeConverter:
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
             gcode_spacing = ';hop_spacing\n' + self._G['G92_E0'] + self._G['G90_G0_C'].format(HopHeight)            
             gcode_spacing += self._G['G90_G0_X_Y'] % (x,y)
-            gcode_spacing += self._G['G90_G0_C'].format(self._initial_layer0_list[self._current_index])
+            gcode_spacing += self._G['G90_G0_C0']
             gcode_spacing += self._G['G92_X0_Y0']
             gcode_spacing += ';Well Number: %d\n' % well_num
 

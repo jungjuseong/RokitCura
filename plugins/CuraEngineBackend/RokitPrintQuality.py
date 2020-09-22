@@ -69,6 +69,7 @@ class RokitPrintQuality:
 
         # z좌표 관리
         self.layer_height_0 = self.getGlobalContainerStackProperty('layer_height_0')
+        self.layer_heights = [self._getExtrudersProperty(index,'layer_height') for index in range(6)]
 
         self.layer_height_list = ' '.join(map(str,[self._getExtrudersProperty(index,'layer_height') for index in self._JoinSequence]))
         self.wall_thickness_list = ' '.join(map(str,[self._getExtrudersProperty(index,'wall_thickness') for index in self._JoinSequence]))
