@@ -251,9 +251,8 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._P.pretty_XYE_Format(match)
                 # shot index 구하기
-                if gcode_list[index-1].startswith('G0'):
-                    self._shot_index = index
                 if gcode_list[index-1].startswith('G1') == False or ('X' and 'Y' not in gcode_list[index-1]):
+                    self._shot_index = index
                     if self._current_nozzle.startswith('FFF') and self._Q.retraction_enable_list[0]: # retraction
                         if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
                             if (self._retraction_index > 0 and self._retraction_index < index):
@@ -299,8 +298,8 @@ class RokitGCodeConverter:
                 if gcode_list[index-1].startswith('G1'):
                     self._retraction_index = index
                 gcode = self._update_Z3(gcode, match)
-                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 accumulated_travel_distance = 0
+                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue 
 
