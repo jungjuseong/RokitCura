@@ -25,11 +25,11 @@
 
         <machine>
             <machine_identifier manufacturer="Rokit Healthcare" product="Rokit Invivo4d6"/>
-            <hotend id="FFF 0.2mm Nozzle" />
-            <hotend id="FFF 0.4mm Nozzle" />
-            <hotend id="FFF 0.6mm Nozzle" />
-            <hotend id="FFF 0.8mm Nozzle" />
-            <hotend id="FFF 1.0mm Nozzle" />
+            <hotend id="Extruder 0.2mm Nozzle" />
+            <hotend id="Extruder 0.4mm Nozzle" />
+            <hotend id="Extruder 0.6mm Nozzle" />
+            <hotend id="Extruder 0.8mm Nozzle" />
+            <hotend id="Extruder 1.0mm Nozzle" />
             <hotend id="Hot Melt 0.2mm Nozzle" />
             <hotend id="Hot Melt 0.4mm Nozzle" />
             <hotend id="Hot Melt 0.6mm Nozzle" />

@@ -371,7 +371,8 @@
                         "Makerbot": "Makerbot",
                         "BFB": "Bits from Bytes",
                         "MACH3": "Mach3",
-                        "Repetier": "Repetier"
+                        "Repetier": "Repetier",
+                        "Invivo4d6": "Invivo4d6"
                     },
                     "default_value": "RepRap (Marlin/Sprinter)",
                     "settable_per_mesh": false,

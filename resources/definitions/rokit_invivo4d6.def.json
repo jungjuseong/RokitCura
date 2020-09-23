@@ -59,6 +59,10 @@
 
     },
     "overrides": {
+        "machine_gcode_flavor":
+        {
+            "default_value": "Invivo4d6"
+        },
         "machine_name": {
             "default_value": "Rokit Invivo4d6" 
         },

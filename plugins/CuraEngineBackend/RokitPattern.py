@@ -35,7 +35,7 @@ class RokitPattern:
                     'M29 X\n'
 
         # match patterns
-        self.T = re.compile(r'^T([0-9]+)')
+        self.D = re.compile(r'^D([0-9]+)')
         self.LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
 
         _FP = r'[+-]?\d*[.]?\d+'
@@ -58,7 +58,7 @@ class RokitPattern:
 
         self.G0_X_Y = re.compile(r'^(G0) X({x}) Y({y})'.format(x=_FP,y=_FP))
         self.G1_X_Y = re.compile(r'^(G1) X({x}) Y({y})'.format(x=_FP,y=_FP))
-
+ 
         self.G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
         self.OnlyInteger = re.compile(r'([XYZ][-+]?\d+)')
 
