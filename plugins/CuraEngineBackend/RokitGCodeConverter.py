@@ -63,11 +63,12 @@ class RokitGCodeConverter:
 
         self._previous_index = -1
         self._current_nozzle = ''
-
-        self._accummulated_distance = 0
+        self._last_position = 0
         self._is_retraction_moment = False
+        self._is_shot_moment = False
 
         self._last_E = 0.0
+        self._shot_index = -1
         self._retraction_index = -1
                 
         self._layer_no = 0
@@ -76,7 +77,6 @@ class RokitGCodeConverter:
         self._gcode_list = []        
         self._last_extrusion_amount = 0
 
-        self._is_shot_moment = True
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
 
@@ -153,15 +153,6 @@ class RokitGCodeConverter:
             self._hasAirCompressorOn = False
         return gcode
 
-    # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
-    def _getTravelDistance(self, current_pos, next_pos):
-        if current_pos is not None:
-            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
-        if self._accummulated_distance > self._Q.retraction_min_travel[0]:
-            self._is_retraction_moment = True
-            self._accummulated_distance = 0
-        return next_pos
-
     def _getZform(self, front_code, z_value, extruder_index) -> str:
         return '{front_code}\nG0 {axis_name}{height:<.3f}'.format(
             front_code = front_code,
@@ -199,75 +190,153 @@ class RokitGCodeConverter:
                 return True
         return False
 
-    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
+    def _getDistance(self, last_pos, next_pos):
+        print_distance = 0
+        if last_pos is not None:
+            print_distance = distance.euclidean(last_pos, next_pos)
+        
+        self._last_position = next_pos
+        return print_distance
 
-        current_position = None
+    def _getNextLocation(self, match):
+        return [float(match.group(2)), float(match.group(3))]
+
+    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
+        self._last_position = None
         before_layer_uvcode = ''
+        accumulated_travel_distance = 0
+        accumulated_shot_distance = 0
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
-
+            # Layer
             if gcode.startswith(';LAYER:'):
                 self._layer_no = self._P.getLayerIndex(gcodes)
-
+                self._retraction_index = 0
+                self._shot_index = 0
                 continue
-
+            # Marlin
             if self._P.MarlinCodeForRemoval.match(gcode) or\
                 (self._current_nozzle.startswith('FFF') is False and gcode == 'G92 E0'):
                 gcode_list[index] = self._P.RemovedMark
                 continue
-            
+            #
             if isStartCode:
                 match = self._P.getMatched(gcode, [self._P.G92_E0])
                 if match:
                     gcode_list[index] = self._P.RemovedMark
                     self._extruderSetupCode += match.group(1) + '\n'
                     continue
-                
+
+            # 주석문
             if gcode.startswith(';'): # comment
-                if self._current_nozzle.startswith('FFF'):
-                    if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
-                        self._is_retraction_moment = False
-                        gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
-                        gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
-                        self._accummulated_distance = 0
+                if gcode.startswith(';TYPE:') == False:
+                    if self._current_nozzle.startswith('FFF'): # retraction
+                        if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
+                            if (self._retraction_index > 0 and self._retraction_index < index):
+                                gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+                                gcode_list[self._retraction_index] = self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+                    else:
+                        if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]: # shot 조건
+                            if (self._shot_index > 0 and self._shot_index < index ):
+                                gcode = "M330\n" + gcode
+                                gcode_list[self._shot_index] = self._P.RemovedMark if self._UV_TEST else "M301\n" + gcode_list[self._shot_index]
                 gcode_list[index] = gcode 
                 continue
 
-            # add M301
+            # add [M301], [Back-retraction] # Retraction
             match = self._P.getMatched(gcode, [self._P.G1_F_X_Y_E])
             if match:
                 gcode = self._P.pretty_XYE_Format(match)
+                # shot index 구하기
+                if gcode_list[index-1].startswith('G1') == False or ('X' and 'Y' not in gcode_list[index-1]):
+                    self._shot_index = index
+                    if self._current_nozzle.startswith('FFF') and self._Q.retraction_enable_list[0]: # retraction
+                        if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
+                            if (self._retraction_index > 0 and self._retraction_index < index):
+                                gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+                                gcode_list[self._retraction_index] = self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
                 if self._current_nozzle.startswith('FFF'):
-                    pressure_code = self._getPressureOn(gcode, reverse=True)
-                    current_position = self._getNextLocation(match)
-                    if self._retraction_index > 0 and self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
-                        gcode = self._insertBackRetraction(pressure_code) # Back-Retraction
-                        gcode_list[self._retraction_index] = \
-                            self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
-                    self._accummulated_distance = 0
                     self._last_E = float(match.group(4))
                 else:
                     gcode = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
-                    gcode = self._getPressureOn(gcode, reverse=True)
-
+                accumulated_shot_distance = 0
+                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match)) # 밑에 있어야 함**
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue
 
+             # add [M330], [Retraction] # Shot
+            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y])
+            if match:
+                gcode = self._P.prettyFormat(match)
+                if gcode_list[index-1].startswith('G0') == False:
+                    self._retraction_index = index
+                if gcode_list[index-1].startswith('G1'):
+                    if self._current_nozzle.startswith('FFF') == False: # shot
+                        if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]:
+                            if (self._shot_index > 0 and self._shot_index < index ):
+                                gcode = "M330\n" + gcode
+                                gcode_list[self._shot_index] = self._P.RemovedMark if self._UV_TEST else "M301\n" + gcode_list[self._shot_index]
+                accumulated_travel_distance = 0
+                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match)) # 밑에 있어야 함**
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
+                continue
+            
+            # Z 값 갱신하고 FFF가 아닐때 M330 추가
+            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
+            if match:
+                gcode = self._update_Z(gcode, match)
+                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
+                continue
+
+            # 디버깅 필요
+            match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
+            if match:
+                gcode = self._update_Z3(gcode, match)
+                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
+                continue 
+
+            # E 제거
+            match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
+            if match:
+                if self._current_nozzle.startswith('FFF'):
+                    gcode = self._P.pretty_XYE_Format(match)
+                    self._last_E = float(match.group(4))
+                else:
+                    gcode = self._P.prettyFormat(match)
+                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
+                continue
+
+            # 소숫점 자리 정리
+            match = self._P.getMatched(gcode, [self._P.G0_X_Y])
+            if match:
+                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
+
+            # 수소점 자리 정리 -1
+            match = self._P.getMatched(gcode, [self._P.G1_X_Y])
+            if match:
+                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match) 
+                continue
+
+            # 리트렉션 코드 관리
             match = self._P.getMatched(gcode, [self._P.G1_F_E])
             if match:
                 # remove itself when Dispensor
+                accumulated_travel_distance = 0 # 리트렉션 중복을 막기 위함.
                 if self._current_index > 0 or isStartCode:
                     gcode_list[index] = self._P.RemovedMark
                     continue
-                elif self._current_nozzle.startswith('FFF'):
-                    self._is_retraction_moment = False
 
                 gcode = '{head} E{e:<.5f}\n'.format(head = match.group(1),e = float(match.group(2)))
 
                 # add M301 when FFF and this is first M301
-                if self._current_nozzle.startswith('FFF') and isStartCode == False:
-                    gcode = self._getPressureOn(gcode)
+                # if self._current_nozzle.startswith('FFF') and isStartCode == False:
+                #     gcode = self._getPressureOn(gcode)
                 
                 if isStartCode:
                     gcode_list[index] = self._P.RemovedMark
@@ -277,78 +346,10 @@ class RokitGCodeConverter:
                 continue
 
             # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
-            if match:
-                gcode = self._update_Z(gcode, match)
-                if self._current_nozzle.startswith('FFF'):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                else:
-                    gcode = self._getPressureOff(gcode)
-                
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # Z 값 갱신하고 FFF가 아닐때 M330 추가
             match = self._P.getMatched(gcode, [self._P.G1_F_Z])
             if match:
                 gcode = self._update_Z2(gcode, match)
-                if self._current_nozzle.startswith('FFF'):
-                    current_position = self._getNextLocation(match)
-                else:
-                    gcode = self._getPressureOff(gcode)
-                
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-             # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y])
-            if match:
-                gcode = self._P.prettyFormat(match)
-                if self._current_nozzle.startswith('FFF'):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                    if not gcode_list[index-1].startswith('G0'):
-                        self._retraction_index = index
-                else:
-                    gcode = self._getPressureOff(gcode)
-
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # add M330 
-            match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
-            if match:
-                gcode = self._update_Z3(gcode, match)                    
-                if self._current_nozzle.startswith('FFF') is False:                    
-                    gcode = self._getPressureOff(gcode) 
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue 
-
-            # E 제거
-            match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
-            if match:
-                if self._current_nozzle.startswith('FFF'):
-                    gcode = self._P.pretty_XYE_Format(match)
-                    current_position = self._getNextLocation(match)
-                    self._accummulated_distance = 0
-                    self._last_E = float(match.group(4))
-                else:
-                    gcode = self._P.prettyFormat(match)
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # 소숫점 자리 정리
-            match = self._P.getMatched(gcode, [self._P.G0_X_Y])
-            if match:
-                if self._current_nozzle.startswith('FFF'):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
-
-            # 수소점 자리 정리 -1
-            match = self._P.getMatched(gcode, [self._P.G1_X_Y])
-            if match:
-                if self._current_nozzle.startswith('FFF'):
-                    current_position = self._getNextLocation(match) # retract
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)   
                 continue
 
             # T0~T5
@@ -373,14 +374,6 @@ class RokitGCodeConverter:
             gcode_list[0] = before_layer_uvcode + gcode_list[0]
 
         return '\n'.join(gcode_list)
-
-    def _getNextLocation(self, match):
-        return [float(match.group(2)), float(match.group(3))]
-
-    def _insertBackRetraction(self, rear_code):
-        self._is_retraction_moment = False
-        return self._P.getBackRetractionCode(self._current_index, self._last_E) + rear_code
-
 
     # Well plate 복제 기능
     def _cloneWellPlate(self):

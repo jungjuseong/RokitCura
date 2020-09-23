@@ -1,4 +1,5 @@
 Rokit Cura
+dy
 ====
 ### ChangeLog
 ------------
@@ -159,3 +160,6 @@ M109		 -->
 *** start of start-gcode for Rokit Healthcare ***)\nM74 ; enable IO\nM78; light ON\nM176 ; mini comp ON\nM72; motor drive on\nG21; set units to mm\n;{shot_time}\n;{vac_time}\n;{nterval}\n;{shot_p}\n;{vac_p}\n{print_temp}\nM109\n; Axis Home\nM29 Y\nM29 X\nM29 Z\nM29 C\nM29 A\nG78 B50.0\nM29 B\n;(*** end of start-gcode ***)
 
 *** start of end-gcode for Rokit Healthcare ***)\nG0 B0.0\nG0 A0.0\nG0 X0.0 Y0.0 C0.0 Z0.0\nM75 ;IO dis \nM79 ; light OFF\nM177 ;comp off\nM73; motor drive off\n;(*** end of end-gcode ***)
+
+
+#+ "; {}, S: {:.2f}, T: {:.2f}, index: {:d} G01: {:d} {}".format(self._getNextLocation(match), accumulated_shot_distance, accumulated_travel_distance, index, self._shot_index, self._is_shot_moment)
