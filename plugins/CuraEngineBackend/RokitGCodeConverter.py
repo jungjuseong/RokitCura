@@ -236,11 +236,13 @@ class RokitGCodeConverter:
                             if (self._retraction_index > 0 and self._retraction_index < index):
                                 gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
                                 gcode_list[self._retraction_index] = self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+                                accumulated_travel_distance = 0
                     else:
                         if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]: # shot 조건
                             if (self._shot_index > 0 and self._shot_index < index ):
                                 gcode = "M330\n" + gcode
                                 gcode_list[self._shot_index] = self._P.RemovedMark if self._UV_TEST else "M301\n" + gcode_list[self._shot_index]
+                                accumulated_shot_distance = 0
                 gcode_list[index] = gcode 
                 continue
 
@@ -303,6 +305,14 @@ class RokitGCodeConverter:
             if match:
                 if self._current_nozzle.startswith('FFF'):
                     gcode = self._P.pretty_XYE_Format(match)
+                    if gcode_list[index-1].startswith('G1') == False or ('X' and 'Y' not in gcode_list[index-1]):
+                        self._shot_index = index
+                        if self._current_nozzle.startswith('FFF') and self._Q.retraction_enable_list[0]: # retraction
+                            if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
+                                if (self._retraction_index > 0 and self._retraction_index < index):
+                                    gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
+                                    gcode_list[self._retraction_index] = self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
+                                    accumulated_shot_distance = 0
                     self._last_E = float(match.group(4))
                 else:
                     gcode = self._P.prettyFormat(match)
@@ -313,6 +323,15 @@ class RokitGCodeConverter:
             # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
+                if gcode_list[index-1].startswith('G0') == False:
+                    self._retraction_index = index
+                if gcode_list[index-1].startswith('G1'):
+                    if self._current_nozzle.startswith('FFF') == False: # shot
+                        if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]:
+                            if (self._shot_index > 0 and self._shot_index < index ):
+                                gcode = "M330\n" + gcode
+                                gcode_list[self._shot_index] = self._P.RemovedMark if self._UV_TEST else "M301\n" + gcode_list[self._shot_index]
+                                accumulated_travel_distance = 0
                 accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
 
