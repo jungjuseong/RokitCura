@@ -63,7 +63,7 @@ class RokitGCodeConverter:
 
         self._previous_index = -1
         self._current_nozzle = ''
-        self._last_position = 0
+        self._current_position = 0
         self._is_retraction_moment = False
         self._is_shot_moment = False
 
@@ -195,14 +195,14 @@ class RokitGCodeConverter:
         if last_pos is not None:
             print_distance = distance.euclidean(last_pos, next_pos)
         
-        self._last_position = next_pos
+        self._current_position = next_pos
         return print_distance
 
     def _getNextLocation(self, match):
         return [float(match.group(2)), float(match.group(3))]
 
     def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
-        self._last_position = None
+        self._current_position = None
         before_layer_uvcode = ''
         accumulated_travel_distance = 0
         accumulated_shot_distance = 0
@@ -261,7 +261,7 @@ class RokitGCodeConverter:
                 else:
                     gcode = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
                 accumulated_shot_distance = 0
-                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match)) # 밑에 있어야 함**
+                accumulated_shot_distance += self._getDistance(self._current_position, self._getNextLocation(match)) # 밑에 있어야 함**
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue
 
@@ -278,7 +278,7 @@ class RokitGCodeConverter:
                                 gcode = "M330\n" + gcode
                                 gcode_list[self._shot_index] = self._P.RemovedMark if self._UV_TEST else "M301\n" + gcode_list[self._shot_index]
                 accumulated_travel_distance = 0
-                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match)) # 밑에 있어야 함**
+                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match)) # 밑에 있어야 함**
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue
             
@@ -286,7 +286,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
             if match:
                 gcode = self._update_Z(gcode, match)
-                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue
 
@@ -294,7 +294,7 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
                 gcode = self._update_Z3(gcode, match)
-                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue 
 
@@ -306,20 +306,20 @@ class RokitGCodeConverter:
                     self._last_E = float(match.group(4))
                 else:
                     gcode = self._P.prettyFormat(match)
-                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                accumulated_shot_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue
 
             # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
-                accumulated_travel_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
 
             # 수소점 자리 정리 -1
             match = self._P.getMatched(gcode, [self._P.G1_X_Y])
             if match:
-                accumulated_shot_distance += self._getDistance(self._last_position, self._getNextLocation(match))
+                accumulated_shot_distance += self._getDistance(self._current_position, self._getNextLocation(match))
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match) 
                 continue
 
