@@ -229,8 +229,8 @@ class RokitGCodeConverter:
                     continue
 
             # 주석문
-            if gcode.startswith(';'): # comment
-                if gcode.startswith(';TYPE:') == False:
+            if gcode.startswith(';'): # comment]
+                if gcode.startswith(';TIME_ELAPSED:'):
                     if self._current_nozzle.startswith('FFF'): # retraction
                         if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
                             if (self._retraction_index > 0 and self._retraction_index < index):
@@ -251,8 +251,9 @@ class RokitGCodeConverter:
             if match:
                 gcode = self._P.pretty_XYE_Format(match)
                 # shot index 구하기
-                if gcode_list[index-1].startswith('G1') == False or ('X' and 'Y' not in gcode_list[index-1]):
+                if gcode_list[index-1].startswith('G0'):
                     self._shot_index = index
+                if gcode_list[index-1].startswith('G1') == False or ('X' and 'Y' not in gcode_list[index-1]):
                     if self._current_nozzle.startswith('FFF') and self._Q.retraction_enable_list[0]: # retraction
                         if (accumulated_travel_distance > self._Q.retraction_min_travel[self._current_index]):
                             if (self._retraction_index > 0 and self._retraction_index < index):
@@ -271,9 +272,9 @@ class RokitGCodeConverter:
             match = self._P.getMatched(gcode, [self._P.G0_F_X_Y])
             if match:
                 gcode = self._P.prettyFormat(match)
-                if gcode_list[index-1].startswith('G0') == False:
-                    self._retraction_index = index
                 if gcode_list[index-1].startswith('G1'):
+                    self._retraction_index = index
+                if gcode_list[index-1].startswith('G0') == False:
                     if self._current_nozzle.startswith('FFF') == False: # shot
                         if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]:
                             if (self._shot_index > 0 and self._shot_index < index ):
@@ -295,8 +296,11 @@ class RokitGCodeConverter:
             # 디버깅 필요
             match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
             if match:
+                if gcode_list[index-1].startswith('G1'):
+                    self._retraction_index = index
                 gcode = self._update_Z3(gcode, match)
                 accumulated_travel_distance += self._getDistance(self._current_position, self._getNextLocation(match))
+                accumulated_travel_distance = 0
                 gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
                 continue 
 
@@ -323,9 +327,9 @@ class RokitGCodeConverter:
             # 소숫점 자리 정리
             match = self._P.getMatched(gcode, [self._P.G0_X_Y])
             if match:
-                if gcode_list[index-1].startswith('G0') == False:
-                    self._retraction_index = index
                 if gcode_list[index-1].startswith('G1'):
+                    self._retraction_index = index
+                if gcode_list[index-1].startswith('G0') == False:
                     if self._current_nozzle.startswith('FFF') == False: # shot
                         if accumulated_shot_distance > self._Q.retraction_extrusion_window[self._current_index]:
                             if (self._shot_index > 0 and self._shot_index < index ):
