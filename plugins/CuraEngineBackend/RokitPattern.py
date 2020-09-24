@@ -128,22 +128,27 @@ class RokitPattern:
             )
         return ''
 
+    def isExtruder(self, extruder_index) -> bool:
+        nozzle = self._Q.getVariantName(extruder_index)
+        return nozzle.startswith('FFF') or nozzle.startswith('Extruder') 
+
     def getExtruderSetup(self, current, next, layer_no) -> str:
 
         g0b15f300 = self._G['G0_B15_F300']
         ResetHeight = self._G['G0_Z40_C30_F420']
         m29b = self._G['M29_B']
         airoff = self._G['M330']
+        airon = self._G['M301']
 
         aaxis = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[next])
 
         extruder = self.getRokitExtruderName(next)
 
-        TOOL_END = '{airoff}{ResetHeight}{m29b}{bed_pos}'.format(
-                airoff = airoff,
+        TOOL_END = '{ResetHeight}{m29b}{bed_pos}{airoff}'.format(
                 ResetHeight = ResetHeight,
                 m29b = m29b,
-                bed_pos = self.getBedPos(next)
+                bed_pos = self.getBedPos(next),
+                airoff = airoff if self.isExtruder(current) else ''
         )
 
         start_bed_pos = ''
@@ -156,9 +161,10 @@ class RokitPattern:
                 start_bed_pos = start_bed_pos,
                 g0b15f300 = g0b15f300
         )
-        LEFT_START = '{extruder}{start_bed_pos}'.format(
+        LEFT_START = '{extruder}{start_bed_pos}{airon}'.format(
                 extruder = extruder,
-                start_bed_pos = start_bed_pos           
+                start_bed_pos = start_bed_pos,
+                airon = airon if self.isExtruder(next) else ''         
         )
 
         next_nozzle = self._Q.getVariantName(next)

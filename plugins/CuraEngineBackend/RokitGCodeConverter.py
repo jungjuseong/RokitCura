@@ -87,6 +87,7 @@ class RokitGCodeConverter:
 
         self._tool_index = -1
         self._tool_code = ''
+        self._successive_uv = False
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -145,9 +146,6 @@ class RokitGCodeConverter:
     def _getLayerNo(self, z_value, extruder_index) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[extruder_index]))
 
-    def _isExtruder(self, nozzle):
-        return nozzle.startswith('FFF') or nozzle.startswith('Extruder') 
-
     def _getDistance(self, last_pos, next_pos):
         print_distance = 0
         if last_pos is not None:
@@ -186,11 +184,27 @@ class RokitGCodeConverter:
                     uvcode = self._P.getUVCode(self._previous_index, self._current_index, self._current_layer)
 
                 if self._previous_index != self._current_index: # tool changed
-                    if self._previous_index != -1:                
-                        gcode_list[self._tool_index] = '{uvcode}{tool}'.format(uvcode=uvcode, tool=self._tool_code)
+                    if self._previous_index != -1:
+                        if self._successive_uv and uvcode != '':
+                            uvcode = ''
+                            self._successive_uv = False
+
+                        gcode_list[self._tool_index] = '{uvcode}{tool}'.format(
+                            uvcode=uvcode, 
+                            tool=self._tool_code
+                        )
                     self._previous_index = self._current_index
                 else:
-                    gcode_list[index] = '{uvcode}{layer}'.format(uvcode=uvcode, layer=gcode_list[index])
+                    if uvcode != '':
+                        gcode_list[index] = '{uvcode}{bed_pos}{layer}'.format(
+                            uvcode=uvcode,
+                            bed_pos=self._P.getBedPos(self._current_index),
+                            layer=gcode_list[index]
+                        )
+                        self._successive_uv = True
+                    else:
+                        self._successive_uv = False
+                
                
         return '\n'.join(gcode_list)
 
