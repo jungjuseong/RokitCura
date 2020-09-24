@@ -51,8 +51,8 @@ class RokitGCodeConverter:
                     'M29 B\n' +\
                     'G0 Z40.0 C30.0 F460\n' +\
                     'G0 A0.\n' +\
-                    'G56 G92.1\n' +\
-                    'G0 X0.0 Y0.0\n' +\
+                    'G56 G0 X0.0 Y0.0\n' +\
+                    'D6\n' +\
                     'G1 E-1 F300 ; retract the Extruder for release some of the pressure\n' +\
                     'G90 ; absolute positioning\n' +\
                     'M308 27 27 27 27 27 27 27 ; set temperature'
@@ -72,6 +72,8 @@ class RokitGCodeConverter:
         self._retraction_index = -1
                 
         self._layer_no = 0
+        self._previous_layer = -1
+        self._current_layer = -1
 
         # *** G-code Line(command) 관리 변수
         self._gcode_list = []        
@@ -82,6 +84,9 @@ class RokitGCodeConverter:
 
         self._hasAirCompressorOn = False
         self._extruderSetupCode = ''
+
+        self._tool_index = -1
+        self._tool_code = ''
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -112,7 +117,7 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self._P.getUVCode(self._current_index, -1, self._layer_no) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self._P.getUVCode(self._previous_index,self._current_index, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
             else:
                 modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
@@ -155,39 +160,38 @@ class RokitGCodeConverter:
         return [float(match.group(2)), float(match.group(3))]
 
     def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
-        self._current_position = None
-        before_layer_uvcode = ''
-        accumulated_travel_distance = 0
-        accumulated_shot_distance = 0
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
 
-            # D
-            extrdur = self._P.getMatched(gcode, [self._P.D])
-            if extrdur:
-                self._current_index = int(extrdur.group(1))
-                self._hasAirCompressorOn = False
+            # tool changed
+            extruder = self._P.getMatched(gcode, [self._P.D])
+            if extruder:
+                self._current_index = int(extruder.group(1))
+                self._tool_code = self._P.getExtruderSetup(self._previous_index, self._current_index, self._layer_no)                
+                self._tool_index = index
 
-                gcode_list[index] = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no)
-                
-                self._previous_index = self._current_index
+                if self._previous_index == -1: # first tool
+                    gcode_list[index] = self._tool_code
+
                 continue
 
-            # Height
-            height = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
-            if height:
-                z_value = float(height.group(1))
-                new_layer_no = self._getLayerNo(z_value, self._current_index)
-        
+            # layer changed
+            layer = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
+            if layer:
+                self._current_layer = self._getLayerNo(float(layer.group(1)), self._current_index)
+
                 uvcode = ''
-                if new_layer_no > self._layer_no:
-                    uvcode = self._P.getUVCode(self._current_index, -1, new_layer_no)        
-                    self._layer_no = new_layer_no
-                    if uvcode != '':
-                        gcode_list[index] = '{uvcode}\n{height_code}'.format(uvcode=uvcode, height_code=gcode_list[index])                
+                if self._current_layer > 0 or self._previous_index != -1:
+                    uvcode = self._P.getUVCode(self._previous_index, self._current_index, self._current_layer)
 
-
+                if self._previous_index != self._current_index: # tool changed
+                    if self._previous_index != -1:                
+                        gcode_list[self._tool_index] = '{uvcode}{tool}'.format(uvcode=uvcode, tool=self._tool_code)
+                    self._previous_index = self._current_index
+                else:
+                    gcode_list[index] = '{uvcode}{layer}'.format(uvcode=uvcode, layer=gcode_list[index])
+               
         return '\n'.join(gcode_list)
 
     # Well plate 복제 기능

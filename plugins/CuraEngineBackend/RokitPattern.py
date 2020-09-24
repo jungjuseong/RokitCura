@@ -92,15 +92,6 @@ class RokitPattern:
         right_bed= self._G['G55_G0_X0_Y0']
         return right_bed if extruder_index > 0 else left_bed
 
-    # UV code
-    def UV_Code(self, extruder_index) -> str:
-        code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
-        return code.format(
-            channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
-            dimming = self._Q.uv_dimming_list[extruder_index], 
-            time = self._Q.uv_time_list[extruder_index], 
-            duration = self._Q.uv_time_list[extruder_index] * 1000)
-
     def is_UV_layer(self,extruder_index,layer_no) -> bool:
         if self._Q.uv_enable_list[extruder_index] == False:
             return False     
@@ -113,23 +104,89 @@ class RokitPattern:
             return True
         return False
 
+    # UV code
+    def UV_Code(self, extruder_index) -> str:
+        code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        return code.format(
+            channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
+            dimming = self._Q.uv_dimming_list[extruder_index], 
+            time = self._Q.uv_time_list[extruder_index], 
+            duration = self._Q.uv_time_list[extruder_index] * 1000)
+    
     # UV 명령어 삽입
     def getUVCode(self, current, next, layer_no) -> str:
-
         if self.is_UV_layer(current, layer_no):
             comment = ';UV - Layer:{layer_no} for {extruder}\n'.format(
                     layer_no = layer_no, 
                     extruder = self.getExtruderName(current)
-            )   
-            bed_pos = self.getBedPos(next) if next != -1 else ''
-
-            return '{comment}{reset_height}{m29b}{uvcode}{bed_pos};end\n'.format(
+            )
+            return '{comment}{reset_height}{m29b}{uvcode}\n'.format(
                 comment = comment,
                 reset_height = self._G['G0_Z40_C30_F420'],
                 m29b = self._G['M29_B'],
-                uvcode = self.UV_Code(current),
-                bed_pos = bed_pos)
+                uvcode = self.UV_Code(current)
+            )
         return ''
+
+    def getExtruderSetup(self, current, next, layer_no) -> str:
+
+        g0b15f300 = self._G['G0_B15_F300']
+        ResetHeight = self._G['G0_Z40_C30_F420']
+        m29b = self._G['M29_B']
+        airoff = self._G['M330']
+
+        aaxis = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[next])
+
+        extruder = self.getRokitExtruderName(next)
+
+        TOOL_END = '{airoff}{ResetHeight}{m29b}{bed_pos}'.format(
+                airoff = airoff,
+                ResetHeight = ResetHeight,
+                m29b = m29b,
+                bed_pos = self.getBedPos(next)
+        )
+
+        start_bed_pos = ''
+        if current == -1:
+            start_bed_pos = self.getBedPos(next)          
+
+        RIGHT_START = '{extruder}{aaxis}{start_bed_pos}{g0b15f300}'.format(
+                extruder = extruder,
+                aaxis = aaxis,
+                start_bed_pos = start_bed_pos,
+                g0b15f300 = g0b15f300
+        )
+        LEFT_START = '{extruder}{start_bed_pos}'.format(
+                extruder = extruder,
+                start_bed_pos = start_bed_pos           
+        )
+
+        next_nozzle = self._Q.getVariantName(next)
+        current_nozzle = self._Q.getVariantName(current)
+
+        code = ''
+        if current == -1: # Nozzle이 처음 나왔을때
+            MESSAGE = ';Tool Setup - start {nozzle}\n'.format(nozzle=next_nozzle)
+            # D1~D5
+            if next > 0:
+                code = MESSAGE + '{start}'.format(start=RIGHT_START)
+            # D6(FFF/HotMelt)
+            elif next == 0: 
+                code = MESSAGE + '{start}'.format(start=LEFT_START)
+        else:            
+            MESSAGE = ';Tool Setup - changes from {curent} to {next}\n'.format(curent=self.getExtruderName(current),next=self.getExtruderName(next))
+
+            # D6(FFF/HotMelt)에서 D1~5로 변경된 경우
+            if current == 0 and next > 0:              
+                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=RIGHT_START)
+            # D1~5에서 D6(FFF/HotMelt)로 변경된 경우
+            elif current > 0 and next == 0:
+                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=LEFT_START)                 
+            # D1~D5에서 D1~D5으로 변경된 경우
+            elif current > 0 and next > 0:
+                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=RIGHT_START)            
+
+        return code + ';Setup End\n'
 
     # 익스트루더가 교체
     def getExtruderSetupCode(self, current, next, layer_no) -> str:
