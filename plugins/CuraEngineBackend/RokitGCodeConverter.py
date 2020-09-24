@@ -148,14 +148,14 @@ class RokitGCodeConverter:
         if last_pos is not None:
             print_distance = distance.euclidean(last_pos, next_pos)
         
-        self._last_position = next_pos
+        self._current_position = next_pos
         return print_distance
 
     def _getNextLocation(self, match):
         return [float(match.group(2)), float(match.group(3))]
 
     def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
-        self._last_position = None
+        self._current_position = None
         before_layer_uvcode = ''
         accumulated_travel_distance = 0
         accumulated_shot_distance = 0
