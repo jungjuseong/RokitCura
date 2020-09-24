@@ -35,11 +35,11 @@ class RokitPattern:
                     'M29 X\n'
 
         # match patterns
-        self.D = re.compile(r'^D([0-9]+)')
-        self.LAYER_NO = re.compile(r'^;LAYER:([0-9]+)')
-
         _FP = r'[+-]?\d*[.]?\d+'
+        self.D = re.compile(r'^[TD]([0-9]+)')
+        self.LAYER_NO = re.compile(r'^;LAYER:({z})'.format(z=_FP))
 
+        self.G0_Z_OR_C = re.compile(r'^G0 [CZ]({z})'.format(z=_FP))
         self.G0_or_G1 = re.compile(r'^G[0-1] ')
         self.G92_E0 = re.compile(r'^(G92 E0$)')
 
@@ -132,7 +132,7 @@ class RokitPattern:
         return ''
 
     # 익스트루더가 교체
-    def getExtruderSetupCode(self, current, next, layer_no, isStartCode=False) -> str:
+    def getExtruderSetupCode(self, current, next, layer_no) -> str:
 
         g0b15f300 = self._G['G0_B15_F300']
         ResetHeight = self._G['G0_Z40_C30_F420']
@@ -141,7 +141,7 @@ class RokitPattern:
 
         aaxis = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[next])
 
-        uvcode = '' if isStartCode else self.getUVCode(current, next, layer_no) # StartCode라면 uv를 skip
+        uvcode = self.getUVCode(current, next, layer_no)
         extruder = self.getRokitExtruderName(next)
 
         TOOL_END = '{airoff}{uvcode}{ResetHeight}{m29b}{bed_pos}'.format(

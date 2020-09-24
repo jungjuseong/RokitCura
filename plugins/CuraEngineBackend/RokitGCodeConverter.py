@@ -62,12 +62,13 @@ class RokitGCodeConverter:
         self._enabled_extruder_list = [] 
 
         self._previous_index = -1
-        self._current_nozzle = ''
 
-        self._accummulated_distance = 0
+        self._last_position = 0
         self._is_retraction_moment = False
+        self._is_shot_moment = False
 
         self._last_E = 0.0
+        self._shot_index = -1
         self._retraction_index = -1
                 
         self._layer_no = 0
@@ -76,7 +77,6 @@ class RokitGCodeConverter:
         self._gcode_list = []        
         self._last_extrusion_amount = 0
 
-        self._is_shot_moment = True
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
 
@@ -99,19 +99,14 @@ class RokitGCodeConverter:
         for index, gcodes in enumerate(self._gcode_list):
             modified_gcodes = gcodes
 
-            if ';FLAVOR:Marlin' in gcodes:
-                modified_gcodes = gcodes.replace(';FLAVOR:Marlin', ';F/W : 7.7.1.x')
-
-            elif self.StartOfStartCode in gcodes:
+            if self.StartOfStartCode in gcodes:
                 self._StartOfStartCodeIndex = index
-                modified_gcodes = gcodes.replace('Cura_SteamEngine', 'OrganRegenerator_Engine')
                 modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
                 modified_gcodes = self._P.replaceLayerInfo(modified_gcodes)
                 if self._Q.dispensor_enable:
                    modified_gcodes = self._P.replaceDispenserSetupCode(modified_gcodes)
-
-            elif self.StartOfEndCode in gcodes:
-                
+            
+            elif self.StartOfEndCode in gcodes:                
                 self._EndOfStartCodeIndex = index if self._EndOfStartCodeIndex is None else self._EndOfStartCodeIndex
                 modified_gcodes = self.StartOfEndCode +\
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
@@ -119,19 +114,10 @@ class RokitGCodeConverter:
 
                 modified_gcodes = self._P.getUVCode(self._current_index, -1, self._layer_no) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
-            elif gcodes.startswith(';LAYER:'):    
-                modified_gcodes = self._convertOneLayerGCode(gcodes)
-
-            elif self._P.G1_F_E.match(gcodes) is not None:
-                self._EndOfStartCodeIndex = index
-                modified_gcodes = self._convertOneLayerGCode(gcodes)
+            else:
+                modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
 
             self._gcode_list[index] = self._P.removeRedundencyGCode(modified_gcodes)
-
-        startSetupCode = self._P.removeRedundencyGCode(self._extruderSetupCode)
-        self._gcode_list[self._StartOfStartCodeIndex] += '\n;Start Point\n{start_setup};Start Point end\n\n{well_num}'.format(
-            start_setup = startSetupCode,
-            well_num = ";Well Number: 0\n" if self._build_plate_type == 'Well Plate' else "")
 
         if self._build_plate_type == 'Well Plate':
             self._cloneWellPlate()
@@ -151,228 +137,58 @@ class RokitGCodeConverter:
             self._hasAirCompressorOn = False
         return gcode
 
-    # X Y를 인식하는 모든 부분에 추가함. (G1과 G0일 때의 x,y 좌표 수용)
-    def _getTravelDistance(self, current_pos, next_pos):
-        if current_pos is not None:
-            self._accummulated_distance += distance.euclidean(current_pos, next_pos)
-        if self._accummulated_distance > self._Q.retraction_min_travel[0]:
-            self._is_retraction_moment = True
-            self._accummulated_distance = 0
-        return next_pos
-
-    def _getZform(self, front_code, z_value, extruder_index, uvcode='') -> str:
-        return '{front_code}\n{uvcode}G0 {axis_name}{height:<.3f}'.format(
-            front_code = front_code,
-            uvcode = uvcode,
-            axis_name = 'C' if extruder_index > 0 else 'Z',
-            height = z_value
-        )
-
-    def _update_XYZ(self, gcode, matched) -> int:        
-        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
-        z_value = float(matched.group(4))
-        return self._getZform(front_code, z_value, self._current_index)
-
     def _getLayerNo(self, z_value, extruder_index) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[extruder_index]))
-
-    def _update_Z_UV(self, gcode, matched) -> str:     
-        front_code = '{head} X{x:<.3f} Y{y:<.3f}'.format(head=matched.group(1), x=float(matched.group(2)), y=float(matched.group(3)))
-        z_value = float(matched.group(4))
-        new_layer_no = self._getLayerNo(z_value, self._current_index)
-        
-        uvcode = ''
-        if new_layer_no > self._layer_no:
-            uvcode = self._P.getUVCode(self._current_index, -1, new_layer_no)        
-            self._layer_no = new_layer_no
-
-        return self._getZform(front_code, z_value, self._current_index, uvcode)
-
-    def _update_Z2(self, gcode, matched) -> str:        
-        front_code = matched.group(1)
-        z_value = float(matched.group(2))
-        return self._getZform(front_code, z_value, self._current_index)
 
     def _isExtruder(self, nozzle):
         return nozzle.startswith('FFF') or nozzle.startswith('Extruder') 
 
-    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
-
-        current_position = None
-
-        gcode_list = gcodes.split('\n')
-        for index, gcode in enumerate(gcode_list):
-
-            if gcode.startswith(';LAYER:'):
-                #self._layer_no = self._P.getLayerIndex(gcodes)
-                continue
-
-            if self._P.MarlinCodeForRemoval.match(gcode) or\
-                (self._isExtruder(self._current_nozzle) is False and gcode == 'G92 E0'):
-                gcode_list[index] = self._P.RemovedMark
-                continue
-            
-            if isStartCode:
-                match = self._P.getMatched(gcode, [self._P.G92_E0])
-                if match:
-                    gcode_list[index] = self._P.RemovedMark
-                    self._extruderSetupCode += match.group(1) + '\n'
-                    continue
-                
-            if gcode.startswith(';'): # comment
-                if self._isExtruder(self._current_nozzle):
-                    if self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
-                        self._is_retraction_moment = False
-                        gcode = self._P.getBackRetractionCode(self._current_index, self._last_E) + gcode
-                        gcode_list[self._retraction_index] = self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
-                        self._accummulated_distance = 0
-                gcode_list[index] = gcode 
-                continue
-
-            # add M301
-            match = self._P.getMatched(gcode, [self._P.G1_F_X_Y_E])
-            if match:
-                gcode = self._P.pretty_XYE_Format(match)
-                if  self._isExtruder(self._current_nozzle):
-                    pressure_code = self._getPressureOn(gcode, reverse=True)
-                    current_position = self._getNextLocation(match)
-                    if self._retraction_index < index and self._is_retraction_moment and self._Q.retraction_enable_list[0]:
-                        gcode = self._insertBackRetraction(pressure_code) # Back-Retraction
-                        gcode_list[self._retraction_index] = \
-                            self._P.RemovedMark if self._UV_TEST else self._P.getRetractionCode(self._current_index, self._last_E) + gcode_list[self._retraction_index]
-                    self._accummulated_distance = 0
-                    self._last_E = float(match.group(4))
-                else:
-                    gcode = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
-                    gcode = self._getPressureOn(gcode, reverse=True)
-
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            match = self._P.getMatched(gcode, [self._P.G1_F_E])
-            if match:
-                # remove itself when Dispensor
-                if self._current_index > 0 or isStartCode:
-                    gcode_list[index] = self._P.RemovedMark
-                    continue
-                elif  self._isExtruder(self._current_nozzle):
-                    self._is_retraction_moment = False
-
-                gcode = '{head} E{e:<.5f}\n'.format(head = match.group(1),e = float(match.group(2)))
-
-                # add M301 when Extruder and this is first M301
-                if  self._isExtruder(self._current_nozzle) and isStartCode == False:
-                    gcode = self._getPressureOn(gcode)
-                
-                if isStartCode:
-                    gcode_list[index] = self._P.RemovedMark
-                    self._extruderSetupCode += gcode + '\n'
-                else:
-                    gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y_Z])
-            if match:
-                gcode = self._update_Z_UV(gcode, match)
-                if  self._isExtruder(self._current_nozzle):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                else:
-                    gcode = self._getPressureOff(gcode)
-                
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G1_F_Z])
-            if match:
-                gcode = self._update_Z2(gcode, match)
-                if  self._isExtruder(self._current_nozzle):
-                    current_position = self._getNextLocation(match)
-                else:
-                    gcode = self._getPressureOff(gcode)
-                
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-             # Z 값 갱신하고 FFF가 아닐때 M330 추가
-            match = self._P.getMatched(gcode, [self._P.G0_F_X_Y])
-            if match:
-                gcode = self._P.prettyFormat(match)
-                if  self._isExtruder(self._current_nozzle):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                    if not gcode_list[index-1].startswith('G0'):
-                        self._retraction_index = index
-                else:
-                    gcode = self._getPressureOff(gcode)
-
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # add M330 
-            match = self._P.getMatched(gcode, [self._P.G0_X_Y_Z])
-            if match:
-                gcode = self._update_XYZ(gcode, match)                    
-                if  self._isExtruder(self._current_nozzle) is False:                    
-                    gcode = self._getPressureOff(gcode) 
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue 
-
-            # E 제거
-            match = self._P.getMatched(gcode, [self._P.G1_X_Y_E])
-            if match:
-                if  self._isExtruder(self._current_nozzle):
-                    gcode = self._P.pretty_XYE_Format(match)
-                    current_position = self._getNextLocation(match)
-                    self._accummulated_distance = 0
-                    self._last_E = float(match.group(4))
-                else:
-                    gcode = self._P.prettyFormat(match)
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else gcode
-                continue
-
-            # 소숫점 자리 정리
-            match = self._P.getMatched(gcode, [self._P.G0_X_Y])
-            if match:
-                if  self._isExtruder(self._current_nozzle):
-                    current_position = self._getTravelDistance(current_position, self._getNextLocation(match)) # retract
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)
-
-            # 수소점 자리 정리 -1
-            match = self._P.getMatched(gcode, [self._P.G1_X_Y])
-            if match:
-                if  self._isExtruder(self._current_nozzle):
-                    current_position = self._getNextLocation(match) # retract
-                gcode_list[index] = self._P.RemovedMark if self._UV_TEST else self._P.prettyFormat(match)   
-                continue
-
-            # D
-            match = self._P.getMatched(gcode, [self._P.D])
-            if match: # Nozzle changed
-                self._current_index = int(match.group(1))
-                self._hasAirCompressorOn = False
-
-                extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no, isStartCode)
-                if isStartCode:
-                    self._extruderSetupCode = extruder_setup
-                    gcode_list[index] = ''
-                else:
-                    gcode_list[index] = extruder_setup
-                
-                self._previous_index = self._current_index
-                self._addToEnabledExtruders(self._current_index)
-                self._current_nozzle = self._Q.getVariantName(self._current_index)
-                continue
-
-        return '\n'.join(gcode_list)
+    def _getDistance(self, last_pos, next_pos):
+        print_distance = 0
+        if last_pos is not None:
+            print_distance = distance.euclidean(last_pos, next_pos)
+        
+        self._last_position = next_pos
+        return print_distance
 
     def _getNextLocation(self, match):
         return [float(match.group(2)), float(match.group(3))]
 
-    def _insertBackRetraction(self, rear_code):
-        self._is_retraction_moment = False
-        return self._P.getBackRetractionCode(self._current_index, self._last_E) + rear_code
+    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
+        self._last_position = None
+        before_layer_uvcode = ''
+        accumulated_travel_distance = 0
+        accumulated_shot_distance = 0
 
+        gcode_list = gcodes.split('\n')
+        for index, gcode in enumerate(gcode_list):
+
+            # D
+            extrdur = self._P.getMatched(gcode, [self._P.D])
+            if extrdur:
+                self._current_index = int(extrdur.group(1))
+                self._hasAirCompressorOn = False
+
+                gcode_list[index] = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no)
+                
+                self._previous_index = self._current_index
+                continue
+
+            # Height
+            height = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
+            if height:
+                z_value = float(height.group(1))
+                new_layer_no = self._getLayerNo(z_value, self._current_index)
+        
+                uvcode = ''
+                if new_layer_no > self._layer_no:
+                    uvcode = self._P.getUVCode(self._current_index, -1, new_layer_no)        
+                    self._layer_no = new_layer_no
+                    if uvcode != '':
+                        gcode_list[index] = '{uvcode}\n{height_code}'.format(uvcode=uvcode, height_code=gcode_list[index])                
+
+
+        return '\n'.join(gcode_list)
 
     # Well plate 복제 기능
     def _cloneWellPlate(self):
