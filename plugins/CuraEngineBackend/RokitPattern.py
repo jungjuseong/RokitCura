@@ -106,7 +106,7 @@ class RokitPattern:
 
     # UV code
     def UV_Code(self, extruder_index) -> str:
-        code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{P4_DURATION}'.format(**self._G)
+        code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{G4_DURATION}'.format(**self._G)
         return code.format(
             channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
             dimming = self._Q.uv_dimming_list[extruder_index], 

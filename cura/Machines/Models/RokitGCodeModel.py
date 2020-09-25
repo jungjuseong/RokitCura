@@ -46,7 +46,7 @@ class RokitGCodeModel():
             'M385_DIMMING': 'M385 {dimming:<.1f}\n',
             'M386_TIME': 'M386 {time:<.1f}\n',
             'M384': 'M384\n',
-            'P4_DURATION': 'P4 P{duration:d}\n',
+            'G4_DURATION': 'G4 P{duration:d}\n',
 
             'M173': 'M173\n',
             'M174': 'M174\n',

@@ -59,31 +59,16 @@ class RokitGCodeConverter:
 
         # 선택한 명령어
         self._current_index = -1  
-        self._enabled_extruder_list = [] 
-
         self._previous_index = -1
-
-        self._last_position = 0
-        self._is_retraction_moment = False
-        self._is_shot_moment = False
-
-        self._last_E = 0.0
-        self._shot_index = -1
-        self._retraction_index = -1
                 
         self._layer_no = 0
-        self._previous_layer = -1
         self._current_layer = -1
 
         # *** G-code Line(command) 관리 변수
         self._gcode_list = []        
-        self._last_extrusion_amount = 0
 
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
-
-        self._hasAirCompressorOn = False
-        self._extruderSetupCode = ''
 
         self._tool_index = -1
         self._tool_code = ''
@@ -94,11 +79,6 @@ class RokitGCodeConverter:
 
     def getReplacedlist(self) -> str:
         return self._gcode_list
-    
-    # 사용된 익스트루더 index 기록
-    def _addToEnabledExtruders(self, current_index) -> None:
-        if current_index not in self._enabled_extruder_list:
-            self._enabled_extruder_list.append(current_index) # [0,1,2,3,4,5]
 
     def run(self) -> None:
 
@@ -128,20 +108,6 @@ class RokitGCodeConverter:
         if self._build_plate_type == 'Well Plate':
             self._cloneWellPlate()
 
-    def _getPressureOn(self, gcode, reverse=False) -> str:
-        if self._hasAirCompressorOn == False:
-            self._hasAirCompressorOn = True
-            if reverse:
-                gcode = self._G['M301'] + gcode
-            else:
-                gcode += self._G['M301']
-        return gcode
-
-    def _getPressureOff(self, gcode) -> str:
-        if self._hasAirCompressorOn:
-            gcode = self._G['M330'] + gcode
-            self._hasAirCompressorOn = False
-        return gcode
 
     def _getLayerNo(self, z_value, extruder_index) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[extruder_index]))
