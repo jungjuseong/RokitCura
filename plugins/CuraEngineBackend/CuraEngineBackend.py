@@ -51,7 +51,7 @@ class CuraEngineBackend(QObject, Backend):
         super().__init__()
         # Find out where the engine is located, and how it is called.
         # This depends on how Cura is packaged and which OS we are running on.
-        executable_name = "CuraEngine"
+        executable_name = "OrganRegenEngine"
         if Platform.isWindows():
             executable_name += ".exe"
         default_engine_location = executable_name

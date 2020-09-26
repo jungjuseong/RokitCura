@@ -58,10 +58,9 @@ class RokitGCodeConverter:
                     'M308 27 27 27 27 27 27 27 ; set temperature'
 
         # 선택한 명령어
-        self._current_index = -1  
-        self._previous_index = -1
+        self._current_tool = -1  
+        self._previous_tool = -1
                 
-        self._layer_no = 0
         self._current_layer = -1
 
         # *** G-code Line(command) 관리 변수
@@ -69,6 +68,8 @@ class RokitGCodeConverter:
 
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
+
+        self._tool_initial_layers = [-1,-1,-1,-1,-1,-1] # 툴이 최초로 시작한 레이어 번호
 
         self._tool_index = -1
         self._tool_code = ''
@@ -98,7 +99,7 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self._P.getUVCode(self._previous_index,self._current_index, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self._P.getUVCode(self._current_tool, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
             else:
                 modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
@@ -109,8 +110,8 @@ class RokitGCodeConverter:
             self._cloneWellPlate()
 
 
-    def _getLayerNo(self, z_value, extruder_index) -> int:
-        return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[extruder_index]))
+    def _getLayerNo(self, z_value, tool) -> int:
+        return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
 
     def _getDistance(self, last_pos, next_pos):
         print_distance = 0
@@ -131,11 +132,11 @@ class RokitGCodeConverter:
             # tool changed
             extruder = self._P.getMatched(gcode, [self._P.D])
             if extruder:
-                self._current_index = int(extruder.group(1))
-                self._tool_code = self._P.getExtruderSetup(self._previous_index, self._current_index, self._layer_no)                
+                self._current_tool = int(extruder.group(1))
+                self._tool_code = self._P.getExtruderSetup(self._previous_tool, self._current_tool, self._current_layer)                
                 self._tool_index = index
 
-                if self._previous_index == -1: # first tool
+                if self._previous_tool == -1: # first tool
                     gcode_list[index] = self._tool_code
 
                 continue
@@ -143,14 +144,19 @@ class RokitGCodeConverter:
             # layer changed
             layer = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
             if layer:
-                self._current_layer = self._getLayerNo(float(layer.group(1)), self._current_index)
+                self._current_layer = self._getLayerNo(float(layer.group(1)), self._current_tool)
+
+                # 처음 툴이 나왔을 때 툴이 시작한 레이어를 기록
+                if self._tool_initial_layers[self._current_tool] == -1:
+                    self._tool_initial_layers[self._current_tool] = self._current_layer
 
                 uvcode = ''
-                if self._current_layer > 0 or self._previous_index != -1:
-                    uvcode = self._P.getUVCode(self._previous_index, self._current_index, self._current_layer)
+                if self._current_layer > 0 or self._previous_tool != -1:
+                    tool_layer = self._current_layer - self._tool_initial_layers[self._current_tool]
+                    uvcode = self._P.getUVCode(self._current_tool, tool_layer)
 
-                if self._previous_index != self._current_index: # tool changed
-                    if self._previous_index != -1:
+                if self._previous_tool != self._current_tool: # tool changed
+                    if self._previous_tool != -1:
                         if self._successive_uv and uvcode != '':
                             uvcode = ''
                             self._successive_uv = False
@@ -159,12 +165,12 @@ class RokitGCodeConverter:
                             uvcode=uvcode, 
                             tool=self._tool_code
                         )
-                    self._previous_index = self._current_index
-                else:
+                    self._previous_tool = self._current_tool
+                else: # layer changed
                     if uvcode != '':
                         gcode_list[index] = '{uvcode}{bed_pos}{layer}'.format(
                             uvcode=uvcode,
-                            bed_pos=self._P.getBedPos(self._current_index),
+                            bed_pos=self._P.getBedPos(self._current_tool),
                             layer=gcode_list[index]
                         )
                         self._successive_uv = True
