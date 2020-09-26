@@ -22,7 +22,7 @@ Window
     width: minimumWidth
     height: minimumHeight
     color: UM.Theme.getColor("rokit_generation_title_background")
-    title: catalog.i18nc("@title:window", "Cura Backups")
+    title: catalog.i18nc("@title:window", "OrganRegen Backups")
 
     // Globally available.
     UM.I18nCatalog

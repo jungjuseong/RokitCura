@@ -1,6 +1,6 @@
 [4.6.0]
 
-THANK YOU to all Ultimaker Cura users helping in the fight against COVID-19 – with 3D printing, volunteering, or just by staying home. Want to get involved? Find out more at https://ultimaker.com/in/cura/covid-19
+THANK YOU to all OrganRgenerator users helping in the fight against COVID-19 – with 3D printing, volunteering, or just by staying home. Want to get involved? Find out more at https://ultimaker.com/in/cura/covid-19
 
 * New Intent profiles.
 In version 4.4 we introduced Intent profiles for the Ultimaker S3 and Ultimaker S5 which allow you to start prints at the click of a button without a lot of configuration steps. Due to popular demand, version 4.6 expands the range of Engineering Intent profiles to include more of the Ultimaker material portfolio: PC, Nylon, CPE, and CPE+. These work with 0.4 print cores.

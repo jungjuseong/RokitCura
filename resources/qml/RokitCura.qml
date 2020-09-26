@@ -125,8 +125,6 @@ UM.MainWindow {
 
         ApplicationMenu {
            id: applicationMenu
-           visible: false
-           height: 0
            window: base
         }
 

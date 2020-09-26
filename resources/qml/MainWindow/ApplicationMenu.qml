@@ -49,43 +49,43 @@ Item
 
         RokitSettingsMenu { title: catalog.i18nc("@title:menu menubar:toplevel", "&Settings") }
 
-        Menu
-        {
-            id: extensionMenu
-            title: catalog.i18nc("@title:menu menubar:toplevel", "E&xtensions")
+        // Menu
+        // {
+        //     id: extensionMenu
+        //     title: catalog.i18nc("@title:menu menubar:toplevel", "E&xtensions")
 
-            Instantiator
-            {
-                id: extensions
-                model: UM.ExtensionModel { }
+        //     Instantiator
+        //     {
+        //         id: extensions
+        //         model: UM.ExtensionModel { }
 
-                Menu
-                {
-                    id: sub_menu
-                    title: model.name;
-                    visible: actions != null
-                    enabled: actions != null
-                    Instantiator
-                    {
-                        model: actions
-                        Loader
-                        {
-                            property var extensionsModel: extensions.model
-                            property var modelText: model.text
-                            property var extensionName: name
+        //         Menu
+        //         {
+        //             id: sub_menu
+        //             title: model.name;
+        //             visible: actions != null
+        //             enabled: actions != null
+        //             Instantiator
+        //             {
+        //                 model: actions
+        //                 Loader
+        //                 {
+        //                     property var extensionsModel: extensions.model
+        //                     property var modelText: model.text
+        //                     property var extensionName: name
 
-                            sourceComponent: modelText.trim() == "" ? extensionsMenuSeparator : extensionsMenuItem
-                        }
+        //                     sourceComponent: modelText.trim() == "" ? extensionsMenuSeparator : extensionsMenuItem
+        //                 }
 
-                        onObjectAdded: sub_menu.insertItem(index, object.item)
-                        onObjectRemoved: sub_menu.removeItem(object.item)
-                    }
-                }
+        //                 onObjectAdded: sub_menu.insertItem(index, object.item)
+        //                 onObjectRemoved: sub_menu.removeItem(object.item)
+        //             }
+        //         }
 
-                onObjectAdded: extensionMenu.insertItem(index, object)
-                onObjectRemoved: extensionMenu.removeItem(object)
-            }
-        }
+        //         onObjectAdded: extensionMenu.insertItem(index, object)
+        //         onObjectRemoved: extensionMenu.removeItem(object)
+        //     }
+        // }
 
         Menu
         {
@@ -101,13 +101,13 @@ Item
             title: catalog.i18nc("@title:menu menubar:toplevel", "&Help")
 
             MenuItem { action: Cura.Actions.showProfileFolder }
-            MenuItem { action: Cura.Actions.showTroubleshooting}
-            MenuItem { action: Cura.Actions.documentation }
-            MenuItem { action: Cura.Actions.reportBug }
+            //MenuItem { action: Cura.Actions.showTroubleshooting}
+            //MenuItem { action: Cura.Actions.documentation }
+            //MenuItem { action: Cura.Actions.reportBug }
             MenuSeparator { }
-            MenuItem { action: Cura.Actions.whatsNew }
+            //MenuItem { action: Cura.Actions.whatsNew }
             MenuItem { action: Cura.Actions.about }
-        }
+        } 
     }
 
     Component
