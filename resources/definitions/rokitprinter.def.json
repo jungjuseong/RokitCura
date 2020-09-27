@@ -5066,7 +5066,6 @@
                         "none": "None"
                     },
                     "default_value": "skirt",
-                    "resolve": "extruderValue(adhesion_extruder_nr, 'adhesion_type')",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -5086,7 +5085,7 @@
                     "label": "Skirt Line Count",
                     "description": "Multiple skirt lines help to prime your extrusion better for small models. Setting this to 0 will disable the skirt.",
                     "type": "int",
-                    "default_value": 1,
+                    "default_value": 0,
                     "minimum_value": "0",
                     "maximum_value_warning": "10",
                     "enabled": "adhesion_type == 'skirt'",
@@ -5195,7 +5194,6 @@
                     "minimum_value_warning": "raft_interface_line_width",
                     "maximum_value_warning": "20",
                     "enabled": "adhesion_type == 'raft'",
-                    "limit_to_extruder": "adhesion_extruder_nr",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -5209,7 +5207,6 @@
                     "minimum_value": "0",
                     "minimum_value_warning": "raft_interface_line_width",
                     "enabled": "adhesion_type == 'raft'",
-                    "limit_to_extruder": "adhesion_extruder_nr",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },

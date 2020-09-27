@@ -355,7 +355,7 @@ class RokitGCodeConverter:
                 self._current_index = int(match.group(1))
                 self._hasAirCompressorOn = False
 
-                extruder_setup = self._P.getExtruderSetupCode(self._previous_index, self._current_index, self._layer_no, isStartCode)
+                extruder_setup = self._P.getToolSetupCode(self._previous_index, self._current_index, self._layer_no, isStartCode)
                 if isStartCode:
                     self._extruderSetupCode = extruder_setup
                     gcode_list[index] = ''

@@ -35,11 +35,11 @@ class RokitPattern:
                     'M29 X\n'
 
         # match patterns
-        _FP = r'[+-]?\d*[.]?\d+'
+        _FP = r'[+-]?\d*[.]?\d*'
         self.D = re.compile(r'^[TD]([0-9]+)')
         self.LAYER_NO = re.compile(r'^;LAYER:({z})'.format(z=_FP))
 
-        self.G0_Z_OR_C = re.compile(r'^G0 [CZ]({z})'.format(z=_FP))
+        self.G0_Z_OR_C = re.compile(r'^G0 [CZ]({z})$'.format(z=_FP))
         self.G0_or_G1 = re.compile(r'^G[0-1] ')
         self.G92_E0 = re.compile(r'^(G92 E0$)')
 
@@ -62,29 +62,12 @@ class RokitPattern:
         self.G1_F_G1_F = re.compile(r'^G1 F{f1}\n(G1 F{f2}\n)'.format(f1=_FP,f2=_FP))
         self.OnlyInteger = re.compile(r'([XYZ][-+]?\d+)')
 
-    def getLayerIndex(self, one_layer_gcode) -> int:
-        return int(self.LAYER_NO.search(one_layer_gcode).group(1))
-
     def getRokitExtruderName(self, index) -> str:
         return '{extruder_name} ;Nozzle({nozzle_type})\n'.format(
             extruder_name = self._Q.ExtruderNames[index], 
             nozzle_type = self._Q.getVariantName(index))
 
-    def getRetractionCode(self, extruder_index, last_e) -> str:
-        if self._Q.retraction_enable_list[extruder_index]:
-            return 'G1 F{f} E{e:<.5f} ;(Retraction_a)\n'.format(
-                f = self._Q.retraction_speed_list[extruder_index] * 60, 
-                e = last_e - self._Q.retraction_amount_list[extruder_index])
-        return ''
-
-    def getBackRetractionCode(self,extruder_index,last_e) -> str:
-        if self._Q.retraction_enable_list[extruder_index]:
-            return 'G1 F{f} E{e:<.5f} ;(Back-Retraction_a)\n'.format(
-                f = self._Q.retraction_speed_list[extruder_index] * 60, 
-                e = last_e)
-        return ''
-
-    def getExtruderName(self, extruder_index) -> str:
+    def getToolName(self, extruder_index) -> str:
         return 'D6' if extruder_index == 0 else 'D{index:<d}'.format(index=extruder_index)
 
     def getBedPos(self, extruder_index) -> str:
@@ -92,12 +75,12 @@ class RokitPattern:
         right_bed= self._G['G55_G0_X0_Y0']
         return right_bed if extruder_index > 0 else left_bed
 
-    def is_UV_layer(self,extruder_index,layer_no) -> bool:
-        if self._Q.uv_enable_list[extruder_index] == False:
+    def is_UV_layer(self,tool,layer_no) -> bool:
+        if self._Q.uv_enable_list[tool] == False:
             return False     
 
-        per_layer = self._Q.uv_per_layer_list[extruder_index]
-        start_layer = self._Q.uv_start_layer_list[extruder_index]
+        per_layer = self._Q.uv_per_layer_list[tool]
+        start_layer = self._Q.uv_start_layer_list[tool]
         layer = layer_no - start_layer + 1
 
         if layer >= 0 and (layer % per_layer) == 0:
@@ -105,26 +88,29 @@ class RokitPattern:
         return False
 
     # UV code
-    def UV_Code(self, extruder_index) -> str:
+    def UV_Code(self, tool) -> str:
         code = '{G59_G0_X0_Y0}{M172}{M381_CHANNEL}{M385_DIMMING}{M386_TIME}{M384}{G4_DURATION}'.format(**self._G)
         return code.format(
-            channel = 0 if self._Q.uv_type_list[extruder_index] == '365' else 1, 
-            dimming = self._Q.uv_dimming_list[extruder_index], 
-            time = self._Q.uv_time_list[extruder_index], 
-            duration = self._Q.uv_time_list[extruder_index] * 1000)
+            channel = 0 if self._Q.uv_type_list[tool] == '365' else 1, 
+            dimming = self._Q.uv_dimming_list[tool], 
+            time = self._Q.uv_time_list[tool], 
+            duration = self._Q.uv_time_list[tool] * 1000)
     
     # UV 명령어 삽입
-    def getUVCode(self, current, layer_no) -> str:
-        if self.is_UV_layer(current, layer_no):
-            comment = ';UV - Layer:{layer_no} for {extruder}\n'.format(
-                    layer_no = layer_no, 
-                    extruder = self.getExtruderName(current)
+    def getUVCode(self, tool, layer_no, real_layer) -> str:
+        if self.is_UV_layer(tool, layer_no):
+            comment = ';UV - Layer:{real_layer}({layer_no}) for {tool_name} (s{start_layer},p{per_layer})\n'.format(
+                real_layer = real_layer + 1,
+                layer_no = layer_no + 1,
+                per_layer = self._Q.uv_per_layer_list[tool],
+                start_layer = self._Q.uv_start_layer_list[tool],
+                tool_name = self.getToolName(tool)
             )
             return '{comment}{reset_height}{m29b}{uvcode}\n'.format(
                 comment = comment,
                 reset_height = self._G['G0_Z40_C30_F420'],
                 m29b = self._G['M29_B'],
-                uvcode = self.UV_Code(current)
+                uvcode = self.UV_Code(tool)
             )
         return ''
 
@@ -132,80 +118,12 @@ class RokitPattern:
         nozzle = self._Q.getVariantName(extruder_index)
         return nozzle.startswith('FFF') or nozzle.startswith('Extruder') 
 
-    def getExtruderSetup(self, current, next, layer_no) -> str:
-
-        g0b15f300 = self._G['G0_B15_F300']
-        ResetHeight = self._G['G0_Z40_C30_F420']
-        m29b = self._G['M29_B']
-        airoff = self._G['M330']
-        airon = self._G['M301']
-
-        aaxis = self._G['G0_A_F600'].format(a_axis = self._Q.A_AxisPosition[next])
-
-        extruder = self.getRokitExtruderName(next)
-
-        TOOL_END = '{ResetHeight}{m29b}{bed_pos}{airoff}'.format(
-                ResetHeight = ResetHeight,
-                m29b = m29b,
-                bed_pos = self.getBedPos(next),
-                airoff = airoff if self.isExtruder(current) else ''
-        )
-
-        start_bed_pos = ''
-        if current == -1:
-            start_bed_pos = self.getBedPos(next)          
-
-        RIGHT_START = '{extruder}{aaxis}{start_bed_pos}{g0b15f300}'.format(
-                extruder = extruder,
-                aaxis = aaxis,
-                start_bed_pos = start_bed_pos,
-                g0b15f300 = g0b15f300
-        )
-        LEFT_START = '{extruder}{start_bed_pos}{airon}'.format(
-                extruder = extruder,
-                start_bed_pos = start_bed_pos,
-                airon = airon if self.isExtruder(next) else ''         
-        )
-
-        next_nozzle = self._Q.getVariantName(next)
-        current_nozzle = self._Q.getVariantName(current)
-
-        code = ''
-        if current == -1: # Nozzle이 처음 나왔을때
-            MESSAGE = ';Tool Setup - start {nozzle}\n'.format(nozzle=next_nozzle)
-            # D1~D5
-            if next > 0:
-                code = MESSAGE + '{start}'.format(start=RIGHT_START)
-            # D6(FFF/HotMelt)
-            elif next == 0: 
-                code = MESSAGE + '{start}'.format(start=LEFT_START)
-        else:            
-            MESSAGE = ';Tool Setup - changes from {curent} to {next}\n'.format(curent=self.getExtruderName(current),next=self.getExtruderName(next))
-
-            # D6(FFF/HotMelt)에서 D1~5로 변경된 경우
-            if current == 0 and next > 0:              
-                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=RIGHT_START)
-            # D1~5에서 D6(FFF/HotMelt)로 변경된 경우
-            elif current > 0 and next == 0:
-                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=LEFT_START)                 
-            # D1~D5에서 D1~D5으로 변경된 경우
-            elif current > 0 and next > 0:
-                code = MESSAGE + '{end}\n{start}'.format(end=TOOL_END, start=RIGHT_START)            
-
-        return code + ';Setup End\n'
-
     def getMatched(self, gcode, patterns):
         for p in patterns:
             matched = p.match(gcode)
             if matched:
                 return matched
         return None
-
-    def prettyFormat(self, match) -> str:
-        return '{head} X{x:<.3f} Y{y:<.3f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)))
-
-    def pretty_XYE_Format(self, match) -> str:
-        return '{head} X{x:<.3f} Y{y:<.3f} E{e:<.5f}'.format(head=match.group(1), x=float(match.group(2)), y=float(match.group(3)),e=float(match.group(4)))
 
     def removeRedundencyGCode(self, one_layer_gcode) -> str:
         # 중복 코드 제거

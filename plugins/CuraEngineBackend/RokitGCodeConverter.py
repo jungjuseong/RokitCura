@@ -61,8 +61,6 @@ class RokitGCodeConverter:
         self._current_tool = -1  
         self._previous_tool = -1
                 
-        self._current_layer = -1
-
         # *** G-code Line(command) 관리 변수
         self._gcode_list = []        
 
@@ -72,8 +70,10 @@ class RokitGCodeConverter:
         self._tool_initial_layers = [-1,-1,-1,-1,-1,-1] # 툴이 최초로 시작한 레이어 번호
 
         self._tool_index = -1
-        self._tool_code = ''
-        self._successive_uv = False
+        self._tool_setup = ''
+        self._logical_layer = 0
+        self._real_layer = 0
+
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -99,7 +99,8 @@ class RokitGCodeConverter:
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
                     self.EndOfEndCode + '\n'
 
-                modified_gcodes = self._P.getUVCode(self._current_tool, self._current_layer) + '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                modified_gcodes = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
+                     '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
 
             else:
                 modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
@@ -113,70 +114,43 @@ class RokitGCodeConverter:
     def _getLayerNo(self, z_value, tool) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
 
-    def _getDistance(self, last_pos, next_pos):
-        print_distance = 0
-        if last_pos is not None:
-            print_distance = distance.euclidean(last_pos, next_pos)
-        
-        self._current_position = next_pos
-        return print_distance
-
-    def _getNextLocation(self, match):
-        return [float(match.group(2)), float(match.group(3))]
-
     def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
 
             # tool changed
-            extruder = self._P.getMatched(gcode, [self._P.D])
-            if extruder:
-                self._current_tool = int(extruder.group(1))
-                self._tool_code = self._P.getExtruderSetup(self._previous_tool, self._current_tool, self._current_layer)                
+            tool_match = self._P.getMatched(gcode, [self._P.D])
+            if tool_match:
+                self._current_tool = int(tool_match.group(1))                    
+                if (self._current_tool == 6):
+                    self._current_tool = 0
                 self._tool_index = index
-
-                if self._previous_tool == -1: # first tool
-                    gcode_list[index] = self._tool_code
 
                 continue
 
             # layer changed
-            layer = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
-            if layer:
-                self._current_layer = self._getLayerNo(float(layer.group(1)), self._current_tool)
+            layer_match = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
+            if layer_match:
+                self._real_layer = self._getLayerNo(float(layer_match.group(1)), self._current_tool)
 
-                # 처음 툴이 나왔을 때 툴이 시작한 레이어를 기록
+                # 처음 툴이 나왔을 때 레이어를 기록
                 if self._tool_initial_layers[self._current_tool] == -1:
-                    self._tool_initial_layers[self._current_tool] = self._current_layer
+                    self._tool_initial_layers[self._current_tool] = self._real_layer
 
-                uvcode = ''
-                if self._current_layer > 0 or self._previous_tool != -1:
-                    tool_layer = self._current_layer - self._tool_initial_layers[self._current_tool]
-                    uvcode = self._P.getUVCode(self._current_tool, tool_layer)
-
+                if self._previous_tool == -1:
+                    self._previous_tool = self._current_tool
+                    continue
+                         
                 if self._previous_tool != self._current_tool: # tool changed
-                    if self._previous_tool != -1:
-                        if self._successive_uv and uvcode != '':
-                            uvcode = ''
-                            self._successive_uv = False
-
-                        gcode_list[self._tool_index] = '{uvcode}{tool}'.format(
-                            uvcode=uvcode, 
-                            tool=self._tool_code
-                        )
+                    self._logical_layer = self._real_layer - self._tool_initial_layers[self._previous_tool]
+                    uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)
+                    gcode_list[self._tool_index] = uvcode + gcode_list[self._tool_index]
                     self._previous_tool = self._current_tool
                 else: # layer changed
-                    if uvcode != '':
-                        gcode_list[index] = '{uvcode}{bed_pos}{layer}'.format(
-                            uvcode=uvcode,
-                            bed_pos=self._P.getBedPos(self._current_tool),
-                            layer=gcode_list[index]
-                        )
-                        self._successive_uv = True
-                    else:
-                        self._successive_uv = False
-                
+                    self._logical_layer = self._real_layer - self._tool_initial_layers[self._current_tool]
+                    uvcode = self._P.getUVCode(self._current_tool, self._logical_layer - 1, self._real_layer - 1)
+                    gcode_list[index] = '{uvcode}{bed_pos}{layer}'.format(uvcode=uvcode,bed_pos=self._P.getBedPos(self._current_tool),layer=gcode_list[index])
                
         return '\n'.join(gcode_list)
 
