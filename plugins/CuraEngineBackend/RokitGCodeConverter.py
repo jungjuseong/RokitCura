@@ -146,6 +146,7 @@ class RokitGCodeConverter:
                     uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)
                     if uvcode != '' and self._before_layer_use_uv == False:
                         gcode_list[self._tool_index] = uvcode + gcode_list[self._tool_index]
+                    self._before_layer_use_uv = False
                     self._previous_tool = self._current_tool
                 else: # layer changed
                     self._logical_layer = self._real_layer - self._tool_initial_layers[self._current_tool]
