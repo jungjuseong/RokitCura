@@ -95,14 +95,14 @@ class RokitGCodeConverter:
             if well % number_of_rows == 0:
                 direction = 'X'
                 distance = forward_spacing
-                forward_travel = not forward_travel
+                travel_forward = not travel_forward
             else:
                 direction = 'Y'
                 distance = backward_spacing if travel_forward else forward_spacing
 
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
 
-            spacing_code = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END\n'.format(
+            spacing_code = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
                     comment=';Well No: %d\n' % well,
                     g0c30=self._G['G0_C30'],
                     g0xy=self._G['G0_X_Y'] % (x,y),
@@ -130,7 +130,7 @@ class RokitGCodeConverter:
         for well in range(1, self._travel['number_of_walls']): # (6,12,24,48,96)
             self._clone_list.append(hopping_list[well] + body)
 
-        gcode_list[insert_here] = '\n'.join(self._clone_list) + gcode_list[insert_here]
+        gcode_list[insert_here] = ''.join(self._clone_list) + gcode_list[insert_here]
         
     def run(self, gcode_list):
 
