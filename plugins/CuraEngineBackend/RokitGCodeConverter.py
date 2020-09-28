@@ -57,7 +57,7 @@ class RokitGCodeConverter:
                     'G90 ; absolute positioning\n' +\
                     'M308 27 27 27 27 27 27 27 ; set temperature'
 
-        # 선택한 명령어
+
         self._current_tool = -1  
         self._previous_tool = -1
                 
@@ -67,13 +67,12 @@ class RokitGCodeConverter:
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
 
+        # for UV
         self._tool_initial_layers = [-1,-1,-1,-1,-1,-1] # 툴이 최초로 시작한 레이어 번호
-
         self._tool_index = -1
-        self._tool_setup = ''
         self._logical_layer = 0
         self._real_layer = 0
-
+        self._before_layer_use_uv = False
 
     def setReplacedlist(self, gcode_list) -> None:
         self._gcode_list = gcode_list
@@ -145,12 +144,18 @@ class RokitGCodeConverter:
                 if self._previous_tool != self._current_tool: # tool changed
                     self._logical_layer = self._real_layer - self._tool_initial_layers[self._previous_tool]
                     uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)
-                    gcode_list[self._tool_index] = uvcode + gcode_list[self._tool_index]
+                    if uvcode != '' and self._before_layer_use_uv == False:
+                        gcode_list[self._tool_index] = uvcode + gcode_list[self._tool_index]
                     self._previous_tool = self._current_tool
                 else: # layer changed
                     self._logical_layer = self._real_layer - self._tool_initial_layers[self._current_tool]
                     uvcode = self._P.getUVCode(self._current_tool, self._logical_layer - 1, self._real_layer - 1)
-                    gcode_list[index] = '{uvcode}{bed_pos}{layer}'.format(uvcode=uvcode,bed_pos=self._P.getBedPos(self._current_tool),layer=gcode_list[index])
+                    if uvcode != '':
+                        gcode_list[index] = uvcode + '{bed_pos}{layer}'.format(bed_pos=self._P.getBedPos(self._current_tool),layer=gcode_list[index])
+                        self._before_layer_use_uv = True
+                    else:
+                        self._before_layer_use_uv = False
+
                
         return '\n'.join(gcode_list)
 
