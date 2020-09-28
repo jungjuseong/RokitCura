@@ -103,15 +103,13 @@ class RokitGCodeConverter:
                 modified_gcodes = gcodes.replace(';FLAVOR:Marlin', ';F/W : 7.7.1.x')
 
             elif self.StartOfStartCode in gcodes:
-                self._StartOfStartCodeIndex = index
                 modified_gcodes = gcodes.replace('Cura_SteamEngine', 'OrganRegenerator_Engine')
                 modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
                 modified_gcodes = self._P.replaceLayerInfo(modified_gcodes)
                 if self._Q.dispensor_enable:
                    modified_gcodes = self._P.replaceDispenserSetupCode(modified_gcodes)
 
-            elif self.StartOfEndCode in gcodes:
-                
+            elif self.StartOfEndCode in gcodes:                
                 self._EndOfStartCodeIndex = index if self._EndOfStartCodeIndex is None else self._EndOfStartCodeIndex
                 modified_gcodes = self.StartOfEndCode +\
                     gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\

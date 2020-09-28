@@ -1,9 +1,8 @@
 class RokitGCodeModel():
     def __init__(self) -> None:
         self.GCODE = {
-            'G90_G0_X_Y': 'G90 G0 X%.3f Y%.3f\n',
             'G90_G0_C_RESET': 'G90 G0 C-30.0\n',
-            'G90_G0_C': 'G90 G0 C{0: <.3f}\n',
+            'G90_G0_C': 'G90 G0 C{c:<.3f}\n',
             'G90_G0_C0': 'G90 G0 C0\n',
 
             'G0': 'G0\n',
@@ -15,6 +14,7 @@ class RokitGCodeModel():
             'G0_Z40': 'G0 Z40.0\n',
             'G0_Z40_C30_F420': 'G0 Z40.0 C30.0 F420\n',
             'G0_Z_RESET': 'G0 Z-40.0\n',
+            'G0_X_Y': 'G0 X%.3f Y%.3f\n',
             
             'G1_F_E':'G1 F{f:d} E{e:<.3f} ;(Back Retraction)\n',
 
@@ -29,7 +29,7 @@ class RokitGCodeModel():
             'G58_G0_X0_Y0': 'G55 G0 X0.0 Y0.0 ;(ORIGIN)\n',
             'G59_G0_X0_Y0': 'G59 G0 X0.0 Y0.0 ;(UV-A)\n',
 
-            'G92_X0_Y0': 'G92 X0.0 Y0.0\n',
+            'G92_X0_Y0': 'G92 X0.0 Y0.0\n', 
             'G92_Z0': 'G92 Z0.0\n',
             'G92_E0': 'G92 E0.0\n',
             'G92_C0': 'G92 C0.0\n',

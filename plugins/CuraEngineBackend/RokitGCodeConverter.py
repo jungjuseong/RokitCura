@@ -6,6 +6,7 @@ from enum import IntEnum
 from UM.Logger import Logger
 from typing import Any, cast, Dict, List, Optional, Set
 import re
+import copy
 import Arcus #For typing.
 from scipy.spatial import distance # <<< 거리를 계산하는 라이브러리 (점과 점사이의 거리) 
 
@@ -41,11 +42,11 @@ class RokitGCodeConverter:
                 break
 
         # startcode / endcode
-        self.StartOfStartCode = '\n; (*** start of start code for Dr.Invivo 4D6)'
-        self.EndOfStartCode = '\n; (*** end of start code for Dr.Invivo 4D6)'
+        self.StartOfStartCode = '(*** start of start code for Dr.Invivo 4D6)'
+        self.EndOfStartCode = '(*** end of start code for Dr.Invivo 4D6)'
 
-        self.StartOfEndCode = '\n; (*** start of end code for Dr.Invivo 4D6)'
-        self.EndOfEndCode = '\n; (*** end of end code for Dr.Invivo 4D6)'
+        self.StartOfEndCode = '(*** start of end code for Dr.Invivo 4D6)'
+        self.EndOfEndCode = '\n(*** end of end code for Dr.Invivo 4D6)'
 
         self.END_CODE = 'M330\n' +\
                     'M29 B\n' +\
@@ -57,13 +58,9 @@ class RokitGCodeConverter:
                     'G90 ; absolute positioning\n' +\
                     'M308 27 27 27 27 27 27 27 ; set temperature'
 
-
         self._current_tool = -1  
         self._previous_tool = -1
                 
-        # *** G-code Line(command) 관리 변수
-        self._gcode_list = []        
-
         self._StartOfStartCodeIndex = -1
         self._EndOfStartCodeIndex = None
 
@@ -74,46 +71,100 @@ class RokitGCodeConverter:
         self._real_layer = 0
         self._before_layer_use_uv = False
 
-    def setReplacedlist(self, gcode_list) -> None:
-        self._gcode_list = gcode_list
+        self._hopping_list = []
+        self._clone_list = []
 
-    def getReplacedlist(self) -> str:
-        return self._gcode_list
+    def findKeyword(self, list, keyword) -> int:
+        for index, word in enumerate(list): 
+            if keyword in word:
+                return index
+        return -1
 
-    def run(self) -> None:
+    def getHoppingList(self):
 
-        for index, gcodes in enumerate(self._gcode_list):
-            modified_gcodes = gcodes
+        number_of_walls = self._travel['number_of_walls']
+        number_of_rows = self._travel['number_of_rows']
+        #hop_height = self._travel['hop_height']
+        forward_spacing = self._travel['spacing']
+        backward_spacing = -self._travel['spacing']
+
+        travel_forward = True
+
+        self._hopping_list.append(';NO_HOP\n')
+        for well in range(1, number_of_walls): # (6,12,24,48,96)
+            if well % number_of_rows == 0:
+                direction = 'X'
+                distance = forward_spacing
+                forward_travel = not forward_travel
+            else:
+                direction = 'Y'
+                distance = backward_spacing if travel_forward else forward_spacing
+
+            (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
+
+            spacing_code = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END\n'.format(
+                    comment=';Well No: %d\n' % well,
+                    g0c30=self._G['G0_C30'],
+                    g0xy=self._G['G0_X_Y'] % (x,y),
+                    g92x0y0=self._G['G92_X0_Y0']
+                )                        
+            self._hopping_list.append(spacing_code)
+
+        return self._hopping_list
+
+    def _cloneWellPlate(self, gcode_list):
+
+        chunk_list = []
+        insert_here = -1
+        for index, line in enumerate(gcode_list):
+            if self.StartOfEndCode in line:
+                insert_here = index
+            chunk_list.extend(line.split('\n'))
+
+        start_position = self.findKeyword(chunk_list,';LAYER_COUNT:') + 1
+        end_position = self.findKeyword(chunk_list,self.StartOfEndCode)
+        body = '\n'.join(chunk_list[start_position:end_position])
+        
+        hopping_list = self.getHoppingList()
+
+        for well in range(1, self._travel['number_of_walls']): # (6,12,24,48,96)
+            self._clone_list.append(hopping_list[well] + body)
+
+        gcode_list[insert_here] = '\n'.join(self._clone_list) + gcode_list[insert_here]
+        
+    def run(self, gcode_list):
+
+        for index, gcodes in enumerate(gcode_list):
+            m_gcodes = gcodes
 
             if self.StartOfStartCode in gcodes:
-                self._StartOfStartCodeIndex = index
-                modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
-                modified_gcodes = self._P.replaceLayerInfo(modified_gcodes)
+                m_gcodes = self._convertOneLayerGCode(m_gcodes)     
+                m_gcodes = self._P.replaceLayerInfo(m_gcodes)
                 if self._Q.dispensor_enable:
-                   modified_gcodes = self._P.replaceDispenserSetupCode(modified_gcodes)
-            
+                   m_gcodes = self._P.replaceDispenserSetupCode(m_gcodes)
+
             elif self.StartOfEndCode in gcodes:                
                 self._EndOfStartCodeIndex = index if self._EndOfStartCodeIndex is None else self._EndOfStartCodeIndex
-                modified_gcodes = self.StartOfEndCode +\
-                    gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)] +\
-                    self.EndOfEndCode + '\n'
-
-                modified_gcodes = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
-                     '\n' + modified_gcodes.replace('{end_code}', self.END_CODE)
+                m_gcodes = self.StartOfEndCode +\
+                    gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)]
+                m_gcodes = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
+                     '\n' + m_gcodes.replace('{end_code}', self.END_CODE)
 
             else:
-                modified_gcodes = self._convertOneLayerGCode(modified_gcodes, isStartCode=True)     
+                m_gcodes = self._convertOneLayerGCode(m_gcodes)     
 
-            self._gcode_list[index] = self._P.removeRedundencyGCode(modified_gcodes)
+            gcode_list[index] = self._P.removeRedundencyGCode(m_gcodes)
+
+            # if self._build_plate_type == 'Well Plate':
+            #     self._chunk.extend(self._gcode_list[index].split('\n'))
 
         if self._build_plate_type == 'Well Plate':
-            self._cloneWellPlate()
-
+           gcode_list = self._cloneWellPlate(gcode_list)
 
     def _getLayerNo(self, z_value, tool) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
 
-    def _convertOneLayerGCode(self,gcodes,isStartCode=False) -> str:
+    def _convertOneLayerGCode(self,gcodes) -> str:
 
         gcode_list = gcodes.split('\n')
         for index, gcode in enumerate(gcode_list):
@@ -125,9 +176,8 @@ class RokitGCodeConverter:
                 if (self._current_tool == 6):
                     self._current_tool = 0
                 self._tool_index = index
-
                 continue
-
+                
             # layer changed
             layer_match = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
             if layer_match:
@@ -156,44 +206,6 @@ class RokitGCodeConverter:
                         self._before_layer_use_uv = True
                     else:
                         self._before_layer_use_uv = False
-
                
         return '\n'.join(gcode_list)
-
-    # Well plate 복제 기능
-    def _cloneWellPlate(self):
-
-        NumberOfWalls = self._travel['number_of_walls']
-        NumberORows = self._travel['number_of_rows']
-        HopHeight = self._travel['hop_height']
-        ForwardSpaceing = self._travel['spacing']
-        BackwardSpacing = -self._travel['spacing']
-
-        self._EndOfStartCodeIndex -= len(self._gcode_list)
-        
-        from_index = self._StartOfStartCodeIndex + 1
-        to_index = self._EndOfStartCodeIndex
-
-        gcode_clone = self._gcode_list[from_index : to_index]
-        travel_forward = True
-
-        gcode_body = []
-        for well_num in range(1, NumberOfWalls): # Clone number ex) 1 ~ 95
-            if well_num % NumberORows == 0:
-                direction = 'X'
-                distance = ForwardSpaceing
-                travel_forward = not travel_forward
-            else:
-                direction = 'Y'
-                distance = BackwardSpacing if travel_forward else ForwardSpaceing
-
-            (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
-            gcode_spacing = ';hop_spacing\n' + self._G['G92_E0'] + self._G['G90_G0_C'].format(HopHeight)            
-            gcode_spacing += self._G['G90_G0_X_Y'] % (x,y)
-            gcode_spacing += self._G['G90_G0_C0']
-            gcode_spacing += self._G['G92_X0_Y0']
-            gcode_spacing += ';Well Number: %d\n' % well_num
-
-            gcode_clone.insert(0, gcode_spacing)
-            self._gcode_list[self._EndOfStartCodeIndex:self._EndOfStartCodeIndex]= gcode_clone # put the clones in front of the end-code
-            gcode_clone.remove(gcode_spacing)
+    
