@@ -108,7 +108,7 @@ class RokitGCodeConverter:
 
         return self._hopping_list
 
-    def _cloneWellPlate(self, gcode_list):
+    def cloneWellPlate(self, gcode_list):
 
         chunk_list = []
         insert_here = -1
@@ -137,7 +137,7 @@ class RokitGCodeConverter:
                 m_code = self._convertOneLayerGCode(m_code)     
                 m_code = self._P.replaceLayerInfo(m_code)
                 if self._Q.dispensor_enable:
-                   m_gcodes = self._P.replaceDispenserSetupCode(m_code)
+                   m_code = self._P.replaceDispenserSetupCode(m_code)
 
             elif self.EndCodeBegin in gcodes:                
                 m_code = '\n' + gcodes[gcodes.find(self.EndCodeBegin):gcodes.rfind(self.EndCodeEnd)] + self.EndCodeEnd
@@ -150,7 +150,7 @@ class RokitGCodeConverter:
             gcode_list[index] = self._P.removeRedundencyGCode(m_code)
 
         if self._build_plate_type == 'Well Plate':
-           gcode_list = self._cloneWellPlate(gcode_list)
+           gcode_list = self.cloneWellPlate(gcode_list)
 
     def _getLayerNo(self, z_value, tool) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
