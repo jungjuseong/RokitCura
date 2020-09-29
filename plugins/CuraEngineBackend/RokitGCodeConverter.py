@@ -40,13 +40,9 @@ class RokitGCodeConverter:
             if self._dish['product_id'] == build_plate:
                 self._travel = self._dish['travel'] # Build plate가 정해짐
                 break
-
-        # startcode / endcode
-        self.StartOfStartCode = '(*** start of start code for Dr.Invivo 4D6)'
-        self.EndOfStartCode = '(*** end of start code for Dr.Invivo 4D6)'
-
-        self.StartOfEndCode = '(*** start of end code for Dr.Invivo 4D6)'
-        self.EndOfEndCode = '\n(*** end of end code for Dr.Invivo 4D6)'
+        
+        self._number_of_walls = self._travel['number_of_walls']
+        self._number_of_rows = self._travel['number_of_rows']
 
         self.END_CODE = 'M330\n' +\
                     'M29 B\n' +\
@@ -60,9 +56,6 @@ class RokitGCodeConverter:
 
         self._current_tool = -1  
         self._previous_tool = -1
-                
-        self._StartOfStartCodeIndex = -1
-        self._EndOfStartCodeIndex = None
 
         # for UV
         self._tool_initial_layers = [-1,-1,-1,-1,-1,-1] # 툴이 최초로 시작한 레이어 번호
@@ -74,6 +67,12 @@ class RokitGCodeConverter:
         self._hopping_list = []
         self._clone_list = []
 
+        self.StartCodeBegin = ';(*** start of start code for Dr.Invivo 4D6)'
+        self.StartCodeEnd = ';(*** end of start code for Dr.Invivo 4D6)'
+
+        self.EndCodeBegin = ';(*** start of end code for Dr.Invivo 4D6)'
+        self.EndCodeEnd = ';(*** end of end code for Dr.Invivo 4D6)'
+
     def findKeyword(self, list, keyword) -> int:
         for index, word in enumerate(list): 
             if keyword in word:
@@ -82,33 +81,30 @@ class RokitGCodeConverter:
 
     def getHoppingList(self):
 
-        number_of_walls = self._travel['number_of_walls']
-        number_of_rows = self._travel['number_of_rows']
         #hop_height = self._travel['hop_height']
-        forward_spacing = self._travel['spacing']
-        backward_spacing = -self._travel['spacing']
+        spacing = self._travel['spacing']
 
         travel_forward = True
 
-        self._hopping_list.append(';NO_HOP\n')
-        for well in range(1, number_of_walls): # (6,12,24,48,96)
-            if well % number_of_rows == 0:
+        self._hopping_list.append(";NO_HOP_SPACING\n")
+        for well in range(1, self._number_of_walls): # (6,12,24,48,96)
+            if well % self._number_of_rows == 0:
                 direction = 'X'
-                distance = forward_spacing
+                distance = spacing
                 travel_forward = not travel_forward
             else:
                 direction = 'Y'
-                distance = backward_spacing if travel_forward else forward_spacing
+                distance = -spacing if travel_forward else spacing
 
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
 
-            spacing_code = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
+            hop_spacing = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
                     comment=';Well No: %d\n' % well,
                     g0c30=self._G['G0_C30'],
                     g0xy=self._G['G0_X_Y'] % (x,y),
                     g92x0y0=self._G['G92_X0_Y0']
                 )                        
-            self._hopping_list.append(spacing_code)
+            self._hopping_list.append(hop_spacing.strip())
 
         return self._hopping_list
 
@@ -117,46 +113,41 @@ class RokitGCodeConverter:
         chunk_list = []
         insert_here = -1
         for index, line in enumerate(gcode_list):
-            if self.StartOfEndCode in line:
+            if self.EndCodeBegin in line:
                 insert_here = index
             chunk_list.extend(line.split('\n'))
 
-        start_position = self.findKeyword(chunk_list,';LAYER_COUNT:') + 1
-        end_position = self.findKeyword(chunk_list,self.StartOfEndCode)
-        body = '\n'.join(chunk_list[start_position:end_position])
-        
+        start_position = self.findKeyword(chunk_list,';BODY_START') + 1
+        end_position = self.findKeyword(chunk_list, self.EndCodeBegin)
+        body = '\n'.join(chunk_list[start_position:end_position]).strip()
+
         hopping_list = self.getHoppingList()
 
-        for well in range(1, self._travel['number_of_walls']): # (6,12,24,48,96)
-            self._clone_list.append(hopping_list[well] + body)
+        for well in range(1, self._number_of_walls): # (6,12,24,48,96)
+            self._clone_list.append(hopping_list[well] + '\n' + body)
 
-        gcode_list[insert_here] = ''.join(self._clone_list) + gcode_list[insert_here]
+        gcode_list[insert_here] = '\n'.join(self._clone_list) + gcode_list[insert_here]
         
     def run(self, gcode_list):
 
         for index, gcodes in enumerate(gcode_list):
-            m_gcodes = gcodes
+            m_code = gcodes
 
-            if self.StartOfStartCode in gcodes:
-                m_gcodes = self._convertOneLayerGCode(m_gcodes)     
-                m_gcodes = self._P.replaceLayerInfo(m_gcodes)
+            if self.StartCodeBegin in gcodes:
+                m_code = self._convertOneLayerGCode(m_code)     
+                m_code = self._P.replaceLayerInfo(m_code)
                 if self._Q.dispensor_enable:
-                   m_gcodes = self._P.replaceDispenserSetupCode(m_gcodes)
+                   m_gcodes = self._P.replaceDispenserSetupCode(m_code)
 
-            elif self.StartOfEndCode in gcodes:                
-                self._EndOfStartCodeIndex = index if self._EndOfStartCodeIndex is None else self._EndOfStartCodeIndex
-                m_gcodes = self.StartOfEndCode +\
-                    gcodes[gcodes.find(self.StartOfEndCode)+len(self.StartOfEndCode):gcodes.rfind(self.EndOfEndCode)]
-                m_gcodes = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
-                     '\n' + m_gcodes.replace('{end_code}', self.END_CODE)
+            elif self.EndCodeBegin in gcodes:                
+                m_code = '\n' + gcodes[gcodes.find(self.EndCodeBegin):gcodes.rfind(self.EndCodeEnd)] + self.EndCodeEnd
+                m_code = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
+                     '\n' + m_code.replace('{end_code}', self.END_CODE)
 
             else:
-                m_gcodes = self._convertOneLayerGCode(m_gcodes)     
+                m_code = self._convertOneLayerGCode(m_code)     
 
-            gcode_list[index] = self._P.removeRedundencyGCode(m_gcodes)
-
-            # if self._build_plate_type == 'Well Plate':
-            #     self._chunk.extend(self._gcode_list[index].split('\n'))
+            gcode_list[index] = self._P.removeRedundencyGCode(m_code)
 
         if self._build_plate_type == 'Well Plate':
            gcode_list = self._cloneWellPlate(gcode_list)
