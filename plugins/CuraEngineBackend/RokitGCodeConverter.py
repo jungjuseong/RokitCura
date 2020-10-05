@@ -28,21 +28,8 @@ class RokitGCodeConverter:
         self._G = g_model.GCODE
 
         self._build_dish_model = RokitBuildDishModel()
-
-        # 외부 dict
-        self._dish = {}
-
-        self._travel= {}
-        build_plate = self._Q.getGlobalContainerStackProperty('machine_build_dish_type')
-        self._build_plate_type = build_plate[:build_plate.find(':')]
-        for index in range(self._build_dish_model.count):
-            self._dish = self._build_dish_model.getItem(index)
-            if self._dish['product_id'] == build_plate:
-                self._travel = self._dish['travel'] # Build plate가 정해짐
-                break
-        
-        self._number_of_walls = self._travel['number_of_walls']
-        self._number_of_rows = self._travel['number_of_rows']
+        self._build_plate = self._Q.getGlobalContainerStackProperty('machine_build_dish_type')
+        self._build_plate_type = self._build_plate[:self._build_plate.find(':')]
 
         self.END_CODE = 'M330\n' +\
                     'M29 B\n' +\
@@ -79,16 +66,13 @@ class RokitGCodeConverter:
                 return index
         return -1
 
-    def getHoppingList(self):
-
-        #hop_height = self._travel['hop_height']
-        spacing = self._travel['spacing']
+    def getHoppingList(self,number_of_walls,number_of_rows,spacing):
 
         travel_forward = True
 
         self._hopping_list.append(";NO_HOP_SPACING\n")
-        for well in range(1, self._number_of_walls): # (6,12,24,48,96)
-            if well % self._number_of_rows == 0:
+        for well in range(1, number_of_walls): # (6,12,24,48,96)
+            if well % number_of_rows == 0:
                 direction = 'X'
                 distance = spacing
                 travel_forward = not travel_forward
@@ -108,7 +92,11 @@ class RokitGCodeConverter:
 
         return self._hopping_list
 
-    def cloneWellPlate(self, gcode_list):
+    def cloneWellPlate(self, gcode_list, travel):
+
+        number_of_walls = int(travel['number_of_walls'])
+        number_of_rows = int(travel['number_of_rows'])
+        spacing = travel['spacing']
 
         chunk_list = []
         insert_here = -1
@@ -121,9 +109,9 @@ class RokitGCodeConverter:
         end_position = self.findKeyword(chunk_list, self.EndCodeBegin)
         body = '\n'.join(chunk_list[start_position:end_position]).strip()
 
-        hopping_list = self.getHoppingList()
+        hopping_list = self.getHoppingList(number_of_walls,number_of_rows,spacing)
 
-        for well in range(1, self._number_of_walls): # (6,12,24,48,96)
+        for well in range(1, number_of_walls): # (6,12,24,48,96)
             self._clone_list.append(hopping_list[well] + '\n' + body)
 
         gcode_list[insert_here] = '\n'.join(self._clone_list) + gcode_list[insert_here]
@@ -150,7 +138,14 @@ class RokitGCodeConverter:
             gcode_list[index] = self._P.removeRedundencyGCode(m_code)
 
         if self._build_plate_type == 'Well Plate':
-           gcode_list = self.cloneWellPlate(gcode_list)
+            travel = {}
+            for index in range(self._build_dish_model.count):
+                dish = self._build_dish_model.getItem(index)
+                if dish['product_id'] == self._build_plate:
+                   travel = dish['travel'] # Build plate가 정해짐
+                   break
+            
+            self.cloneWellPlate(gcode_list, travel)
 
     def _getLayerNo(self, z_value, tool) -> int:
         return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
