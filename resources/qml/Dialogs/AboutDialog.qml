@@ -69,7 +69,7 @@ UM.Dialog
         width: parent.width
 
         //: About dialog application description
-        text: catalog.i18nc("@label","End-to-end solution for fused filament 3D printing.")
+        text: catalog.i18nc("@label","End-to-end solution for bio ink & filament 3D printing.")
         font: UM.Theme.getFont("system")
         wrapMode: Text.WordWrap
         anchors.top: header.bottom
