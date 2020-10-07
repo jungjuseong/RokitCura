@@ -70,7 +70,7 @@ class RokitGCodeConverter:
 
         travel_forward = True
 
-        self._hopping_list.append(";NO_HOP_SPACING\n")
+        self._hopping_list.append(";NO_HOPPING\n")
         for well in range(1, number_of_walls): # (6,12,24,48,96)
             if well % number_of_rows == 0:
                 direction = 'X'
@@ -82,13 +82,13 @@ class RokitGCodeConverter:
 
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
 
-            hop_spacing = ';HOP_SPACING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
+            hopping = ';HOPPING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
                     comment=';Well No: %d\n' % well,
                     g0c30=self._G['G0_C30'],
                     g0xy=self._G['G0_X_Y'] % (x,y),
                     g92x0y0=self._G['G92_X0_Y0']
                 )                        
-            self._hopping_list.append(hop_spacing.strip())
+            self._hopping_list.append(hopping.strip())
 
         return self._hopping_list
 
