@@ -38,7 +38,7 @@ class RokitGCodeModel():
             'G0_B0_F300': 'G0 B0.00 F300\n',
             'G0_A_F600': 'G0 A{a_axis:<.3f} F600\n',
 
-            'G0_B15_F300': 'G0 B15.0 F300\n',
+            'G0_B15_F300': 'G0 B15.0 F300 ;(ADD)\n',
 
             'M29_B': 'M29 B\n',
             'M172': 'M172\n',

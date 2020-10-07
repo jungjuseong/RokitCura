@@ -106,7 +106,7 @@ class RokitPattern:
                 start_layer = self._Q.uv_start_layer_list[tool],
                 tool_name = self.getToolName(tool)
             )
-            return '{comment}{reset_height}{m29b}{uvcode}\n'.format(
+            return '{comment}{reset_height}{m29b}{uvcode};END\n'.format(
                 comment = comment,
                 reset_height = self._G['G0_Z40_C30_F420'],
                 m29b = self._G['M29_B'],
