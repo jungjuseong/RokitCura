@@ -126,12 +126,10 @@ class RokitGCodeConverter:
                 m_code = self._P.replaceLayerInfo(m_code)
                 if self._Q.dispensor_enable:
                    m_code = self._P.replaceDispenserSetupCode(m_code)
-
             elif self.EndCodeBegin in gcodes:                
-                m_code = '\n' + gcodes[gcodes.find(self.EndCodeBegin):gcodes.rfind(self.EndCodeEnd)] + self.EndCodeEnd
-                m_code = self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer) +\
-                     '\n' + m_code.replace('{end_code}', self.END_CODE)
-
+                m_code = gcodes[gcodes.find(self.EndCodeBegin):gcodes.rfind(self.EndCodeEnd)] + self.EndCodeEnd
+                m_code = '\n' + m_code.replace('{end_code}', self.END_CODE)
+                gcode_list[index-1] += self._P.getUVCode(self._current_tool, self._logical_layer,self._real_layer)
             else:
                 m_code = self._convertOneLayerGCode(m_code)     
 
