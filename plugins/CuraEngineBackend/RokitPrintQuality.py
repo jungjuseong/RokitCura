@@ -41,6 +41,7 @@ class RokitPrintQuality:
         self.vac_power_list = ' '.join(map(str,[self._getExtrudersProperty(index,'dispensor_vac_power') for index in self._JoinSequence]))
 
         # UV 설정
+        self.uv_enable_list = [False,False,False,False,False,False]
         self.uv_per_layer_list = [1,1,1,1,1,1]
         self.uv_start_layer_list = [1,1,1,1,1,1]
 
@@ -48,7 +49,10 @@ class RokitPrintQuality:
         self.uv_time_list = [5,5,5,5,5,5]
         self.uv_dimming_list = [80,80,80,80,80,80]
 
-        self.uv_enable_list = [self._getExtrudersProperty(index,'uv_enable') for index in range(6)]
+        # Well Plate의 경우 UV는 출력이 안되게 함
+        uv = self.getGlobalContainerStackProperty("uv"); 
+        if uv:
+            self.uv_enable_list = [self._getExtrudersProperty(index,'uv_enable') for index in range(6)]
 
         for index, uv_enable in enumerate(self.uv_enable_list):
             if uv_enable:

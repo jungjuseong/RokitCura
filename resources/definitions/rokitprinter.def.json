@@ -7739,6 +7739,9 @@
             "type": "category",
             "icon": "category_uv",
             "description": "UV",
+            "value": "resolveOrValue('machine_build_dish_type') != 'Well Plate:6' and resolveOrValue('machine_build_dish_type') != 'Well Plate:12' and resolveOrValue('machine_build_dish_type') != 'Well Plate:24' and resolveOrValue('machine_build_dish_type') != 'Well Plate:48' and resolveOrValue('machine_build_dish_type') != 'Well Plate:96'",
+            "settable_per_extruder": false,
+            "enabled": "resolveOrValue('machine_build_dish_type') != 'Well Plate:6' and resolveOrValue('machine_build_dish_type') != 'Well Plate:12' and resolveOrValue('machine_build_dish_type') != 'Well Plate:24' and resolveOrValue('machine_build_dish_type') != 'Well Plate:48' and resolveOrValue('machine_build_dish_type') != 'Well Plate:96'",
             "children":
             {
                 "uv_enable":
