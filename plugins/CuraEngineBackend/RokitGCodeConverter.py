@@ -183,14 +183,16 @@ class RokitGCodeConverter:
                     self._before_layer_use_uv = False
                     self._previous_tool = self._current_tool
                 else: # layer changed
-                    self._logical_layer = self._real_layer - self._tool_initial_layers[self._current_tool]
-                    uvcode = self._P.getUVCode(self._current_tool, self._logical_layer - 1, self._real_layer - 1)
-                    if uvcode != '':
-                        gcode_list[index] = uvcode + '{bed_pos}{lower_b_axis}{layer}'.format(
-                            bed_pos = self._P.getBedPos(self._current_tool),
-                            lower_b_axis = self._G['G0_B15_F300'] if self._current_tool > 0 else '',
-                            layer = gcode_list[index])
-                        self._before_layer_use_uv = True
+                    new_logical_layer = self._real_layer - self._tool_initial_layers[self._current_tool]
+                    if self._logical_layer != new_logical_layer:
+                        self._logical_layer = new_logical_layer
+                        uvcode = self._P.getUVCode(self._current_tool, self._logical_layer - 1, self._real_layer - 1)
+                        if uvcode != '':
+                            gcode_list[index] = uvcode + '{bed_pos}{lower_b_axis}{layer}'.format(
+                                bed_pos = self._P.getBedPos(self._current_tool),
+                                lower_b_axis = self._G['G0_B15_F300'] if self._current_tool > 0 else '',
+                                layer = gcode_list[index])
+                            self._before_layer_use_uv = True
                     else:
                         self._before_layer_use_uv = False
                
