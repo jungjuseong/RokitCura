@@ -161,7 +161,7 @@ class RokitGCodeConverter:
                     self._current_tool = 0
                 self._tool_index = index
                 continue
-                
+
             # layer changed
             layer_match = self._P.getMatched(gcode, [self._P.G0_Z_OR_C])
             if layer_match:
@@ -177,9 +177,10 @@ class RokitGCodeConverter:
                          
                 if self._previous_tool != self._current_tool: # tool changed
                     self._logical_layer = self._real_layer - self._tool_initial_layers[self._previous_tool]
-                    uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)
+                    uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)                    
                     if uvcode != '' and self._before_layer_use_uv == False:
-                        gcode_list[self._tool_index] = uvcode + gcode_list[self._tool_index]
+                        bed_pos = self._P.getBedPos(self._current_tool) + ';(TOOL_CHANGED)\n'
+                        gcode_list[self._tool_index] = uvcode + bed_pos + gcode_list[self._tool_index]
                     self._before_layer_use_uv = False
                     self._previous_tool = self._current_tool
                 else: # layer changed

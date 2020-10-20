@@ -70,9 +70,7 @@ class RokitPattern:
         return 'D6' if extruder_index == 0 else 'D{index:<d}'.format(index=extruder_index)
 
     def getBedPos(self, extruder_index) -> str:
-        left_bed= self._G['G54_G0_X0_Y0']
-        right_bed= self._G['G55_G0_X0_Y0']
-        return right_bed if extruder_index > 0 else left_bed
+        return self._G['G55_G0_X0_Y0'] if extruder_index > 0 else self._G['G54_G0_X0_Y0']
 
     def is_UV_layer(self,tool,layer_no) -> bool:
         if self._Q.uv_enable_list[tool] == False:
