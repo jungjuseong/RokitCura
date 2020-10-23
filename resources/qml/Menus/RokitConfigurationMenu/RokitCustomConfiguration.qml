@@ -152,6 +152,44 @@ Item {
             }
             property string instructionLink: Cura.MachineManager.activeStack != null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "instruction_link", ""): ""
 
+            // Row
+            // {
+            //     height: visible ? UM.Theme.getSize("setting_control").height : 0
+            //     visible: extrudersModel.count > 1  // If there is only one extruder, there is no point to enable/disable that.
+
+            //     Label
+            //     {
+            //         text: catalog.i18nc("@label", "Enabled")
+            //         verticalAlignment: Text.AlignVCenter
+            //         font: UM.Theme.getFont("default")
+            //         color: UM.Theme.getColor("text")
+            //         height: parent.height
+            //         width: selectors.textWidth
+            //         renderType: Text.NativeRendering
+            //     }
+
+            //     OldControls.CheckBox
+            //     {
+            //         id: enabledCheckbox
+            //         checked: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.isEnabled : false
+            //         enabled: !checked || Cura.MachineManager.numberExtrudersEnabled > 1 //Disable if it's the last enabled extruder.
+            //         height: parent.height
+            //         style: UM.Theme.styles.checkbox
+
+            //         /* Use a MouseArea to process the click on this checkbox.
+            //            This is necessary because actually clicking the checkbox
+            //            causes the "checked" property to be overwritten. After
+            //            it's been overwritten, the original link that made it
+            //            depend on the active extruder stack is broken. */
+            //         MouseArea
+            //         {
+            //             anchors.fill: parent
+            //             onClicked: Cura.MachineManager.setExtruderEnabled(Cura.ExtruderManager.activeExtruderIndex, !parent.checked)
+            //             enabled: parent.enabled
+            //         }
+            //     }
+            // }
+
             Row { // Nozzle
                 height: UM.Theme.getSize("print_setup_big_item").height
 

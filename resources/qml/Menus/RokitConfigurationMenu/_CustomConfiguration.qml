@@ -8,8 +8,7 @@ import QtQuick.Controls 1.1 as OldControls
 import Cura 1.0 as Cura
 import UM 1.3 as UM
 
-Item
-{
+Item {
     UM.I18nCatalog
     {
         id: catalog
@@ -19,8 +18,7 @@ Item
     width: parent.width
     height: childrenRect.height
 
-    Label
-    {
+    Label {
         id: header
         text: catalog.i18nc("@header", "Custom")
         font: UM.Theme.getFont("medium")
@@ -81,15 +79,13 @@ Item
         }
     }
 
-    UM.TabRow
-    {
+    UM.TabRow {
         id: tabBar
         anchors.top: printerTypeSelectorRow.bottom
         anchors.topMargin: UM.Theme.getSize("default_margin").height
         visible: extrudersModel.count > 1
 
-        Repeater
-        {
+        Repeater {
             id: repeater
             model: extrudersModel
             delegate: UM.TabRowButton
@@ -115,8 +111,7 @@ Item
         //When active extruder changes for some other reason, switch tabs.
         //Don't directly link currentIndex to Cura.ExtruderManager.activeExtruderIndex!
         //This causes a segfault in Qt 5.11. Something with VisualItemModel removing index -1. We have to use setCurrentIndex instead.
-        Connections
-        {
+        Connections {
             target: Cura.ExtruderManager
             onActiveExtruderChanged:
             {
@@ -125,8 +120,7 @@ Item
         }
 
         // Can't use 'item: ...activeExtruderIndex' directly apparently, see also the comment on the previous block.
-        onVisibleChanged:
-        {
+        onVisibleChanged: {
             if (tabBar.visible)
             {
                 tabBar.setCurrentIndex(Cura.ExtruderManager.activeExtruderIndex);
@@ -136,8 +130,7 @@ Item
         //When the model of the extruders is rebuilt, the list of extruders is briefly emptied and rebuilt.
         //This causes the currentIndex of the tab to be in an invalid position which resets it to 0.
         //Therefore we need to change it back to what it was: The active extruder index.
-        Connections
-        {
+        Connections {
             target: repeater.model
             onModelChanged:
             {
@@ -146,8 +139,7 @@ Item
         }
     }
 
-    Rectangle
-    {
+    Rectangle {
         width: parent.width
         height: childrenRect.height
         anchors.top: tabBar.bottom
@@ -180,8 +172,7 @@ Item
             }
         }
 
-        Column
-        {
+        Column {
             id: selectors
             padding: UM.Theme.getSize("default_margin").width
             spacing: UM.Theme.getSize("default_margin").height
@@ -203,8 +194,7 @@ Item
             }
             property string instructionLink: Cura.MachineManager.activeStack != null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "instruction_link", ""): ""
 
-            Row
-            {
+            Row {
                 height: visible ? UM.Theme.getSize("setting_control").height : 0
                 visible: extrudersModel.count > 1  // If there is only one extruder, there is no point to enable/disable that.
 
@@ -219,8 +209,7 @@ Item
                     renderType: Text.NativeRendering
                 }
 
-                OldControls.CheckBox
-                {
+                OldControls.CheckBox {
                     id: enabledCheckbox
                     checked: Cura.MachineManager.activeStack != null ? Cura.MachineManager.activeStack.isEnabled : false
                     enabled: !checked || Cura.MachineManager.numberExtrudersEnabled > 1 //Disable if it's the last enabled extruder.
@@ -241,8 +230,7 @@ Item
                 }
             }
 
-            Row
-            {
+            Row {
                 height: visible ? UM.Theme.getSize("print_setup_big_item").height : 0
                 visible: Cura.MachineManager.activeMachine.hasMaterials
 
@@ -257,8 +245,7 @@ Item
                     renderType: Text.NativeRendering
                 }
 
-                OldControls.ToolButton
-                {
+                OldControls.ToolButton {
                     id: materialSelection
 
                     property bool valueError: Cura.MachineManager.activeStack !== null ? Cura.ContainerManager.getContainerMetaDataEntry(Cura.MachineManager.activeStack.material.id, "compatible", "") !== "True" : true

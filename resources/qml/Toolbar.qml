@@ -7,16 +7,14 @@ import QtQuick.Controls 2.3
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-Item
-{
+Item {
     id: base
 
     width: buttons.width
     height: buttons.height
     property int activeY
 
-    Item
-    {
+    Item {
         id: buttons
         width: parent.visible ? toolButtons.width : 0
         height: childrenRect.height
@@ -24,8 +22,7 @@ Item
         Behavior on width { NumberAnimation { duration: 100 } }
 
         // Used to create a rounded rectangle behind the toolButtons
-        Rectangle
-        {
+        Rectangle {
             anchors
             {
                 fill: toolButtons
@@ -38,16 +35,14 @@ Item
             color: UM.Theme.getColor("lining")
         }
 
-        Column
-        {
+        Column {
             id: toolButtons
 
             anchors.top: parent.top
             anchors.right: parent.right
             spacing: UM.Theme.getSize("default_lining").height
 
-            Repeater
-            {
+            Repeater {
                 id: repeat
 
                 model: UM.ToolModel { id: toolsModel }
@@ -82,18 +77,15 @@ Item
 
                     //Workaround since using ToolButton's onClicked would break the binding of the checked property, instead
                     //just catch the click so we do not trigger that behaviour.
-                    MouseArea
-                    {
+                    MouseArea {
                         anchors.fill: parent;
                         onClicked:
                         {
                             forceActiveFocus() //First grab focus, so all the text fields are updated
-                            if(parent.checked)
-                            {
+                            if(parent.checked) {
                                 UM.Controller.setActiveTool(null);
                             }
-                            else
-                            {
+                            else {
                                 UM.Controller.setActiveTool(model.id);
                             }
                         }
@@ -103,8 +95,7 @@ Item
         }
 
         // Used to create a rounded rectangle behind the extruderButtons
-        Rectangle
-        {
+        Rectangle {
             anchors
             {
                 fill: extruderButtons
@@ -118,8 +109,7 @@ Item
             visible: extrudersModel.items.length > 1
         }
 
-        Column
-        {
+        Column {
             id: extruderButtons
 
             anchors.topMargin: UM.Theme.getSize("default_margin").height
@@ -127,8 +117,7 @@ Item
             anchors.right: parent.right
             spacing: UM.Theme.getSize("default_lining").height
 
-            Repeater
-            {
+            Repeater {
                 id: extruders
                 width: childrenRect.width
                 height: childrenRect.height
@@ -146,8 +135,7 @@ Item
 
     property var extrudersModel: CuraApplication.getExtrudersModel()
 
-    UM.PointingRectangle
-    {
+    UM.PointingRectangle {
         id: panelBorder
 
         anchors.left: parent.right
