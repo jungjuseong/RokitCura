@@ -3010,8 +3010,7 @@
                     "value": "speed_layer_0",
                     "enabled": "resolveOrValue('adhesion_type') == 'skirt' or resolveOrValue('adhesion_type') == 'brim' or resolveOrValue('draft_shield_enabled') or resolveOrValue('ooze_shield_enabled')",
                     "settable_per_mesh": false,
-                    "settable_per_extruder": true,
-                    "limit_to_extruder": "adhesion_extruder_nr"
+                    "settable_per_extruder": true
                 },
                 "speed_z_hop":
                 {
@@ -3351,8 +3350,7 @@
                     "minimum_value_warning": "100",
                     "maximum_value_warning": "10000",
                     "enabled": "resolveOrValue('acceleration_enabled') and (resolveOrValue('adhesion_type') == 'skirt' or resolveOrValue('adhesion_type') == 'brim' or resolveOrValue('draft_shield_enabled') or resolveOrValue('ooze_shield_enabled'))",
-                    "settable_per_mesh": false,
-                    "limit_to_extruder": "adhesion_extruder_nr"
+                    "settable_per_mesh": false
                 },
                 "jerk_enabled":
                 {
@@ -3626,8 +3624,7 @@
                     "maximum_value_warning": "50",
                     "value": "jerk_layer_0",
                     "enabled": "resolveOrValue('jerk_enabled') and (resolveOrValue('adhesion_type') == 'skirt' or resolveOrValue('adhesion_type') == 'brim' or resolveOrValue('draft_shield_enabled') or resolveOrValue('ooze_shield_enabled'))",
-                    "settable_per_mesh": false,
-                    "limit_to_extruder": "adhesion_extruder_nr"
+                    "settable_per_mesh": false
                 }
             }
         },
@@ -5076,7 +5073,7 @@
                     "type": "extruder",
                     "default_value": "0",
                     "value": "int(defaultExtruderPosition())",
-                    "enabled": "extruders_enabled_count > 1",
+                    "enabled": "extruders_enabled_count > 1 and (resolveOrValue('adhesion_type') != 'none' or resolveOrValue('prime_tower_brim_enable'))",
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
@@ -5577,7 +5574,6 @@
                     "settable_per_mesh": false,
                     "settable_per_extruder": true,
                     "enabled": "resolveOrValue('adhesion_type') == 'raft'",
-                    "limit_to_extruder": "adhesion_extruder_nr",
                     "children":
                     {
                         "raft_surface_fan_speed":
