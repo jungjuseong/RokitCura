@@ -35,6 +35,17 @@ Menu {
                 buildDishType.setPropertyValue("value", selected)
 
                 preview.product_id = selected
+
+                CuraApplication.writeToLog("i", 'selected.substr(0,10):'+ selected.substr(0,10))
+
+                if (selected.substr(0,10) == "Well Plate") {
+                    //var extruder = Cura.MachineManager.activeMachine.extruderList[0]
+                    Cura.MachineManager.setExtruderEnabled(0, false)
+                }
+                else {
+                    Cura.MachineManager.setExtruderEnabled(0, true)
+
+                }
             }
         }
         onObjectAdded: {
