@@ -60,7 +60,7 @@ class RokitGCodeConverter:
         self.EndCodeBegin = ';(*** start of end code for Dr.Invivo 4D6)'
         self.EndCodeEnd = ';(*** end of end code for Dr.Invivo 4D6)'
 
-    def findKeyword(self, list, keyword) -> int:
+    def findWord(self, list, keyword) -> int:
         for index, word in enumerate(list): 
             if keyword in word:
                 return index
@@ -82,9 +82,10 @@ class RokitGCodeConverter:
 
             (x,y) = (distance, 0.0) if direction == 'X' else (0.0, distance)
 
-            hopping = ';HOPPING - {comment}{g0c30}{g0xy}{g92x0y0};END'.format(
+            hopping = ';HOPPING - {comment}{g0c30}{m29b}{g0xy}{g92x0y0};END'.format(
                     comment=';Well No: %d\n' % well,
                     g0c30=self._G['G0_C30'],
+                    m29b=self._G['M29_B'],
                     g0xy=self._G['G0_X_Y'] % (x,y),
                     g92x0y0=self._G['G92_X0_Y0']
                 )                        
@@ -105,8 +106,8 @@ class RokitGCodeConverter:
                 insert_here = index
             chunk_list.extend(line.split('\n'))
 
-        start_position = self.findKeyword(chunk_list,';BODY_START') + 1
-        end_position = self.findKeyword(chunk_list, self.EndCodeBegin)
+        start_position = self.findWord(chunk_list,';BODY_START') + 1
+        end_position = self.findWord(chunk_list, self.EndCodeBegin)
         body = '\n'.join(chunk_list[start_position:end_position]).strip()
 
         hopping_list = self.getHoppingList(number_of_walls,number_of_rows,spacing)
@@ -178,8 +179,8 @@ class RokitGCodeConverter:
                 if self._previous_tool != self._current_tool: # tool changed
                     self._logical_layer = self._real_layer - self._tool_initial_layers[self._previous_tool]
                     uvcode = self._P.getUVCode(self._previous_tool, self._logical_layer, self._real_layer)  
-                    bed_pos = self._P.getBedPos(self._current_tool)
-                    reset_height = (self._G['G0_Z40_C30_F420'] + self._G['M29_B']) #if self._current_tool > 0 else ''
+                    bed_pos = self._P.getBedPos(self._current_tool) if self._build_plate_type != 'Well Plate' else ''
+                    reset_height = (self._G['G0_Z40_C30_F420'] + self._G['M29_B'])
 
                     if uvcode != '' and self._before_layer_use_uv == False:
                         gcode_list[self._tool_index] = uvcode + bed_pos + gcode_list[self._tool_index]
