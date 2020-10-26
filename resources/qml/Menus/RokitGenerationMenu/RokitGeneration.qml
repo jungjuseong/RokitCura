@@ -53,27 +53,27 @@ Item {
         storeIndex: propertyStoreIndex
     }
 
-    Label {
-        id: header
-        text: {
-                if (buildDishType.properties.value == null || buildDishType.properties.value == undefined) {
-                    return catalog.i18nc("@header", "Generation")
-                }
-                const buildDish = buildDishType.properties.value.split(":")
+    // Label {
+    //     id: header
+    //     text: {
+    //             if (buildDishType.properties.value == null || buildDishType.properties.value == undefined) {
+    //                 return catalog.i18nc("@header", "Generation")
+    //             }
+    //             const buildDish = buildDishType.properties.value.split(":")
 
-                return "Build Plate: " + buildDish[0] + " - " + buildDish[1]
-        }
-        font: UM.Theme.getFont("medium")
-        color: UM.Theme.getColor("small_button_text")
-        height: contentHeight
-        renderType: Text.NativeRendering
+    //             return "Build Plate: " + buildDish[0] + " - " + buildDish[1]
+    //     }
+    //     font: UM.Theme.getFont("medium")
+    //     color: UM.Theme.getColor("small_button_text")
+    //     height: contentHeight
+    //     renderType: Text.NativeRendering
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-        }
-    }
+    //     anchors {
+    //         top: parent.top
+    //         left: parent.left
+    //         right: parent.right
+    //     }
+    // }
 
 
     UM.TabRow {
