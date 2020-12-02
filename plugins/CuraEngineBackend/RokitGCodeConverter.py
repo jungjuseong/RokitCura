@@ -39,7 +39,8 @@ class RokitGCodeConverter:
                     'D6\n' +\
                     'G1 E-1 F300 ; retract the Extruder for release some of the pressure\n' +\
                     'G90 ; absolute positioning\n' +\
-                    'M308 27 27 27 27 27 27 27 ; set temperature'
+                    'M308 27 27 27 27 27 27 27 ; set temperature\n' +\
+                    'G92.1'
 
         self._current_tool = -1  
         self._previous_tool = -1
@@ -147,7 +148,7 @@ class RokitGCodeConverter:
             self.cloneWellPlate(gcode_list, travel)
 
     def _getLayerNo(self, z_value, tool) -> int:
-        return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_heights[tool]))
+        return int(round((z_value - self._Q.layer_height_0) / self._Q.layer_height))
 
     def _convertOneLayerGCode(self,gcodes) -> str:
 

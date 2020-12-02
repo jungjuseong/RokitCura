@@ -16,6 +16,13 @@
         },
         "machine_extruder_end_code": {
             "default_value0": "; (*** end of start code for D3)\n"
+        },
+        "adhesion_type": {
+            "default_value": "brim"
+        },
+        "adhesion_extruder_nr": {
+            "default_value": 3,
+            "enabled": "extruderValue(adhesion_extruder_nr,'adhesion_type') == 'skirt' or extruderValue(adhesion_extruder_nr,'adhesion_type') == 'brim' or extruderValue(adhesion_extruder_nr,'adhesion_type') == 'raft'"
         }
     }
 }

@@ -3,6 +3,7 @@
 
 import numpy
 import math
+import copy
 
 from typing import List, Optional, TYPE_CHECKING, Any, Set, cast, Iterable, Dict
 
@@ -99,7 +100,7 @@ class BuildVolume(SceneNode):
 
         self._raft_thickness = 0.0
         self._extra_z_clearance = 0.0
-        self._adhesion_type = None  # type: Any
+        self._adhesion_type = ['none','none','none','none','none','none']  # type: Any
         self._platform = Platform(self)
 
         self._build_volume_message = Message(catalog.i18nc("@info:status",
@@ -636,6 +637,30 @@ class BuildVolume(SceneNode):
         return self._raft_thickness
 
     def _updateRaftThickness(self) -> None:
+        if not self._global_container_stack:
+            return
+
+        dirty = False
+        for index, ext in enumerate(ExtruderManager.getInstance().getUsedExtruderStacks()):
+            adhesion_type = ext.getProperty("adhesion_type", "value")
+            if adhesion_type == 'raft':
+                old_raft_thickness = self._raft_thickness
+                self._raft_thickness = (
+                    ext.getProperty("raft_base_thickness", "value") + 
+                    ext.getProperty("raft_interface_thickness", "value") +
+                    ext.getProperty("raft_surface_layers", "value") * 
+                    ext.getProperty("raft_surface_thickness", "value") +
+                    ext.getProperty("raft_airgap", "value") - 
+                    ext.getProperty("layer_0_z_overlap", "value"))
+                if old_raft_thickness != self._raft_thickness:
+                    dirty = True
+                    break
+        # Rounding errors do not matter, we check if raft_thickness has changed at all
+        if dirty:
+            self.setPosition(Vector(0, -self._raft_thickness, 0), SceneNode.TransformSpace.World)
+            self.raftThicknessChanged.emit()
+
+    def _updateRaftThicknessGlobal(self) -> None:
         if not self._global_container_stack:
             return
 

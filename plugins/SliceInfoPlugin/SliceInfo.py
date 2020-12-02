@@ -164,6 +164,10 @@ class SliceInfo(QObject, Extension):
                 extruder_dict["nozzle_size"] = extruder.getProperty("machine_nozzle_size", "value")
 
                 extruder_settings = dict()
+                # Platform adhesion settings
+                extruder_settings["adhesion_type"] = extruder.getProperty("adhesion_type", "value")
+                extruder_settings["adhesion_extruder_nr"] = extruder.getProperty("adhesion_extruder_nr", "value")
+
                 extruder_settings["wall_line_count"] = extruder.getProperty("wall_line_count", "value")
                 extruder_settings["retraction_enable"] = extruder.getProperty("retraction_enable", "value")
                 extruder_settings["infill_sparse_density"] = extruder.getProperty("infill_sparse_density", "value")
@@ -234,9 +238,6 @@ class SliceInfo(QObject, Extension):
             # Support settings
             print_settings["support_enabled"] = global_stack.getProperty("support_enable", "value")
             print_settings["support_extruder_nr"] = int(global_stack.getExtruderPositionValueWithDefault("support_extruder_nr"))
-
-            # Platform adhesion settings
-            print_settings["adhesion_type"] = global_stack.getProperty("adhesion_type", "value")
 
             # Shell settings
             print_settings["wall_line_count"] = global_stack.getProperty("wall_line_count", "value")

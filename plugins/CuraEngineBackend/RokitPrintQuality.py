@@ -66,17 +66,16 @@ class RokitPrintQuality:
         self.cool_fan_enabled_list = [self._getExtrudersProperty(index,'cool_fan_enabled') for index in range(6)]
 
         # 리트렉션
-        self.retraction_enable_list = [self._getExtrudersProperty(index,'retraction_enable') for index in range(6)]
-        self.retraction_amount_list = [self._getExtrudersProperty(index,'retraction_amount') for index in range(6)]
-        self.retraction_speed_list = [self._getExtrudersProperty(index,'retraction_speed') for index in range(6)]
-        self.retraction_min_travel = [self._getExtrudersProperty(index,'retraction_min_travel') for index in range(6)]
-        self.retraction_extrusion_window = [self._getExtrudersProperty(index,'retraction_extrusion_window') for index in range(6)]
+        # self.retraction_enable_list = [self._getExtrudersProperty(index,'retraction_enable') for index in range(6)]
+        # self.retraction_amount_list = [self._getExtrudersProperty(index,'retraction_amount') for index in range(6)]
+        # self.retraction_speed_list = [self._getExtrudersProperty(index,'retraction_speed') for index in range(6)]
+        # self.retraction_min_travel = [self._getExtrudersProperty(index,'retraction_min_travel') for index in range(6)]
+        # self.retraction_extrusion_window = [self._getExtrudersProperty(index,'retraction_extrusion_window') for index in range(6)]
 
         # z좌표 관리
         self.layer_height_0 = self.getGlobalContainerStackProperty('layer_height_0')
-        self.layer_heights = [self._getExtrudersProperty(index,'layer_height') for index in range(6)]
+        self.layer_height = self.getGlobalContainerStackProperty('layer_height')
 
-        self.layer_height_list = ' '.join(map(str,[self._getExtrudersProperty(index,'layer_height') for index in self._JoinSequence]))
         self.wall_thickness_list = ' '.join(map(str,[self._getExtrudersProperty(index,'wall_thickness') for index in self._JoinSequence]))
         self.infill_sparse_density_list = ' '.join(map(str,[self._getExtrudersProperty(index,'infill_sparse_density') for index in self._JoinSequence]))
 

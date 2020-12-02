@@ -143,7 +143,7 @@ class RokitPattern:
 
         return start_code\
             .replace('{print_temp}', self._G['PRINT_TEMP'] % self._Q.print_temperature)\
-            .replace('{layer_height}', self._Q.layer_height_list)\
+            .replace('{layer_height}', str(self._Q.layer_height))\
             .replace('{wall_thickness}', self._Q.wall_thickness_list)\
             .replace('{infill_sparse_density}', self._Q.infill_sparse_density_list)
 
