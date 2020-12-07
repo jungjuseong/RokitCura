@@ -641,17 +641,17 @@ class BuildVolume(SceneNode):
             return
 
         dirty = False
-        for index, ext in enumerate(ExtruderManager.getInstance().getUsedExtruderStacks()):
-            adhesion_type = ext.getProperty("adhesion_type", "value")
+        for index, extruder in enumerate(ExtruderManager.getInstance().getUsedExtruderStacks()):
+            adhesion_type = extruder.getProperty("adhesion_type", "value")
             if adhesion_type == 'raft':
                 old_raft_thickness = self._raft_thickness
                 self._raft_thickness = (
-                    ext.getProperty("raft_base_thickness", "value") + 
-                    ext.getProperty("raft_interface_thickness", "value") +
-                    ext.getProperty("raft_surface_layers", "value") * 
-                    ext.getProperty("raft_surface_thickness", "value") +
-                    ext.getProperty("raft_airgap", "value") - 
-                    ext.getProperty("layer_0_z_overlap", "value"))
+                    extruder.getProperty("raft_base_thickness", "value") + 
+                    extruder.getProperty("raft_interface_thickness", "value") +
+                    extruder.getProperty("raft_surface_layers", "value") * 
+                    extruder.getProperty("raft_surface_thickness", "value") +
+                    extruder.getProperty("raft_airgap", "value") - 
+                    extruder.getProperty("layer_0_z_overlap", "value"))
                 if old_raft_thickness != self._raft_thickness:
                     dirty = True
                     break

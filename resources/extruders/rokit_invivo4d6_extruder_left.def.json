@@ -21,8 +21,7 @@
             "default_value": "skirt"
         },
         "adhesion_extruder_nr": {
-            "default_value": 0,
-            "enabled": "extruderValue(adhesion_extruder_nr,'adhesion_type') == 'skirt' or extruderValue(adhesion_extruder_nr,'adhesion_type') == 'brim' or extruderValue(adhesion_extruder_nr,'adhesion_type') == 'raft'"
+            "value": 0
         }
     }
 }

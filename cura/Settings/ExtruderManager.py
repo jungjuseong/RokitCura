@@ -263,8 +263,7 @@ class ExtruderManager(QObject):
 
         # The platform adhesion extruder. Not used if using none.
         if global_stack.getProperty("adhesion_type", "value") != "none" or (
-                global_stack.getProperty("prime_tower_brim_enable", "value") and
-                global_stack.getProperty("adhesion_type", "value") != 'raft'):
+                global_stack.getProperty("prime_tower_brim_enable", "value") and global_stack.getProperty("adhesion_type", "value") != 'raft'):
             extruder_str_nr = str(global_stack.getProperty("adhesion_extruder_nr", "value"))
             if extruder_str_nr == "-1":
                 extruder_str_nr = self._application.getMachineManager().defaultExtruderPosition
@@ -279,15 +278,22 @@ class ExtruderManager(QObject):
 
     ##  Get the extruder that the print will start with.
     #
-    #   This should mirror the implementation in CuraEngine of
-    #   ``FffGcodeWriter::getStartExtruder()``.
+    #   This should mirror the implementation in CuraEngine of ``FffGcodeWriter::getStartExtruder()``.
     def getInitialExtruderNr(self) -> int:
         application = cura.CuraApplication.CuraApplication.getInstance()
         global_stack = application.getGlobalContainerStack()
 
+        usedExtruders = ExtruderManager.getInstance().getUsedExtruderStacks()
+        for index, extruder in enumerate(usedExtruders):
+            adhesion_type = extruder.getProperty("adhesion_type", "value")
+            if adhesion_type != "none":
+                return adhesion_type
+
         # Starts with the adhesion extruder.
-        if global_stack.getProperty("adhesion_type", "value") != "none":
-            return global_stack.getProperty("adhesion_extruder_nr", "value")
+        # adhesion_type = global_stack.getProperty("adhesion_type", "value")
+        # if adhesion_type != "none":
+        #     return adhesion_type
+
 
         # No adhesion? Well maybe there is still support brim.
         if (global_stack.getProperty("support_enable", "value") or global_stack.getProperty("support_tree_enable", "value")) and global_stack.getProperty("support_brim_enable", "value"):
