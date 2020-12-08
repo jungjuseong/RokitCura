@@ -5058,14 +5058,12 @@
                     "options":
                     {
                         "skirt": "Skirt",
-                        "brim": "Brim",
-                        "raft": "Raft",
                         "none": "None"
                     },
                     "default_value": "brim",
                     "resolve": "extruderValue(adhesion_extruder_nr, 'adhesion_type')",
                     "settable_per_mesh": false,
-                    "settable_per_mesh_group": true,
+                    "settable_per_mesh_group": false,
                     "settable_per_extruder": true
                 },
                 "adhesion_extruder_nr":
