@@ -18,7 +18,7 @@
             "default_value0": "; (*** end of start code for D3)\n"
         },
         "adhesion_type": {
-            "default_value": "brim"
+            "default_value": "none"
         },
         "adhesion_extruder_nr": {
             "value": 3
