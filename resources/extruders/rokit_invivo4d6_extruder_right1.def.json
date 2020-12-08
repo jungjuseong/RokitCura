@@ -18,6 +18,7 @@
             "default_value0": "; (*** end of start code for D1)\n"
         },
         "adhesion_type": {
+            "enabled": false,
             "default_value": "none"
         },
         "adhesion_extruder_nr": {
