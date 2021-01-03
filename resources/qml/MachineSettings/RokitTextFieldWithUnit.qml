@@ -11,8 +11,7 @@ import Cura 1.1 as Cura
 //
 // TextField widget with validation for editing numeric data in the Machine Settings dialog.
 //
-UM.TooltipArea
-{
+UM.TooltipArea {
     id: numericTextFieldWithUnit
 
     UM.I18nCatalog { id: catalog; name: "cura"; }
@@ -30,6 +29,7 @@ UM.TooltipArea
     property alias settingStoreIndex: propertyProvider.storeIndex
 
     property alias propertyProvider: propertyProvider
+
     property alias labelText: fieldLabel.text
     property alias labelFont: fieldLabel.font
     property alias labelWidth: fieldLabel.width
@@ -55,15 +55,12 @@ UM.TooltipArea
     // a dummy function for default property values
     function dummy_func() {}
 
-
-    UM.SettingPropertyProvider
-    {
+    UM.SettingPropertyProvider {
         id: propertyProvider
         watchedProperties: [ "value", "description" ]
     }
 
-    Label
-    {
+    Label  {
         id: fieldLabel
         anchors.left: parent.left
         anchors.verticalCenter: textFieldWithUnit.verticalCenter
@@ -73,8 +70,7 @@ UM.TooltipArea
         renderType: Text.NativeRendering
     }
 
-    TextField
-    {
+    TextField  {
         id: textFieldWithUnit
         anchors.left: fieldLabel.right
         //anchors.leftMargin: UM.Theme.getSize("default_margin").width
@@ -85,20 +81,17 @@ UM.TooltipArea
         enabled: false
 
         // Background is a rounded-cornered box with filled color as state indication (normal, warning, error, etc.)
-        background: Rectangle
-        {
+        background: Rectangle {
             anchors.fill: parent
             anchors.margins: Math.round(UM.Theme.getSize("default_lining").width)
             radius: UM.Theme.getSize("setting_control_radius").width
 
-            border.color:
-            {
+            border.color: {
                 if (!textFieldWithUnit.enabled)
                 {
                     return UM.Theme.getColor("setting_control_disabled_border")
                 }
-                switch (propertyProvider.properties.validationState)
-                {
+                switch (propertyProvider.properties.validationState)  {
                     case "ValidatorState.Exception":
                     case "ValidatorState.MinimumError":
                     case "ValidatorState.MaximumError":
@@ -115,8 +108,7 @@ UM.TooltipArea
                 return UM.Theme.getColor("setting_control_border")
             }
 
-            color:
-            {
+            color: {
                 if (!textFieldWithUnit.enabled)
                 {
                     return UM.Theme.getColor("setting_control_disabled")
@@ -145,21 +137,18 @@ UM.TooltipArea
         renderType: Text.NativeRendering
 
         // When the textbox gets focused by TAB, select all text
-        onActiveFocusChanged:
-        {
+        onActiveFocusChanged: {
             if (activeFocus && (focusReason == Qt.TabFocusReason || focusReason == Qt.BacktabFocusReason))
             {
                 selectAll()
             }
         }
 
-        text:
-        {
+        text: {
             const value = propertyProvider.properties.value
             return value ? value : ""
         }
-        validator: DoubleValidator
-        {
+        validator: DoubleValidator {
             bottom: allowNegativeValue ? Number.NEGATIVE_INFINITY : 0
             top: allowPositiveValue ? Number.POSITIVE_INFINITY : 0
             decimals: 6

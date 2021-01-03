@@ -23,7 +23,6 @@ Item {
     property var labelFont: UM.Theme.getFont("default")
 
     property string machineStackId: Cura.MachineManager.activeMachine.id
-    //property var extrudersModel:  CuraApplication.getExtrudersModel()
 
     property var extrudersModel: Cura.ExtrudersModel {}
 
@@ -38,20 +37,21 @@ Item {
     function getExtruderType() {
         const variantName = Cura.MachineManager.activeStack.variant.name
         const lists = variantName.split(" ")
-        if (lists.length > 0)
-            return lists[0][0]
+        // console.log("variant name:",lists[0])
+        if (lists.length > 1)
+            return lists[0]
         
         return ""
     }
 
     // "Build dish type"
-    UM.SettingPropertyProvider {
-        id: buildDishType
-        containerStack: Cura.MachineManager.activeMachine
-        key: "machine_build_dish_type"
-        watchedProperties: [ "value"]
-        storeIndex: propertyStoreIndex
-    }
+    // UM.SettingPropertyProvider {
+    //     id: buildDishType
+    //     containerStack: Cura.MachineManager.activeMachine
+    //     key: "machine_build_dish_type"
+    //     watchedProperties: [ "value"]
+    //     storeIndex: propertyStoreIndex
+    // }
 
     // Label {
     //     id: header
@@ -381,7 +381,9 @@ Item {
                             left: parent.left
                             leftMargin: UM.Theme.getSize("default_margin").width 
                         }
-                        text: "UV"
+                        text: {
+                            return "UV"
+                        }
                     }
                 }
                 
@@ -403,7 +405,7 @@ Item {
                 Cura.NumericTextFieldWithUnit  {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "uv_per_layers"
-                    labelText: catalog.i18nc("@label", "Layers")
+                    labelText: catalog.i18nc("@label", "Layers" )
                     unitText: catalog.i18nc("@label", "layers")
 
                     labelFont: base.labelFont
@@ -453,8 +455,8 @@ Item {
                 }
             }
 
-            Row { // Dispensor Bar
-                visible: getExtruderType() === "Dispensor"
+            Row { // Dispenser Bar
+                visible: getExtruderType() === "Dispenser"
                 Rectangle {
                     width:  selectors.bar_width
                     height: selectors.bar_height
@@ -471,7 +473,7 @@ Item {
                             left: parent.left
                             leftMargin: UM.Theme.getSize("default_margin").width 
                         }
-                        text: "Dispensor"
+                        text: "Dispenser"
                     }
                 }
             }
@@ -479,7 +481,7 @@ Item {
             GridLayout {
                 id: dispensor
 
-                visible: getExtruderType() === "Dispensor"
+                visible: getExtruderType() === "Dispenser"
 
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor

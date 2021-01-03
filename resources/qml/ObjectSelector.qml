@@ -7,21 +7,18 @@ import QtQuick.Controls 2.3
 import UM 1.2 as UM
 import Cura 1.0 as Cura
 
-Item
-{
+Item {
     id: objectSelector
     width: UM.Theme.getSize("objects_menu_size").width
     property bool opened: UM.Preferences.getValue("cura/show_list_of_objects")
 
     // Eat up all the mouse events (we don't want the scene to react or have the scene context menu showing up)
-    MouseArea
-    {
+    MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.AllButtons
     }
 
-    Button
-    {
+    Button {
         id: openCloseButton
         width: parent.width
         height: contentItem.height + bottomPadding
@@ -29,19 +26,16 @@ Item
         padding: 0
         bottomPadding: UM.Theme.getSize("narrow_margin").height / 2 | 0
 
-        anchors
-        {
+        anchors {
             bottom: contents.top
             horizontalCenter: parent.horizontalCenter
         }
 
-        contentItem: Item
-        {
+        contentItem: Item {
             width: parent.width
             height: label.height
 
-            UM.RecolorImage
-            {
+            UM.RecolorImage {
                 id: openCloseIcon
                 width: UM.Theme.getSize("standard_arrow").width
                 height: UM.Theme.getSize("standard_arrow").height
@@ -73,8 +67,7 @@ Item
         }
     }
 
-    Rectangle
-    {
+    Rectangle {
         id: contents
         width: parent.width
         visible: objectSelector.opened
@@ -87,8 +80,7 @@ Item
 
         anchors.bottom: parent.bottom
 
-        ListView
-        {
+        ListView {
             id: listView
             clip: true
             anchors
@@ -109,8 +101,7 @@ Item
 
             model: Cura.ObjectsModel {}
 
-            delegate: ObjectItemButton
-            {
+            delegate: ObjectItemButton {
                 id: modelButton
                 Binding
                 {

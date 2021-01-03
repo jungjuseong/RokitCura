@@ -11,8 +11,7 @@ import Cura 1.1 as Cura
 //
 // TextField widget with validation for editing numeric data in the Machine Settings dialog.
 //
-UM.TooltipArea
-{
+UM.TooltipArea {
     id: numericTextFieldWithUnit
 
     UM.I18nCatalog { id: catalog; name: "cura"; } 
@@ -54,14 +53,12 @@ UM.TooltipArea
     function dummy_func() {}
 
 
-    UM.SettingPropertyProvider
-    {
+    UM.SettingPropertyProvider {
         id: propertyProvider
         watchedProperties: [ "value", "description" ]
     }
 
-    Label
-    {
+    Label  {
         id: fieldLabel
         anchors.left: parent.left
         anchors.verticalCenter: textFieldWithUnit.verticalCenter
@@ -71,8 +68,7 @@ UM.TooltipArea
         renderType: Text.NativeRendering
     }
 
-    TextField
-    {
+    TextField {
         id: textFieldWithUnit
         anchors.left: fieldLabel.right
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
@@ -81,16 +77,13 @@ UM.TooltipArea
         height: numericTextFieldWithUnit.controlHeight
 
         // Background is a rounded-cornered box with filled color as state indication (normal, warning, error, etc.)
-        background: Rectangle
-        {
+        background: Rectangle {
             anchors.fill: parent
             anchors.margins: Math.round(UM.Theme.getSize("default_lining").width)
             radius: UM.Theme.getSize("setting_control_radius").width
 
-            border.color:
-            {
-                if (!textFieldWithUnit.enabled)
-                {
+            border.color: {
+                if (!textFieldWithUnit.enabled) {
                     return UM.Theme.getColor("setting_control_disabled_border")
                 }
                 switch (propertyProvider.properties.validationState)
@@ -104,21 +97,17 @@ UM.TooltipArea
                         return UM.Theme.getColor("setting_validation_warning")
                 }
                 // Validation is OK.
-                if (textFieldWithUnit.hovered || textFieldWithUnit.activeFocus)
-                {
+                if (textFieldWithUnit.hovered || textFieldWithUnit.activeFocus) {
                     return UM.Theme.getColor("setting_control_border_highlight")
                 }
                 return UM.Theme.getColor("setting_control_border")
             }
 
-            color:
-            {
-                if (!textFieldWithUnit.enabled)
-                {
+            color: {
+                if (!textFieldWithUnit.enabled) {
                     return UM.Theme.getColor("setting_control_disabled")
                 }
-                switch (propertyProvider.properties.validationState)
-                {
+                switch (propertyProvider.properties.validationState) {
                     case "ValidatorState.Exception":
                     case "ValidatorState.MinimumError":
                     case "ValidatorState.MaximumError":
@@ -141,21 +130,17 @@ UM.TooltipArea
         renderType: Text.NativeRendering
 
         // When the textbox gets focused by TAB, select all text
-        onActiveFocusChanged:
-        {
-            if (activeFocus && (focusReason == Qt.TabFocusReason || focusReason == Qt.BacktabFocusReason))
-            {
+        onActiveFocusChanged: {
+            if (activeFocus && (focusReason == Qt.TabFocusReason || focusReason == Qt.BacktabFocusReason)) {
                 selectAll()
             }
         }
 
-        text:
-        {
+        text: {
             const value = propertyProvider.properties.value
             return value ? value : ""
         }
-        validator: DoubleValidator
-        {
+        validator: DoubleValidator {
             bottom: numericTextFieldWithUnit.minimum
             top: numericTextFieldWithUnit.maximum
             decimals: numericTextFieldWithUnit.decimals
@@ -166,11 +151,9 @@ UM.TooltipArea
         //The DoubleValidator allows intermediate values, which essentially means that the maximum gets rounded up to the nearest power of 10.
         //This is not accurate at all, so here if the value exceeds the maximum or the minimum we disallow it.
         property string previousText
-        onTextChanged:
-        {
+        onTextChanged: {
             var value = Number(text);
-            if(value < numericTextFieldWithUnit.minimum || value > numericTextFieldWithUnit.maximum)
-            {
+            if(value < numericTextFieldWithUnit.minimum || value > numericTextFieldWithUnit.maximum) {
                 text = previousText;
             }
             previousText = text;
@@ -180,10 +163,8 @@ UM.TooltipArea
 
         property var editingFinishedFunction: defaultEditingFinishedFunction
 
-        function defaultEditingFinishedFunction()
-        {
-            if (propertyProvider && text != propertyProvider.properties.value)
-            {
+        function defaultEditingFinishedFunction() {
+            if (propertyProvider && text != propertyProvider.properties.value) {
                 // For some properties like the extruder-compatible material diameter, they need to
                 // trigger many updates, such as the available materials, the current material may
                 // need to be switched, etc. Although setting the diameter can be done directly via
@@ -195,8 +176,7 @@ UM.TooltipArea
                 // and it triggers the diameter update signals only when it is needed. Here it is optionally
                 // choose to use setCompatibleMaterialDiameter() or other more specific functions that
                 // are available.
-                if (setValueFunction !== null)
-                {
+                if (setValueFunction !== null) {
                     setValueFunction(text)
                 }
                 else
@@ -208,8 +188,7 @@ UM.TooltipArea
             }
         }
 
-        Label
-        {
+        Label {
             id: unitLabel
             anchors.right: parent.right
             anchors.rightMargin: Math.round(UM.Theme.getSize("setting_unit_margin").width)

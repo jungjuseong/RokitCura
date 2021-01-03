@@ -29,7 +29,7 @@ class PrintInformation(QObject):
 
     UNTITLED_JOB_NAME = "Untitled"
 
-    def __init__(self, application: "CuraApplication", parent = None) -> None:
+    def __init__(self, application: "OrganRegenerator", parent = None) -> None:
         super().__init__(parent)
         self._application = application
 
@@ -298,7 +298,7 @@ class PrintInformation(QObject):
             self.jobNameChanged.emit()
             return
 
-        base_name = self._stripAccents(self._base_name)
+        base_name = self._base_name # self._stripAccents(self._base_name)
         self._defineAbbreviatedMachineName()
 
         # Only update the job name when it's not user-specified.

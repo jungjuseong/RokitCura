@@ -21,7 +21,10 @@ UM.MainWindow {
 
     // Cura application window title
     title: {
-        const title = (PrintInformation !== null && PrintInformation.jobName != "") ? PrintInformation.jobName + " - " : ""
+        const title = ""
+        if (PrintInformation !== null && PrintInformation.jobName != "") 
+            title = PrintInformation.jobName + " - "
+        
         return title + CuraApplication.applicationDisplayName;
     }
 
