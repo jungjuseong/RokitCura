@@ -98,6 +98,9 @@
         "retraction_speed": { 
             "default_value": 15
         },
+        "retract_at_layer_change": {
+            "default_value": true
+        },
         "retraction_extrusion_window":
         {
             "default_value": 1
