@@ -18,7 +18,7 @@
     </properties>
     <settings>
         <setting key="print temperature">110</setting>
-        <setting key="heated bed temperature">5</setting>
+        <setting key="heated bed temperature">0</setting>
         <setting key="standby temperature">60</setting>
         <setting key="adhesion tendency">0</setting>
         <setting key="build volume temperature">6</setting>
