@@ -111,7 +111,7 @@
         },
         "switch_extruder_retraction_amount":
         {
-            "default_value": 16
+            "default_value": 30
         },
         "switch_extruder_retraction_speeds":
         {
