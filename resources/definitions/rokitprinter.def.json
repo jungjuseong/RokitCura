@@ -3650,7 +3650,7 @@
                     "label": "Retract at Layer Change",
                     "description": "Retract the filament when the nozzle is moving to the next layer.",
                     "type": "bool",
-                    "default_value": false,
+                    "default_value": true,
                     "settable_per_mesh": false,
                     "settable_per_extruder": true
                 },
