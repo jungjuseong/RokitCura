@@ -37,7 +37,6 @@ Item {
     function getExtruderType() {
         const variantName = Cura.MachineManager.activeStack.variant.name
         const lists = variantName.split(" ")
-        // console.log("variant name:",lists[0])
         if (lists.length > 1)
             return lists[0]
         
@@ -106,10 +105,10 @@ Item {
             spacing: UM.Theme.getSize("default_margin").height / 5
 
             readonly property real paddedWidth: parent.width - padding
-            property real textWidth: Math.round(paddedWidth * 0.2)
-            property real controlWidth: (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 3.2
+            property real textWidth: Math.round(paddedWidth * 0.27)
+            property real controlWidth: (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 4
 
-            readonly property real bar_width: UM.Theme.getSize("rokit_big_item").width * 1.2
+            readonly property real bar_width: UM.Theme.getSize("rokit_big_item").width * 1.1
             readonly property real bar_height: UM.Theme.getSize("rokit_big_item").height * 0.8
             readonly property real bar_radius: UM.Theme.getSize("rokit_combobox_radius").height
 
@@ -218,7 +217,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "material_print_temperature"
-                    labelText: catalog.i18nc("@label", "Print Temp.")
+                    labelText: catalog.i18nc("@label", "Print Temperature")
                     unitText: catalog.i18nc("@label", "°C")
 
                     labelFont: base.labelFont
@@ -230,7 +229,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "material_bed_temperature"
-                    labelText: catalog.i18nc("@label", "Bed Temp.")
+                    labelText: catalog.i18nc("@label", "Bed Temperature")
                     unitText: catalog.i18nc("@label", "°C")
 
                     labelFont: base.labelFont
@@ -364,7 +363,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "speed_print_layer_0"
-                    labelText: catalog.i18nc("@label", "Layer 0 Print")
+                    labelText: catalog.i18nc("@label", "Layer 0 Print Speed")
                     unitText: catalog.i18nc("@label", "mm/s")
 
                     labelFont: base.labelFont
@@ -388,7 +387,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "speed_travel_layer_0"
-                    labelText: catalog.i18nc("@label", "Layer 0 Travel")
+                    labelText: catalog.i18nc("@label", "Layer 0 Travel Speed")
                     unitText: catalog.i18nc("@label", "mm/s")
 
                     labelFont: base.labelFont
@@ -400,7 +399,8 @@ Item {
             }
 
             Row { // Travel
-                visible: (retractionEnable.checked_value == 'true')
+                visible: getExtruderType() === "Extruder"
+
                 Rectangle {
                     width: selectors.bar_width
                     height: selectors.bar_height
@@ -417,9 +417,9 @@ Item {
                             left: parent.left
                             leftMargin: UM.Theme.getSize("default_margin").width 
                         }
-                        text: 'Retraction'
+                        text: 'Retraction on Travel'
                     }
-                    Cura.RokitSimpleCheckBox  // Enable UV"
+                    Cura.RokitSimpleCheckBox 
                     {
                         id: retractionEnable
                         visible: false
@@ -444,7 +444,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "retraction_amount"
-                    labelText: catalog.i18nc("@label", "Distance")
+                    labelText: catalog.i18nc("@label", "Retraction Distance")
                     unitText: catalog.i18nc("@label", "mm")
 
                     labelFont: base.labelFont
@@ -468,7 +468,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "retraction_min_travel"
-                    labelText: catalog.i18nc("@label", "Minimum Travel")
+                    labelText: catalog.i18nc("@label", "Retraction Min Travel")
                     unitText: catalog.i18nc("@label", "mm")
 
                     labelFont: base.labelFont
@@ -480,7 +480,7 @@ Item {
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
                     settingKey: "retraction_count_max"
-                    labelText: catalog.i18nc("@label", "Maximum Count")
+                    labelText: catalog.i18nc("@label", "Retraction Max Count")
                     unitText: catalog.i18nc("@label", "")
 
                     labelFont: base.labelFont
@@ -492,7 +492,6 @@ Item {
             }
 
             Row { // UV Bar
-                visible: uvEnable.checked_value == 'true'
                 Rectangle {
                     width: selectors.bar_width
                     height: selectors.bar_height
