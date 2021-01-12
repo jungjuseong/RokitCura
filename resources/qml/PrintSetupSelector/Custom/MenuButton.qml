@@ -7,8 +7,7 @@ import QtQuick.Controls 2.3
 import UM 1.2 as UM
 import Cura 1.6 as Cura
 
-Button
-{
+Button {
     // This is a work around for a qml issue. Since the default button uses a private implementation for contentItem
     // (the so called IconText), which handles the mnemonic conversion (aka; ensuring that &Button) text property
     // is rendered with the B underlined. Since we're also forced to mix controls 1.0 and 2.0 actions together,
@@ -19,8 +18,7 @@ Button
     id: button
     hoverEnabled: true
 
-    background: Rectangle
-    {
+    background: Rectangle {
         id: backgroundRectangle
         border.width: UM.Theme.getSize("default_lining").width
         border.color: button.checked ? UM.Theme.getColor("setting_control_border_highlight") : "transparent"
@@ -29,18 +27,15 @@ Button
     }
 
     // Workarround to ensure that the mnemonic highlighting happens correctly
-    function replaceText(txt)
-    {
+    function replaceText(txt) {
         var index = txt.indexOf("&")
-        if(index >= 0)
-        {
+        if(index >= 0) {
             txt = txt.replace(txt.substr(index, 2), ("<u>" + txt.substr(index + 1, 1) + "</u>"))
         }
         return txt
     }
 
-    contentItem: Label
-    {
+    contentItem: Label {
         id: textLabel
         text: button.text != "" ? replaceText(button.text) : replaceText(button.labelText)
         height: contentHeight

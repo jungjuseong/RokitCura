@@ -36,7 +36,7 @@ Cura.ExpandablePopup {
     contentItem: Column {
         id: popupItem
 
-        width: UM.Theme.getSize("configuration_selector").width
+        width: UM.Theme.getSize("configuration_selector").width * 1.2
         height: implicitHeight  // ExpandableComponent will try to use this to determine the size of the background of the pop-up.
         padding: UM.Theme.getSize("default_margin").height
         spacing: UM.Theme.getSize("default_margin").height

@@ -44,38 +44,6 @@ Item {
         return ""
     }
 
-    // "Build dish type"
-    // UM.SettingPropertyProvider {
-    //     id: buildDishType
-    //     containerStack: Cura.MachineManager.activeMachine
-    //     key: "machine_build_dish_type"
-    //     watchedProperties: [ "value"]
-    //     storeIndex: propertyStoreIndex
-    // }
-
-    // Label {
-    //     id: header
-    //     text: {
-    //             if (buildDishType.properties.value == null || buildDishType.properties.value == undefined) {
-    //                 return catalog.i18nc("@header", "Generation")
-    //             }
-    //             const buildDish = buildDishType.properties.value.split(":")
-
-    //             return "Build Plate: " + buildDish[0] + " - " + buildDish[1]
-    //     }
-    //     font: UM.Theme.getFont("medium")
-    //     color: UM.Theme.getColor("small_button_text")
-    //     height: contentHeight
-    //     renderType: Text.NativeRendering
-
-    //     anchors {
-    //         top: parent.top
-    //         left: parent.left
-    //         right: parent.right
-    //     }
-    // }
-
-
     UM.TabRow {
         id: tabBar
         anchors.top: header.bottom
@@ -141,7 +109,7 @@ Item {
             property real textWidth: Math.round(paddedWidth * 0.2)
             property real controlWidth: (paddedWidth - textWidth - UM.Theme.getSize("print_setup_big_item").height * 0.5 - UM.Theme.getSize("default_margin").width) / 3.2
 
-            readonly property real bar_width: UM.Theme.getSize("rokit_big_item").width
+            readonly property real bar_width: UM.Theme.getSize("rokit_big_item").width * 1.2
             readonly property real bar_height: UM.Theme.getSize("rokit_big_item").height * 0.8
             readonly property real bar_radius: UM.Theme.getSize("rokit_combobox_radius").height
 
@@ -275,7 +243,6 @@ Item {
             }
 
             Row { // Layer Quality Bar
-                //visible: Cura.MachineManager.activeMachine.hasMaterials
                 Rectangle {
                     width: selectors.bar_width
                     height: selectors.bar_height
@@ -348,6 +315,39 @@ Item {
                     controlHeight: base.controlHeight
                     textField.readOnly: true
                 }
+            }
+
+            Row { // Speed
+                Rectangle {
+                    width: selectors.bar_width
+                    height: selectors.bar_height
+                    radius: selectors.bar_radius
+                    color: selectors.bar_color
+                    border.color: selectors.bar_border_color                    
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+                    Text {
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: "Speed"
+                    }
+                }
+            }
+            GridLayout {
+                id: speed
+
+                Layout.fillWidth: true
+                columnSpacing: 24 * screenScaleFactor
+                rowSpacing: 1 * screenScaleFactor
+                anchors {
+                    left: selectors.left
+                    margins: UM.Theme.getSize("default_margin").width
+                }
+                columns: 2
 
                 Cura.NumericTextFieldWithUnit {
                     containerStackId: base.getActiveExtruderId()
@@ -361,10 +361,138 @@ Item {
                     controlHeight: base.controlHeight
                     textField.readOnly: true
                 }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "speed_print_layer_0"
+                    labelText: catalog.i18nc("@label", "Layer 0 Print")
+                    unitText: catalog.i18nc("@label", "mm/s")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "speed_travel"
+                    labelText: catalog.i18nc("@label", "Travel Speed")
+                    unitText: catalog.i18nc("@label", "mm/s")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "speed_travel_layer_0"
+                    labelText: catalog.i18nc("@label", "Layer 0 Travel")
+                    unitText: catalog.i18nc("@label", "mm/s")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+            }
+
+            Row { // Travel
+                visible: (retractionEnable.checked_value == 'true')
+                Rectangle {
+                    width: selectors.bar_width
+                    height: selectors.bar_height
+                    radius: selectors.bar_radius
+                    color: selectors.bar_color
+                    border.color: selectors.bar_border_color                    
+                    anchors { 
+                        margins: UM.Theme.getSize("default_margin").width
+                    }
+                    Text {
+                        id: travel_text
+                        anchors{
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: UM.Theme.getSize("default_margin").width 
+                        }
+                        text: 'Retraction'
+                    }
+                    Cura.RokitSimpleCheckBox  // Enable UV"
+                    {
+                        id: retractionEnable
+                        visible: false
+                        containerStackId: base.getActiveExtruderId()
+                        settingKey: "retraction_enable"
+                    }
+                }
+            }
+            GridLayout {
+                id: retraction
+                visible: (retractionEnable.checked_value == 'true')
+
+                Layout.fillWidth: true
+                columnSpacing: 24 * screenScaleFactor
+                rowSpacing: 1 * screenScaleFactor
+                anchors {
+                    left: selectors.left
+                    margins: UM.Theme.getSize("default_margin").width
+                }
+                columns: 2
+
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "retraction_amount"
+                    labelText: catalog.i18nc("@label", "Distance")
+                    unitText: catalog.i18nc("@label", "mm")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "retraction_speed"
+                    labelText: catalog.i18nc("@label", "Retraction Speed")
+                    unitText: catalog.i18nc("@label", "mm/s")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "retraction_min_travel"
+                    labelText: catalog.i18nc("@label", "Minimum Travel")
+                    unitText: catalog.i18nc("@label", "mm")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
+                Cura.NumericTextFieldWithUnit {
+                    containerStackId: base.getActiveExtruderId()
+                    settingKey: "retraction_count_max"
+                    labelText: catalog.i18nc("@label", "Maximum Count")
+                    unitText: catalog.i18nc("@label", "")
+
+                    labelFont: base.labelFont
+                    labelWidth: selectors.textWidth
+                    controlWidth: selectors.controlWidth
+                    controlHeight: base.controlHeight
+                    textField.readOnly: true
+                }
             }
 
             Row { // UV Bar
-                visible: Cura.MachineManager.activeMachine.hasMaterials
+                visible: uvEnable.checked_value == 'true'
                 Rectangle {
                     width: selectors.bar_width
                     height: selectors.bar_height
@@ -376,6 +504,7 @@ Item {
                     }
 
                     Text {
+                        id: uv_text
                         anchors{
                             verticalCenter: parent.verticalCenter
                             left: parent.left
@@ -385,12 +514,19 @@ Item {
                             return "UV"
                         }
                     }
-                }
-                
+                    Cura.RokitSimpleCheckBox  // Enable UV"
+                    {
+                        id: uvEnable
+                        visible: false
+                        containerStackId: base.getActiveExtruderId()
+                        settingKey: "uv_enable"
+                    }
+                }                
             }
 
             GridLayout {
                 id: uv
+                visible: uvEnable.checked_value == 'true'
 
                 Layout.fillWidth: true
                 columnSpacing: 24 * screenScaleFactor

@@ -12,13 +12,12 @@ import Cura 1.1 as Cura
 //
 // CheckBox widget for the on/off or true/false settings in the Machine Settings Dialog.
 //
-UM.TooltipArea
-{
+UM.TooltipArea {
     id: simpleCheckBox
 
     UM.I18nCatalog { id: catalog; name: "cura"; }
 
-    property int controlHeight: UM.Theme.getSize("setting_control").height
+    property int controlHeight: UM.Theme.getSize("setting_control").height * 0.7
 
     height: childrenRect.height
     width: childrenRect.width
@@ -37,6 +36,8 @@ UM.TooltipArea
     // callback functions
     property var forceUpdateOnChangeFunction: dummy_func
 
+    property var checked_value: String(propertyProvider.properties.value).toLowerCase()
+
     // a dummy function for default property values
     function dummy_func() {}
 
@@ -46,8 +47,7 @@ UM.TooltipArea
         watchedProperties: [ "value", "description" ]
     }
 
-    Label
-    {
+    Label {
         id: fieldLabel
         anchors.left: parent.left
         anchors.verticalCenter: checkBox.verticalCenter
@@ -57,17 +57,15 @@ UM.TooltipArea
         renderType: Text.NativeRendering
     }
 
-    Cura.CheckBox
-    {
+    Cura.CheckBox {
         id: checkBox
         enabled: false
         anchors.left: fieldLabel.right
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
-        checked: String(propertyProvider.properties.value).toLowerCase() != 'false'
+        checked: checked_value != 'false'
         height: simpleCheckBox.controlHeight
         text: ""
-        onClicked:
-        {
+        onClicked: {
             propertyProvider.setPropertyValue("value", checked)
             forceUpdateOnChangeFunction()
         }
